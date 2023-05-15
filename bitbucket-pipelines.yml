@@ -13,7 +13,8 @@ pipelines:
   branches:
     main:
       - step:
-          name: 'Package'
+          name: 'Dotnet Core Build'
+          trigger: manual
           caches:
             - dotnetcore
           script:
