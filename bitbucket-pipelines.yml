@@ -14,7 +14,6 @@ pipelines:
     main:
       - step:
           name: 'Dotnet Core Build'
-          trigger: manual
           caches:
             - dotnetcore
           script:
