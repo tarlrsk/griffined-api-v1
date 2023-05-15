@@ -21,7 +21,7 @@ pipelines:
             - apt-get install zip -y
             - dotnet build
             - dotnet publish -c Release -o ./bin/Publish
-            - cd .bin/Publish
+            - cd ./bin/Publish
             - zip -r main.zip .
           artifacts:
             - 'main'
