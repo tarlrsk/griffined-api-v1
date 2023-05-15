@@ -20,11 +20,11 @@ pipelines:
             - apt-get update
             - apt-get install zip -y
             - dotnet build
-            - dotnet publish ./web/web.csproj -c Release -o ./publish
-            - cd ./publish
-            - zip -r web.zip .
+            - dotnet publish -c Release -o ./bin/Publish
+            - cd .bin/Publish
+            - zip -r main.zip .
           artifacts:
-            - 'publish/web/web.zip'
+            - 'main'
       - step:
           name: Deploy to stg
           deployment: test
