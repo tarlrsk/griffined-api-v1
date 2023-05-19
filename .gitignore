@@ -6,6 +6,7 @@
 # Environment Variable
 **/launchSettings.json
 **/appsettings.Development.json
+**/firebase-config.json
 
 # User-specific files
 *.rsuser
