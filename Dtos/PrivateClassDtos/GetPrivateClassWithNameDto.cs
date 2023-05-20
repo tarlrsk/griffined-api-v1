@@ -21,7 +21,7 @@ namespace griffined_api.Dtos.PrivateClassDtos
         private TimeOnly _toTime;
         [Required]
         public string toTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
-        public List<GetStudentPrivateClassWithNameDto> studentPrivateClasses { get; set; } = new List<GetStudentPrivateClassWithNameDto>();
-        public GetTeacherPrivateClassWithNameDto teacherPrivateClass { get; set; } = new GetTeacherPrivateClassWithNameDto();
+        public List<GetStudentPrivateClassWithNameDto>? studentPrivateClasses { get; set; }
+        public GetTeacherPrivateClassWithNameDto? teacherPrivateClass { get; set; }
     }
 }

@@ -96,11 +96,11 @@ namespace griffined_api.Services.TeacherService
             {
                 var courses = await _context.PrivateCourses
                 .Include(c => c.privateClasses)
-                    .ThenInclude(pc => pc.studentPrivateClasses)
+                    .ThenInclude(pc => pc.studentPrivateClasses)!
                         .ThenInclude(spc => spc.student)
                 .Include(c => c.privateClasses)
                     .ThenInclude(pc => pc.teacherPrivateClass)
-                        .ThenInclude(tpc => tpc.teacher)
+                        .ThenInclude(tpc => tpc!.teacher)
                 .Include(c => c.request)
                 .Where(c => c.privateClasses.Any(pc => pc.teacherPrivateClass != null && pc.teacherPrivateClass.teacherId == teacherId))
                 .ToListAsync();
@@ -181,11 +181,11 @@ namespace griffined_api.Services.TeacherService
             {
                 var courses = await _context.PrivateCourses
                 .Include(c => c.privateClasses)
-                    .ThenInclude(pc => pc.studentPrivateClasses)
+                    .ThenInclude(pc => pc.studentPrivateClasses)!
                         .ThenInclude(spc => spc.student)
                 .Include(c => c.privateClasses)
                     .ThenInclude(pc => pc.teacherPrivateClass)
-                        .ThenInclude(tpc => tpc.teacher)
+                        .ThenInclude(tpc => tpc!.teacher)
                 .Include(c => c.request)
                 .Where(c => c.privateClasses.Any(pc => pc.teacherPrivateClass != null && pc.teacherPrivateClass.teacherId == teacherId))
                 .ToListAsync();
@@ -389,11 +389,11 @@ namespace griffined_api.Services.TeacherService
             var response = new ServiceResponse<GetStudentAttendanceDto>();
             var course = await _context.PrivateCourses
                 .Include(c => c.privateClasses)
-                    .ThenInclude(pc => pc.studentPrivateClasses)
+                    .ThenInclude(pc => pc.studentPrivateClasses)!
                         .ThenInclude(spc => spc.student)
                 .Include(c => c.privateClasses)
                     .ThenInclude(pc => pc.teacherPrivateClass)
-                        .ThenInclude(tpc => tpc.teacher)
+                        .ThenInclude(tpc => tpc!.teacher)
                 .FirstOrDefaultAsync(c => c.privateClasses.Any(pc => pc.id == classId));
 
             if (course is null)
@@ -507,7 +507,7 @@ namespace griffined_api.Services.TeacherService
             try
             {
                 var teachers = await _context.Teachers
-                    .Include(t => t.privateClasses)
+                    .Include(t => t.privateClasses)!
                         .ThenInclude(pc => pc.privateClass)
                             .ThenInclude(pc => pc.privateCourse)
                     .ToListAsync();
@@ -517,7 +517,7 @@ namespace griffined_api.Services.TeacherService
                     id = t.id,
                     fullName = t.fullName,
                     nickname = t.nickname,
-                    courseCount = t.privateClasses
+                    courseCount = t.privateClasses!
                         .Select(tpc => tpc.privateClass.privateCourse)
                         .Where(c => c?.isActive == true && c?.request.status != RegistrationRequestStatus.Reject)
                         .Distinct()
