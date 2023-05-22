@@ -38,7 +38,9 @@ namespace griffined_api.Services.CheckAvailableService
             {
                 var conflictStatus = false;
                 var _currentClass = false;
-                var cls = await _context.PrivateClasses.Where(pc => pc.teacherPrivateClass.teacherId == teacher.id
+                var cls = await _context.PrivateClasses.Where(pc => 
+                        pc.teacherPrivateClass != null && 
+                        pc.teacherPrivateClass.teacherId == teacher.id
                         && pc.date == date && pc.isActive == true).ToListAsync();
                 if (cls != null)
                 {
