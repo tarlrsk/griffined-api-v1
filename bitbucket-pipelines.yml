@@ -40,6 +40,16 @@ pipelines:
                 ZIP_FILE: 'publish/web.zip'
     develop:
       - step:
+          name: Add Firebase Credential file
+          script:
+            - echo "This step add environment files"
+            - |
+              cat << EOF > ./firebase-config.json
+              $FIREBASE_CREDENTIAL
+              EOF
+          artifacts:
+            - 'firebase-cred.json'
+      - step:
           name: 'Dotnet Core Build'
           caches:
             - dotnetcore
@@ -51,9 +61,9 @@ pipelines:
             - cd ./bin/Publish
             - zip -r main.zip .
           artifacts:
-            - 'main'
+            - 'bin/Publish/main.zip'
       - step:
-          name: Deploy to stg
+          name: Deploy Azure App Service Staging
           deployment: test
           trigger: manual
           script:
@@ -64,7 +74,8 @@ pipelines:
                 AZURE_TENANT_ID: $AZURE_TENANT_ID
                 AZURE_RESOURCE_GROUP: 'House-of-Griffin'
                 AZURE_APP_NAME: 'houseofgriffin-api-stg'
-                ZIP_FILE: 'publish/web.zip'
+                ZIP_FILE: 'bin/Publish/main.zip'
+                DEBUG: 'true'
 
 
   
