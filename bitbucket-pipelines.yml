@@ -48,7 +48,7 @@ pipelines:
               $FIREBASE_CREDENTIAL
               EOF
           artifacts:
-            - 'firebase-cred.json'
+            - 'firebase-config.json'
       - step:
           name: 'Dotnet Core Build'
           caches:
@@ -58,7 +58,7 @@ pipelines:
             - apt-get install zip -y
             - dotnet build
             - dotnet publish -c Release -o ./bin/Publish
-            - mv firebase.json ./bin/Publish
+            - mv firebase-config.json ./bin/Publish
             - cd ./bin/Publish
             - zip -r main.zip .
           artifacts:
@@ -77,6 +77,4 @@ pipelines:
                 AZURE_APP_NAME: 'houseofgriffin-api-stg'
                 ZIP_FILE: 'bin/Publish/main.zip'
                 DEBUG: 'true'
-
-
-  
+                
