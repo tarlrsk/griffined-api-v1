@@ -5,7 +5,6 @@
 
 # Environment Variable
 **/launchSettings.json
-**/appsettings.Development.json
 **/firebase-config.json
 **.env
 
