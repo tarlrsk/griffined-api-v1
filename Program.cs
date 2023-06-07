@@ -58,11 +58,12 @@ using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+DotNetEnv.Env.Load();
 
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(Environment.GetEnvironmentVariable("REMOTE_DB")));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
@@ -90,7 +91,10 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddSingleton(FirebaseApp.Create());
+builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))
+}));
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });

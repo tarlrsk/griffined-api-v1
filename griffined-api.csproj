@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="DotNetEnv" Version="2.5.0" />
     <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
     <PackageReference Include="FirebaseAdminAuthentication.DependencyInjection" Version="1.1.0" />
     <PackageReference Include="FirebaseAuthentication.net" Version="3.0.7" />
