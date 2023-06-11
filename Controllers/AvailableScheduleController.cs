@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/check-available")]
 
     [Authorize(Roles = "ea")]
 
@@ -19,14 +19,14 @@ namespace griffined_api.Controllers
 
         }
 
-        [HttpGet("GetAvailableTime")]
+        [HttpGet("available-time")]
         public async Task<ActionResult<ServiceResponse<List<GetAvailableTimeDto>>>> GetAvailableTime([FromQuery] int[] listOfStudentId, string date, int hour, int classId)
         {
             var response = await _checkAvailable.GetAvailableTime(listOfStudentId, date, hour, classId);
             return Ok(response);
         }
 
-        [HttpGet("GetAvailableTeacher")]
+        [HttpGet("available-teacher")]
         public async Task<ActionResult<ServiceResponse<List<GetAvailableTeacherDto>>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId)
         {
             var response = await _checkAvailable.GetAvailableTeacher(fromTime, toTime, date, classId);

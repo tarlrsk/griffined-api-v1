@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/schedule")]
     public class ScheduleController : ControllerBase
     {
         private readonly IScheduleService _scheduleService;
@@ -15,13 +15,13 @@ namespace griffined_api.Controllers
             _scheduleService = scheduleService;
         }
 
-        [HttpGet("Get"), Authorize(Roles = "ep, ea, oa")]
+        [HttpGet, Authorize(Roles = "ep, ea, oa")]
         public async Task<ActionResult<ServiceResponse<List<GetScheduleDto>>>> GetSchedule()
         {
             return Ok(await _scheduleService.GetSchedule());
         }
 
-        [HttpGet("Get/{reqId}"), Authorize(Roles = "ea, ep, oa")]
+        [HttpGet("{reqId}"), Authorize(Roles = "ea, ep, oa")]
         public async Task<ActionResult<ServiceResponse<GetScheduleDto>>> GetScheduleByRequestId(int reqId)
         {
             var response = await _scheduleService.GetScheduleByRequestId(reqId);
@@ -30,25 +30,25 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Post"), Authorize(Roles = "ea")]
+        [HttpPost, Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<GetScheduleDto>>> AddSchedule(AddScheduleDto newSchedule)
         {
             return Ok(await _scheduleService.AddSchedule(newSchedule));
         }
 
-        [HttpPost("Class/Post"), Authorize(Roles = "ea")]
+        [HttpPost("class"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<GetSinglePrivateClassDto>>> AddPrivateClass(AddSinglePrivateClassDto newClass)
         {
             return Ok(await _scheduleService.AddPrivateClass(newClass));
         }
 
-        [HttpPost("ListOfClass/Post"), Authorize(Roles = "ea")]
+        [HttpPost("list-of-class"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<List<GetSinglePrivateClassDto>>>> AddListOfPrivateClass(List<AddSinglePrivateClassDto> newClasses)
         {
             return Ok(await _scheduleService.AddListOfPrivateClass(newClasses));
         }
 
-        [HttpPut("Class/Put"), Authorize(Roles = "ea")]
+        [HttpPut("class"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<UpdatePrivateClassDto>>> UpdatePrivateClass(UpdatePrivateClassDto updatedClass)
         {
             var response = await _scheduleService.UpdatePrivateClass(updatedClass);
@@ -57,7 +57,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("ListOfClass/Put"), Authorize(Roles = "ea")]
+        [HttpPut("list-of-class"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<List<UpdatePrivateClassDto>>>> UpdateListOfPrivateClass(List<UpdatePrivateClassDto> updatedClasses)
         {
             var response = await _scheduleService.UpdateListOfPrivateClass(updatedClasses);
@@ -66,7 +66,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{courseId}"), Authorize(Roles = "ea")]
+        [HttpDelete("{courseId}"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<List<GetScheduleDto>>>> DeleteSchedule(int courseId)
         {
             var response = await _scheduleService.DeleteSchedule(courseId);
@@ -76,7 +76,7 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpPut("SoftDelete/{courseId}"), Authorize(Roles = "ea, ep ,oa")]
+        [HttpPut("deactivate/{courseId}"), Authorize(Roles = "ea, ep ,oa")]
         public async Task<ActionResult<ServiceResponse<List<GetScheduleDto>>>> SoftDelete(int courseId)
         {
             var response = await _scheduleService.SoftDeleteSchedule(courseId);
@@ -85,7 +85,7 @@ namespace griffined_api.Controllers
             return response;
         }
 
-        [HttpDelete("Class/Delete/{classId}"), Authorize(Roles = "ea")]
+        [HttpDelete("class/{classId}"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<List<GetPrivateClassDto>>>> DeletePrivateClass(int classId)
         {
             var response = await _scheduleService.DeletePrivateClass(classId);
@@ -93,7 +93,7 @@ namespace griffined_api.Controllers
                 return NotFound(response);
             return response;
         }
-        [HttpDelete("ListOfClass/Delete"), Authorize(Roles = "ea")]
+        [HttpDelete("list-of-class"), Authorize(Roles = "ea")]
         public async Task<ActionResult<ServiceResponse<List<GetPrivateClassDto>>>> DeleteListOfPrivateClass([FromQuery] int[] listOfClassId)
         {
             var response = await _scheduleService.DeleteListOfPrivateClass(listOfClassId);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/payment")]
     [Authorize(Roles = "ep, ea, oa")]
 
     public class PaymentController : ControllerBase
@@ -18,7 +18,7 @@ namespace griffined_api.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpGet("GetPrivatePayment/{reqId}")]
+        [HttpGet("{reqId}")]
         public async Task<ActionResult<ServiceResponse<List<GetPrivatePaymentDto>>>> GetPaymentByPrivateReqId(int reqId)
         {
             var response = await _paymentService.GetPaymentByPrivateReqId(reqId);
@@ -27,13 +27,13 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Post")]
+        [HttpPost]
         public async Task<ActionResult<ServiceResponse<GetPrivatePaymentDto>>> AddPayment(AddPrivatePaymentDto newPayment)
         {
             return Ok(await _paymentService.AddPayment(newPayment));
         }
 
-        [HttpPut("Put")]
+        [HttpPut]
         public async Task<ActionResult<ServiceResponse<GetPrivatePaymentDto>>> UpdatePayment(UpdatePrivatePaymentDto updatedPayment)
         {
             var response = await _paymentService.UpdatePayment(updatedPayment);
@@ -42,7 +42,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{fileId}")]
+        [HttpDelete("{fileId}")]
         public async Task<ActionResult<ServiceResponse<List<GetPrivatePaymentDto>>>> DeletePayment(int fileId)
         {
             var response = await _paymentService.DeletePayment(fileId);
