@@ -78,51 +78,61 @@ namespace griffined_api.Services.AuthenticationService
             string customRole = string.Empty;
             string azure_id = string.Empty;
 
-            var oa = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Office Admin");
-            if (oa != null)
+            var master = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "master");
+            if (master != null)
             {
-                azure_id = oa.id.ToString();
-                customRole = "oa";
+                azure_id = master.id.ToString();
+                customRole = "master";
             }
             else
             {
-                var ea = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Admin");
-                if (ea != null)
+                var oa = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Office Admin");
+                if (oa != null)
                 {
-                    azure_id = ea.id.ToString();
-                    customRole = "ea";
+                    azure_id = oa.id.ToString();
+                    customRole = "oa";
                 }
                 else
                 {
-                    var ep = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Planner");
-                    if (ep != null)
+                    var ea = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Admin");
+                    if (ea != null)
                     {
-                        azure_id = ep.id.ToString();
-                        customRole = "ep";
+                        azure_id = ea.id.ToString();
+                        customRole = "ea";
                     }
                     else
                     {
-                        var teacher = await _context.Teachers.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
-                        if (teacher != null)
+                        var ep = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Planner");
+                        if (ep != null)
                         {
-                            azure_id = teacher.id.ToString();
-                            customRole = "teacher";
+                            azure_id = ep.id.ToString();
+                            customRole = "ep";
                         }
                         else
                         {
-                            var student = await _context.Students.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
-                            if (student != null)
+                            var teacher = await _context.Teachers.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
+                            if (teacher != null)
                             {
-                                azure_id = student.id.ToString();
-                                customRole = "student";
-                            }else{
-                                throw new Exception("user not found");
+                                azure_id = teacher.id.ToString();
+                                customRole = "teacher";
+                            }
+                            else
+                            {
+                                var student = await _context.Students.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
+                                if (student != null)
+                                {
+                                    azure_id = student.id.ToString();
+                                    customRole = "student";
+                                }
+                                else
+                                {
+                                    throw new Exception("user not found");
+                                }
                             }
                         }
                     }
                 }
             }
-
 
             return new List<Claim>
             {
