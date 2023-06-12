@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/request/registration")]
     [Authorize(Roles = "ep, ea, oa")]
     public class PrivateRegistrationRequestController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace griffined_api.Controllers
             _privateRegistrationRequestService = privateRegistrationRequestService;
         }
 
-        [HttpGet("Get")]
+        [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<GetPrivateRegReqWithInfoDto>>>> GetPrivateRegistrationRequest()
         {
             var response = await _privateRegistrationRequestService.GetPrivateRegistrationRequest();
@@ -25,7 +25,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("Get/{reqId}")]
+        [HttpGet("{reqId}")]
         public async Task<ActionResult<ServiceResponse<GetPrivateRegReqWithInfoDto>>> GetPrivateRegistrationRequestById(int reqId)
         {
             var response = await _privateRegistrationRequestService.GetPrivateRegistrationRequestById(reqId);
@@ -34,7 +34,7 @@ namespace griffined_api.Controllers
             return response;
         }
 
-        [HttpPost("Post"), Authorize(Roles = "ep")]
+        [HttpPost, Authorize(Roles = "ep")]
         public async Task<ActionResult<ServiceResponse<List<GetPrivateRegReqWithInfoDto>>>> AddPrivateRegistrationRequest(AddPrivateRegReqWithInfoDto newRequest)
         {
             var response = await _privateRegistrationRequestService.AddPrivateRegistrationRequest(newRequest);
@@ -43,7 +43,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("Put")]
+        [HttpPut]
         public async Task<ActionResult<ServiceResponse<GetPrivateRegReqWithInfoDto>>> UpdatePrivateRegistrationRequest(UpdatePrivateRegReqWithInfoDto updatedRequest)
         {
             var response = await _privateRegistrationRequestService.UpdatePrivateRegistrationRequest(updatedRequest);
@@ -52,7 +52,7 @@ namespace griffined_api.Controllers
             return response;
         }
 
-        [HttpDelete("Delete/{reqId}")]
+        [HttpDelete("{reqId}")]
         public async Task<ActionResult<ServiceResponse<List<GetPrivateRegReqWithInfoDto>>>> DeletePrivateRegistrationRequest(int reqId)
         {
             var response = await _privateRegistrationRequestService.DeletePrivateRegistrationRequest(reqId);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/staff")]
 
     public class StaffController : ControllerBase
     {
@@ -15,13 +15,13 @@ namespace griffined_api.Controllers
         {
             _staffService = staffService;
         }
-        [HttpGet("Get"), Authorize(Roles = "oa")]
+        [HttpGet, Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<List<GetStaffDto>>>> Get()
         {
             return Ok(await _staffService.GetStaff());
         }
 
-        [HttpGet("Get/{id}"), Authorize(Roles = "ep, ea, oa")]
+        [HttpGet("{id}"), Authorize(Roles = "ep, ea, oa")]
         public async Task<ActionResult<ServiceResponse<List<GetStaffDto>>>> GetStaffById(int id)
         {
             var response = await _staffService.GetStaffById(id);
@@ -30,7 +30,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Post"), Authorize(Roles = "oa")]
+        [HttpPost, Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<List<GetStaffDto>>>> AddStaff(AddStaffDto newStaff)
         {
             var response = await _staffService.AddStaff(newStaff);
@@ -39,7 +39,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("Put"), Authorize(Roles = "oa")]
+        [HttpPut, Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<List<GetStaffDto>>>> UpdateStaff(UpdateStaffDto updatedStaff)
         {
             var response = await _staffService.UpdateStaff(updatedStaff);
@@ -48,7 +48,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}"), Authorize(Roles = "oa")]
+        [HttpDelete("{id}"), Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<GetStaffDto>>> DeleteEPById(int id)
         {
             var response = await _staffService.DeleteStaff(id);
@@ -58,7 +58,7 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpGet("Enable/{id}"), Authorize(Roles = "oa")]
+        [HttpPut("activate/{id}"), Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
         {
             var response = await _staffService.EnableStaff(id);
@@ -68,7 +68,7 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpDelete("Disable/{id}"), Authorize(Roles = "oa")]
+        [HttpPut("deactivate/{id}"), Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
         {
             var response = await _staffService.DisableStaff(id);

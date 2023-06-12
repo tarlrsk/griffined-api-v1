@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/teacher")]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService _teacherService;
@@ -15,13 +15,13 @@ namespace griffined_api.Models
             _teacherService = teacherService;
         }
 
-        [HttpGet("Get"), Authorize(Roles = "oa, ea")]
+        [HttpGet, Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> Get()
         {
             return Ok(await _teacherService.GetTeacher());
         }
 
-        [HttpGet("Get/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpGet("{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherById(int id)
         {
             var response = await _teacherService.GetTeacherById(id);
@@ -30,7 +30,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("Get/Me"), Authorize(Roles = "teacher")]
+        [HttpGet("me"), Authorize(Roles = "teacher")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherByMe()
         {
             var response = await _teacherService.GetTeacherByMe();
@@ -39,13 +39,13 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("CourseCount/Get"), Authorize(Roles = "oa, ea, teacher")]
+        [HttpGet("course-count"), Authorize(Roles = "oa, ea, teacher")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherWithCourseCountDto>>>> GetTeacherWithCourseCount()
         {
             return Ok(await _teacherService.GetTeacherWithCourseCount());
         }
 
-        [HttpGet("Course/Get/{teacherId}"), Authorize(Roles = "oa, ea")]
+        [HttpGet("course/{teacherId}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherCourseWithClassesDto>>>> GetTeacherCourseWithClassesByTeacherId(int teacherId)
         {
             var response = await _teacherService.GetTeacherCourseWithClassesByTeacherId(teacherId);
@@ -53,7 +53,7 @@ namespace griffined_api.Models
                 return NotFound(response);
             return Ok(response);
         }
-        [HttpGet("Course/Get/Me"), Authorize(Roles = "teacher")]
+        [HttpGet("course/me"), Authorize(Roles = "teacher")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherCourseWithClassesDto>>>> GetTeacherCourseWithClassesByMe()
         {
             var response = await _teacherService.GetTeacherCourseWithClassesByMe();
@@ -62,7 +62,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("Student/Attendance/Get/{classId}"), Authorize(Roles = "oa, ea, teacher")]
+        [HttpGet("student/attendance/{classId}"), Authorize(Roles = "oa, ea, teacher")]
         public async Task<ActionResult<ServiceResponse<List<GetStudentAttendanceDto>>>> GetStudentAttendanceByClassId(int classId)
         {
             var response = await _teacherService.GetStudentAttendanceByClassId(classId);
@@ -71,13 +71,13 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPost("Post"), Authorize(Roles = "oa, ea")]
+        [HttpPost, Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> AddTeacher(AddTeacherDto newTeacher)
         {
             return Ok(await _teacherService.AddTeacher(newTeacher));
         }
 
-        [HttpPut("Put"), Authorize(Roles = "oa, ea")]
+        [HttpPut, Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> UpdateTeacher(UpdateTeacherDto updatedTeacher)
         {
             var response = await _teacherService.UpdateTeacher(updatedTeacher);
@@ -86,7 +86,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPut("Student/Attendance/Put"), Authorize(Roles = "teacher")]
+        [HttpPut("student/attendance"), Authorize(Roles = "teacher")]
         public async Task<ActionResult<ServiceResponse<GetStudentPrivateClassDto>>> UpdateStudentAttendance(UpdateStudentPrivateClassDto updatedStudentAttendance)
         {
             var response = await _teacherService.UpdateStudentAttendance(updatedStudentAttendance);
@@ -95,7 +95,7 @@ namespace griffined_api.Models
             return response;
         }
 
-        [HttpPut("Class/Status/Put"), Authorize(Roles = "teacher")]
+        [HttpPut("class/status"), Authorize(Roles = "teacher")]
         public async Task<ActionResult<ServiceResponse<GetTeacherPrivateClassDto>>> UpdateClassStatus(UpdateTeacherPrivateClassDto updatedClassStatus)
         {
             var response = await _teacherService.UpdateClassStatus(updatedClassStatus);
@@ -104,7 +104,7 @@ namespace griffined_api.Models
             return response;
         }
 
-        [HttpDelete("Delete/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpDelete("{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetTeacherDto>>> DeleteTeacher(int id)
         {
             var response = await _teacherService.DeleteTeacher(id);
@@ -113,7 +113,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("Enable/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpPut("activate/{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
         {
             var response = await _teacherService.EnableTeacher(id);
@@ -122,7 +122,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpDelete("Disable/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpPut("deactivate/{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
         {
             var response = await _teacherService.DisableTeacher(id);

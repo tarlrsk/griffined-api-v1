@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/oa")]
     public class OAController : ControllerBase
     {
         public readonly IOAService _oaService;
@@ -15,13 +15,13 @@ namespace griffined_api.Controllers
             _oaService = oaService;
         }
 
-        [HttpGet("Get")]
+        [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<GetOADto>>>> Get()
         {
             return Ok(await _oaService.GetOA());
         }
 
-        [HttpGet("Get/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<List<GetOADto>>>> GetOAById(int id)
         {
             var response = await _oaService.GetOAById(id);
@@ -30,13 +30,13 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Post")]
+        [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetOADto>>>> AddEA(AddOADto newOA)
         {
             return Ok(await _oaService.AddOA(newOA));
         }
 
-        [HttpPut("Put")]
+        [HttpPut]
         public async Task<ActionResult<ServiceResponse<List<GetOADto>>>> UpdateEA(UpdateOADto updatedOA)
         {
             var response = await _oaService.UpdateOA(updatedOA);
@@ -45,7 +45,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResponse<GetOADto>>> DeleteOAById(int id)
         {
             var response = await _oaService.DeleteOA(id);

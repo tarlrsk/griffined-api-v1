@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/ep")]
     public class EPController : ControllerBase
     {
         public readonly IEPService _epService;
@@ -15,13 +15,13 @@ namespace griffined_api.Controllers
             _epService = epService;
         }
 
-        [HttpGet("Get")]
+        [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<GetEPDto>>>> Get()
         {
             return Ok(await _epService.GetEP());
         }
 
-        [HttpGet("Get/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<List<GetEADto>>>> GetEPById(int id)
         {
             var response = await _epService.GetEPById(id);
@@ -30,7 +30,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Post")]
+        [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetEPDto>>>> AddEP(AddEPDto newEP)
         {
             var response = await _epService.AddEP(newEP);
@@ -39,7 +39,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("Put")]
+        [HttpPut]
         public async Task<ActionResult<ServiceResponse<List<GetEPDto>>>> UpdateEP(UpdateEPDto updatedEP)
         {
             var response = await _epService.UpdateEP(updatedEP);
@@ -48,7 +48,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResponse<GetEPDto>>> DeleteEPById(int id)
         {
             var response = await _epService.DeleteEP(id);

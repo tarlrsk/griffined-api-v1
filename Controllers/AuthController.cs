@@ -9,7 +9,7 @@ using Firebase.Auth;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
 
     public class AuthController : ControllerBase
     {
@@ -32,11 +32,11 @@ namespace griffined_api.Controllers
             }
         }
 
-        [HttpPost("ResetPassword"), Authorize(Roles = "oa, ea, ep")]
+        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ep")]
         public async Task<ActionResult<String>> ResetPassword(string email)
         {
             await firebaseAuthProvider.SendPasswordResetEmailAsync(email);
-            return Ok("Sucess");
+            return Ok("Success");
         }
 
 

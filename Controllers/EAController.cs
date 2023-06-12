@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/ea")]
     public class EAController : ControllerBase
     {
         public readonly IEAService _eaService;
@@ -15,13 +15,13 @@ namespace griffined_api.Controllers
             _eaService = eaService;
         }
 
-        [HttpGet("Get")]
+        [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<GetEADto>>>> Get()
         {
             return Ok(await _eaService.GetEA());
         }
 
-        [HttpGet("Get/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<List<GetEADto>>>> GetEAById(int id)
         {
             var response = await _eaService.GetEAById(id);
@@ -30,16 +30,16 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Post")]
+        [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetEADto>>>> AddEA(AddEADto newEA)
         {
             var response = await _eaService.AddEA(newEA);
-            if(response.Data is null)
+            if (response.Data is null)
                 return BadRequest(response);
             return Ok(response);
         }
 
-        [HttpPut("Put")]
+        [HttpPut]
         public async Task<ActionResult<ServiceResponse<List<GetEADto>>>> UpdateEA(UpdateEADto updatedEA)
         {
             var response = await _eaService.UpdateEA(updatedEA);
@@ -48,7 +48,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResponse<GetEADto>>> DeleteEAById(int id)
         {
             var response = await _eaService.DeleteEA(id);
