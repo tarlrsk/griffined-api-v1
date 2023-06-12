@@ -58,7 +58,7 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpGet("activate/{id}"), Authorize(Roles = "oa")]
+        [HttpPut("activate/{id}"), Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
         {
             var response = await _staffService.EnableStaff(id);
@@ -68,7 +68,7 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpDelete("deactivate/{id}"), Authorize(Roles = "oa")]
+        [HttpPut("deactivate/{id}"), Authorize(Roles = "oa")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
         {
             var response = await _staffService.DisableStaff(id);

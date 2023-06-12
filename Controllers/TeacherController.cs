@@ -113,7 +113,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("activate/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpPut("activate/{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
         {
             var response = await _teacherService.EnableTeacher(id);
@@ -122,7 +122,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpDelete("deactivate/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpPut("deactivate/{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
         {
             var response = await _teacherService.DisableTeacher(id);
