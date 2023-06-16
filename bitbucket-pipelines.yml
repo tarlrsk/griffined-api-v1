@@ -8,48 +8,9 @@
 
 image: mcr.microsoft.com/dotnet/sdk:7.0
 
-
-pipelines:
-  branches:
-    main:
-      - step:
-          name: 'Dotnet Core Build'
-          caches:
-            - dotnetcore
-          script:
-            - apt-get update
-            - apt-get install zip -y
-            - dotnet build
-            - dotnet publish -c Release -o ./bin/Publish
-            - cd ./bin/Publish
-            - zip -r main.zip .
-          artifacts:
-            - 'main'
-      - step:
-          name: Deploy to stg
-          deployment: test
-          trigger: manual
-          script:
-            - pipe: microsoft/azure-web-apps-deploy:1.0.3
-              variables:
-                AZURE_APP_ID: $AZURE_APP_ID
-                AZURE_PASSWORD: $AZURE_PASSWORD
-                AZURE_TENANT_ID: $AZURE_TENANT_ID
-                AZURE_RESOURCE_GROUP: 'House-of-Griffin'
-                AZURE_APP_NAME: 'houseofgriffin-api-stg'
-                ZIP_FILE: 'publish/web.zip'
-    develop:
-      - step:
-          name: Add Firebase Credential file
-          script:
-            - echo "This step add environment files"
-            - |
-              cat << EOF > ./firebase-config.json
-              $FIREBASE_CREDENTIAL
-              EOF
-          artifacts:
-            - 'firebase-config.json'
-      - step:
+definitions:
+  steps:
+    - step: &build
           name: 'Dotnet Core Build'
           caches:
             - dotnetcore
@@ -59,22 +20,77 @@ pipelines:
             - dotnet build
             - dotnet publish -c Release -o ./bin/Publish
             - mv firebase-config.json ./bin/Publish
+            - mv .env ./bin/Publish
             - cd ./bin/Publish
             - zip -r main.zip .
           artifacts:
             - 'bin/Publish/main.zip'
+
+pipelines:
+  branches:
+    main:
       - step:
-          name: Deploy Azure App Service Staging
-          deployment: test
+          name: Add Firebase Credential & Environment File
+          script:
+            - echo "This step add environment files"
+            - |
+              cat << EOF > ./firebase-config.json
+              $PROD_FIREBASE_CREDENTIAL
+              EOF
+            - |
+              cat << EOF> ./.env
+              REMOTE_DB=$PROD_REMOTE_DB
+              FIREBASE_API_KEY=$PROD_FIREBASE_API_KEY
+              GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+
+          artifacts:
+            - 'firebase-config.json'
+            - '.env'
+      - step: *build
+      - step:
+          name: Deploy Azure App Service Production
+          deployment: production
           trigger: manual
           script:
-            - pipe: microsoft/azure-web-apps-deploy:1.0.3
+            - pipe: atlassian/azure-web-apps-deploy:1.1.0
               variables:
                 AZURE_APP_ID: $AZURE_APP_ID
                 AZURE_PASSWORD: $AZURE_PASSWORD
                 AZURE_TENANT_ID: $AZURE_TENANT_ID
-                AZURE_RESOURCE_GROUP: 'House-of-Griffin'
-                AZURE_APP_NAME: 'houseofgriffin-api-stg'
+                AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+                AZURE_APP_NAME: $AZURE_APP_NAME
+                ZIP_FILE: 'bin/Publish/main.zip'
+                DEBUG: 'true'
+    develop:
+      - step:
+          name: Add Firebase Credential & Environment File
+          script:
+            - echo "This step add environment files"
+            - |
+              cat << EOF > ./firebase-config.json
+              $STG_FIREBASE_CREDENTIAL
+              EOF
+            - |
+              cat << EOF> ./.env
+              REMOTE_DB=$STG_REMOTE_DB
+              FIREBASE_API_KEY=$STG_FIREBASE_API_KEY
+              GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+          artifacts:
+            - 'firebase-config.json'
+            - '.env'
+      - step: *build
+      - step:
+          name: Deploy Azure App Service Staging
+          deployment: staging
+          trigger: manual
+          script:
+            - pipe: atlassian/azure-web-apps-deploy:1.1.0
+              variables:
+                AZURE_APP_ID: $AZURE_APP_ID
+                AZURE_PASSWORD: $AZURE_PASSWORD
+                AZURE_TENANT_ID: $AZURE_TENANT_ID
+                AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+                AZURE_APP_NAME: $AZURE_APP_NAME
                 ZIP_FILE: 'bin/Publish/main.zip'
                 DEBUG: 'true'
                 
