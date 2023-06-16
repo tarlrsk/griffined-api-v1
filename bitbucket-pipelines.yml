@@ -39,9 +39,10 @@ pipelines:
               EOF
             - |
               cat << EOF> ./.env
-              REMOTE_DB=$PROD_REMOTE_DB
-              FIREBASE_API_KEY=$PROD_FIREBASE_API_KEY
-              GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+              REMOTE_DB="$PROD_REMOTE_DB"
+              FIREBASE_API_KEY="$PROD_FIREBASE_API_KEY"
+              GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+              EOF
 
           artifacts:
             - 'firebase-config.json'
@@ -72,9 +73,10 @@ pipelines:
               EOF
             - |
               cat << EOF> ./.env
-              REMOTE_DB=$STG_REMOTE_DB
-              FIREBASE_API_KEY=$STG_FIREBASE_API_KEY
-              GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+              REMOTE_DB="$STG_REMOTE_DB"
+              FIREBASE_API_KEY="$STG_FIREBASE_API_KEY"
+              GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+              EOF
           artifacts:
             - 'firebase-config.json'
             - '.env'
