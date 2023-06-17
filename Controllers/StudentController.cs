@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/student")]
+    [Route("api/v1/student")]
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/payment")]
+    [Route("api/v1/payment")]
     [Authorize(Roles = "ep, ea, oa")]
 
     public class PaymentController : ControllerBase

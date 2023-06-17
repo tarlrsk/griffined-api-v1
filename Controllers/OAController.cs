@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/oa")]
+    [Route("api/v1/oa")]
     public class OAController : ControllerBase
     {
         public readonly IOAService _oaService;

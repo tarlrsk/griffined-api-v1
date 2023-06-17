@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/ep")]
+    [Route("api/v1/ep")]
     public class EPController : ControllerBase
     {
         public readonly IEPService _epService;

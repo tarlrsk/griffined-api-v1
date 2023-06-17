@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/request/registration")]
+    [Route("api/v1/request/registration")]
     [Authorize(Roles = "ep, ea, oa")]
     public class PrivateRegistrationRequestController : ControllerBase
     {

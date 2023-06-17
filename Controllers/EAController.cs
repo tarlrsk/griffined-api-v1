@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/ea")]
+    [Route("api/v1/ea")]
     public class EAController : ControllerBase
     {
         public readonly IEAService _eaService;

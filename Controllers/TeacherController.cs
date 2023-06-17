@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [ApiController]
-    [Route("api/teacher")]
+    [Route("api/v1/teacher")]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService _teacherService;

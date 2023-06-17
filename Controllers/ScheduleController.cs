@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/schedule")]
+    [Route("api/v1/schedule")]
     public class ScheduleController : ControllerBase
     {
         private readonly IScheduleService _scheduleService;

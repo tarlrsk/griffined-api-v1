@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/staff")]
+    [Route("api/v1/staff")]
 
     public class StaffController : ControllerBase
     {
