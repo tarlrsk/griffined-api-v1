@@ -18,6 +18,5 @@ namespace griffined_api.Models
         [Required]
         public string toTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
         public int privateReqInfoId { get; set; }
-        public PrivateRegistrationRequestInfo privateReqInfo { get; set; } = new PrivateRegistrationRequestInfo();
     }
 }

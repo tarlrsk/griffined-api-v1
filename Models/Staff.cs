@@ -28,6 +28,5 @@ namespace griffined_api.Models
         public bool isActive { get; set; } = true;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
-        public ICollection<PrivateRegistrationRequest>? privateRegistrationRequests { get; set; }
     }
 }

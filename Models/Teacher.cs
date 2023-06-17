@@ -29,7 +29,5 @@ namespace griffined_api.Models
         public int? LastUpdatedBy { get; set; }
         [Required]
         public ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
-        public ICollection<TeacherPrivateClass>? privateClasses { get; set; }
-        public ICollection<TeacherLeavingRequest>? leavingRequests { get; set; }
     }
 }

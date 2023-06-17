@@ -53,10 +53,6 @@ namespace griffined_api.Models
         public Parent? parent { get; set; }
         public Address? address { get; set; }
         public ICollection<StudentAdditionalFiles>? additionalFiles { get; set; }
-        public ICollection<PrivateRegistrationRequest>? privateRegistrationRequests { get; set; }
-        public ICollection<StudentPrivateClass> privateClasses { get; set; } = new List<StudentPrivateClass>();
-        public ICollection<ExamDate>? examDates { get; set; }
-        public ICollection<StudentClassCancellationRequest>? classCancellationRequests { get; set; }
 
     }
 }
