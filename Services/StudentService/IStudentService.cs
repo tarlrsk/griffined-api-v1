@@ -9,10 +9,10 @@ namespace griffined_api.Services.StudentService
     {
         Task<ServiceResponse<List<GetStudentDto>>> GetStudent();
         Task<ServiceResponse<GetStudentDto>> GetStudentById(int id);
-        Task<ServiceResponse<GetStudentDto>> GetStudentByMe();
+        Task<ServiceResponse<GetStudentDto>> GetStudentByToken();
         Task<ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>> GetStudentWithCoursesRegistered();
         Task<ServiceResponse<List<GetStudentCourseWithClassesDto>>> GetStudentCourseWithClassesByStudentId(int studentId);
-        Task<ServiceResponse<List<GetStudentCourseWithClassesDto>>> GetStudentCourseWithClassesByMe();
+        Task<ServiceResponse<List<GetStudentCourseWithClassesDto>>> GetStudentCourseWithClassesByToken();
         Task<ServiceResponse<GetStudentDto>> AddStudent(AddStudentDto newStudent);
         Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentDto updatedStudent);
         Task<ServiceResponse<List<GetStudentDto>>> DeleteStudent(int id);

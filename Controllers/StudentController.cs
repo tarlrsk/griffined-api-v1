@@ -31,33 +31,10 @@ namespace griffined_api.Controllers
                 return NotFound(response);
             return Ok(response);
         }
-        [HttpGet("me"), Authorize(Roles = "student")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentByMe()
+        [HttpGet("by-token"), Authorize(Roles = "student")]
+        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentByToken()
         {
-            var response = await _studentService.GetStudentByMe();
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-
-        [HttpGet("course-count"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>>> GetStudentWithCourseRegistered()
-        {
-            return Ok(await _studentService.GetStudentWithCoursesRegistered());
-        }
-
-        [HttpGet("course/{studentId}"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentCourseWithClassesDto>>>> GetStudentCourseWithClassesByStudentId(int studentId)
-        {
-            var response = await _studentService.GetStudentCourseWithClassesByStudentId(studentId);
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-        [HttpGet("course/me"), Authorize(Roles = "student")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentCourseWithClassesDto>>>> GetStudentCourseWithClassesByMe()
-        {
-            var response = await _studentService.GetStudentCourseWithClassesByMe();
+            var response = await _studentService.GetStudentByToken();
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);
