@@ -63,15 +63,6 @@ namespace griffined_api.Models
             return response;
         }
 
-        [HttpPut("class/status"), Authorize(Roles = "teacher")]
-        public async Task<ActionResult<ServiceResponse<GetTeacherPrivateClassDto>>> UpdateClassStatus(UpdateTeacherPrivateClassDto updatedClassStatus)
-        {
-            var response = await _teacherService.UpdateClassStatus(updatedClassStatus);
-            if (response.Data is null)
-                return NotFound(response);
-            return response;
-        }
-
         [HttpDelete("{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetTeacherDto>>> DeleteTeacher(int id)
         {

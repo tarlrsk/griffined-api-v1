@@ -10,8 +10,6 @@ global using griffined_api.Dtos.StudentDtos;
 global using griffined_api.Dtos.StudentAddtionalFilesDtos;
 global using griffined_api.Dtos.StudentPrivateClassDtos;
 global using griffined_api.Dtos.TeacherDtos;
-global using griffined_api.Dtos.TeacherLeavingRequestDtos;
-global using griffined_api.Dtos.TeacherPrivateClassDtos;
 global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
 global using griffined_api.Models;

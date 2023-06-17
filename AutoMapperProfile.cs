@@ -56,10 +56,6 @@ namespace griffined_api
             CreateMap<PaymentFile, GetPaymentFileDto>();
             CreateMap<AddPaymentFileDto, PaymentFile>();
             CreateMap<UpdatePaymentFileDto, PaymentFile>();
-
-            CreateMap<TeacherLeavingRequest, GetTeacherLeavingRequestDto>();
-            CreateMap<AddTeacherLeavingRequestDto, TeacherLeavingRequest>();
-            CreateMap<UpdateTeacherLeavingRequestDto, TeacherLeavingRequest>();
         }
     }
 }
