@@ -54,15 +54,6 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPut("student/attendance"), Authorize(Roles = "teacher")]
-        public async Task<ActionResult<ServiceResponse<GetStudentPrivateClassDto>>> UpdateStudentAttendance(UpdateStudentPrivateClassDto updatedStudentAttendance)
-        {
-            var response = await _teacherService.UpdateStudentAttendance(updatedStudentAttendance);
-            if (response.Data is null)
-                return NotFound(response);
-            return response;
-        }
-
         [HttpDelete("{id}"), Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<GetTeacherDto>>> DeleteTeacher(int id)
         {

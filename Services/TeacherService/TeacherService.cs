@@ -207,35 +207,6 @@ namespace griffined_api.Services.TeacherService
                 };
             await docRef.SetAsync(staffDoc);
         }
-
-        public async Task<ServiceResponse<GetStudentPrivateClassDto>> UpdateStudentAttendance(UpdateStudentPrivateClassDto updatedStudentAttendance)
-        {
-            var response = new ServiceResponse<GetStudentPrivateClassDto>();
-            try
-            {
-                var studentPrivateClass = await _context.StudentPrivateClasses
-                    .Include(spc => spc.student)
-                    .FirstOrDefaultAsync(spc => spc.id == updatedStudentAttendance.id);
-
-                if (studentPrivateClass is null)
-                    throw new Exception($"Student private class with ID {updatedStudentAttendance.id} not found.");
-
-                _mapper.Map(updatedStudentAttendance, studentPrivateClass);
-
-                studentPrivateClass.attendance = updatedStudentAttendance.attendance;
-
-                await _context.SaveChangesAsync();
-
-                response.Data = _mapper.Map<GetStudentPrivateClassDto>(studentPrivateClass);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
         
         public async Task<ServiceResponse<GetTeacherDto>> DisableTeacher(int id)
         {
