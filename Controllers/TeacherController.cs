@@ -39,15 +39,6 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("student/attendance/{classId}"), Authorize(Roles = "oa, ea, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentAttendanceDto>>>> GetStudentAttendanceByClassId(int classId)
-        {
-            var response = await _teacherService.GetStudentAttendanceByClassId(classId);
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-
         [HttpPost, Authorize(Roles = "oa, ea")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> AddTeacher(AddTeacherDto newTeacher)
         {

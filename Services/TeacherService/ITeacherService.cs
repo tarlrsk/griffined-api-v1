@@ -11,7 +11,6 @@ namespace griffined_api.Services.TeacherService
         Task<ServiceResponse<List<GetTeacherDto>>> GetTeacher();
         Task<ServiceResponse<GetTeacherDto>> GetTeacherById(int id);
         Task<ServiceResponse<GetTeacherDto>> GetTeacherByToken();
-        Task<ServiceResponse<GetStudentAttendanceDto>> GetStudentAttendanceByClassId(int classId);
         Task<ServiceResponse<GetTeacherDto>> AddTeacher(AddTeacherDto newTeacher);
         Task<ServiceResponse<GetTeacherDto>> UpdateTeacher(UpdateTeacherDto updatedTeacher);
         Task<ServiceResponse<List<GetTeacherDto>>> DeleteTeacher(int id);

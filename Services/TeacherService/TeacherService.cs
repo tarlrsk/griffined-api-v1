@@ -208,67 +208,6 @@ namespace griffined_api.Services.TeacherService
             await docRef.SetAsync(staffDoc);
         }
 
-        public async Task<ServiceResponse<GetStudentAttendanceDto>> GetStudentAttendanceByClassId(int classId)
-        {
-            var response = new ServiceResponse<GetStudentAttendanceDto>();
-            var course = await _context.PrivateCourses
-                .Include(c => c.privateClasses)
-                    .ThenInclude(pc => pc.studentPrivateClasses)!
-                        .ThenInclude(spc => spc.student)
-                .Include(c => c.privateClasses)
-                    .ThenInclude(pc => pc.teacherPrivateClass)
-                        .ThenInclude(tpc => tpc!.teacher)
-                .FirstOrDefaultAsync(c => c.privateClasses.Any(pc => pc.id == classId));
-
-            if (course is null)
-                throw new Exception($"Course with class ID {classId} not found.");
-
-            response.Data = new GetStudentAttendanceDto
-            {
-                course = new GetPrivateCourseDto
-                {
-                    id = course.id,
-                    course = course.course,
-                    section = course.section,
-                    subject = course.subject ?? "",
-                    level = course.level ?? "",
-                    method = course.method,
-                    totalHour = course.totalHour,
-                    hourPerClass = course.hourPerClass,
-                    fromDate = course.fromDate,
-                    toDate = course.toDate
-                },
-                cls = new GetPrivateClassWithNameDto
-                {
-                    id = classId,
-                    room = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.room ?? " ",
-                    method = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.method ?? StudyMethod.onsite,
-                    date = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.date ?? " ",
-                    fromTime = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.fromTime ?? " ",
-                    toTime = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.toTime ?? " ",
-                    studentPrivateClasses = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.studentPrivateClasses?
-                    .Select(spc => new GetStudentPrivateClassWithNameDto
-                    {
-                        id = spc.id,
-                        studentId = spc.studentId,
-                        fullName = spc.student.fullName,
-                        nickname = spc.student.nickname,
-                        attendance = spc.attendance
-                    }).ToList() ?? new List<GetStudentPrivateClassWithNameDto>(),
-                    teacherPrivateClass = new GetTeacherPrivateClassWithNameDto
-                    {
-                        id = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.teacherPrivateClass?.id ?? 0,
-                        teacherId = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.teacherPrivateClass?.teacherId ?? 0,
-                        fullName = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.teacherPrivateClass?.teacher.fullName ?? " ",
-                        nickname = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.teacherPrivateClass?.teacher.nickname ?? " ",
-                        status = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.teacherPrivateClass?.status ?? TeacherClassStatus.Incomplete,
-                        workType = course.privateClasses.FirstOrDefault(pc => pc.id == classId)?.teacherPrivateClass?.workType ?? " "
-                    }
-                }
-            };
-            return response;
-        }
-
         public async Task<ServiceResponse<GetStudentPrivateClassDto>> UpdateStudentAttendance(UpdateStudentPrivateClassDto updatedStudentAttendance)
         {
             var response = new ServiceResponse<GetStudentPrivateClassDto>();
