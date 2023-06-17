@@ -10,6 +10,5 @@ namespace griffined_api.Models
         public int id { get; set; }
         public int paymentId { get; set; }
         public string file { get; set; } = string.Empty;
-        public Payment payment { get; set; } = new Payment();
     }
 }
