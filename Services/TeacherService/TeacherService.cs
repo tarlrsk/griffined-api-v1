@@ -118,9 +118,7 @@ namespace griffined_api.Services.TeacherService
             return response;
         }
 
-
-
-        public async Task<ServiceResponse<GetTeacherDto>> GetTeacherByMe()
+        public async Task<ServiceResponse<GetTeacherDto>> GetTeacherByToken()
         {
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             var response = new ServiceResponse<GetTeacherDto>();
@@ -192,11 +190,6 @@ namespace griffined_api.Services.TeacherService
             }
             return response;
         }
-
-        // public Task<ServiceResponse<GetTeacherLeavingRequestDto>> UpdateTeacherLeavingRequest(UpdateTeacherLeavingRequestDto updatedRequest)
-        // {
-        //     throw new NotImplementedException();
-        // }
 
         private async Task addStaffFireStoreAsync(Teacher staff)
         {

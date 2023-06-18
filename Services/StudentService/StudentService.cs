@@ -142,7 +142,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> GetStudentByMe()
+        public async Task<ServiceResponse<GetStudentDto>> GetStudentByToken()
         {
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             var response = new ServiceResponse<GetStudentDto>();

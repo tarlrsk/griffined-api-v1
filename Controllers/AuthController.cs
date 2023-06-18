@@ -9,7 +9,7 @@ using Firebase.Auth;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/auth")]
+    [Route("api/v1/auth")]
 
     public class AuthController : ControllerBase
     {

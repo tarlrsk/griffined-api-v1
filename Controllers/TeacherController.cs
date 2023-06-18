@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [ApiController]
-    [Route("api/teacher")]
+    [Route("api/v1/teacher")]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService _teacherService;
@@ -30,10 +30,10 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("me"), Authorize(Roles = "teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherByMe()
+        [HttpGet("by-token"), Authorize(Roles = "teacher")]
+        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherByToken()
         {
-            var response = await _teacherService.GetTeacherByMe();
+            var response = await _teacherService.GetTeacherByToken();
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);

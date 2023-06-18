@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/available")]
+    [Route("api/v1/available")]
 
     [Authorize(Roles = "ea")]
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/student")]
+    [Route("api/v1/student")]
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
@@ -31,10 +31,10 @@ namespace griffined_api.Controllers
                 return NotFound(response);
             return Ok(response);
         }
-        [HttpGet("me"), Authorize(Roles = "student")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentByMe()
+        [HttpGet("by-token"), Authorize(Roles = "student")]
+        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentByToken()
         {
-            var response = await _studentService.GetStudentByMe();
+            var response = await _studentService.GetStudentByToken();
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);
