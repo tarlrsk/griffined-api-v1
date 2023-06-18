@@ -18,7 +18,6 @@ namespace griffined_api.Data
         public DbSet<Teacher> Teachers => Set<Teacher>();
         public DbSet<WorkTime> WorkTimes => Set<WorkTime>();
         public DbSet<Staff> Staffs => Set<Staff>();
-        public DbSet<PaymentFile> PaymentFiles => Set<PaymentFile>();
         public DbSet<StudentAdditionalFiles> StudentAdditionalFiles => Set<StudentAdditionalFiles>();
         public DbSet<PreferredDay> PreferredDays => Set<PreferredDay>();
     }
