@@ -7,22 +7,15 @@ namespace griffined_api.Models
 {
     public class Student
     {
-        [Required]
         public int id { get; set; }
-        [Required]
         public string firebaseId { get; set; } = string.Empty;
-        [Required]
         public string title { get; set; } = string.Empty;
-        [Required]
         public string fName { get; set; } = string.Empty;
-        [Required]
         public string lName { get; set; } = string.Empty;
         public string fullName { get { return fName + " " + lName; } }
-        [Required]
         public string nickname { get; set; } = string.Empty;
         public string? profilePicture { get; set; }
         private DateTime _dob;
-        [Required]
         public string dob { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
         public int age
         {
@@ -34,7 +27,6 @@ namespace griffined_api.Models
                 return _age;
             }
         }
-        [Required]
         public string phone { get; set; } = string.Empty;
         public string? line { get; set; }
         public string? email { get; set; }
@@ -46,7 +38,7 @@ namespace griffined_api.Models
         public string? targetScore { get; set; }
         public string? hogInfo { get; set; }
         public string? healthInfo { get; set; }
-        public bool isActive { get; set; } = true;
+        public _StudentStatusEnum status { get; set; }
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public DateTime dateCreated { get; set; } = DateTime.Now;

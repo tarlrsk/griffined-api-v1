@@ -308,7 +308,7 @@ namespace griffined_api.Services.StudentService
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
-            student.isActive = false;
+            student.status = _StudentStatusEnum.Inactive;
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
@@ -326,7 +326,7 @@ namespace griffined_api.Services.StudentService
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
-            student.isActive = true;
+            student.status = _StudentStatusEnum.Active;
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs

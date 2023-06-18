@@ -7,7 +7,6 @@ namespace griffined_api.Models
 {
     public class Address
     {
-        [Required]
         public int id { get; set; }
         public string address { get; set; } = string.Empty;
         public string subdistrict { get; set; } = string.Empty;
