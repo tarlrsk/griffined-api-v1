@@ -40,29 +40,6 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("course-count"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>>> GetStudentWithCourseRegistered()
-        {
-            return Ok(await _studentService.GetStudentWithCoursesRegistered());
-        }
-
-        [HttpGet("course/{studentId}"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentCourseWithClassesDto>>>> GetStudentCourseWithClassesByStudentId(int studentId)
-        {
-            var response = await _studentService.GetStudentCourseWithClassesByStudentId(studentId);
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-        [HttpGet("course/me"), Authorize(Roles = "student")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentCourseWithClassesDto>>>> GetStudentCourseWithClassesByMe()
-        {
-            var response = await _studentService.GetStudentCourseWithClassesByMe();
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-
         [HttpPost, Authorize(Roles = "ep")]
         public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> AddStudent(AddStudentDto newStudent)
         {
