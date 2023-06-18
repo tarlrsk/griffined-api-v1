@@ -11,42 +11,68 @@ image: mcr.microsoft.com/dotnet/sdk:7.0
 definitions:
   steps:
     - step: &build
-          name: 'Dotnet Core Build'
-          caches:
-            - dotnetcore
-          script:
-            - apt-get update
-            - apt-get install zip -y
-            - dotnet build
-            - dotnet publish -c Release -o ./bin/Publish
-            - mv firebase-config.json ./bin/Publish
-            - mv .env ./bin/Publish
-            - cd ./bin/Publish
-            - zip -r main.zip .
-          artifacts:
-            - 'bin/Publish/main.zip'
+        name: 'Dotnet Core Build'
+        caches:
+          - dotnetcore
+        script:
+          - apt-get update
+          - apt-get install zip -y
+          - dotnet build
+          - dotnet publish -c Release -o ./bin/Publish
+          - mv firebase-config.json ./bin/Publish
+          - mv .env ./bin/Publish
+          - cd ./bin/Publish
+          - zip -r main.zip .
+        artifacts:
+          - 'bin/Publish/main.zip'
+    - step: &prod_env
+        name: Add Firebase Credential & Environment File
+        script:
+          - echo "This step add environment files"
+          - |
+            cat << EOF > ./firebase-config.json
+            $PROD_FIREBASE_CREDENTIAL
+            EOF
+          - |
+            cat << EOF> ./.env
+            REMOTE_DB="$PROD_REMOTE_DB"
+            FIREBASE_API_KEY="$PROD_FIREBASE_API_KEY"
+            GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+            EOF
 
+        artifacts:
+          - 'firebase-config.json'
+          - '.env'
+    - step: &stg_env
+        name: Add Firebase Credential & Environment File
+        script:
+          - echo "This step add environment files"
+          - |
+            cat << EOF > ./firebase-config.json
+            $STG_FIREBASE_CREDENTIAL
+            EOF
+          - |
+            cat << EOF> ./.env
+            REMOTE_DB="$STG_REMOTE_DB"
+            FIREBASE_API_KEY="$STG_FIREBASE_API_KEY"
+            GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+            EOF
+        artifacts:
+          - 'firebase-config.json'
+          - '.env'
+          
 pipelines:
+  pull-requests:
+    '{feature/*,refactor/*,update/*,migration/*,fix/*,test/*}':
+      - step: *stg_env
+      - step: *build
+    '{hotfix/*}':
+      - step: *prod_env
+      - step: *build
+    
   branches:
-    main:
-      - step:
-          name: Add Firebase Credential & Environment File
-          script:
-            - echo "This step add environment files"
-            - |
-              cat << EOF > ./firebase-config.json
-              $PROD_FIREBASE_CREDENTIAL
-              EOF
-            - |
-              cat << EOF> ./.env
-              REMOTE_DB="$PROD_REMOTE_DB"
-              FIREBASE_API_KEY="$PROD_FIREBASE_API_KEY"
-              GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
-              EOF
-
-          artifacts:
-            - 'firebase-config.json'
-            - '.env'
+    '{main}':
+      - step: *prod_env
       - step: *build
       - step:
           name: Deploy Azure App Service Production
@@ -62,24 +88,8 @@ pipelines:
                 AZURE_APP_NAME: $AZURE_APP_NAME
                 ZIP_FILE: 'bin/Publish/main.zip'
                 DEBUG: 'true'
-    develop:
-      - step:
-          name: Add Firebase Credential & Environment File
-          script:
-            - echo "This step add environment files"
-            - |
-              cat << EOF > ./firebase-config.json
-              $STG_FIREBASE_CREDENTIAL
-              EOF
-            - |
-              cat << EOF> ./.env
-              REMOTE_DB="$STG_REMOTE_DB"
-              FIREBASE_API_KEY="$STG_FIREBASE_API_KEY"
-              GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
-              EOF
-          artifacts:
-            - 'firebase-config.json'
-            - '.env'
+    '{develop}':
+      - step: *stg_env
       - step: *build
       - step:
           name: Deploy Azure App Service Staging
