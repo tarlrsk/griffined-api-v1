@@ -167,40 +167,6 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>> GetStudentWithCoursesRegistered()
-        {
-            var response = new ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>();
-            try
-            {
-                var students = await _context.Students
-                    .Include(s => s.privateClasses)
-                        .ThenInclude(c => c.privateClass)
-                            .ThenInclude(pc => pc.privateCourse)
-                    .ToListAsync();
-
-                var studentWithCourseCount = students.Select(s => new GetStudentWithCourseRegisteredCountDto
-                {
-                    id = s.id,
-                    studentId = s.dateCreated.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (s.id % 10000).ToString("0000"),
-                    fullName = s.fullName,
-                    nickname = s.nickname,
-                    courseCount = s.privateClasses
-                        .Select(spc => spc.privateClass.privateCourse)
-                        .Where(c => c?.isActive == true && c?.request.status != RegistrationRequestStatus.Reject)
-                        .Distinct()
-                        .Count()
-                }).ToList();
-
-                response.Data = studentWithCourseCount;
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
         public async Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentDto updatedStudent)
         {
             var response = new ServiceResponse<GetStudentDto>();
@@ -342,7 +308,7 @@ namespace griffined_api.Services.StudentService
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
-            student.isActive = false;
+            student.status = _StudentStatusEnum.Inactive;
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
@@ -360,7 +326,7 @@ namespace griffined_api.Services.StudentService
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
-            student.isActive = true;
+            student.status = _StudentStatusEnum.Active;
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs

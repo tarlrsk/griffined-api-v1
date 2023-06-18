@@ -88,7 +88,6 @@ namespace griffined_api.Services.TeacherService
             }
             return response;
         }
-
         public async Task<ServiceResponse<List<GetTeacherDto>>> GetTeacher()
         {
             var response = new ServiceResponse<List<GetTeacherDto>>();
@@ -207,7 +206,7 @@ namespace griffined_api.Services.TeacherService
                 };
             await docRef.SetAsync(staffDoc);
         }
-        
+
         public async Task<ServiceResponse<GetTeacherDto>> DisableTeacher(int id)
         {
             var response = new ServiceResponse<GetTeacherDto>();

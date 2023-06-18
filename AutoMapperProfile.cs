@@ -46,16 +46,6 @@ namespace griffined_api
             CreateMap<StudentAdditionalFiles, GetStudentAdditionalFilesDto>();
             CreateMap<AddStudentAdditionalFilesDto, StudentAdditionalFiles>();
             CreateMap<UpdateStudentAdditionalFilesDto, StudentAdditionalFiles>();
-
-            // Payment
-            CreateMap<Payment, GetPrivatePaymentDto>();
-            CreateMap<AddPrivatePaymentDto, Payment>()
-                .ForMember(dest => dest.payment, opt => opt.MapFrom(src => src.payment));
-            CreateMap<UpdatePrivatePaymentDto, Payment>()
-                .ForMember(dest => dest.payment, opt => opt.MapFrom(src => src.payment));
-            CreateMap<PaymentFile, GetPaymentFileDto>();
-            CreateMap<AddPaymentFileDto, PaymentFile>();
-            CreateMap<UpdatePaymentFileDto, PaymentFile>();
         }
     }
 }
