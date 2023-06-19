@@ -22,8 +22,9 @@ namespace griffined_api.Controllers
             try
             {
                 FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.SignInWithEmailAndPasswordAsync(request.email, request.password);
-
-                return Ok(firebaseAuthLink.FirebaseToken);
+                var response = new TokenResponseDto();
+                response.accessToken = firebaseAuthLink.FirebaseToken;
+                return Ok(response);
 
             }
             catch (FirebaseAuthException ex)
@@ -32,7 +33,7 @@ namespace griffined_api.Controllers
             }
         }
 
-        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ep")]
+        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ep, master")]
         public async Task<ActionResult<String>> ResetPassword(string email)
         {
             await firebaseAuthProvider.SendPasswordResetEmailAsync(email);

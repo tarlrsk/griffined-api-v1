@@ -8,7 +8,7 @@ namespace griffined_api.Controllers
     [ApiController]
     [Route("api/v1/available")]
 
-    [Authorize(Roles = "ea")]
+    [Authorize(Roles = "ea, master")]
 
     public class CheckAvailable : ControllerBase
     {

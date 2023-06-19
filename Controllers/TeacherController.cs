@@ -15,13 +15,13 @@ namespace griffined_api.Models
             _teacherService = teacherService;
         }
 
-        [HttpGet, Authorize(Roles = "oa, ea")]
+        [HttpGet, Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> Get()
         {
             return Ok(await _teacherService.GetTeacher());
         }
 
-        [HttpGet("{id}"), Authorize(Roles = "oa, ea")]
+        [HttpGet("{id}"), Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherById(int id)
         {
             var response = await _teacherService.GetTeacherById(id);
@@ -30,7 +30,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpGet("by-token"), Authorize(Roles = "teacher")]
+        [HttpGet("by-token"), Authorize(Roles = "teacher, master")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherByToken()
         {
             var response = await _teacherService.GetTeacherByToken();
@@ -39,13 +39,13 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPost, Authorize(Roles = "oa, ea")]
+        [HttpPost, Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> AddTeacher(AddTeacherDto newTeacher)
         {
             return Ok(await _teacherService.AddTeacher(newTeacher));
         }
 
-        [HttpPut, Authorize(Roles = "oa, ea")]
+        [HttpPut, Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> UpdateTeacher(UpdateTeacherDto updatedTeacher)
         {
             var response = await _teacherService.UpdateTeacher(updatedTeacher);
@@ -54,7 +54,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpDelete("{id}"), Authorize(Roles = "oa, ea")]
+        [HttpDelete("{id}"), Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<GetTeacherDto>>> DeleteTeacher(int id)
         {
             var response = await _teacherService.DeleteTeacher(id);
@@ -63,7 +63,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPut("activate/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpPut("activate/{id}"), Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
         {
             var response = await _teacherService.EnableTeacher(id);
@@ -72,7 +72,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPut("deactivate/{id}"), Authorize(Roles = "oa, ea")]
+        [HttpPut("deactivate/{id}"), Authorize(Roles = "oa, ea, master")]
         public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
         {
             var response = await _teacherService.DisableTeacher(id);
