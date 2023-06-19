@@ -13,7 +13,7 @@ namespace griffined_api.Models
         public string district { get; set; } = string.Empty;
         public string province { get; set; } = string.Empty;
         public string zipcode { get; set; } = string.Empty;
-        public Student? student { get; set; }
         public int studentId { get; set; }
+        public Student? student { get; set; }
     }
 }

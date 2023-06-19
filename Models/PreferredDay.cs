@@ -13,6 +13,7 @@ namespace griffined_api.Models
         public string fromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
         private TimeOnly _toTime;
         public string toTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
-        public int privateReqInfoId { get; set; }
+        public int studyCourseId { get; set; }
+        public StudyCourse studyCourse { get; set; } = new StudyCourse();
     }
 }

@@ -9,7 +9,6 @@ namespace griffined_api.Models
     {
         public int id { get; set; }
         public string subject { get; set; } = string.Empty;
-        public int courseId { get; set; }
-        public Course? course { get; set; }
+        public ICollection<Course> courses = new List<Course>();
     }
 }

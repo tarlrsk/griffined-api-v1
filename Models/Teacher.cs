@@ -19,7 +19,8 @@ namespace griffined_api.Models
         public bool isActive { get; set; } = true;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
-        [Required]
         public ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
+        public ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
+        public ICollection<CancellationRequest> cancellationRequests = new List<CancellationRequest>();
     }
 }

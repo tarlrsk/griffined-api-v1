@@ -10,7 +10,9 @@ namespace griffined_api.Models
         public int id { get; set; }
         public string title { get; set; } = string.Empty;
         public string description { get; set; } = string.Empty;
-        public _AppointmentTypeEnum appointmentType { get; set; }
-        public _AppointmentStatusEnum appointmentStatus { get; set; }
+        public AppointmentType appointmentType { get; set; }
+        public AppointmentStatus appointmentStatus { get; set; }
+        public ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
+        public ICollection<Schedule> schedules { get; set; } = new List<Schedule>();
     }
 }

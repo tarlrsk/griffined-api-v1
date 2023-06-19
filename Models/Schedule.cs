@@ -14,8 +14,10 @@ namespace griffined_api.Models
         public string fromTime { get; set; } = string.Empty;
         private TimeOnly _toTime;
         public string toTime { get; set; } = string.Empty;
-        public _ScheduleTypeEnum type { get; set; }
-        public ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
-        public ICollection<Appointment> appointments { get; set; } = new List<Appointment>();
+        public ScheduleType type { get; set; }
+        public int studyClassId { get; set; }
+        public StudyClass studyClass { get; set; } = new StudyClass();
+        public int appointmentId { get; set; }
+        public Appointment appointment { get; set; } = new Appointment();
     }
 }

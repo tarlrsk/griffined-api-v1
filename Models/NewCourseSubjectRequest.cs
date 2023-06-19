@@ -8,8 +8,10 @@ namespace griffined_api.Models
     public class NewCourseSubjectRequest
     {
         public int id { get; set; }
-        public ICollection<Subject> subjects { get; set; } = new List<Subject>();
-        public ICollection<NewCourseRequest> newCourseRequests { get; set; } = new List<NewCourseRequest>();
+        public int subjectId { get; set; }
+        public Subject subject { get; set; } = new Subject();
+        public int newCourseRequestId { get; set; }
+        public NewCourseRequest newCourseRequest { get; set; } = new NewCourseRequest();
         public int hour { get; set; }
     }
 }

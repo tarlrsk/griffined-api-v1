@@ -8,10 +8,13 @@ namespace griffined_api.Models
     public class NewCourseRequest
     {
         public int id { get; set; }
-        public ICollection<RegistrationRequest> registrationRequests { get; set; } = new List<RegistrationRequest>();
-        public ICollection<Course> courses { get; set; } = new List<Course>();
-        public ICollection<Level> levels { get; set; } = new List<Level>();
-        public _MethodEnum method { get; set; }
+        public int registrationRequestId { get; set; }
+        public RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        public int courseId { get; set; }
+        public Course course { get; set; } = new Course();
+        public int levelId { get; set; }
+        public Level level { get; set; } = new Level();
+        public Method method { get; set; }
         public int totalHours { get; set; }
 
     }

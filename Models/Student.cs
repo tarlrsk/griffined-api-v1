@@ -45,6 +45,7 @@ namespace griffined_api.Models
         public Parent? parent { get; set; }
         public Address? address { get; set; }
         public ICollection<StudentAdditionalFiles>? additionalFiles { get; set; }
+        public ICollection<CancellationRequest>? cancellationRequests { get; set; }
 
     }
 }

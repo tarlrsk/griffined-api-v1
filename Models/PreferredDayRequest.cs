@@ -13,6 +13,7 @@ namespace griffined_api.Models
         public string fromTime { get; set; } = string.Empty;
         private TimeOnly _toTime;
         public string toTime { get; set; } = string.Empty;
-        public ICollection<RegistrationRequest> registrationRequests = new List<RegistrationRequest>();
+        public int registrationRequestId { get; set; }
+        public RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
     }
 }

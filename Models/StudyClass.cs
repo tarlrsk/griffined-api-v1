@@ -11,6 +11,7 @@ namespace griffined_api.Models
         public int classNumber { get; set; }
         public _ClassStatusEnum status { get; set; }
         public bool isMakeup { get; set; } = false;
+        public ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
         public int scheduleId { get; set; }
         public Schedule schedule { get; set; } = new Schedule();
         public ICollection<StudySubject> studySubjects { get; set; } = new List<StudySubject>();
