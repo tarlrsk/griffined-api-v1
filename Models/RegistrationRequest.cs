@@ -18,7 +18,6 @@ namespace griffined_api.Models
         public int byECId { get; set; }
         public int byEAId { get; set; }
         public int byOAId { get; set; }
-        public int studentAddingRequestId { get; set; }
         public StudentAddingRequest? studentAddingRequest { get; set; }
         public ICollection<NewCourseRequest> newCourseRequests { get; set; } = new List<NewCourseRequest>();
         public ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();

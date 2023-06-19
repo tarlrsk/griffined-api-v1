@@ -20,5 +20,7 @@ namespace griffined_api.Models
         public bool isActive { get; set; } = true;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
+        public ICollection<StaffNotification> staffNotifications { get; set; } = new List<StaffNotification>();
+        public ICollection<StudyCourseHistory> studyCourseHistories { get; set; } = new List<StudyCourseHistory>();
     }
 }

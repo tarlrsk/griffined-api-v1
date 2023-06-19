@@ -8,9 +8,10 @@ namespace griffined_api.Models
     public class StudentAttendance
     {
         public int id { get; set; }
-        public _AttendanceEnum attendance { get; set; }
+        public Attendance attendance { get; set; }
         public int studentId { get; set; }
         public Student student { get; set; } = new Student();
-        public ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
+        public int attendanceId { get; set; }
+        public StudentAttendance studentAttendance { get; set; } = new StudentAttendance();
     }
 }

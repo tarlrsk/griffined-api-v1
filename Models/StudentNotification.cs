@@ -9,9 +9,11 @@ namespace griffined_api.Models
     {
         public int id { get; set; }
         public DateTime dateCreated { get; set; } = DateTime.Now;
-        public _StudentNotificationTypeEnum type { get; set; }
+        public StudentNotificationType type { get; set; }
         public bool hasRead { get; set; }
-        public ICollection<Student> students { get; set; } = new List<Student>();
-        public ICollection<StudyCourse> studyCourses { get; set; } = new List<StudyCourse>();
+        public int studentId { get; set; }
+        public Student student { get; set; } = new Student();
+        public int studyCourseId { get; set; }
+        public StudyCourse studyCourse { get; set; } = new StudyCourse();
     }
 }

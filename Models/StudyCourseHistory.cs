@@ -11,7 +11,9 @@ namespace griffined_api.Models
         public string description { get; set; } = string.Empty;
         private DateTime _dateUpdated;
         public string dateUpdated { get; set; } = string.Empty;
-        public ICollection<StudyCourse> studyCourses { get; set; } = new List<StudyCourse>();
-        public ICollection<Staff> byStaff { get; set; } = new List<Staff>();
+        public int studyCourseId { get; set; }
+        public StudyCourse studyCourse { get; set; } = new StudyCourse();
+        public int byStaffId { get; set; }
+        public Staff byStaff { get; set; } = new Staff();
     }
 }

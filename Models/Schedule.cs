@@ -15,7 +15,6 @@ namespace griffined_api.Models
         private TimeOnly _toTime;
         public string toTime { get; set; } = string.Empty;
         public ScheduleType type { get; set; }
-        public int studyClassId { get; set; }
         public StudyClass studyClass { get; set; } = new StudyClass();
         public int appointmentId { get; set; }
         public Appointment appointment { get; set; } = new Appointment();

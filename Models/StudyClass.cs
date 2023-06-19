@@ -9,12 +9,15 @@ namespace griffined_api.Models
     {
         public int id { get; set; }
         public int classNumber { get; set; }
-        public _ClassStatusEnum status { get; set; }
+        public ClassStatus status { get; set; }
         public bool isMakeup { get; set; } = false;
-        public ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
         public int scheduleId { get; set; }
         public Schedule schedule { get; set; } = new Schedule();
-        public ICollection<StudySubject> studySubjects { get; set; } = new List<StudySubject>();
-        public ICollection<Teacher> teachers { get; set; } = new List<Teacher>();
+        public int studySubjectId { get; set; }
+        public StudySubject studySubject { get; set; } = new StudySubject();
+        public int teacherId { get; set; }
+        public Teacher teacher { get; set; } = new Teacher();
+        public ICollection<StudentAttendance> attendances { get; set; } = new List<StudentAttendance>();
+        public ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
     }
 }

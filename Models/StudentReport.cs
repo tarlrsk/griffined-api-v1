@@ -9,12 +9,14 @@ namespace griffined_api.Models
     {
         public int id { get; set; }
         public string report { get; set; } = string.Empty;
-        public _ProgressionEnum progression { get; set; }
+        public Progression progression { get; set; }
         private DateTime _dateUploaded;
         public string dateUploaded { get; set; } = string.Empty;
         private DateTime _dateUpdated;
         public string dateUpdated { get; set; } = string.Empty;
-        public ICollection<CourseMember> courseMembers = new List<CourseMember>();
-        public ICollection<Teacher> teachers = new List<Teacher>();
+        public int courseMemberId { get; set; }
+        public CourseMember courseMember { get; set; } = new CourseMember();
+        public int teacherId { get; set; }
+        public Teacher teacher { get; set; } = new Teacher();
     }
 }

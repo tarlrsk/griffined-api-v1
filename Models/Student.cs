@@ -38,14 +38,18 @@ namespace griffined_api.Models
         public string? targetScore { get; set; }
         public string? hogInfo { get; set; }
         public string? healthInfo { get; set; }
-        public _StudentStatusEnum status { get; set; }
+        public StudentStatus status { get; set; }
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public DateTime dateCreated { get; set; } = DateTime.Now;
         public Parent? parent { get; set; }
         public Address? address { get; set; }
+        public StudentAttendance? attendance { get; set; }
         public ICollection<StudentAdditionalFiles>? additionalFiles { get; set; }
+        public ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
+        public ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
         public ICollection<CancellationRequest>? cancellationRequests { get; set; }
+        public ICollection<StudentNotification>? studentNotifications { get; set; }
 
     }
 }

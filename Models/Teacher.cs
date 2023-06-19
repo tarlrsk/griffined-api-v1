@@ -20,7 +20,11 @@ namespace griffined_api.Models
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
+        public ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
+        public ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
         public ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
-        public ICollection<CancellationRequest> cancellationRequests = new List<CancellationRequest>();
+        public ICollection<StudentReport> studentReports { get; set; } = new List<StudentReport>();
+        public ICollection<TeacherNotification> teacherNotifications { get; set; } = new List<TeacherNotification>();
+        public ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
     }
 }
