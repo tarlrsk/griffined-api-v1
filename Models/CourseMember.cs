@@ -12,6 +12,6 @@ namespace griffined_api.Models
         public int studySubjectId { get; set; }
         public StudySubject studySubject { get; set; } = new StudySubject();
         public int studentId { get; set; }
-        public Student student = new Student();
+        public Student student { get; set; } = new Student();
     }
 }
