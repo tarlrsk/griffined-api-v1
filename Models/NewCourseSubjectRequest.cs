@@ -8,7 +8,7 @@ namespace griffined_api.Models
     public class NewCourseSubjectRequest
     {
         public int id { get; set; }
-        public int subjectId { get; set; }
+        public int? subjectId { get; set; }
         public Subject subject { get; set; } = new Subject();
         public int newCourseRequestId { get; set; }
         public NewCourseRequest newCourseRequest { get; set; } = new NewCourseRequest();

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230619142606_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -265,7 +268,7 @@ namespace griffinedapi.Migrations
                     b.Property<int>("newCourseRequestId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("subjectId")
+                    b.Property<int>("subjectId")
                         .HasColumnType("int");
 
                     b.HasKey("id");
@@ -1207,7 +1210,9 @@ namespace griffinedapi.Migrations
 
                     b.HasOne("griffined_api.Models.Subject", "subject")
                         .WithMany("newCourseSubjectRequests")
-                        .HasForeignKey("subjectId");
+                        .HasForeignKey("subjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("newCourseRequest");
 

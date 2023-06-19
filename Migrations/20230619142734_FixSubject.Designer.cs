@@ -12,8 +12,8 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230619142128_Initial")]
-    partial class Initial
+    [Migration("20230619142734_FixSubject")]
+    partial class FixSubject
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -268,7 +268,7 @@ namespace griffinedapi.Migrations
                     b.Property<int>("newCourseRequestId")
                         .HasColumnType("int");
 
-                    b.Property<int>("subjectId")
+                    b.Property<int?>("subjectId")
                         .HasColumnType("int");
 
                     b.HasKey("id");
@@ -1210,9 +1210,7 @@ namespace griffinedapi.Migrations
 
                     b.HasOne("griffined_api.Models.Subject", "subject")
                         .WithMany("newCourseSubjectRequests")
-                        .HasForeignKey("subjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("subjectId");
 
                     b.Navigation("newCourseRequest");
 
