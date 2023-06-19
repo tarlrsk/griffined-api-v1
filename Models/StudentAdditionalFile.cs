@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class StudentAdditionalFiles
+    public class StudentAdditionalFile
     {
         public int id { get; set; }
         public string file { get; set; } = string.Empty;

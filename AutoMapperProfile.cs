@@ -43,9 +43,9 @@ namespace griffined_api
             CreateMap<UpdateStaffDto, Staff>();
 
             // Additional Files
-            CreateMap<StudentAdditionalFiles, GetStudentAdditionalFilesDto>();
-            CreateMap<AddStudentAdditionalFilesDto, StudentAdditionalFiles>();
-            CreateMap<UpdateStudentAdditionalFilesDto, StudentAdditionalFiles>();
+            CreateMap<StudentAdditionalFile, GetStudentAdditionalFilesDto>();
+            CreateMap<AddStudentAdditionalFilesDto, StudentAdditionalFile>();
+            CreateMap<UpdateStudentAdditionalFilesDto, StudentAdditionalFile>();
         }
     }
 }

@@ -44,10 +44,10 @@ namespace griffined_api.Services.StudentService
 
                 if (newStudent.additionalFiles != null)
                 {
-                    _student.additionalFiles = new List<StudentAdditionalFiles>();
+                    _student.additionalFiles = new List<StudentAdditionalFile>();
                     foreach (var additionalFile in newStudent.additionalFiles)
                     {
-                        var file = _mapper.Map<StudentAdditionalFiles>(additionalFile);
+                        var file = _mapper.Map<StudentAdditionalFile>(additionalFile);
                         _student.additionalFiles.Add(file);
                     }
                 }
@@ -280,7 +280,7 @@ namespace griffined_api.Services.StudentService
                             var existingFile = student.additionalFiles?.FirstOrDefault(f => f.id == updatedFile.id);
                             if (existingFile is null)
                             {
-                                existingFile = new StudentAdditionalFiles();
+                                existingFile = new StudentAdditionalFile();
                                 student.additionalFiles?.Add(existingFile);
                             }
 

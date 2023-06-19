@@ -45,7 +45,7 @@ namespace griffined_api.Models
         public Parent? parent { get; set; }
         public Address? address { get; set; }
         public StudentAttendance? attendance { get; set; }
-        public ICollection<StudentAdditionalFiles>? additionalFiles { get; set; }
+        public ICollection<StudentAdditionalFile>? additionalFiles { get; set; }
         public ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
         public ICollection<CancellationRequest>? cancellationRequests { get; set; }

@@ -38,7 +38,7 @@ namespace griffined_api.Services.StaffService
                 staff.firebaseId = firebaseId;
                 staff.CreatedBy = id;
                 staff.LastUpdatedBy = id;
-                _context.Staffs.Add(staff);
+                _context.Staff.Add(staff);
 
                 await _context.SaveChangesAsync();
                 await addStaffFireStoreAsync(staff);
@@ -58,14 +58,14 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<List<GetStaffDto>>();
             try
             {
-                var dbStaff = await _context.Staffs.FirstAsync(e => e.id == id);
+                var dbStaff = await _context.Staff.FirstAsync(e => e.id == id);
                 if (dbStaff is null)
                     throw new Exception($"Staff with ID '{id}' not found.");
 
-                _context.Staffs.Remove(dbStaff);
+                _context.Staff.Remove(dbStaff);
                 await _context.SaveChangesAsync();
 
-                response.Data = _context.Staffs.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
+                response.Data = _context.Staff.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<GetStaffDto>();
             try
             {
-                var staff = await _context.Staffs.FirstOrDefaultAsync(o => o.id == id);
+                var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == id);
                 if (staff is null)
                     throw new Exception($"Staff with ID '{id}' not found.");
 
@@ -108,7 +108,7 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<GetStaffDto>();
             try
             {
-                var staff = await _context.Staffs.FirstOrDefaultAsync(o => o.id == id);
+                var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == id);
                 if (staff is null)
                     throw new Exception($"Staff with ID '{id}' not found.");
 
@@ -134,7 +134,7 @@ namespace griffined_api.Services.StaffService
         public async Task<ServiceResponse<List<GetStaffDto>>> GetStaff()
         {
             var response = new ServiceResponse<List<GetStaffDto>>();
-            var dbStaffs = await _context.Staffs.ToListAsync();
+            var dbStaffs = await _context.Staff.ToListAsync();
             response.Data = dbStaffs.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
             return response;
         }
@@ -144,7 +144,7 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<GetStaffDto>();
             try
             {
-                var dbStaff = await _context.Staffs.FirstOrDefaultAsync(e => e.id == id);
+                var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
                 if (dbStaff is null)
                     throw new Exception($"Staff with ID '{id}' not found.");
                 response.Data = _mapper.Map<GetStaffDto>(dbStaff);
@@ -164,7 +164,7 @@ namespace griffined_api.Services.StaffService
 
             try
             {
-                var staff = await _context.Staffs.FirstOrDefaultAsync(o => o.id == updatedStaff.id);
+                var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == updatedStaff.id);
                 if (staff is null)
                     throw new Exception($"Staff with ID '{updatedStaff.id}' not found.");
 

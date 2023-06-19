@@ -78,7 +78,7 @@ namespace griffined_api.Services.AuthenticationService
             string customRole = string.Empty;
             string azure_id = string.Empty;
 
-            var master = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "master");
+            var master = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "master");
             if (master != null)
             {
                 azure_id = master.id.ToString();
@@ -86,7 +86,7 @@ namespace griffined_api.Services.AuthenticationService
             }
             else
             {
-                var oa = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Office Admin");
+                var oa = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Office Admin");
                 if (oa != null)
                 {
                     azure_id = oa.id.ToString();
@@ -94,7 +94,7 @@ namespace griffined_api.Services.AuthenticationService
                 }
                 else
                 {
-                    var ea = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Admin");
+                    var ea = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Admin");
                     if (ea != null)
                     {
                         azure_id = ea.id.ToString();
@@ -102,7 +102,7 @@ namespace griffined_api.Services.AuthenticationService
                     }
                     else
                     {
-                        var ep = await _context.Staffs.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Planner");
+                        var ep = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Planner");
                         if (ep != null)
                         {
                             azure_id = ep.id.ToString();
