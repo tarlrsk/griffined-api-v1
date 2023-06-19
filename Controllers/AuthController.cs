@@ -22,7 +22,7 @@ namespace griffined_api.Controllers
             try
             {
                 FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.SignInWithEmailAndPasswordAsync(request.email, request.password);
-                var response = new tokenDtoResponseDto();
+                var response = new tokenResponseDto();
                 response.accessToken = firebaseAuthLink.FirebaseToken;
                 return Ok(response);
 

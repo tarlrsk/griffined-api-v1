@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.UserDtos
 {
-    public class tokenDtoResponseDto
+    public class TokenResponseDto
     {
         public string accessToken { get; set; } = string.Empty;
     }
