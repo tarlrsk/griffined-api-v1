@@ -9,6 +9,7 @@ namespace griffined_api.Services.TeacherService
     public class TeacherService : ITeacherService
     {
         private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -193,7 +194,7 @@ namespace griffined_api.Services.TeacherService
 
         private async Task addStaffFireStoreAsync(Teacher staff)
         {
-            FirestoreDb db = FirestoreDb.Create("myproject-f44ec");
+            FirestoreDb db = FirestoreDb.Create("PROJECT_ID");
             DocumentReference docRef = db.Collection("users").Document(staff.firebaseId);
             Dictionary<string, object> staffDoc = new Dictionary<string, object>()
                 {
