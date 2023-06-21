@@ -47,19 +47,26 @@ namespace griffined_api.Data
         public virtual DbSet<TeacherNotification> TeacherNotifications { get; set; }
         public virtual DbSet<WorkTime> WorkTimes { get; set; }
 
-        // Enums
-        // public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 
             }
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var cascadeFKs = modelBuilder.Model.GetEntityTypes()
+            .SelectMany(t => t.GetForeignKeys())
+            .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
+
+            foreach (var fk in cascadeFKs)
+                fk.DeleteBehavior = DeleteBehavior.Restrict;
+
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Address>(entity =>
             {
                 entity.ToTable("Address");
@@ -314,8 +321,7 @@ namespace griffined_api.Data
 
                 entity.HasMany(e => e.studySubjects)
                     .WithOne(e => e.subject)
-                    .HasForeignKey(e => e.subjectId)
-                    .IsRequired(false);
+                    .HasForeignKey(e => e.subjectId);
             });
 
             modelBuilder.Entity<Teacher>(entity =>
