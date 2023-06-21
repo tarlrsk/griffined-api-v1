@@ -30,7 +30,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost, Authorize(Roles = "oa, master")]
+        [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetStaffDto>>>> AddStaff(AddStaffDto newStaff)
         {
             var response = await _staffService.AddStaff(newStaff);
