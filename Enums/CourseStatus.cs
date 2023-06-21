@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _MethodEnum
+    public enum CourseStatus
     {
-        Online,
-        Onsite,
-        Hybrid
+        Ongoing,
+        Finished,
+        Pending,
+        NotStarted,
+        Cancelled
     }
 }

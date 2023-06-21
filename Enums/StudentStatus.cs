@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _ProgressionEnum
+    public enum StudentStatus
     {
-        FiftyPercent,
-        HundredPercent,
-        Special
+        Active,
+        Inactive,
+        Inprocess
     }
 }

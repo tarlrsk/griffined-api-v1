@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _ScheduleTypeEnum
+    public enum Attendance
     {
-        Appointment,
-        Class
+        Present,
+        Late,
+        Absent
     }
 }

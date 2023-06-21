@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _PaymentStatusEnum
+    public enum AppointmentType
     {
-        Complete,
-        Incomplete
+        Meeting,
+        Training,
+        Demo,
+        Prepare,
+        Observe
     }
 }

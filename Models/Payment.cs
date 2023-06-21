@@ -7,18 +7,14 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class PreferredDayRequest
+    public class Payment
     {
         public int id { get; set; }
         public int? registrationRequestId { get; set; }
 
-        public string day { get; set; } = string.Empty;
-        private TimeOnly _fromTime;
-        public string fromTime { get; set; } = string.Empty;
-        private TimeOnly _toTime;
-        public string toTime { get; set; } = string.Empty;
+        public string file { get; set; } = string.Empty;
 
         [ForeignKey(nameof(registrationRequestId))]
-        public RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        public virtual RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
     }
 }

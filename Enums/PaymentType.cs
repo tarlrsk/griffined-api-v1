@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _AppointmentStatusEnum
+    public enum PaymentType
     {
-        NotStarted,
-        Ongoing,
-        Finished
+        FullPaid,
+        PartiallyPaid
     }
 }

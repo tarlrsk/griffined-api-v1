@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _CancellationRoleEnum
+    public enum StaffNotificationType
     {
-        Student,
-        Teacher
+        ClassCancellationRequest,
+        CourseApproval
     }
 }

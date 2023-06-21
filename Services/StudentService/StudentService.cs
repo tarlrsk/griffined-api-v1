@@ -44,10 +44,10 @@ namespace griffined_api.Services.StudentService
 
                 if (newStudent.additionalFiles != null)
                 {
-                    _student.additionalFiles = new List<StudentAdditionalFiles>();
+                    _student.additionalFiles = new List<StudentAdditionalFile>();
                     foreach (var additionalFile in newStudent.additionalFiles)
                     {
-                        var file = _mapper.Map<StudentAdditionalFiles>(additionalFile);
+                        var file = _mapper.Map<StudentAdditionalFile>(additionalFile);
                         _student.additionalFiles.Add(file);
                     }
                 }
@@ -280,7 +280,7 @@ namespace griffined_api.Services.StudentService
                             var existingFile = student.additionalFiles?.FirstOrDefault(f => f.id == updatedFile.id);
                             if (existingFile is null)
                             {
-                                existingFile = new StudentAdditionalFiles();
+                                existingFile = new StudentAdditionalFile();
                                 student.additionalFiles?.Add(existingFile);
                             }
 
@@ -308,7 +308,7 @@ namespace griffined_api.Services.StudentService
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
-            student.status = _StudentStatusEnum.Inactive;
+            student.status = StudentStatus.Inactive;
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
@@ -326,7 +326,7 @@ namespace griffined_api.Services.StudentService
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
-            student.status = _StudentStatusEnum.Active;
+            student.status = StudentStatus.Active;
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,6 +11,7 @@ namespace griffined_api.Models
     {
         public int id { get; set; }
         public string firebaseId { get; set; } = string.Empty;
+
         public string title { get; set; } = string.Empty;
         public string fName { get; set; } = string.Empty;
         public string lName { get; set; } = string.Empty;
@@ -38,13 +41,20 @@ namespace griffined_api.Models
         public string? targetScore { get; set; }
         public string? hogInfo { get; set; }
         public string? healthInfo { get; set; }
-        public _StudentStatusEnum status { get; set; }
+
+        public StudentStatus status { get; set; }
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public DateTime dateCreated { get; set; } = DateTime.Now;
-        public Parent? parent { get; set; }
-        public Address? address { get; set; }
-        public ICollection<StudentAdditionalFiles>? additionalFiles { get; set; }
+
+        public virtual Parent? parent { get; set; }
+        public virtual Address? address { get; set; }
+        public virtual StudentAttendance? attendance { get; set; }
+        public virtual ICollection<StudentAdditionalFile>? additionalFiles { get; set; }
+        public virtual ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
+        public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
+        public virtual ICollection<CancellationRequest>? cancellationRequests { get; set; }
+        public virtual ICollection<StudentNotification>? studentNotifications { get; set; }
 
     }
 }

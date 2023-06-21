@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _AttendanceEnum
+    public enum AppointmentStatus
     {
-        Present,
-        Late,
-        Absent
+        NotStarted,
+        Ongoing,
+        Finished
     }
 }

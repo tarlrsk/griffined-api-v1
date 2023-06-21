@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class Course
+    public class StudentAdditionalFile
     {
         public int id { get; set; }
+        public int? studentId { get; set; }
+        public string file { get; set; } = string.Empty;
 
-        public string course { get; set; } = string.Empty;
-
-        public virtual ICollection<Subject> subjects { get; set; } = new List<Subject>();
+        [ForeignKey(nameof(studentId))]
+        public virtual Student student { get; set; } = new Student();
     }
 }

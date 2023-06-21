@@ -8,12 +8,9 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum _CourseStatusEnum
+    public enum PaymentStatus
     {
-        Ongoing,
-        Finished,
-        Pending,
-        NotStarted,
-        Cancelled
+        Complete,
+        Incomplete
     }
 }
