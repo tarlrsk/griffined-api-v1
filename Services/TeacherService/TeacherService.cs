@@ -9,6 +9,7 @@ namespace griffined_api.Services.TeacherService
     public class TeacherService : ITeacherService
     {
         private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
