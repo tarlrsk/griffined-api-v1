@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,6 +10,7 @@ namespace griffined_api.Models
     public class Teacher
     {
         public int id { get; set; }
+
         public string firebaseId { get; set; } = string.Empty;
         public string fName { get; set; } = string.Empty;
         public string lName { get; set; } = string.Empty;
@@ -19,12 +22,13 @@ namespace griffined_api.Models
         public bool isActive { get; set; } = true;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
-        public ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
-        public ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
-        public ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
-        public ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
-        public ICollection<StudentReport> studentReports { get; set; } = new List<StudentReport>();
-        public ICollection<TeacherNotification> teacherNotifications { get; set; } = new List<TeacherNotification>();
-        public ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
+
+        public virtual ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
+        public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
+        public virtual ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
+        public virtual ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
+        public virtual ICollection<StudentReport> studentReports { get; set; } = new List<StudentReport>();
+        public virtual ICollection<TeacherNotification> teacherNotifications { get; set; } = new List<TeacherNotification>();
+        public virtual ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
     }
 }
