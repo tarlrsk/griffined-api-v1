@@ -15,8 +15,7 @@ namespace griffined_api.Models
         public int byOAId { get; set; }
 
         public string section { get; set; } = string.Empty;
-        private DateTime _date;
-        public string date { get; set; } = string.Empty;
+        public DateTime date { get; set; } = DateTime.Now;
         public string type { get; set; } = string.Empty;
         public virtual PaymentType paymentType { get; set; }
         public virtual PaymentStatus paymentStatus { get; set; }

@@ -24,7 +24,6 @@ namespace griffined_api.Models
         public int? LastUpdatedBy { get; set; }
 
         public virtual ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
-        public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
         public virtual ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
         public virtual ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
         public virtual ICollection<StudentReport> studentReports { get; set; } = new List<StudentReport>();
