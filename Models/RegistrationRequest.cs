@@ -17,6 +17,9 @@ namespace griffined_api.Models
         public string section { get; set; } = string.Empty;
         public DateTime date { get; set; } = DateTime.Now;
         public string type { get; set; } = string.Empty;
+        public RegistrationStatus registrationStatus { get; set; }
+        public bool isSentBack { get; set; }
+
         public virtual PaymentType paymentType { get; set; }
         public virtual PaymentStatus paymentStatus { get; set; }
 
