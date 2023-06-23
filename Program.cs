@@ -11,7 +11,7 @@ global using griffined_api.Dtos.TeacherDtos;
 global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
 global using griffined_api.Models;
-global using griffined_api.Services.AuthenticationService;
+global using griffined_api.integrations.Firebase;
 global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
