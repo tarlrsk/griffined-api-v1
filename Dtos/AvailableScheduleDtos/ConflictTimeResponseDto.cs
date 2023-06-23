@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
-    public class GetAvailableTimeDto
+    public class ConflictTimeResponseDto
     {
+        public int id { get; set; }
         private TimeOnly _fromTime;
         [Required]
         public string fromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }

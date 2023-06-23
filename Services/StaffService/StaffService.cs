@@ -21,9 +21,9 @@ namespace griffined_api.Services.StaffService
 
         }
 
-        public async Task<ServiceResponse<GetStaffDto>> AddStaff(AddStaffDto newStaff)
+        public async Task<ServiceResponse<StaffResponseDto>> AddStaff(AddStaffRequestDto newStaff)
         {
-            var response = new ServiceResponse<GetStaffDto>();
+            var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
             try
@@ -44,7 +44,7 @@ namespace griffined_api.Services.StaffService
                 await _context.SaveChangesAsync();
                 await addStaffFireStoreAsync(staff);
 
-                response.Data = _mapper.Map<GetStaffDto>(staff);
+                response.Data = _mapper.Map<StaffResponseDto>(staff);
             }
             catch (Exception ex)
             {
@@ -54,9 +54,9 @@ namespace griffined_api.Services.StaffService
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetStaffDto>>> DeleteStaff(int id)
+        public async Task<ServiceResponse<List<StaffResponseDto>>> DeleteStaff(int id)
         {
-            var response = new ServiceResponse<List<GetStaffDto>>();
+            var response = new ServiceResponse<List<StaffResponseDto>>();
             try
             {
                 var dbStaff = await _context.Staff.FirstAsync(e => e.id == id);
@@ -66,7 +66,7 @@ namespace griffined_api.Services.StaffService
                 _context.Staff.Remove(dbStaff);
                 await _context.SaveChangesAsync();
 
-                response.Data = _context.Staff.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
+                response.Data = _context.Staff.Select(e => _mapper.Map<StaffResponseDto>(e)).ToList();
             }
             catch (Exception ex)
             {
@@ -76,9 +76,9 @@ namespace griffined_api.Services.StaffService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStaffDto>> DisableStaff(int id)
+        public async Task<ServiceResponse<StaffResponseDto>> DisableStaff(int id)
         {
-            var response = new ServiceResponse<GetStaffDto>();
+            var response = new ServiceResponse<StaffResponseDto>();
             try
             {
                 var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == id);
@@ -104,9 +104,9 @@ namespace griffined_api.Services.StaffService
             }
             return response;
         }
-        public async Task<ServiceResponse<GetStaffDto>> EnableStaff(int id)
+        public async Task<ServiceResponse<StaffResponseDto>> EnableStaff(int id)
         {
-            var response = new ServiceResponse<GetStaffDto>();
+            var response = new ServiceResponse<StaffResponseDto>();
             try
             {
                 var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == id);
@@ -132,23 +132,23 @@ namespace griffined_api.Services.StaffService
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetStaffDto>>> GetStaff()
+        public async Task<ServiceResponse<List<StaffResponseDto>>> GetStaff()
         {
-            var response = new ServiceResponse<List<GetStaffDto>>();
+            var response = new ServiceResponse<List<StaffResponseDto>>();
             var dbStaffs = await _context.Staff.ToListAsync();
-            response.Data = dbStaffs.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
+            response.Data = dbStaffs.Select(e => _mapper.Map<StaffResponseDto>(e)).ToList();
             return response;
         }
 
-        public async Task<ServiceResponse<GetStaffDto>> GetStaffById(int id)
+        public async Task<ServiceResponse<StaffResponseDto>> GetStaffById(int id)
         {
-            var response = new ServiceResponse<GetStaffDto>();
+            var response = new ServiceResponse<StaffResponseDto>();
             try
             {
                 var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
                 if (dbStaff is null)
                     throw new Exception($"Staff with ID '{id}' not found.");
-                response.Data = _mapper.Map<GetStaffDto>(dbStaff);
+                response.Data = _mapper.Map<StaffResponseDto>(dbStaff);
             }
             catch (Exception ex)
             {
@@ -158,9 +158,9 @@ namespace griffined_api.Services.StaffService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStaffDto>> UpdateStaff(UpdateStaffDto updatedStaff)
+        public async Task<ServiceResponse<StaffResponseDto>> UpdateStaff(UpdateStaffRequestDto updatedStaff)
         {
-            var response = new ServiceResponse<GetStaffDto>();
+            var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
             try
@@ -189,7 +189,7 @@ namespace griffined_api.Services.StaffService
 
                 await addStaffFireStoreAsync(staff);
 
-                response.Data = _mapper.Map<GetStaffDto>(staff);
+                response.Data = _mapper.Map<StaffResponseDto>(staff);
             }
             catch (Exception ex)
             {

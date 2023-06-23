@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.ParentDtos
 {
-    public class UpdateParentDto
+    public class ParentRequestDto
     {
         public string fName { get; set; } = string.Empty;
         public string lName { get; set; } = string.Empty;
@@ -15,4 +15,5 @@ namespace griffined_api.Dtos.ParentDtos
         public string email { get; set; } = string.Empty;
         public string line { get; set; } = string.Empty;
     }
+
 }

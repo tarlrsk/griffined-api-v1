@@ -17,7 +17,7 @@ namespace griffined_api.Controllers
 
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDto request)
+        public async Task<ActionResult> Login(UserDto request)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ep, master")]
-        public async Task<ActionResult<String>> ResetPassword(string email)
+        public async Task<ActionResult> ResetPassword(string email)
         {
             await firebaseAuthProvider.SendPasswordResetEmailAsync(email);
             return Ok("Success");

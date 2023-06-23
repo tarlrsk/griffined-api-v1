@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StudentDtos
 {
-    public class UpdateStudentDto
+    public class UpdateStudentRequestDto
     {
         [Required]
         public int id { get; set; }
@@ -46,8 +46,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? targetScore { get; set; }
         public string? hogInfo { get; set; }
         public string? healthInfo { get; set; }
-        public UpdateParentDto? parent { get; set; }
-        public UpdateAddressDto? address { get; set; }
-        public ICollection<UpdateStudentAdditionalFilesDto>? additionalFiles { get; set; }
+        public ParentRequestDto? parent { get; set; }
+        public AddressRequestDto? address { get; set; }
+        public ICollection<UpdateStudentAdditionalFilesRequestDto>? additionalFiles { get; set; }
     }
 }

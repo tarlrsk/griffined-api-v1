@@ -11,25 +11,23 @@ namespace griffined_api
         {
             // Student
             CreateMap<Student, GetStudentDto>();
-            CreateMap<AddStudentDto, Student>()
+            CreateMap<AddStudentRequestDto, Student>()
                 .ForMember(dest => dest.additionalFiles, opt => opt.MapFrom(src => src.additionalFiles));
-            CreateMap<UpdateStudentDto, Student>();
+            CreateMap<UpdateStudentRequestDto, Student>();
 
             // Parent
-            CreateMap<Parent, GetParentDto>();
-            CreateMap<AddParentDto, Parent>();
-            CreateMap<UpdateParentDto, Parent>();
+            CreateMap<Parent, ParentDtoResponse>();
+            CreateMap<ParentRequestDto, Parent>();
 
             // Address
-            CreateMap<Address, GetAddressDto>();
-            CreateMap<AddAddressDto, Address>();
-            CreateMap<UpdateAddressDto, Address>();
+            CreateMap<Address, AddressResponseDto>();
+            CreateMap<AddressRequestDto, Address>();
 
             // Teacher
             CreateMap<Teacher, GetTeacherDto>()
                 .ForMember(dest => dest.workTimes, opt => opt.MapFrom(src => src.workTimes));
             CreateMap<AddTeacherDto, Teacher>();
-            CreateMap<Teacher, GetAvailableTeacherDto>();
+            CreateMap<Teacher, AvailableTeacherResponseDto>();
             CreateMap<UpdateTeacherDto, Teacher>();
 
             // WorkTime
@@ -38,14 +36,14 @@ namespace griffined_api
             CreateMap<UpdateWorkTimeDto, WorkTime>();
 
             // Staff
-            CreateMap<Staff, GetStaffDto>();
-            CreateMap<AddStaffDto, Staff>();
-            CreateMap<UpdateStaffDto, Staff>();
+            CreateMap<Staff, StaffResponseDto>();
+            CreateMap<AddStaffRequestDto, Staff>();
+            CreateMap<UpdateStaffRequestDto, Staff>();
 
             // Additional Files
-            CreateMap<StudentAdditionalFile, GetStudentAdditionalFilesDto>();
-            CreateMap<AddStudentAdditionalFilesDto, StudentAdditionalFile>();
-            CreateMap<UpdateStudentAdditionalFilesDto, StudentAdditionalFile>();
+            CreateMap<StudentAdditionalFile, StudentAdditionalFilesResponseDto>();
+            CreateMap<AddStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
+            CreateMap<UpdateStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
         }
     }
 }

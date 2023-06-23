@@ -197,14 +197,14 @@ namespace griffined_api.Services.CheckAvailableService
 
         //     return response;
         // }
-        private List<GetAvailableTimeDto> CreateFixPeriod(int hour)
+        private List<AvailableTimeResponseDto> CreateFixPeriod(int hour)
         {
-            var fixPeriod = new List<GetAvailableTimeDto>();
+            var fixPeriod = new List<AvailableTimeResponseDto>();
             var startTime = TimeOnly.Parse("10:00");
             var endTime = TimeOnly.Parse("20:00").AddHours(-(hour));
             while (startTime <= endTime)
             {
-                fixPeriod.Add(new GetAvailableTimeDto { fromTime = startTime.ToString(), toTime = (startTime.AddHours(hour)).ToString() });
+                fixPeriod.Add(new AvailableTimeResponseDto { fromTime = startTime.ToString(), toTime = (startTime.AddHours(hour)).ToString() });
                 startTime = startTime.AddHours(1);
             }
             return fixPeriod;
