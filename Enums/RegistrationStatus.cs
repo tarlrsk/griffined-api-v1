@@ -10,6 +10,7 @@ namespace griffined_api.Models
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum RegistrationStatus
     {
+        PendingPayment,
         PendingEC,
         PendingEA,
         PendingOA,

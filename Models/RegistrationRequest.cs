@@ -18,8 +18,9 @@ namespace griffined_api.Models
         public string section { get; set; } = string.Empty;
         public DateTime date { get; set; } = DateTime.Now;
         public string type { get; set; } = string.Empty;
-        public bool isSentBackByEA { get; set; }
-        public bool isSentBackByOA { get; set; }
+        public bool paymentError { get; set; }
+        public bool scheduleError { get; set; }
+        public bool newCourseDetailError { get; set; }
         public bool hasSchedule { get; set; }
         public virtual RegistrationStatus registrationStatus { get; set; }
 

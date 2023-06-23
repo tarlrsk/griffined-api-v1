@@ -15,6 +15,8 @@ namespace griffined_api.Models
         public int? levelId { get; set; }
 
         public int totalHours { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime endDate { get; set; }
         public virtual Method method { get; set; }
 
         [ForeignKey(nameof(levelId))]
