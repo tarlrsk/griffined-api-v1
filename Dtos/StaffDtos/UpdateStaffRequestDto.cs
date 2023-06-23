@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StaffDtos
 {
-    public class GetStaffDto
+    public class UpdateStaffRequestDto
     {
         [Required]
         public int id { get; set; }
@@ -17,8 +17,6 @@ namespace griffined_api.Dtos.StaffDtos
         public string lName { get; set; } = string.Empty;
         public string fullName { get { return fName + " " + lName; } }
         [Required]
-        public string role { get; set; } = string.Empty;
-        [Required]
         public string nickname { get; set; } = string.Empty;
         [Required]
         public string phone { get; set; } = string.Empty;
@@ -26,6 +24,5 @@ namespace griffined_api.Dtos.StaffDtos
         public string line { get; set; } = string.Empty;
         [Required]
         public string email { get; set; } = string.Empty;
-        public Boolean isActive { get; set; } = true;
     }
 }

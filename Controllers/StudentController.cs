@@ -18,13 +18,13 @@ namespace griffined_api.Controllers
         }
 
         [HttpGet, Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudent()
+        public async Task<ActionResult> GetStudent()
         {
             return Ok(await _studentService.GetStudent());
         }
 
         [HttpGet("{id}"), Authorize(Roles = "ep, ea, oa, teacher, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentById(int id)
+        public async Task<ActionResult> GetStudentById(int id)
         {
             var response = await _studentService.GetStudentById(id);
             if (response.Data is null)
@@ -32,7 +32,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         [HttpGet("by-token"), Authorize(Roles = "student, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentByToken()
+        public async Task<ActionResult> GetStudentByToken()
         {
             var response = await _studentService.GetStudentByToken();
             if (response.Data is null)
@@ -41,13 +41,13 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "ep, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> AddStudent(AddStudentDto newStudent)
+        public async Task<ActionResult> AddStudent(AddStudentRequestDto newStudent)
         {
             return Ok(await _studentService.AddStudent(newStudent));
         }
 
         [HttpPut, Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> UpdateStudent(UpdateStudentDto updatedStudent)
+        public async Task<ActionResult> UpdateStudent(UpdateStudentRequestDto updatedStudent)
         {
             var response = await _studentService.UpdateStudent(updatedStudent);
             if (response.Data is null)
@@ -56,7 +56,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpDelete("{id}"), Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DeleteStudent(int id)
+        public async Task<ActionResult> DeleteStudent(int id)
         {
             var response = await _studentService.DeleteStudent(id);
             if (response.Data is null)
@@ -66,7 +66,7 @@ namespace griffined_api.Controllers
 
 
         [HttpPut("activate/{id}"), Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
+        public async Task<ActionResult> EnableStudent(int id)
         {
             var response = await _studentService.EnableStudent(id);
             if (response.Success != true)
@@ -76,7 +76,7 @@ namespace griffined_api.Controllers
 
 
         [HttpPut("deactivate/{id}"), Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
+        public async Task<ActionResult> DisableStudent(int id)
         {
             var response = await _studentService.DisableStudent(id);
             if (response.Success != true)

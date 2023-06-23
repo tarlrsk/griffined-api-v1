@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
-    public class GetAvailableTeacherDto
+    public class AvailableTeacherResponseDto
     {
         [Required]
         public int id { get; set; }

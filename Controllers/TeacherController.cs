@@ -16,13 +16,13 @@ namespace griffined_api.Models
         }
 
         [HttpGet, Authorize(Roles = "oa, ea, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> Get()
+        public async Task<ActionResult> Get()
         {
             return Ok(await _teacherService.GetTeacher());
         }
 
         [HttpGet("{id}"), Authorize(Roles = "oa, ea, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherById(int id)
+        public async Task<ActionResult> GetTeacherById(int id)
         {
             var response = await _teacherService.GetTeacherById(id);
             if (response.Data is null)
@@ -31,7 +31,7 @@ namespace griffined_api.Models
         }
 
         [HttpGet("by-token"), Authorize(Roles = "teacher, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> GetTeacherByToken()
+        public async Task<ActionResult> GetTeacherByToken()
         {
             var response = await _teacherService.GetTeacherByToken();
             if (response.Data is null)
@@ -40,13 +40,13 @@ namespace griffined_api.Models
         }
 
         [HttpPost, Authorize(Roles = "oa, ea, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> AddTeacher(AddTeacherDto newTeacher)
+        public async Task<ActionResult> AddTeacher(AddTeacherDto newTeacher)
         {
             return Ok(await _teacherService.AddTeacher(newTeacher));
         }
 
         [HttpPut, Authorize(Roles = "oa, ea, master")]
-        public async Task<ActionResult<ServiceResponse<List<GetTeacherDto>>>> UpdateTeacher(UpdateTeacherDto updatedTeacher)
+        public async Task<ActionResult> UpdateTeacher(UpdateTeacherDto updatedTeacher)
         {
             var response = await _teacherService.UpdateTeacher(updatedTeacher);
             if (response.Data is null)
@@ -55,7 +55,7 @@ namespace griffined_api.Models
         }
 
         [HttpDelete("{id}"), Authorize(Roles = "oa, ea, master")]
-        public async Task<ActionResult<ServiceResponse<GetTeacherDto>>> DeleteTeacher(int id)
+        public async Task<ActionResult> DeleteTeacher(int id)
         {
             var response = await _teacherService.DeleteTeacher(id);
             if (response.Data is null)

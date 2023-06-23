@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StaffDtos
 {
-    public class AddStaffDto
+    public class AddStaffRequestDto
     {
         [Required]
         public string fName { get; set; } = string.Empty;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.AddressDtos
 {
-    public class AddAddressDto
+    public class AddressRequestDto
     {
         public string address { get; set; } = string.Empty;
         public string subdistrict { get; set; } = string.Empty;

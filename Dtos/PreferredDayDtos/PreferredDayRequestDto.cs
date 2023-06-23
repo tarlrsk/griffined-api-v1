@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.PreferredDayDtos
 {
-    public class AddPreferredDayDto
+    public class PreferredDayRequestDto
     {
         [Required]
         public string day { get; set; } = string.Empty;

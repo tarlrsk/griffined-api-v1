@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StudentAddtionalFilesDtos
 {
-    public class UpdateStudentAdditionalFilesDto
+    public class AddStudentAdditionalFilesRequestDto
     {
-        public int? id { get; set; }
+        [Required]
         public string file { get; set; } = string.Empty;
     }
 }

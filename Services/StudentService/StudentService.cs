@@ -21,7 +21,7 @@ namespace griffined_api.Services.StudentService
             _mapper = mapper;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> AddStudent(AddStudentDto newStudent)
+        public async Task<ServiceResponse<GetStudentDto>> AddStudent(AddStudentRequestDto newStudent)
         {
             var response = new ServiceResponse<GetStudentDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -167,7 +167,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentDto updatedStudent)
+        public async Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent)
         {
             var response = new ServiceResponse<GetStudentDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");

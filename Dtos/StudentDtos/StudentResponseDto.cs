@@ -54,8 +54,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? hogInfo { get; set; }
         public string? healthInfo { get; set; }
         public bool isActive { get; set; } = true;
-        public GetParentDto? parent { get; set; }
-        public GetAddressDto? address { get; set; }
-        public ICollection<GetStudentAdditionalFilesDto>? additionalFiles { get; set; }
+        public ParentDtoResponse? parent { get; set; }
+        public AddressRequestDto? address { get; set; }
+        public ICollection<StudentAdditionalFilesResponseDto>? additionalFiles { get; set; }
     }
 }
