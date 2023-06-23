@@ -21,7 +21,7 @@ namespace griffined_api.Middlewares
 
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                ProblemDetails problem = new()
+                ProblemDetails problemJson = new()
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Type = "Server Error",
@@ -29,9 +29,9 @@ namespace griffined_api.Middlewares
                     Detail = "An internal server has occurred"
                 };
 
-                string json = JsonSerializer.Serialize(problem);
+                string problem = JsonSerializer.Serialize(problemJson);
 
-                await context.Response.WriteAsync(json);
+                await context.Response.WriteAsync(problem);
 
                 context.Response.ContentType = "application/json";
             }
