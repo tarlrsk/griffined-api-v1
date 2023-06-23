@@ -61,9 +61,15 @@ namespace griffinedapi.Migrations
                     byECId = table.Column<int>(type: "int", nullable: false),
                     byEAId = table.Column<int>(type: "int", nullable: false),
                     byOAId = table.Column<int>(type: "int", nullable: false),
+                    cancelledBy = table.Column<int>(type: "int", nullable: false),
                     section = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    createdDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    paymentError = table.Column<bool>(type: "bit", nullable: false),
+                    scheduleError = table.Column<bool>(type: "bit", nullable: false),
+                    newCourseDetailError = table.Column<bool>(type: "bit", nullable: false),
+                    hasSchedule = table.Column<bool>(type: "bit", nullable: false),
+                    registrationStatus = table.Column<int>(type: "int", nullable: false),
                     paymentType = table.Column<int>(type: "int", nullable: false),
                     paymentStatus = table.Column<int>(type: "int", nullable: false)
                 },
@@ -224,6 +230,8 @@ namespace griffinedapi.Migrations
                     courseId = table.Column<int>(type: "int", nullable: false),
                     levelId = table.Column<int>(type: "int", nullable: false),
                     totalHours = table.Column<int>(type: "int", nullable: false),
+                    startDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    endDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     method = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -287,6 +295,34 @@ namespace griffinedapi.Migrations
                         name: "FK_PreferredDayRequest_RegistrationRequest_registrationRequestId",
                         column: x => x.registrationRequestId,
                         principalTable: "RegistrationRequest",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comment",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    registrationRequestId = table.Column<int>(type: "int", nullable: false),
+                    staffId = table.Column<int>(type: "int", nullable: false),
+                    comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    createdDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comment", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Comment_RegistrationRequest_registrationRequestId",
+                        column: x => x.registrationRequestId,
+                        principalTable: "RegistrationRequest",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Comment_Staff_staffId",
+                        column: x => x.staffId,
+                        principalTable: "Staff",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -855,6 +891,16 @@ namespace griffinedapi.Migrations
                 column: "teacherId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Comment_registrationRequestId",
+                table: "Comment",
+                column: "registrationRequestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comment_staffId",
+                table: "Comment",
+                column: "staffId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CourseMember_studentId",
                 table: "CourseMember",
                 column: "studentId");
@@ -1060,6 +1106,9 @@ namespace griffinedapi.Migrations
 
             migrationBuilder.DropTable(
                 name: "CancellationRequest");
+
+            migrationBuilder.DropTable(
+                name: "Comment");
 
             migrationBuilder.DropTable(
                 name: "NewCourseSubjectRequest");

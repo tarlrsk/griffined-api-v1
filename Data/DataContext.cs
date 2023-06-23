@@ -19,6 +19,7 @@ namespace griffined_api.Data
         public virtual DbSet<Appointment> Appointments { get; set; }
         public virtual DbSet<AppointmentMember> AppointmentMembers { get; set; }
         public virtual DbSet<CancellationRequest> CancellationRequests { get; set; }
+        public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Course> Courses { get; set; }
         public virtual DbSet<CourseMember> CourseMembers { get; set; }
         public virtual DbSet<Level> Levels { get; set; }
@@ -93,6 +94,11 @@ namespace griffined_api.Data
             modelBuilder.Entity<CancellationRequest>(entity =>
             {
                 entity.ToTable("CancellationRequest");
+            });
+
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.ToTable("Comment");
             });
 
             modelBuilder.Entity<Course>(entity =>
@@ -171,6 +177,10 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.preferredDayRequests)
                     .WithOne(e => e.registrationRequest)
                     .HasForeignKey(e => e.registrationRequestId);
+
+                entity.HasMany(e => e.comments)
+                    .WithOne(e => e.registrationRequest)
+                    .HasForeignKey(e => e.registrationRequestId);
             });
 
             modelBuilder.Entity<RegistrationRequestMember>(entity =>
@@ -193,6 +203,10 @@ namespace griffined_api.Data
 
                 entity.HasMany(e => e.studyCourseHistories)
                     .WithOne(e => e.byStaff)
+                    .HasForeignKey(e => e.staffId);
+
+                entity.HasMany(e => e.comments)
+                    .WithOne(e => e.staff)
                     .HasForeignKey(e => e.staffId);
             });
 
