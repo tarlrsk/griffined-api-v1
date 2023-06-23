@@ -13,12 +13,15 @@ namespace griffined_api.Models
         public int byECId { get; set; }
         public int byEAId { get; set; }
         public int byOAId { get; set; }
+        public int cancelledBy { get; set; }
 
         public string section { get; set; } = string.Empty;
         public DateTime date { get; set; } = DateTime.Now;
         public string type { get; set; } = string.Empty;
-        public RegistrationStatus registrationStatus { get; set; }
-        public bool isSentBack { get; set; }
+        public bool isSentBackByEA { get; set; }
+        public bool isSentBackByOA { get; set; }
+        public bool hasSchedule { get; set; }
+        public virtual RegistrationStatus registrationStatus { get; set; }
 
         public virtual PaymentType paymentType { get; set; }
         public virtual PaymentStatus paymentStatus { get; set; }
@@ -28,6 +31,5 @@ namespace griffined_api.Models
         public virtual ICollection<NewCourseRequest> newCourseRequests { get; set; } = new List<NewCourseRequest>();
         public virtual ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public virtual ICollection<PreferredDayRequest> preferredDayRequests { get; set; } = new List<PreferredDayRequest>();
-
     }
 }

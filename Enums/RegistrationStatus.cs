@@ -12,6 +12,8 @@ namespace griffined_api.Models
     {
         PendingEC,
         PendingEA,
-        PendingOA
+        PendingOA,
+        Cancelled,
+        Completed
     }
 }
