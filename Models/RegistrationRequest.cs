@@ -16,7 +16,7 @@ namespace griffined_api.Models
         public int cancelledBy { get; set; }
 
         public string section { get; set; } = string.Empty;
-        public DateTime date { get; set; } = DateTime.Now;
+        public DateTime createdDate { get; set; } = DateTime.Now;
         public string type { get; set; } = string.Empty;
         public bool paymentError { get; set; }
         public bool scheduleError { get; set; }
