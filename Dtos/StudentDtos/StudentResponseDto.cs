@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StudentDtos
 {
-    public class GetStudentDto
+    public class StudentResponseDto
     {
         [Required]
         public int id { get; set; }
@@ -55,7 +55,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? healthInfo { get; set; }
         public bool isActive { get; set; } = true;
         public ParentDtoResponse? parent { get; set; }
-        public AddressRequestDto? address { get; set; }
+        public AddressResponseDto? address { get; set; }
         public ICollection<StudentAdditionalFilesResponseDto>? additionalFiles { get; set; }
     }
 }

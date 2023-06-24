@@ -7,14 +7,14 @@ namespace griffined_api.Services.StudentService
 {
     public interface IStudentService
     {
-        Task<ServiceResponse<List<GetStudentDto>>> GetStudent();
-        Task<ServiceResponse<GetStudentDto>> GetStudentById(int id);
-        Task<ServiceResponse<GetStudentDto>> GetStudentByToken();
-        Task<ServiceResponse<GetStudentDto>> AddStudent(AddStudentRequestDto newStudent);
-        Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent);
-        Task<ServiceResponse<List<GetStudentDto>>> DeleteStudent(int id);
-        Task<ServiceResponse<GetStudentDto>> DisableStudent(int id);
-        Task<ServiceResponse<GetStudentDto>> EnableStudent(int id);
+        Task<ServiceResponse<List<StudentResponseDto>>> GetStudent();
+        Task<ServiceResponse<StudentResponseDto>> GetStudentById(int id);
+        Task<ServiceResponse<StudentResponseDto>> GetStudentByToken();
+        Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent);
+        Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent);
+        Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int id);
+        Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id);
+        Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id);
 
     }
 }

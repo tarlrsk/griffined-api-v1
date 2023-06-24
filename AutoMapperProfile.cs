@@ -10,7 +10,7 @@ namespace griffined_api
         public AutoMapperProfile()
         {
             // Student
-            CreateMap<Student, GetStudentDto>();
+            CreateMap<Student, StudentResponseDto>();
             CreateMap<AddStudentRequestDto, Student>()
                 .ForMember(dest => dest.additionalFiles, opt => opt.MapFrom(src => src.additionalFiles));
             CreateMap<UpdateStudentRequestDto, Student>();
@@ -31,9 +31,8 @@ namespace griffined_api
             CreateMap<UpdateTeacherDto, Teacher>();
 
             // WorkTime
-            CreateMap<WorkTime, GetWorkTimeDto>();
-            CreateMap<AddWorkTimeDto, WorkTime>();
-            CreateMap<UpdateWorkTimeDto, WorkTime>();
+            CreateMap<WorkTime, WorkTimeResponseDto>();
+            CreateMap<WorkTimeRequestDto, WorkTime>();
 
             // Staff
             CreateMap<Staff, StaffResponseDto>();
