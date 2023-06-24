@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using griffined_api.Models;
 
 namespace griffined_api.Middlewares
 {
@@ -15,26 +16,41 @@ namespace griffined_api.Middlewares
             {
                 await next(context);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(e, e.Message);
-
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                ProblemDetails problemJson = new()
-                {
-                    Status = (int)HttpStatusCode.InternalServerError,
-                    Type = "Server Error",
-                    Title = "Error",
-                    Detail = "An internal server has occurred"
-                };
-
-                string problem = JsonSerializer.Serialize(problemJson);
-
-                await context.Response.WriteAsync(problem);
-
-                context.Response.ContentType = "application/json";
+                await HandleExceptionAsync(context, ex);
             }
+        }
+
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+            var response = context.Response;
+
+            var errorResponse = new ErrorResponse
+            {
+                Success = false
+            };
+            switch (exception)
+            {
+                case ApplicationException ex:
+                    if (ex.Message.Contains("Invalid Token"))
+                    {
+                        response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        errorResponse.Message = ex.Message;
+                        break;
+                    }
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    errorResponse.Message = ex.Message;
+                    break;
+                default:
+                    response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    errorResponse.Message = "Internal server error!";
+                    break;
+            }
+            _logger.LogError(exception.Message);
+            var result = JsonSerializer.Serialize(errorResponse);
+            await context.Response.WriteAsync(result);
         }
     }
 }
