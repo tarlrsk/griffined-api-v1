@@ -24,67 +24,23 @@ namespace griffined_api.Middlewares
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var response = context.Response;
-            response.ContentType = "application/json";
+            _logger.LogError(exception, exception.Message);
 
-            var errorResponse = new ErrorResponse
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            ProblemDetails problem = new()
             {
-                Success = false
+                Status = (int)HttpStatusCode.InternalServerError,
+                Type = "Server Error",
+                Title = "Server Error",
+                Detail = "An internal server has occured"
             };
 
-            switch (exception)
-            {
-                case ApplicationException ex:
-                    if (ex.Message.Contains("Invalid Token"))
-                    {
-                        response.StatusCode = (int)HttpStatusCode.Forbidden;
-                        errorResponse.StatusCode = response.StatusCode;
-                        errorResponse.Message = ex.Message;
-                        break;
-                    }
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    errorResponse.StatusCode = response.StatusCode;
-                    errorResponse.Message = ex.Message;
-                    break;
-                default:
-                    response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    errorResponse.StatusCode = response.StatusCode;
-                    errorResponse.Message = "Internal Server Error";
-                    break;
-            }
-            _logger.LogError(exception.Message);
-            var result = JsonSerializer.Serialize(errorResponse);
-            await response.WriteAsync(result);
+            string json = JsonSerializer.Serialize(problem);
 
-            //     switch (exception)
-            //     {
-            //         case ApplicationException ex:
-            //             if (ex.Message.Contains("Invalid Token"))
-            //             {
-            //                 response.StatusCode = (int)HttpStatusCode.Forbidden;
-            //                 result = JsonSerializer.Serialize(new
-            //                 {
-            //                     Type = "Forbidden Error",
-            //                     Title = "Forbidden Error",
-            //                     Detail = "Unauthorized"
-            //                 });
-            //                 break;
-            //             }
-            //             response.StatusCode = (int)HttpStatusCode.BadRequest;
-            //             break;
-            //         default:
-            //             response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            //             result = JsonSerializer.Serialize(new
-            //             {
-            //                 Type = "Server Error",
-            //                 Title = "Internal Server Error",
-            //                 Detail = "An internal server has occurred"
-            //             });
-            //             break;
-            //     }
-            //     _logger.LogError(exception, exception.Message);
-            //     await response.WriteAsync(result);
-            // }
+            await context.Response.WriteAsync(json);
+
+            context.Response.ContentType = "application/json";
         }
     }
 }
