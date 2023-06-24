@@ -24,23 +24,55 @@ namespace griffined_api.Middlewares
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            _logger.LogError(exception, exception.Message);
-
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-            ProblemDetails problem = new()
+            string errorId = Guid.NewGuid().ToString();
+            var errorResult = new ErrorResponse
             {
-                Status = (int)HttpStatusCode.InternalServerError,
-                Type = "Server Error",
-                Title = "Server Error",
-                Detail = "An internal server has occured"
+                Source = exception.TargetSite?.DeclaringType?.FullName,
+                Exception = exception.Message,
+                ErrorId = errorId
             };
+            errorResult.Messages.Add(exception.Message);
 
-            string json = JsonSerializer.Serialize(problem);
+            if (exception is not CustomException && exception.InnerException != null)
+            {
+                while (exception.InnerException != null)
+                {
+                    exception = exception.InnerException;
+                }
+            }
 
-            await context.Response.WriteAsync(json);
+            switch (exception)
+            {
+                case CustomException e:
+                    errorResult.StatusCode = (int)e.StatusCode;
+                    if (e.Messages is not null)
+                    {
+                        errorResult.Messages = e.Messages;
+                    }
 
-            context.Response.ContentType = "application/json";
+                    break;
+
+                case KeyNotFoundException:
+                    errorResult.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
+
+                default:
+                    errorResult.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
+            }
+
+            _logger.Log(LogLevel.Error, $"{errorResult.Exception} Request failed with Status Code {context.Response.StatusCode} and Error Id {errorId}.");
+            var response = context.Response;
+            if (!response.HasStarted)
+            {
+                response.ContentType = "application/json";
+                response.StatusCode = errorResult.StatusCode;
+                await response.WriteAsync(JsonSerializer.Serialize(errorResult));
+            }
+            else
+            {
+                _logger.Log(LogLevel.Warning, "Can't write error response. Response has already started.");
+            }
         }
     }
 }
