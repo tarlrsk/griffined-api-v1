@@ -25,13 +25,13 @@ namespace griffined_api.Middlewares
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             string errorId = Guid.NewGuid().ToString();
-            var errorResult = new ErrorResponse
+            var errorResponse = new ErrorResponse
             {
                 Source = exception.TargetSite?.DeclaringType?.FullName,
                 Exception = exception.Message,
                 ErrorId = errorId
             };
-            errorResult.Messages.Add(exception.Message);
+            errorResponse.Messages.Add(exception.Message);
 
             if (exception is not CustomException && exception.InnerException != null)
             {
@@ -44,30 +44,30 @@ namespace griffined_api.Middlewares
             switch (exception)
             {
                 case CustomException e:
-                    errorResult.StatusCode = (int)e.StatusCode;
+                    errorResponse.StatusCode = (int)e.StatusCode;
                     if (e.Messages is not null)
                     {
-                        errorResult.Messages = e.Messages;
+                        errorResponse.Messages = e.Messages;
                     }
 
                     break;
 
                 case KeyNotFoundException:
-                    errorResult.StatusCode = (int)HttpStatusCode.NotFound;
+                    errorResponse.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
 
                 default:
-                    errorResult.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    errorResponse.StatusCode = (int)HttpStatusCode.InternalServerError;
                     break;
             }
 
-            _logger.Log(LogLevel.Error, $"{errorResult.Exception} Request failed with Status Code {context.Response.StatusCode} and Error Id {errorId}.");
+            _logger.Log(LogLevel.Error, $"{errorResponse.Exception} Request failed with Status Code {context.Response.StatusCode} and Error Id {errorId}.");
             var response = context.Response;
             if (!response.HasStarted)
             {
                 response.ContentType = "application/json";
-                response.StatusCode = errorResult.StatusCode;
-                await response.WriteAsync(JsonSerializer.Serialize(errorResult));
+                response.StatusCode = errorResponse.StatusCode;
+                await response.WriteAsync(JsonSerializer.Serialize(errorResponse));
             }
             else
             {
