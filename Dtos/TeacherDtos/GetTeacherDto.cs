@@ -24,7 +24,7 @@ namespace griffined_api.Dtos.TeacherDtos
         public string email { get; set; } = string.Empty;
         [Required]
         public string line { get; set; } = string.Empty;
-        public List<GetWorkTimeDto> workTimes { get; set; } = new List<GetWorkTimeDto>();
+        public List<WorkTimeResponseDto> workTimes { get; set; } = new List<WorkTimeResponseDto>();
         public bool isActive { get; set; } = true;
     }
 }

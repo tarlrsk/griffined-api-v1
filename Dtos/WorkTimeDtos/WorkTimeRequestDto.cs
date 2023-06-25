@@ -1,6 +1,6 @@
 namespace griffined_api.Dtos.WorkTimeDtos
 {
-    public class AddWorkTimeDto
+    public class WorkTimeRequestDto
     {
 
         [Required]
