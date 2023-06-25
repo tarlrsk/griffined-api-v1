@@ -304,7 +304,7 @@ namespace griffined_api.Services.StudentService
         public async Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstAsync(s => s.id == id);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
 
@@ -322,9 +322,9 @@ namespace griffined_api.Services.StudentService
         public async Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstAsync(s => s.id == id);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
             if (student is null)
-                throw new Exception($"Student with ID '{id}' not found.");
+                throw new NotFoundException($"Student with ID '{id}' not found.");
 
             student.status = StudentStatus.Active;
             await _context.SaveChangesAsync();
