@@ -10,6 +10,8 @@ global using griffined_api.Dtos.StudentAddtionalFilesDtos;
 global using griffined_api.Dtos.TeacherDtos;
 global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
+global using griffined_api.Exceptions;
+global using griffined_api.Middlewares;
 global using griffined_api.Models;
 global using griffined_api.integrations.Firebase;
 global using griffined_api.Services.CheckAvailableService;
@@ -47,10 +49,12 @@ builder.Services.AddDbContext<DataContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddLogging();
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -97,6 +101,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.MapControllers();
 
