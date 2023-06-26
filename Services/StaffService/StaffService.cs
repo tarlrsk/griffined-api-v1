@@ -25,32 +25,36 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-
+            string password = "hog" + newStaff.phone;
+            FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
+            FirebaseAuthLink firebaseAuthLink;
             try
             {
-                string password = "hog" + newStaff.phone;
-                FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
-                FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.email, password);
-
-                var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
-                string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
-
-                var staff = _mapper.Map<Staff>(newStaff);
-                staff.firebaseId = firebaseId;
-                staff.CreatedBy = id;
-                staff.LastUpdatedBy = id;
-                _context.Staff.Add(staff);
-
-                await _context.SaveChangesAsync();
-                await addStaffFireStoreAsync(staff);
-
-                response.Data = _mapper.Map<StaffResponseDto>(staff);
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.email, password);
             }
             catch (Exception ex)
             {
-                response.Success = false;
-                response.Message = ex.Message;
+                if (ex.Message.Contains("EMAIL_EXISTS"))
+                    throw new ConflictException("Email Exists");
+                else if (ex.Message.Contains("INVALID_EMAIL"))
+                    throw new ConflictException("Invalid Email Format");
+                else
+                    throw new InternalServerException("Something went wrong.");
             }
+
+            var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
+            string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
+
+            var staff = _mapper.Map<Staff>(newStaff);
+            staff.firebaseId = firebaseId;
+            staff.CreatedBy = id;
+            staff.LastUpdatedBy = id;
+            _context.Staff.Add(staff);
+
+            await _context.SaveChangesAsync();
+            await addStaffFireStoreAsync(staff);
+
+            response.Data = _mapper.Map<StaffResponseDto>(staff);
             return response;
         }
 
@@ -59,9 +63,9 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<List<StaffResponseDto>>();
             try
             {
-                var dbStaff = await _context.Staff.FirstAsync(e => e.id == id);
+                var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
                 if (dbStaff is null)
-                    throw new Exception($"Staff with ID '{id}' not found.");
+                    throw new NotFoundException($"Staff with ID '{id}' not found.");
 
                 _context.Staff.Remove(dbStaff);
                 await _context.SaveChangesAsync();

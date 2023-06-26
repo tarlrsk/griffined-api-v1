@@ -24,42 +24,47 @@ namespace griffined_api.Services.TeacherService
         {
             var response = new ServiceResponse<GetTeacherDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            string password = "hog" + newTeacher.phone;
+            FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
+            FirebaseAuthLink firebaseAuthLink;
             try
             {
-                string password = "hog" + newTeacher.phone;
-                FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
-                FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newTeacher.email, password);
-
-                var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
-                string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
-
-                var teacher = _mapper.Map<Teacher>(newTeacher);
-                teacher.firebaseId = firebaseId;
-                teacher.CreatedBy = id;
-                teacher.LastUpdatedBy = id;
-                await addStaffFireStoreAsync(teacher);
-                _context.Teachers.Add(teacher);
-
-                if (newTeacher.workTimes != null)
-                {
-                    teacher.workTimes = new List<WorkTime>();
-                    foreach (var workTime in newTeacher.workTimes)
-                    {
-                        var day = _mapper.Map<WorkTime>(workTime);
-                        teacher.workTimes.Add(day);
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-                await addStaffFireStoreAsync(teacher);
-
-                response.Data = _mapper.Map<GetTeacherDto>(teacher);
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newTeacher.email, password);
             }
             catch (Exception ex)
             {
-                response.Success = false;
-                response.Message = ex.Message;
+                if (ex.Message.Contains("EMAIL_EXISTS"))
+                    throw new ConflictException("Email Exists");
+                else if (ex.Message.Contains("INVALID_EMAIL"))
+                    throw new ConflictException("Invalid Email Format");
+                else
+                    throw new InternalServerException("Something went wrong.");
             }
+
+            var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
+            string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
+
+            var teacher = _mapper.Map<Teacher>(newTeacher);
+            teacher.firebaseId = firebaseId;
+            teacher.CreatedBy = id;
+            teacher.LastUpdatedBy = id;
+            await addStaffFireStoreAsync(teacher);
+            _context.Teachers.Add(teacher);
+
+            if (newTeacher.workTimes != null)
+            {
+                teacher.workTimes = new List<WorkTime>();
+                foreach (var workTime in newTeacher.workTimes)
+                {
+                    var day = _mapper.Map<WorkTime>(workTime);
+                    teacher.workTimes.Add(day);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            await addStaffFireStoreAsync(teacher);
+
+            response.Data = _mapper.Map<GetTeacherDto>(teacher);
             return response;
         }
 
@@ -71,9 +76,9 @@ namespace griffined_api.Services.TeacherService
             {
                 var dbTeacher = await _context.Teachers
                     .Include(t => t.workTimes)
-                    .FirstAsync(t => t.id == id);
+                    .FirstOrDefaultAsync(t => t.id == id);
                 if (dbTeacher is null)
-                    throw new Exception($"Teacher with ID {id} not found.");
+                    throw new NotFoundException($"Teacher with ID {id} not found.");
 
                 _context.Teachers.Remove(dbTeacher);
                 _context.WorkTimes.RemoveRange(dbTeacher.workTimes);
