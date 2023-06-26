@@ -126,7 +126,7 @@ namespace griffined_api.integrations.Firebase
                                 }
                                 else
                                 {
-                                    throw new Exception("user not found");
+                                    throw new NotFoundException("User not found");
                                 }
                             }
                         }
