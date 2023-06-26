@@ -63,7 +63,7 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<List<StaffResponseDto>>();
             try
             {
-                var dbStaff = await _context.Staff.FirstAsync(e => e.id == id);
+                var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
                 if (dbStaff is null)
                     throw new Exception($"Staff with ID '{id}' not found.");
 

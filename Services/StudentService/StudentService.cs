@@ -71,7 +71,7 @@ namespace griffined_api.Services.StudentService
             var response = new ServiceResponse<List<StudentResponseDto>>();
             try
             {
-                var dbStudent = await _context.Students.FirstAsync(s => s.id == id);
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
                 if (dbStudent is null)
                     throw new Exception($"Student with ID '{id}' not found.");
 
@@ -79,13 +79,13 @@ namespace griffined_api.Services.StudentService
 
                 if (dbStudent.parent != null)
                 {
-                    var dbParent = await _context.Parents.FirstAsync(p => p.studentId == id);
+                    var dbParent = await _context.Parents.FirstOrDefaultAsync(p => p.studentId == id);
                     _context.Parents.Remove(dbParent);
                 }
 
                 if (dbStudent.address != null)
                 {
-                    var dbAddress = await _context.Addresses.FirstAsync(a => a.studentId == id);
+                    var dbAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.studentId == id);
                     _context.Addresses.Remove(dbAddress);
                 }
 

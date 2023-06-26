@@ -76,7 +76,7 @@ namespace griffined_api.Services.TeacherService
             {
                 var dbTeacher = await _context.Teachers
                     .Include(t => t.workTimes)
-                    .FirstAsync(t => t.id == id);
+                    .FirstOrDefaultAsync(t => t.id == id);
                 if (dbTeacher is null)
                     throw new Exception($"Teacher with ID {id} not found.");
 
