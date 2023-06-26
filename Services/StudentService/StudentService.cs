@@ -80,12 +80,16 @@ namespace griffined_api.Services.StudentService
                 if (dbStudent.parent != null)
                 {
                     var dbParent = await _context.Parents.FirstOrDefaultAsync(p => p.studentId == id);
+                    if (dbParent is null)
+                        throw new NotFoundException("Parent not found.");
                     _context.Parents.Remove(dbParent);
                 }
 
                 if (dbStudent.address != null)
                 {
                     var dbAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.studentId == id);
+                    if (dbAddress is null)
+                        throw new NotFoundException("Address not found.");
                     _context.Addresses.Remove(dbAddress);
                 }
 
