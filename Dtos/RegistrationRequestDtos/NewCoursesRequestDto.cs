@@ -12,6 +12,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         [Required]
         public required List<int> memberIds { get; set; }
         public List<PreferredDayRequestDto>? preferredDays { get; set; }
-        public List<NewCourseDto>? courses { get; set; }
+        [Required]
+        public List<NewStudyCourseDto>? courses { get; set; }
     }
 }
