@@ -1,6 +1,6 @@
 namespace griffined_api.Dtos.WorkTimeDtos
 {
-    public class GetWorkTimeDto
+    public class WorkTimeResponseDto
     {
         [Required]
         public string day { get; set; } = string.Empty;

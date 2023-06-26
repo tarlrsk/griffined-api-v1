@@ -194,7 +194,7 @@ namespace griffined_api.Services.TeacherService
 
         private async Task addStaffFireStoreAsync(Teacher staff)
         {
-            FirestoreDb db = FirestoreDb.Create("PROJECT_ID");
+            FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
             DocumentReference docRef = db.Collection("users").Document(staff.firebaseId);
             Dictionary<string, object> staffDoc = new Dictionary<string, object>()
                 {

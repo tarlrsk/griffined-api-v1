@@ -21,9 +21,9 @@ namespace griffined_api.Services.StudentService
             _mapper = mapper;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> AddStudent(AddStudentRequestDto newStudent)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent)
         {
-            var response = new ServiceResponse<GetStudentDto>();
+            var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             try
             {
@@ -53,7 +53,7 @@ namespace griffined_api.Services.StudentService
                 }
 
                 await _context.SaveChangesAsync();
-                response.Data = _mapper.Map<GetStudentDto>(_student);
+                response.Data = _mapper.Map<StudentResponseDto>(_student);
 
             }
             catch (Exception ex)
@@ -66,9 +66,9 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetStudentDto>>> DeleteStudent(int id)
+        public async Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int id)
         {
-            var response = new ServiceResponse<List<GetStudentDto>>();
+            var response = new ServiceResponse<List<StudentResponseDto>>();
             try
             {
                 var dbStudent = await _context.Students.FirstAsync(s => s.id == id);
@@ -95,7 +95,7 @@ namespace griffined_api.Services.StudentService
                 _context.StudentAdditionalFiles.RemoveRange(dbAdditionalFiles);
 
                 await _context.SaveChangesAsync();
-                response.Data = _context.Students.Select(s => _mapper.Map<GetStudentDto>(s)).ToList();
+                response.Data = _context.Students.Select(s => _mapper.Map<StudentResponseDto>(s)).ToList();
             }
             catch (Exception ex)
             {
@@ -105,22 +105,22 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetStudentDto>>> GetStudent()
+        public async Task<ServiceResponse<List<StudentResponseDto>>> GetStudent()
         {
-            var response = new ServiceResponse<List<GetStudentDto>>();
+            var response = new ServiceResponse<List<StudentResponseDto>>();
             var dbStudents = await _context.Students
                 .Include(s => s.parent)
                 .Include(s => s.address)
                 .Include(s => s.additionalFiles)
-                .Select(s => _mapper.Map<GetStudentDto>(s))
+                .Select(s => _mapper.Map<StudentResponseDto>(s))
                 .ToListAsync();
             response.Data = dbStudents;
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> GetStudentById(int id)
+        public async Task<ServiceResponse<StudentResponseDto>> GetStudentById(int id)
         {
-            var response = new ServiceResponse<GetStudentDto>();
+            var response = new ServiceResponse<StudentResponseDto>();
             try
             {
                 var dbStudent = await _context.Students
@@ -130,7 +130,7 @@ namespace griffined_api.Services.StudentService
                     .FirstOrDefaultAsync(s => s.id == id);
                 if (dbStudent is null)
                     throw new Exception($"Student with ID '{id}' not found.");
-                response.Data = _mapper.Map<GetStudentDto>(dbStudent);
+                response.Data = _mapper.Map<StudentResponseDto>(dbStudent);
 
             }
             catch (Exception ex)
@@ -142,10 +142,10 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> GetStudentByToken()
+        public async Task<ServiceResponse<StudentResponseDto>> GetStudentByToken()
         {
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            var response = new ServiceResponse<GetStudentDto>();
+            var response = new ServiceResponse<StudentResponseDto>();
             try
             {
                 var dbStudent = await _context.Students
@@ -155,7 +155,7 @@ namespace griffined_api.Services.StudentService
                     .FirstOrDefaultAsync(s => s.id == id);
                 if (dbStudent is null)
                     throw new Exception($"Student with ID '{id}' not found.");
-                response.Data = _mapper.Map<GetStudentDto>(dbStudent);
+                response.Data = _mapper.Map<StudentResponseDto>(dbStudent);
 
             }
             catch (Exception ex)
@@ -167,9 +167,9 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent)
+        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent)
         {
-            var response = new ServiceResponse<GetStudentDto>();
+            var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             try
             {
@@ -291,7 +291,7 @@ namespace griffined_api.Services.StudentService
 
                 await _context.SaveChangesAsync();
 
-                response.Data = _mapper.Map<GetStudentDto>(student);
+                response.Data = _mapper.Map<StudentResponseDto>(student);
             }
             catch (Exception ex)
             {
@@ -301,9 +301,9 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> DisableStudent(int id)
+        public async Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id)
         {
-            var response = new ServiceResponse<GetStudentDto>();
+            var response = new ServiceResponse<StudentResponseDto>();
             var student = await _context.Students.FirstAsync(s => s.id == id);
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
@@ -319,9 +319,9 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<GetStudentDto>> EnableStudent(int id)
+        public async Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id)
         {
-            var response = new ServiceResponse<GetStudentDto>();
+            var response = new ServiceResponse<StudentResponseDto>();
             var student = await _context.Students.FirstAsync(s => s.id == id);
             if (student is null)
                 throw new Exception($"Student with ID '{id}' not found.");
