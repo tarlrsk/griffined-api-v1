@@ -39,7 +39,7 @@ namespace griffined_api.Services.StaffService
                 else if (ex.Message.Contains("INVALID_EMAIL"))
                     throw new ConflictException("Invalid Email Format");
                 else
-                    throw new InternalServerException(ex.Message);
+                    throw new InternalServerException("Something went wrong.");
             }
 
             var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
