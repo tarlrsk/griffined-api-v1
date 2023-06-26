@@ -68,7 +68,6 @@ namespace griffined_api.Services.TeacherService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(teacher);
-            response.Message = "Sucessfully added teacher";
 
             return response;
         }
@@ -91,7 +90,6 @@ namespace griffined_api.Services.TeacherService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _context.Teachers.Select(t => _mapper.Map<GetTeacherDto>(t)).ToList();
-            response.Message = $"Sucessfully deleted teacher with ID {id}";
 
             return response;
         }
@@ -108,7 +106,6 @@ namespace griffined_api.Services.TeacherService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = dbTeachers.Select(t => _mapper.Map<GetTeacherDto>(t)).ToList();
-            response.Message = "Successfully get all teachers.";
 
             return response;
         }
@@ -126,7 +123,6 @@ namespace griffined_api.Services.TeacherService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
-            response.Message = $"Successfully get teacher with ID {id}";
 
             return response;
         }
@@ -145,7 +141,6 @@ namespace griffined_api.Services.TeacherService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
-            response.Message = "Successfully get teacher by token.";
 
             return response;
         }
@@ -194,7 +189,6 @@ namespace griffined_api.Services.TeacherService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(teacher);
-            response.Message = $"Sucessfully updated teacher with ID {id}";
 
             return response;
         }
@@ -234,7 +228,6 @@ namespace griffined_api.Services.TeacherService
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Message = $"Sucessfully disabled teacher with ID {id}";
 
             return response;
         }
@@ -258,7 +251,6 @@ namespace griffined_api.Services.TeacherService
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Message = $"Sucessfully enabled teacher with ID {id}";
 
             return response;
         }

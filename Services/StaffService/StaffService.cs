@@ -72,7 +72,6 @@ namespace griffined_api.Services.StaffService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _context.Staff.Select(e => _mapper.Map<StaffResponseDto>(e)).ToList();
-            response.Message = $"Successfully deleted staff with ID {id}";
 
             return response;
         }
@@ -97,7 +96,6 @@ namespace griffined_api.Services.StaffService
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Message = $"Sucessfully disabled staff with ID {id}";
 
             return response;
         }
@@ -119,7 +117,6 @@ namespace griffined_api.Services.StaffService
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Message = $"Sucessfully enabled staff with ID {id}";
 
             return response;
         }
@@ -134,7 +131,6 @@ namespace griffined_api.Services.StaffService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = dbStaff.Select(e => _mapper.Map<StaffResponseDto>(e)).ToList();
-            response.Message = "Sucessfully get all staff.";
 
             return response;
         }
@@ -150,7 +146,6 @@ namespace griffined_api.Services.StaffService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StaffResponseDto>(dbStaff);
-            response.Message = $"Sucessfully get staff with ID {id}";
 
             return response;
         }
@@ -186,7 +181,6 @@ namespace griffined_api.Services.StaffService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StaffResponseDto>(staff);
-            response.Message = $"Sucessfully updated staff with ID {id}";
 
             return response;
         }

@@ -55,7 +55,6 @@ namespace griffined_api.Services.StudentService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(_student);
-            response.Message = "Successfully added a student.";
 
             return response;
         }
@@ -95,7 +94,6 @@ namespace griffined_api.Services.StudentService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _context.Students.Select(s => _mapper.Map<StudentResponseDto>(s)).ToList();
-            response.Message = $"Successfully deleted student with ID {id}";
 
             return response;
         }
@@ -116,7 +114,6 @@ namespace griffined_api.Services.StudentService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = dbStudents;
-            response.Message = "Successfully get all students";
 
             return response;
         }
@@ -135,7 +132,6 @@ namespace griffined_api.Services.StudentService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(dbStudent);
-            response.Message = $"Sucessfully get student with ID {id}";
 
             return response;
         }
@@ -156,7 +152,6 @@ namespace griffined_api.Services.StudentService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(dbStudent);
-            response.Message = $"Sucessfully get student by token";
 
             return response;
         }
@@ -284,7 +279,6 @@ namespace griffined_api.Services.StudentService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(student);
-            response.Message = $"Successfully updated student with ID {id}";
 
             return response;
         }
@@ -307,7 +301,6 @@ namespace griffined_api.Services.StudentService
             });
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Message = $"Sucessfully disabled student with ID {id}";
 
             return response;
         }
@@ -330,7 +323,6 @@ namespace griffined_api.Services.StudentService
             });
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Message = $"Sucesssfully enabled student with ID {id}";
 
             return response;
         }
