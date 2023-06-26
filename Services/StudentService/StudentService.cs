@@ -73,7 +73,7 @@ namespace griffined_api.Services.StudentService
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
                 if (dbStudent is null)
-                    throw new Exception($"Student with ID '{id}' not found.");
+                    throw new NotFoundException($"Student with ID '{id}' not found.");
 
                 _context.Students.Remove(dbStudent);
 

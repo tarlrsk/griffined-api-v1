@@ -65,7 +65,7 @@ namespace griffined_api.Services.StaffService
             {
                 var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
                 if (dbStaff is null)
-                    throw new Exception($"Staff with ID '{id}' not found.");
+                    throw new NotFoundException($"Staff with ID '{id}' not found.");
 
                 _context.Staff.Remove(dbStaff);
                 await _context.SaveChangesAsync();
