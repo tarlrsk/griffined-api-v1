@@ -78,7 +78,7 @@ namespace griffined_api.Services.TeacherService
                     .Include(t => t.workTimes)
                     .FirstOrDefaultAsync(t => t.id == id);
                 if (dbTeacher is null)
-                    throw new Exception($"Teacher with ID {id} not found.");
+                    throw new NotFoundException($"Teacher with ID {id} not found.");
 
                 _context.Teachers.Remove(dbTeacher);
                 _context.WorkTimes.RemoveRange(dbTeacher.workTimes);
