@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Firebase.Auth;
 
@@ -27,6 +28,7 @@ namespace griffined_api.Services.TeacherService
             string password = "hog" + newTeacher.phone;
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
+
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newTeacher.email, password);
@@ -64,7 +66,10 @@ namespace griffined_api.Services.TeacherService
             await _context.SaveChangesAsync();
             await addStaffFireStoreAsync(teacher);
 
+            response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(teacher);
+            response.Message = "Sucessfully added teacher";
+
             return response;
         }
 
@@ -72,55 +77,57 @@ namespace griffined_api.Services.TeacherService
         {
             var response = new ServiceResponse<List<GetTeacherDto>>();
 
-            try
-            {
-                var dbTeacher = await _context.Teachers
-                    .Include(t => t.workTimes)
-                    .FirstOrDefaultAsync(t => t.id == id);
-                if (dbTeacher is null)
-                    throw new NotFoundException($"Teacher with ID {id} not found.");
+            var dbTeacher = await _context.Teachers
+                .Include(t => t.workTimes)
+                .FirstOrDefaultAsync(t => t.id == id);
 
-                _context.Teachers.Remove(dbTeacher);
-                _context.WorkTimes.RemoveRange(dbTeacher.workTimes);
+            if (dbTeacher is null)
+                throw new NotFoundException($"Teacher with ID {id} not found.");
 
-                await _context.SaveChangesAsync();
+            _context.Teachers.Remove(dbTeacher);
+            _context.WorkTimes.RemoveRange(dbTeacher.workTimes);
 
-                response.Data = _context.Teachers.Select(t => _mapper.Map<GetTeacherDto>(t)).ToList();
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = _context.Teachers.Select(t => _mapper.Map<GetTeacherDto>(t)).ToList();
+            response.Message = $"Sucessfully deleted teacher with ID {id}";
+
             return response;
         }
         public async Task<ServiceResponse<List<GetTeacherDto>>> GetTeacher()
         {
             var response = new ServiceResponse<List<GetTeacherDto>>();
+
             var dbTeachers = await _context.Teachers
                 .Include(t => t.workTimes)
                 .ToListAsync();
+
+            if (dbTeachers is null)
+                throw new NotFoundException("No teachers found.");
+
+            response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = dbTeachers.Select(t => _mapper.Map<GetTeacherDto>(t)).ToList();
+            response.Message = "Successfully get all teachers.";
+
             return response;
         }
 
         public async Task<ServiceResponse<GetTeacherDto>> GetTeacherById(int id)
         {
             var response = new ServiceResponse<GetTeacherDto>();
-            try
-            {
-                var dbTeacher = await _context.Teachers
-                    .Include(t => t.workTimes)
-                    .FirstOrDefaultAsync(t => t.id == id);
-                if (dbTeacher is null)
-                    throw new Exception($"Teacher with ID {id} not found.");
-                response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
+
+            var dbTeacher = await _context.Teachers
+                .Include(t => t.workTimes)
+                .FirstOrDefaultAsync(t => t.id == id);
+
+            if (dbTeacher is null)
+                throw new NotFoundException($"Teacher with ID {id} not found.");
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
+            response.Message = $"Successfully get teacher with ID {id}";
+
             return response;
         }
 
@@ -128,20 +135,18 @@ namespace griffined_api.Services.TeacherService
         {
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             var response = new ServiceResponse<GetTeacherDto>();
-            try
-            {
-                var dbTeacher = await _context.Teachers
-                    .Include(t => t.workTimes)
-                    .FirstOrDefaultAsync(t => t.id == id);
-                if (dbTeacher is null)
-                    throw new Exception($"Teacher with ID {id} not found.");
-                response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
+
+            var dbTeacher = await _context.Teachers
+                .Include(t => t.workTimes)
+                .FirstOrDefaultAsync(t => t.id == id);
+
+            if (dbTeacher is null)
+                throw new NotFoundException($"Teacher with ID {id} not found.");
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
+            response.Message = "Successfully get teacher by token.";
+
             return response;
         }
 
@@ -149,51 +154,48 @@ namespace griffined_api.Services.TeacherService
         {
             var response = new ServiceResponse<GetTeacherDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            try
+
+            var teacher = await _context.Teachers
+                .Include(t => t.workTimes)
+                .FirstOrDefaultAsync(t => t.id == updatedTeacher.id);
+
+            if (teacher is null)
+                throw new NotFoundException($"Teacher with ID {updatedTeacher.id} not found.");
+
+            _mapper.Map(updatedTeacher, teacher);
+
+            teacher.fName = updatedTeacher.fName;
+            teacher.lName = updatedTeacher.lName;
+            teacher.nickname = updatedTeacher.nickname;
+            teacher.email = updatedTeacher.email;
+            teacher.line = updatedTeacher.line;
+            teacher.isActive = updatedTeacher.isActive;
+            teacher.LastUpdatedBy = id;
+
+            if (updatedTeacher.workTimes != null)
             {
-                var teacher = await _context.Teachers
-                    .Include(t => t.workTimes)
-                    .FirstOrDefaultAsync(t => t.id == updatedTeacher.id);
-                if (teacher is null)
-                    throw new Exception($"Teacher with ID {updatedTeacher.id} not found.");
-
-                _mapper.Map(updatedTeacher, teacher);
-
-                teacher.fName = updatedTeacher.fName;
-                teacher.lName = updatedTeacher.lName;
-                teacher.nickname = updatedTeacher.nickname;
-                teacher.email = updatedTeacher.email;
-                teacher.line = updatedTeacher.line;
-                teacher.isActive = updatedTeacher.isActive;
-                teacher.LastUpdatedBy = id;
-
-                if (updatedTeacher.workTimes != null)
+                teacher.workTimes.Clear();
+                foreach (var updatedWorkTime in updatedTeacher.workTimes)
                 {
-                    teacher.workTimes.Clear();
-                    foreach (var updatedWorkTime in updatedTeacher.workTimes)
-                    {
-                        var workTime = _mapper.Map<WorkTime>(updatedWorkTime);
-                        teacher.workTimes.Add(workTime);
-                    }
+                    var workTime = _mapper.Map<WorkTime>(updatedWorkTime);
+                    teacher.workTimes.Add(workTime);
                 }
-
-                await _context.SaveChangesAsync();
-
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
-                {
-                    Uid = teacher.firebaseId,
-                    Email = updatedTeacher.email
-                });
-
-                await addStaffFireStoreAsync(teacher);
-
-                response.Data = _mapper.Map<GetTeacherDto>(teacher);
             }
-            catch (Exception ex)
+
+            await _context.SaveChangesAsync();
+
+            await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
+                Uid = teacher.firebaseId,
+                Email = updatedTeacher.email
+            });
+
+            await addStaffFireStoreAsync(teacher);
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = _mapper.Map<GetTeacherDto>(teacher);
+            response.Message = $"Sucessfully updated teacher with ID {id}";
+
             return response;
         }
 
@@ -216,56 +218,48 @@ namespace griffined_api.Services.TeacherService
         public async Task<ServiceResponse<GetTeacherDto>> DisableTeacher(int id)
         {
             var response = new ServiceResponse<GetTeacherDto>();
-            try
+
+            var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.id == id);
+            if (staff is null)
+                throw new NotFoundException($"Teacher with ID '{id}' not found.");
+
+            await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.id == id);
-                if (staff is null)
-                    throw new Exception($"Teacher with ID '{id}' not found.");
-
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
-                {
-                    Uid = staff.firebaseId,
-                    Disabled = true
-                });
+                Uid = staff.firebaseId,
+                Disabled = true
+            });
 
 
-                staff.isActive = false;
-                await _context.SaveChangesAsync();
+            staff.isActive = false;
+            await _context.SaveChangesAsync();
 
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Message = $"Sucessfully disabled teacher with ID {id}";
+
             return response;
         }
 
         public async Task<ServiceResponse<GetTeacherDto>> EnableTeacher(int id)
         {
             var response = new ServiceResponse<GetTeacherDto>();
-            try
+
+            var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.id == id);
+            if (staff is null)
+                throw new NotFoundException($"Teacher with ID '{id}' not found.");
+
+            await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.id == id);
-                if (staff is null)
-                    throw new Exception($"Teacher with ID '{id}' not found.");
-
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
-                {
-                    Uid = staff.firebaseId,
-                    Disabled = false
-                });
+                Uid = staff.firebaseId,
+                Disabled = false
+            });
 
 
-                staff.isActive = true;
-                await _context.SaveChangesAsync();
+            staff.isActive = true;
+            await _context.SaveChangesAsync();
 
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Message = $"Sucessfully enabled teacher with ID {id}";
+
             return response;
         }
 

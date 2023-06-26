@@ -306,6 +306,9 @@ namespace griffined_api.Services.StudentService
                 Disabled = true
             });
 
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Message = $"Sucessfully disabled student with ID {id}";
+
             return response;
         }
 
@@ -325,6 +328,9 @@ namespace griffined_api.Services.StudentService
                 Uid = student.firebaseId,
                 Disabled = false
             });
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Message = $"Sucesssfully enabled student with ID {id}";
 
             return response;
         }
