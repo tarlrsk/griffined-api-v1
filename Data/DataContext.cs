@@ -108,6 +108,10 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.subjects)
                     .WithOne(e => e.course)
                     .HasForeignKey(e => e.courseId);
+
+                entity.HasMany(e => e.levels)
+                    .WithOne(e => e.course)
+                    .HasForeignKey(e => e.courseId);
             });
 
             modelBuilder.Entity<CourseMember>(entity =>
@@ -131,6 +135,10 @@ namespace griffined_api.Data
             modelBuilder.Entity<NewCourseRequest>(entity =>
             {
                 entity.ToTable("NewCourseRequest");
+
+                entity.HasMany(e => e.NewCourseSubjectRequests)
+                    .WithOne(e => e.newCourseRequest)
+                    .HasForeignKey(e => e.newCourseRequestId);
             });
 
             modelBuilder.Entity<NewCourseSubjectRequest>(entity =>
