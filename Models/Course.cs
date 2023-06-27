@@ -14,5 +14,6 @@ namespace griffined_api.Models
         public string course { get; set; } = string.Empty;
 
         public virtual ICollection<Subject> subjects { get; set; } = new List<Subject>();
+        public virtual ICollection<Level> levels { get; set; } = new List<Level>();
     }
 }
