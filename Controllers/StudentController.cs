@@ -23,10 +23,10 @@ namespace griffined_api.Controllers
             return Ok(await _studentService.GetStudent());
         }
 
-        [HttpGet("{id}"), Authorize(Roles = "ep, ea, oa, teacher, master")]
-        public async Task<ActionResult> GetStudentById(int id)
+        [HttpGet("{studentId}"), Authorize(Roles = "ep, ea, oa, teacher, master")]
+        public async Task<ActionResult> GetStudentByStudentId(string studentId)
         {
-            var response = await _studentService.GetStudentById(id);
+            var response = await _studentService.GetStudentByStudentId(studentId);
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);

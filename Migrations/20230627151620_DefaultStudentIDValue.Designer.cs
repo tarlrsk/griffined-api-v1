@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230627151620_DefaultStudentIDValue")]
+    partial class DefaultStudentIDValue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -732,10 +735,6 @@ namespace griffinedapi.Migrations
 
                     b.Property<int>("status")
                         .HasColumnType("int");
-
-                    b.Property<string>("studentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("targetScore")
                         .HasColumnType("nvarchar(max)");

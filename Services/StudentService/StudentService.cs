@@ -30,7 +30,23 @@ namespace griffined_api.Services.StudentService
                         DateTime.ParseExact(newStudent.dob, "dd-MMMM-yyyy HH:mm:ss", null).ToString("dd/MM/yyyy");
 
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
-            FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStudent.email, password);
+
+            FirebaseAuthLink firebaseAuthLink;
+
+            try
+            {
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStudent.email, password);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("EMAIL_EXISTS"))
+                    throw new ConflictException("Email Exists");
+                else if (ex.Message.Contains("INVALID_EMAIL"))
+                    throw new ConflictException("Invalid Email Format");
+                else
+                    throw new InternalServerException("Something went wrong.");
+            }
+
             var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
             string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
 
@@ -50,6 +66,12 @@ namespace griffined_api.Services.StudentService
                     _student.additionalFiles.Add(file);
                 }
             }
+
+            await _context.SaveChangesAsync();
+
+            string studentId = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.id % 10000).ToString("0000");
+
+            _student.studentId = studentId;
 
             await _context.SaveChangesAsync();
 
@@ -118,7 +140,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> GetStudentById(int id)
+        public async Task<ServiceResponse<StudentResponseDto>> GetStudentByStudentId(string studentId)
         {
             var response = new ServiceResponse<StudentResponseDto>();
 
@@ -126,9 +148,9 @@ namespace griffined_api.Services.StudentService
                 .Include(s => s.parent)
                 .Include(s => s.address)
                 .Include(s => s.additionalFiles)
-                .FirstOrDefaultAsync(s => s.id == id);
+                .FirstOrDefaultAsync(s => s.studentId == studentId);
             if (dbStudent is null)
-                throw new NotFoundException($"Student with ID '{id}' not found.");
+                throw new NotFoundException($"Student with ID '{studentId}' not found.");
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(dbStudent);

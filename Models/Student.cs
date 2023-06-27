@@ -10,6 +10,7 @@ namespace griffined_api.Models
     public class Student
     {
         public int id { get; set; }
+        public string studentId { get; set; } = string.Empty;
         public string firebaseId { get; set; } = string.Empty;
 
         public string title { get; set; } = string.Empty;
