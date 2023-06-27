@@ -7,24 +7,17 @@ namespace griffined_api.Dtos.StudentDtos
 {
     public class StudentResponseDto
     {
-        [Required]
         public int id { get; set; }
-        [Required]
-        public string StudentId { get { return dateCreated.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (id % 10000).ToString("0000"); } }
-        [Required]
+        public string studentId { get { return dateCreated.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (id % 10000).ToString("0000"); } }
         public string firebaseId { get; set; } = string.Empty;
-        [Required]
+
         public string title { get; set; } = string.Empty;
-        [Required]
         public string fName { get; set; } = string.Empty;
-        [Required]
         public string lName { get; set; } = string.Empty;
         public string fullName { get; set; } = string.Empty;
-        [Required]
         public string nickname { get; set; } = string.Empty;
         public string? profilePicture { get; set; }
         private DateTime _dob;
-        [Required]
         public string dob
         {
             get { return _dob.ToString("dd-MMMM-yyyy", System.Globalization.CultureInfo.InvariantCulture); }
@@ -40,12 +33,11 @@ namespace griffined_api.Dtos.StudentDtos
                 return _age;
             }
         }
-        [Required]
         public string phone { get; set; } = string.Empty;
         public string? line { get; set; }
         public string? email { get; set; }
         public string? school { get; set; }
-        public string? countryOfSchool { get; set; } 
+        public string? countryOfSchool { get; set; }
         public string? levelOfStudy { get; set; }
         public string? program { get; set; }
         public DateTime dateCreated { get; set; } = DateTime.Now;
@@ -54,6 +46,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? hogInfo { get; set; }
         public string? healthInfo { get; set; }
         public bool isActive { get; set; } = true;
+
         public ParentDtoResponse? parent { get; set; }
         public AddressResponseDto? address { get; set; }
         public ICollection<StudentAdditionalFilesResponseDto>? additionalFiles { get; set; }
