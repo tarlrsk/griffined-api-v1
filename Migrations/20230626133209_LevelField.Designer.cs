@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230626133209_LevelField")]
+    partial class LevelField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,17 +246,11 @@ namespace griffinedapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int?>("courseId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<string>("level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
-
-                    b.HasIndex("courseId");
 
                     b.ToTable("Level", (string)null);
                 });
@@ -1265,17 +1262,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("studySubject");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.Level", b =>
-                {
-                    b.HasOne("griffined_api.Models.Course", "course")
-                        .WithMany("levels")
-                        .HasForeignKey("courseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("course");
-                });
-
             modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
                 {
                     b.HasOne("griffined_api.Models.Course", "course")
@@ -1306,7 +1292,7 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.NewCourseSubjectRequest", b =>
                 {
                     b.HasOne("griffined_api.Models.NewCourseRequest", "newCourseRequest")
-                        .WithMany("NewCourseSubjectRequests")
+                        .WithMany()
                         .HasForeignKey("newCourseRequestId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1634,8 +1620,6 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.Course", b =>
                 {
-                    b.Navigation("levels");
-
                     b.Navigation("subjects");
                 });
 
@@ -1647,11 +1631,6 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.Level", b =>
                 {
                     b.Navigation("newCourseRequests");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
-                {
-                    b.Navigation("NewCourseSubjectRequests");
                 });
 
             modelBuilder.Entity("griffined_api.Models.RegistrationRequest", b =>

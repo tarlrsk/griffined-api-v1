@@ -12,6 +12,6 @@ namespace griffined_api.Models
         public T? Data { get; set; }
         public bool Success { get; set; } = true;
 
-        public string Message { get; set; } = string.Empty;
+        public ResponseStatus Message { get; set; } = ResponseStatus.Success;
     }
 }
