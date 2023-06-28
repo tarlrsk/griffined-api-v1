@@ -351,10 +351,6 @@ namespace griffined_api.Data
             {
                 entity.ToTable("Student");
 
-                entity.Property(e => e.autoIncrementId)
-                    .ValueGeneratedOnAdd()
-                    .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Throw);
-
                 entity.HasOne(e => e.parent)
                     .WithOne(e => e.student)
                     .HasForeignKey<Parent>(e => e.studentId);

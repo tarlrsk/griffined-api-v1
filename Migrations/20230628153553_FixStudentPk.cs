@@ -5,7 +5,7 @@
 namespace griffinedapi.Migrations
 {
     /// <inheritdoc />
-    public partial class StudentIdPkAttemptedFix : Migration
+    public partial class FixStudentPk : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

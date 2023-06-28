@@ -664,20 +664,17 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.Student", b =>
                 {
-                    b.Property<int>("studentId")
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<int?>("LastUpdatedBy")
                         .HasColumnType("int");
-
-                    b.Property<int>("autoIncrementId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("autoIncrementId"));
 
                     b.Property<string>("countryOfSchool")
                         .HasColumnType("nvarchar(max)");
@@ -736,6 +733,10 @@ namespace griffinedapi.Migrations
                     b.Property<int>("status")
                         .HasColumnType("int");
 
+                    b.Property<string>("studentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("targetScore")
                         .HasColumnType("nvarchar(max)");
 
@@ -746,7 +747,7 @@ namespace griffinedapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("studentId");
+                    b.HasKey("id");
 
                     b.ToTable("Student", (string)null);
                 });

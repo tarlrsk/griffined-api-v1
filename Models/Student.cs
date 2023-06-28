@@ -9,11 +9,8 @@ namespace griffined_api.Models
 {
     public class Student
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int studentId { get; set; }
-
-        public int autoIncrementId { get; set; }
+        public int id { get; set; }
+        public string studentId { get; set; } = string.Empty;
         public string firebaseId { get; set; } = string.Empty;
 
         public string title { get; set; } = string.Empty;
