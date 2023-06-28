@@ -17,16 +17,16 @@ namespace griffined_api.Services.RegistrationRequestService
             _context = context;
         }
 
-        public async Task<ServiceResponse<string>> AddNewCourses(NewCoursesRequestDto newStudyCoursesRequest)
+        public async Task<ServiceResponse<string>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
         {
             var response = new ServiceResponse<string>();
             var request = new RegistrationRequest();
 
-            if (newStudyCoursesRequest.memberIds == null || newStudyCoursesRequest.memberIds.Count == 0)
+            if (newRequestedCourses.memberIds == null || newRequestedCourses.memberIds.Count == 0)
             {
                 throw new BadRequestException("The memberIds field is required.");
             }
-            foreach (var memberId in newStudyCoursesRequest.memberIds)
+            foreach (var memberId in newRequestedCourses.memberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == memberId);
                 if (dbStudent == null)
@@ -35,94 +35,136 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
                 var member = new RegistrationRequestMember();
                 member.studentId = memberId;
-                request.registrationRequestMembers.Append(member);
+                request.registrationRequestMembers.Add(member);
             }
 
-            if (newStudyCoursesRequest.courses == null || newStudyCoursesRequest.courses.Count == 0)
+            foreach (var newPreferredDay in newRequestedCourses.preferredDays)
+            {
+                var requestedPreferredDay = new PreferredDayRequest();
+                requestedPreferredDay.day = newPreferredDay.day;
+                requestedPreferredDay.fromTime = newPreferredDay.fromTime;
+                requestedPreferredDay.toTime = newPreferredDay.toTime;
+                request.preferredDayRequests.Add(requestedPreferredDay);
+            }
+
+            if (newRequestedCourses.courses == null || newRequestedCourses.courses.Count == 0)
             {
                 throw new BadRequestException("The courses field is required.");
             }
 
-            List<string>? coursesRequest = null;
-            List<string>? levelRequest = null;
-            foreach (var newStudyCourse in newStudyCoursesRequest.courses)
-            {
-                coursesRequest!.Append(newStudyCourse.course);
-                levelRequest!.Append(newStudyCourse.level);
-            }
-            var coursesResponse = await _context.Courses
+            var requestedCourses = newRequestedCourses.courses.Select(c => c.course).ToList();
+            var existedCourses = await _context.Courses
                         .Include(c => c.subjects)
-                        .Where(c => coursesRequest!.Contains(c.course)).ToListAsync();
+                        .Include(c => c.levels)
+                        .Where(c => requestedCourses.Contains(c.course)).ToListAsync();
 
-            var levelResponse = await _context.Levels
-                                .Where(l => levelRequest!.Contains(l.level)).ToListAsync();
-
-            foreach (var newStudyCourse in newStudyCoursesRequest.courses)
+            foreach (var newRequestedCourse in newRequestedCourses.courses)
             {
-                var newStudyCourseRequest = new NewCourseRequest();
-                var course = coursesResponse.FirstOrDefault(c => c.course == newStudyCourse.course);
+                var newRequestedCourseRequest = new NewCourseRequest();
+                var course = existedCourses.FirstOrDefault(c => c.course == newRequestedCourse.course);
                 if (course == null)
                 {
                     var newCourse = new Course();
-                    newCourse.course = newStudyCourse.course;
-                    if (newStudyCourse.subjects == null)
+                    newCourse.course = newRequestedCourse.course;
+
+                    if (newRequestedCourse.subjects == null)
                         throw new BadRequestException("The subjects field is required.");
-                    foreach (var newStudySubject in newStudyCourse.subjects)
+
+                    foreach (var subject in newRequestedCourse.subjects)
                     {
                         var newSubject = new Subject();
-                        newSubject.subject = newStudySubject.subject;
-                        newCourse.subjects.Append(newSubject);
+                        newSubject.subject = subject.subject;
+                        newCourse.subjects.Add(newSubject);
                     }
 
-                    if (newStudyCourse.level != null)
+                    if (newRequestedCourse.level != null)
                     {
                         var newLevel = new Level();
-                        newLevel.level = newStudyCourse.level;
-                        _context.Levels.Append(newLevel); //TODO Change to _context.Course.Level.Append(newLevel) When the Table is ready
+                        newLevel.level = newRequestedCourse.level;
+                        newCourse.levels.Add(newLevel);
                     }
 
-                    _context.Courses.Append(newCourse);
+                    _context.Courses.Add(newCourse);
                     await _context.SaveChangesAsync();
-                    coursesResponse = await _context.Courses
+                    existedCourses = await _context.Courses
                         .Include(c => c.subjects)
-                        .Where(c => coursesRequest!.Contains(c.course)).ToListAsync();
+                        .Where(c => requestedCourses.Contains(c.course)).ToListAsync();
 
-                    levelResponse = await _context.Levels
-                                .Where(l => levelRequest!.Contains(l.level)).ToListAsync();
+                    course = existedCourses.First(c => c.course == newRequestedCourse.course);
 
-                    course = coursesResponse.First(c => c.course == newStudyCourse.course);
-                    var level = levelResponse.FirstOrDefault(l => l.level == newStudyCourse.level);
+                    var level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
+                    newRequestedCourseRequest.level = level;
 
-                    newStudyCourseRequest.courseId = course.id;
-                    newStudyCourseRequest.level = level;
-                    newStudyCourseRequest.totalHours = newStudyCourse.totalHours;
-                    newStudyCourseRequest.method = newStudyCourseRequest.method;
-                    newStudyCourseRequest.startDate = DateTime.Parse(newStudyCourse.startDate);
-                    newStudyCourseRequest.startDate = DateTime.Parse(newStudyCourse.endDate);
-
-                    request.newCourseRequests.Append(newStudyCourseRequest);
+                    var requestedSubjects = newRequestedCourse.subjects.Select(s => s.subject).ToList();
+                    var existedSubjects = course.subjects.Where(s => requestedSubjects.Contains(s.subject));
+                    foreach (var requestedSubject in newRequestedCourse.subjects)
+                    {
+                        var subject = existedSubjects.First(s => s.subject == requestedSubject.subject);
+                        var newRequestedSubject = new NewCourseSubjectRequest();
+                        newRequestedSubject.subjectId = subject.id;
+                        newRequestedSubject.hour = requestedSubject.hour;
+                        newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
+                    }
                 }
                 else
                 {
-                    if (newStudyCourse.subjects == null)
-                        throw new BadRequestException($"The subjects field is required for {newStudyCourse.course}");
-                    foreach (var newStudySubject in newStudyCourse.subjects)
+                    if (newRequestedCourse.subjects == null)
+                        throw new BadRequestException($"The subjects field is required for {newRequestedCourse.course}");
+                    foreach (var requestedSubject in newRequestedCourse.subjects)
                     {
-                        var subject = course.subjects.FirstOrDefault(s => s.subject == newStudySubject.subject);
+                        var newRequestedSubject = new NewCourseSubjectRequest();
+                        var subject = course.subjects.FirstOrDefault(s => s.subject == requestedSubject.subject);
                         if (subject == null)
                         {
                             var newSubject = new Subject();
-                            newSubject.subject = newStudySubject.subject;
+                            newSubject.subject = requestedSubject.subject;
                             newSubject.courseId = course.id;
-                            _context.Subjects.Append(newSubject);
+                            _context.Subjects.Add(newSubject);
                             await _context.SaveChangesAsync();
-                            coursesResponse = await _context.Courses
+                            existedCourses = await _context.Courses
                                                 .Include(c => c.subjects)
-                                                .Where(c => coursesRequest!.Contains(c.course)).ToListAsync();
+                                                .Where(c => requestedCourses
+                                                .Contains(c.course)).ToListAsync();
+                            course = existedCourses.First(c => c.course == course.course);
+
+                            newRequestedSubject.subjectId = newSubject.id;
                         }
+                        else
+                        {
+                            newRequestedSubject.subjectId = subject.id;
+                        }
+                        newRequestedSubject.hour = requestedSubject.hour;
+                        newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
+
+                    var level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
+                    if (newRequestedCourse.level != null && level != null)
+                    {
+                        var newLevel = new Level();
+                        newLevel.level = newRequestedCourse.level;
+                        newLevel.courseId = course.id;
+                        _context.Levels.Add(newLevel);
+                        await _context.SaveChangesAsync();
+                        course = await _context.Courses
+                                            .Include(c => c.subjects)
+                                            .Include(c => c.levels)
+                                            .FirstAsync(c => c.course == newRequestedCourse.course);
+                        level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
+                    }
+                    newRequestedCourseRequest.level = level;
                 }
+
+                newRequestedCourseRequest.courseId = course.id;
+                newRequestedCourseRequest.totalHours = newRequestedCourse.totalHours;
+                newRequestedCourseRequest.method = newRequestedCourseRequest.method;
+                newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.startDate);
+                newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.endDate);
+                request.newCourseRequests.Add(newRequestedCourseRequest);
             }
+            request.section = newRequestedCourses.sectionName;
+            request.registrationStatus = RegistrationStatus.PendingEA;
+            _context.RegistrationRequests.Add(request);
+            await _context.SaveChangesAsync();
 
             return response;
         }
