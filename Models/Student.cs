@@ -9,8 +9,11 @@ namespace griffined_api.Models
 {
     public class Student
     {
-        public int id { get; set; }
-        public string studentId { get; set; } = string.Empty;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int studentId { get; set; }
+
+        public int autoIncrementId { get; set; }
         public string firebaseId { get; set; } = string.Empty;
 
         public string title { get; set; } = string.Empty;
@@ -51,6 +54,7 @@ namespace griffined_api.Models
         public virtual Parent? parent { get; set; }
         public virtual Address? address { get; set; }
         public virtual StudentAttendance? attendance { get; set; }
+
         public virtual ICollection<StudentAdditionalFile>? additionalFiles { get; set; }
         public virtual ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();

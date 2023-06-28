@@ -69,9 +69,9 @@ namespace griffined_api.Services.StudentService
 
             await _context.SaveChangesAsync();
 
-            string studentId = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.id % 10000).ToString("0000");
+            string studentId = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.autoIncrementId % 10000).ToString("0000");
 
-            _student.studentId = studentId;
+            _student.studentId = int.Parse(studentId);
 
             await _context.SaveChangesAsync();
 
@@ -85,7 +85,7 @@ namespace griffined_api.Services.StudentService
         {
             var response = new ServiceResponse<List<StudentResponseDto>>();
 
-            var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
+            var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.studentId == id);
             if (dbStudent is null)
                 throw new NotFoundException($"Student with ID '{id}' not found.");
 
@@ -140,7 +140,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> GetStudentByStudentId(string studentId)
+        public async Task<ServiceResponse<StudentResponseDto>> GetStudentByStudentId(int studentId)
         {
             var response = new ServiceResponse<StudentResponseDto>();
 
@@ -167,7 +167,7 @@ namespace griffined_api.Services.StudentService
                 .Include(s => s.parent)
                 .Include(s => s.address)
                 .Include(s => s.additionalFiles)
-                .FirstOrDefaultAsync(s => s.id == id);
+                .FirstOrDefaultAsync(s => s.studentId == id);
 
             if (dbStudent is null)
                 throw new NotFoundException($"Student with ID '{id}' not found.");
@@ -183,7 +183,7 @@ namespace griffined_api.Services.StudentService
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var student = await _context.Students.Include(s => s.additionalFiles).FirstOrDefaultAsync(s => s.id == updatedStudent.id);
+            var student = await _context.Students.Include(s => s.additionalFiles).FirstOrDefaultAsync(s => s.studentId == updatedStudent.id);
             if (student is null)
                 throw new NotFoundException($"Student with ID '{updatedStudent.id}' not found.");
 
@@ -308,7 +308,7 @@ namespace griffined_api.Services.StudentService
         public async Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.studentId == id);
 
             if (student is null)
                 throw new NotFoundException($"Student with ID '{id}' not found.");
@@ -330,7 +330,7 @@ namespace griffined_api.Services.StudentService
         public async Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.id == id);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.studentId == id);
 
             if (student is null)
                 throw new NotFoundException($"Student with ID '{id}' not found.");

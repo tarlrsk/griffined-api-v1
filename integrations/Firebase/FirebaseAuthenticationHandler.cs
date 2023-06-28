@@ -121,7 +121,7 @@ namespace griffined_api.integrations.Firebase
                                 var student = await _context.Students.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
                                 if (student != null)
                                 {
-                                    azure_id = student.id.ToString();
+                                    azure_id = student.studentId.ToString();
                                     customRole = "student";
                                 }
                                 else

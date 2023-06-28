@@ -10,10 +10,11 @@ namespace griffined_api.Models
     public class StudyClass
     {
         public int id { get; set; }
-        public int classNumber { get; set; }
         public int? scheduleId { get; set; }
         public int? studySubjectId { get; set; }
         public int? teacherId { get; set; }
+
+        public int classNumber { get; set; }
 
         public virtual ClassStatus status { get; set; }
         public bool isMakeup { get; set; } = false;

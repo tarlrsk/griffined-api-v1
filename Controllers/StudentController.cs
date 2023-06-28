@@ -24,7 +24,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpGet("{studentId}"), Authorize(Roles = "ep, ea, oa, teacher, master")]
-        public async Task<ActionResult> GetStudentByStudentId(string studentId)
+        public async Task<ActionResult> GetStudentByStudentId(int studentId)
         {
             var response = await _studentService.GetStudentByStudentId(studentId);
             if (response.Data is null)

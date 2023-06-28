@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230628041817_StudentIdPk")]
+    partial class StudentIdPk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1258,7 +1261,7 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.StudySubject", "studySubject")
-                        .WithMany("courseMembers")
+                        .WithMany()
                         .HasForeignKey("studySubjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1282,7 +1285,7 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
                 {
                     b.HasOne("griffined_api.Models.Course", "course")
-                        .WithMany("newCourseRequests")
+                        .WithMany()
                         .HasForeignKey("courseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1309,7 +1312,7 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.NewCourseSubjectRequest", b =>
                 {
                     b.HasOne("griffined_api.Models.NewCourseRequest", "newCourseRequest")
-                        .WithMany("newCourseSubjectRequests")
+                        .WithMany("NewCourseSubjectRequests")
                         .HasForeignKey("newCourseRequestId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1352,7 +1355,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
                         .WithMany("preferredDays")
                         .HasForeignKey("studyCourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("studyCourse");
@@ -1410,7 +1413,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
                         .WithMany("staffNotifications")
                         .HasForeignKey("studyCourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("staff");
@@ -1427,7 +1430,7 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
-                        .WithMany("studentAddingRequests")
+                        .WithMany()
                         .HasForeignKey("studyCourseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1478,7 +1481,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
                         .WithMany("studentNotifications")
                         .HasForeignKey("studyCourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("student");
@@ -1535,7 +1538,7 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.StudyCourse", b =>
                 {
                     b.HasOne("griffined_api.Models.Course", "course")
-                        .WithMany("studyCourses")
+                        .WithMany()
                         .HasForeignKey("courseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1554,7 +1557,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
                         .WithMany("studyCourseHistories")
                         .HasForeignKey("studyCourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("byStaff");
@@ -1567,7 +1570,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
                         .WithMany("studySubjects")
                         .HasForeignKey("studyCourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.Subject", "subject")
@@ -1595,7 +1598,7 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.TeacherNotification", b =>
                 {
                     b.HasOne("griffined_api.Models.Appointment", "appointment")
-                        .WithMany("teacherNotifications")
+                        .WithMany()
                         .HasForeignKey("appointmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1603,7 +1606,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "studyCourse")
                         .WithMany("teacherNotifications")
                         .HasForeignKey("studyCourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.Teacher", "teacher")
@@ -1633,17 +1636,11 @@ namespace griffinedapi.Migrations
                     b.Navigation("appointmentMembers");
 
                     b.Navigation("schedules");
-
-                    b.Navigation("teacherNotifications");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Course", b =>
                 {
                     b.Navigation("levels");
-
-                    b.Navigation("newCourseRequests");
-
-                    b.Navigation("studyCourses");
 
                     b.Navigation("subjects");
                 });
@@ -1660,7 +1657,7 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
                 {
-                    b.Navigation("newCourseSubjectRequests");
+                    b.Navigation("NewCourseSubjectRequests");
                 });
 
             modelBuilder.Entity("griffined_api.Models.RegistrationRequest", b =>
@@ -1727,8 +1724,6 @@ namespace griffinedapi.Migrations
 
                     b.Navigation("staffNotifications");
 
-                    b.Navigation("studentAddingRequests");
-
                     b.Navigation("studentNotifications");
 
                     b.Navigation("studyCourseHistories");
@@ -1740,8 +1735,6 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.StudySubject", b =>
                 {
-                    b.Navigation("courseMembers");
-
                     b.Navigation("studyClasses");
                 });
 
