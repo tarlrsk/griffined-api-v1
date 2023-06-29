@@ -34,7 +34,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
                 var member = new RegistrationRequestMember();
-                member.studentId = memberId;
+                member.student = dbStudent;
                 request.registrationRequestMembers.Add(member);
             }
 
@@ -101,7 +101,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var subject = existedSubjects.First(s => s.subject == requestedSubject.subject);
                         var newRequestedSubject = new NewCourseSubjectRequest();
-                        newRequestedSubject.subjectId = subject.id;
+                        newRequestedSubject.subject = subject;
                         newRequestedSubject.hour = requestedSubject.hour;
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
@@ -118,7 +118,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             var newSubject = new Subject();
                             newSubject.subject = requestedSubject.subject;
-                            newSubject.courseId = course.id;
+                            newSubject.course = course;
                             _context.Subjects.Add(newSubject);
                             await _context.SaveChangesAsync();
                             existedCourses = await _context.Courses
@@ -127,11 +127,11 @@ namespace griffined_api.Services.RegistrationRequestService
                                                 .Contains(c.course)).ToListAsync();
                             course = existedCourses.First(c => c.course == course.course);
 
-                            newRequestedSubject.subjectId = newSubject.id;
+                            newRequestedSubject.subject = newSubject;
                         }
                         else
                         {
-                            newRequestedSubject.subjectId = subject.id;
+                            newRequestedSubject.subject = subject;
                         }
                         newRequestedSubject.hour = requestedSubject.hour;
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
@@ -142,7 +142,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var newLevel = new Level();
                         newLevel.level = newRequestedCourse.level;
-                        newLevel.courseId = course.id;
+                        newLevel.course = course;
                         _context.Levels.Add(newLevel);
                         await _context.SaveChangesAsync();
                         course = await _context.Courses
@@ -154,7 +154,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     newRequestedCourseRequest.level = level;
                 }
 
-                newRequestedCourseRequest.courseId = course.id;
+                newRequestedCourseRequest.course = course;
                 newRequestedCourseRequest.totalHours = newRequestedCourse.totalHours;
                 newRequestedCourseRequest.method = newRequestedCourseRequest.method;
                 newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.startDate);
