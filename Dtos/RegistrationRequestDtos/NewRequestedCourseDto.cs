@@ -7,7 +7,6 @@ namespace griffined_api.Dtos.RegistrationRequestDto
 {
     public class NewRequestedCourseDto
     {
-        [Required]
         public string course { get; set; } = string.Empty;
         public string? level { get; set; }
         public int totalHours { get; set; }
