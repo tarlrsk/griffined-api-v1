@@ -103,7 +103,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         var newRequestedSubject = new NewCourseSubjectRequest();
                         newRequestedSubject.subject = subject;
                         newRequestedSubject.hour = requestedSubject.hour;
-                        newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
+                        newRequestedCourseRequest.newCourseSubjectRequests.Add(newRequestedSubject);
                     }
                 }
                 else
@@ -134,7 +134,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             newRequestedSubject.subject = subject;
                         }
                         newRequestedSubject.hour = requestedSubject.hour;
-                        newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
+                        newRequestedCourseRequest.newCourseSubjectRequests.Add(newRequestedSubject);
                     }
 
                     var level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
