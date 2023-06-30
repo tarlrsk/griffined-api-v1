@@ -19,6 +19,7 @@ namespace griffined_api.Models
         [ForeignKey(nameof(studyCourseId))]
         public virtual StudyCourse studyCourse { get; set; } = new StudyCourse();
 
+        public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
         public virtual ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
     }
 }

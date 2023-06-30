@@ -16,6 +16,8 @@ namespace griffined_api.Models
 
         public virtual AppointmentType appointmentType { get; set; }
         public virtual AppointmentStatus appointmentStatus { get; set; }
+
+        public virtual ICollection<TeacherNotification> teacherNotifications { get; set; } = new List<TeacherNotification>();
         public virtual ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
         public virtual ICollection<Schedule> schedules { get; set; } = new List<Schedule>();
     }

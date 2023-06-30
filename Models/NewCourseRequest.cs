@@ -19,7 +19,7 @@ namespace griffined_api.Models
         public DateTime endDate { get; set; }
         public virtual Method method { get; set; }
 
-        public virtual ICollection<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
+        public virtual ICollection<NewCourseSubjectRequest> newCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
 
         [ForeignKey(nameof(levelId))]
         public virtual Level? level { get; set; } = new Level();

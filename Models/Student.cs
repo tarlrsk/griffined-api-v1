@@ -51,6 +51,7 @@ namespace griffined_api.Models
         public virtual Parent? parent { get; set; }
         public virtual Address? address { get; set; }
         public virtual StudentAttendance? attendance { get; set; }
+
         public virtual ICollection<StudentAdditionalFile>? additionalFiles { get; set; }
         public virtual ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
