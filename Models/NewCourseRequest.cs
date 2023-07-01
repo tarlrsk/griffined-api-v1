@@ -22,7 +22,7 @@ namespace griffined_api.Models
         public virtual ICollection<NewCourseSubjectRequest> newCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
 
         [ForeignKey(nameof(levelId))]
-        public virtual Level level { get; set; } = new Level();
+        public virtual Level? level { get; set; } = new Level();
 
         [ForeignKey(nameof(registrationRequestId))]
         public virtual RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();

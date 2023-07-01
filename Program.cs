@@ -18,6 +18,7 @@ global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
 global using griffined_api.Services.TeacherService;
+global using griffined_api.Services.RegistrationRequestService;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+builder.Services.AddScoped<IRegistrationRequestService, RegistrationRequestService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
