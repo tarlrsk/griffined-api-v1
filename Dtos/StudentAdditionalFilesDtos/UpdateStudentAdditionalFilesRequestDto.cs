@@ -8,6 +8,6 @@ namespace griffined_api.Dtos.StudentAddtionalFilesDtos
     public class UpdateStudentAdditionalFilesRequestDto
     {
         public int? id { get; set; }
-        public string file { get; set; } = string.Empty;
+        public string fileName { get; set; } = string.Empty;
     }
 }

@@ -282,18 +282,18 @@ namespace griffined_api.Services.StudentService
                         student.additionalFiles?.Remove(file);
                     }
 
-                    // Update or add any files that were included in the updated DTO
-                    foreach (var updatedFile in updatedStudent.additionalFiles)
-                    {
-                        var existingFile = student.additionalFiles?.FirstOrDefault(f => f.id == updatedFile.id);
-                        if (existingFile is null)
-                        {
-                            existingFile = new StudentAdditionalFile();
-                            student.additionalFiles?.Add(existingFile);
-                        }
+                    // // Update or add any files that were included in the updated DTO
+                    // foreach (var updatedFile in updatedStudent.additionalFiles)
+                    // {
+                    //     var existingFile = student.additionalFiles?.FirstOrDefault(f => f.id == updatedFile.id);
+                    //     if (existingFile is null)
+                    //     {
+                    //         existingFile = new StudentAdditionalFile();
+                    //         student.additionalFiles?.Add(existingFile);
+                    //     }
 
-                        _mapper.Map(updatedFile, existingFile);
-                    }
+                    //     _mapper.Map(updatedFile, existingFile);
+                    // }
                 }
             }
 
