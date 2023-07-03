@@ -107,7 +107,7 @@ namespace griffined_api.Services.StudentService
                 _context.Addresses.Remove(dbAddress);
             }
 
-            var dbAdditionalFiles = await _context.StudentAdditionalFiles.Where(f => f.studentId == id).ToListAsync();
+            var dbAdditionalFiles = await _context.StudentAdditionalFiles.Where(f => f.StudentId == id).ToListAsync();
             if (dbAdditionalFiles is null)
                 throw new NotFoundException($"No additional files found.");
             _context.StudentAdditionalFiles.RemoveRange(dbAdditionalFiles);
@@ -270,11 +270,11 @@ namespace griffined_api.Services.StudentService
 
             if (updatedStudent.additionalFiles is not null)
             {
-                var existingFileIds = student.additionalFiles?.Select(f => f.id).ToList();
+                var existingFileIds = student.additionalFiles?.Select(f => f.Id).ToList();
                 var updatedFileIds = updatedStudent.additionalFiles.Select(f => f.id).ToList();
 
                 // Remove any files that were not included in the updated DTO
-                var filesToRemove = student.additionalFiles?.Where(f => !updatedFileIds.Contains(f.id)).ToList();
+                var filesToRemove = student.additionalFiles?.Where(f => !updatedFileIds.Contains(f.Id)).ToList();
                 if (filesToRemove != null)
                 {
                     foreach (var file in filesToRemove)

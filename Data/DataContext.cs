@@ -364,8 +364,8 @@ namespace griffined_api.Data
                     .HasForeignKey<StudentAttendance>(e => e.studentId);
 
                 entity.HasMany(e => e.additionalFiles)
-                    .WithOne(e => e.student)
-                    .HasForeignKey(e => e.studentId);
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
 
                 entity.HasMany(e => e.registrationRequestMembers)
                     .WithOne(e => e.student)
@@ -401,9 +401,9 @@ namespace griffined_api.Data
             {
                 entity.ToTable("StudentAdditionalFile");
 
-                entity.HasOne(e => e.student)
+                entity.HasOne(e => e.Student)
                     .WithMany(e => e.additionalFiles)
-                    .HasForeignKey(e => e.studentId);
+                    .HasForeignKey(e => e.StudentId);
             });
 
             modelBuilder.Entity<StudentAttendance>(entity =>
