@@ -36,6 +36,7 @@ global using Google.Cloud.Firestore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using FirebaseAdmin;
 using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 
@@ -78,6 +79,8 @@ builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
+
+var storageClient = StorageClient.Create();
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {

@@ -11,6 +11,7 @@ namespace griffined_api.Services.StudentService
     public class StudentService : IStudentService
     {
         private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private string? FirebaseBucket = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
