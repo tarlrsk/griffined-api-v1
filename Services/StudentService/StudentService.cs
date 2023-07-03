@@ -1,4 +1,5 @@
 using Firebase.Auth;
+using Google.Cloud.Storage.V1;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,16 +12,18 @@ namespace griffined_api.Services.StudentService
     public class StudentService : IStudentService
     {
         private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
-        private string? FirebaseBucket = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
+        private string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly StorageClient _storageClient;
 
-        public StudentService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
+        public StudentService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, StorageClient storageClient)
         {
             _httpContextAccessor = httpContextAccessor;
             _context = context;
             _mapper = mapper;
+            _storageClient = storageClient;
         }
 
         public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent)
@@ -58,12 +61,27 @@ namespace griffined_api.Services.StudentService
 
             _context.Students.Add(_student);
 
-            if (newStudent.additionalFiles != null)
+            if (newStudent.additionalFiles != null && newStudent.additionalFiles.Count > 0)
             {
                 _student.additionalFiles = new List<StudentAdditionalFile>();
-                foreach (var additionalFile in newStudent.additionalFiles)
+
+                foreach (var fileRequestDto in newStudent.additionalFiles)
                 {
-                    var file = _mapper.Map<StudentAdditionalFile>(additionalFile);
+                    var file = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
+                    var fileName = file.FileName;
+
+                    using (var stream = fileRequestDto.FileData.OpenReadStream())
+                    {
+                        var storageObject = await _storageClient.UploadObjectAsync(
+                            FIREBASE_BUCKET,
+                            $"students/{fileName}",
+                            null,
+                            stream
+                        );
+
+                        file.URL = storageObject.MediaLink;
+                    }
+
                     _student.additionalFiles.Add(file);
                 }
             }

@@ -81,6 +81,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
 
 var storageClient = StorageClient.Create();
+builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {
