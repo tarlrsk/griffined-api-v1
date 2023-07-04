@@ -10,15 +10,17 @@ namespace griffined_api.Services.RegistrationRequestService
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-
-        public RegistrationRequestService(IMapper mapper, DataContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public RegistrationRequestService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
         {
+            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
         }
 
         public async Task<ServiceResponse<string>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
         {
+            // TODO Add Comment on Request
             var response = new ServiceResponse<string>();
             var request = new RegistrationRequest();
 
@@ -161,10 +163,50 @@ namespace griffined_api.Services.RegistrationRequestService
                 newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.endDate);
                 request.newCourseRequests.Add(newRequestedCourseRequest);
             }
+            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            request.byECId = byECId;
             request.section = newRequestedCourses.sectionName;
             request.registrationStatus = RegistrationStatus.PendingEA;
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudyAddingRequestDto newRequest)
+        {
+            var response = new ServiceResponse<string>();
+            var request = new RegistrationRequest();
+
+            if (newRequest.memberIds == null || newRequest.memberIds.Count == 0)
+            {
+                throw new BadRequestException("The memberIds field is required.");
+            }
+            foreach (var memberId in newRequest.memberIds)
+            {
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == memberId);
+                if (dbStudent == null)
+                {
+                    throw new NotFoundException($"Student with ID {memberId} not found.");
+                }
+                var member = new RegistrationRequestMember();
+                member.student = dbStudent;
+                request.registrationRequestMembers.Add(member);
+                int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            }
+
+            foreach (var studyCourseId in newRequest.courseIds)
+            {
+                var studyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.id == studyCourseId);
+                var newStudentAddingRequest = new StudentAddingRequest();
+                if (studyCourse == null)
+                {
+                    throw new NotFoundException($"Study Course with ID {studyCourseId} not found");
+                }
+                newStudentAddingRequest.studyCourse = studyCourse;
+                request.studentAddingRequest.Add(newStudentAddingRequest);
+            }
+            
 
             return response;
         }
