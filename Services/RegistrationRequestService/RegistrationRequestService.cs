@@ -166,6 +166,7 @@ namespace griffined_api.Services.RegistrationRequestService
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             request.byECId = byECId;
             request.section = newRequestedCourses.sectionName;
+            request.type = nameof(RegistrationRequestType.NewRequestedCourse);
             request.registrationStatus = RegistrationStatus.PendingEA;
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
@@ -217,6 +218,7 @@ namespace griffined_api.Services.RegistrationRequestService
             request.byECId = byECId;
             request.paymentType = newRequest.paymentType;
             request.registrationStatus = RegistrationStatus.PendingEA;
+            request.type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
             return response;
