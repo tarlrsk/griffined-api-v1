@@ -10,7 +10,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         [Required]
         public required List<int> memberIds { get; set; }
         [Required]
-        public string paymentType { get; set; } = string.Empty;
+        public PaymentType paymentType { get; set; }
         [Required]
         public List<int> courseIds{ get; set; } = new List<int>();
         [Required]

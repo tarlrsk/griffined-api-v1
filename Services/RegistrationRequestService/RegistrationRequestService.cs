@@ -18,10 +18,10 @@ namespace griffined_api.Services.RegistrationRequestService
             _context = context;
         }
 
-        public async Task<ServiceResponse<string>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
+        public async Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
         {
             // TODO Add Comment on Request
-            var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<String>();
             var request = new RegistrationRequest();
 
             if (newRequestedCourses.memberIds == null || newRequestedCourses.memberIds.Count == 0)
@@ -173,9 +173,9 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudyAddingRequestDto newRequest)
+        public async Task<ServiceResponse<String>> AddStudentAddingRequest(StudyAddingRequestDto newRequest)
         {
-            var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<String>();
             var request = new RegistrationRequest();
 
             if (newRequest.memberIds == null || newRequest.memberIds.Count == 0)
@@ -192,7 +192,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new RegistrationRequestMember();
                 member.student = dbStudent;
                 request.registrationRequestMembers.Add(member);
-                int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             }
 
             foreach (var studyCourseId in newRequest.courseIds)
@@ -207,7 +206,19 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.studentAddingRequest.Add(newStudentAddingRequest);
             }
             
+            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            foreach (var comment in newRequest.comments)
+            {
+                var newComment = new Comment();
+                newComment.staffId = byECId;
+                request.comments.Add(newComment);
+            }
 
+            request.byECId = byECId;
+            request.paymentType = newRequest.paymentType;
+            request.registrationStatus = RegistrationStatus.PendingEA;
+            _context.RegistrationRequests.Add(request);
+            await _context.SaveChangesAsync();
             return response;
         }
     }
