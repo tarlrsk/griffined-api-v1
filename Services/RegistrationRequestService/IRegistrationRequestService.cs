@@ -9,5 +9,6 @@ namespace griffined_api.Services.RegistrationRequestService
     public interface IRegistrationRequestService
     {
         Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newCourses);
+        Task<ServiceResponse<String>> AddStudentAddingRequest(StudyAddingRequestDto newRequest);
     }
 }

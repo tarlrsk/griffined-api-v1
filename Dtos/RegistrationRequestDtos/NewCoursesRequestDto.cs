@@ -9,7 +9,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
     {
         public string? sectionName { get; set; }
         [Required]
-        public required List<int> memberIds { get; set; }
+        public List<int> memberIds { get; set; } = new List<int>();
         [Required]
         public string type {get; set;} = string.Empty;
         public List<PreferredDayRequestDto> preferredDays { get; set; } = new List<PreferredDayRequestDto>();
