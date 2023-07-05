@@ -9,12 +9,12 @@ namespace griffined_api.Models
 {
     public class Payment
     {
-        public int id { get; set; }
-        public int? registrationRequestId { get; set; }
+        public int Id { get; set; }
+        public int? RegistrationRequestId { get; set; }
 
-        public string file { get; set; } = string.Empty;
+        public string File { get; set; } = string.Empty;
 
-        [ForeignKey(nameof(registrationRequestId))]
-        public virtual RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        [ForeignKey(nameof(RegistrationRequestId))]
+        public virtual RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
     }
 }

@@ -7,6 +7,6 @@ namespace griffined_api.Dtos.UserDtos
 {
     public class TokenResponseDto
     {
-        public string accessToken { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
     }
 }

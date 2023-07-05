@@ -8,20 +8,20 @@ namespace griffined_api.Dtos.TeacherDtos
     public class UpdateTeacherDto
     {
         [Required]
-        public int id { get; set; }
+        public int Id { get; set; }
         [Required]
-        public string fName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
         [Required]
-        public string lName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         [Required]
-        public string nickname { get; set; } = string.Empty;
+        public string Nickname { get; set; } = string.Empty;
         [Required]
-        public string phone { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
         [Required]
-        public string email { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         [Required]
-        public string line { get; set; } = string.Empty;
-        public List<WorkTimeRequestDto> workTimes { get; set; } = new List<WorkTimeRequestDto>();
-        public bool isActive { get; set; } = true;
+        public string Line { get; set; } = string.Empty;
+        public List<WorkTimeRequestDto> WorkTimes { get; set; } = new List<WorkTimeRequestDto>();
+        public bool IsActive { get; set; } = true;
     }
 }

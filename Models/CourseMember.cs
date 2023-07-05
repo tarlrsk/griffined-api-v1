@@ -9,16 +9,16 @@ namespace griffined_api.Models
 {
     public class CourseMember
     {
-        public int id { get; set; }
-        public int? studentId { get; set; }
-        public int? studySubjectId { get; set; }
+        public int Id { get; set; }
+        public int? StudentId { get; set; }
+        public int? StudySubjectId { get; set; }
 
-        [ForeignKey(nameof(studentId))]
-        public virtual Student student { get; set; } = new Student();
+        [ForeignKey(nameof(StudentId))]
+        public virtual Student Student { get; set; } = new Student();
 
-        [ForeignKey(nameof(studySubjectId))]
-        public virtual StudySubject studySubject { get; set; } = new StudySubject();
+        [ForeignKey(nameof(StudySubjectId))]
+        public virtual StudySubject StudySubject { get; set; } = new StudySubject();
 
-        public virtual ICollection<StudentReport> studentReports { get; set; } = new List<StudentReport>();
+        public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
     }
 }

@@ -9,18 +9,18 @@ namespace griffined_api.Models
 {
     public class StudentNotification
     {
-        public int id { get; set; }
-        public int? studentId { get; set; }
-        public int? studyCourseId { get; set; }
+        public int Id { get; set; }
+        public int? StudentId { get; set; }
+        public int? StudyCourseId { get; set; }
 
-        public DateTime dateCreated { get; set; } = DateTime.Now;
-        public virtual StudentNotificationType type { get; set; }
-        public bool hasRead { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public virtual StudentNotificationType Type { get; set; }
+        public bool IsRead { get; set; }
 
-        [ForeignKey(nameof(studentId))]
-        public virtual Student student { get; set; } = new Student();
+        [ForeignKey(nameof(StudentId))]
+        public virtual Student Student { get; set; } = new Student();
 
-        [ForeignKey(nameof(studyCourseId))]
-        public virtual StudyCourse studyCourse { get; set; } = new StudyCourse();
+        [ForeignKey(nameof(StudyCourseId))]
+        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
     }
 }

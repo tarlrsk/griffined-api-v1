@@ -9,16 +9,16 @@ namespace griffined_api.Models
 {
     public class PreferredDay
     {
-        public int id { get; set; }
-        public int? studyCourseId { get; set; }
+        public int Id { get; set; }
+        public int? StudyCourseId { get; set; }
 
-        public string day { get; set; } = string.Empty;
+        public string Day { get; set; } = string.Empty;
         private TimeOnly _fromTime;
-        public string fromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
+        public string FromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
         private TimeOnly _toTime;
-        public string toTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
+        public string ToTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
 
-        [ForeignKey(nameof(studyCourseId))]
-        public StudyCourse studyCourse { get; set; } = new StudyCourse();
+        [ForeignKey(nameof(StudyCourseId))]
+        public StudyCourse StudyCourse { get; set; } = new StudyCourse();
     }
 }
