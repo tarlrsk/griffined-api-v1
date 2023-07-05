@@ -10,10 +10,10 @@ namespace griffined_api.Models
     public class RegistrationRequest
     {
         public int id { get; set; }
-        public int byECId { get; set; }
-        public int byEAId { get; set; }
-        public int byOAId { get; set; }
-        public int cancelledBy { get; set; }
+        public int? byECId { get; set; }
+        public int? byEAId { get; set; }
+        public int? byOAId { get; set; }
+        public int? cancelledBy { get; set; }
 
         public string? section { get; set; }
         public DateTime createdDate { get; set; } = DateTime.Now;
@@ -24,8 +24,8 @@ namespace griffined_api.Models
         public bool hasSchedule { get; set; }
         public virtual RegistrationStatus registrationStatus { get; set; }
 
-        public virtual PaymentType paymentType { get; set; }
-        public virtual PaymentStatus paymentStatus { get; set; }
+        public virtual PaymentType? paymentType { get; set; }
+        public virtual PaymentStatus? paymentStatus { get; set; }
 
         public virtual ICollection<StudentAddingRequest> studentAddingRequest { get; set; } = new List<StudentAddingRequest>();
         public virtual ICollection<Payment> payment { get; set; } = new List<Payment>();
