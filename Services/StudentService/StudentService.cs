@@ -26,7 +26,7 @@ namespace griffined_api.Services.StudentService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile file)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, ICollection<IFormFile> files)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
