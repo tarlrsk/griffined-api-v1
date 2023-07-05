@@ -10,16 +10,18 @@ namespace griffined_api.Services.RegistrationRequestService
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-
-        public RegistrationRequestService(IMapper mapper, DataContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public RegistrationRequestService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
         {
+            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
         }
 
-        public async Task<ServiceResponse<string>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
+        public async Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
         {
-            var response = new ServiceResponse<string>();
+            // TODO Add Comment on Request
+            var response = new ServiceResponse<String>();
             var request = new RegistrationRequest();
 
             if (newRequestedCourses.memberIds == null || newRequestedCourses.memberIds.Count == 0)
@@ -161,11 +163,64 @@ namespace griffined_api.Services.RegistrationRequestService
                 newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.endDate);
                 request.newCourseRequests.Add(newRequestedCourseRequest);
             }
+            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            request.byECId = byECId;
             request.section = newRequestedCourses.sectionName;
+            request.type = nameof(RegistrationRequestType.NewRequestedCourse);
             request.registrationStatus = RegistrationStatus.PendingEA;
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
+            return response;
+        }
+
+        public async Task<ServiceResponse<String>> AddStudentAddingRequest(StudyAddingRequestDto newRequest)
+        {
+            var response = new ServiceResponse<String>();
+            var request = new RegistrationRequest();
+
+            if (newRequest.memberIds == null || newRequest.memberIds.Count == 0)
+            {
+                throw new BadRequestException("The memberIds field is required.");
+            }
+            foreach (var memberId in newRequest.memberIds)
+            {
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == memberId);
+                if (dbStudent == null)
+                {
+                    throw new NotFoundException($"Student with ID {memberId} not found.");
+                }
+                var member = new RegistrationRequestMember();
+                member.student = dbStudent;
+                request.registrationRequestMembers.Add(member);
+            }
+
+            foreach (var studyCourseId in newRequest.courseIds)
+            {
+                var studyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.id == studyCourseId);
+                var newStudentAddingRequest = new StudentAddingRequest();
+                if (studyCourse == null)
+                {
+                    throw new NotFoundException($"Study Course with ID {studyCourseId} not found");
+                }
+                newStudentAddingRequest.studyCourse = studyCourse;
+                request.studentAddingRequest.Add(newStudentAddingRequest);
+            }
+            
+            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            foreach (var comment in newRequest.comments)
+            {
+                var newComment = new Comment();
+                newComment.staffId = byECId;
+                request.comments.Add(newComment);
+            }
+
+            request.byECId = byECId;
+            request.paymentType = newRequest.paymentType;
+            request.registrationStatus = RegistrationStatus.PendingEA;
+            request.type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
+            _context.RegistrationRequests.Add(request);
+            await _context.SaveChangesAsync();
             return response;
         }
     }

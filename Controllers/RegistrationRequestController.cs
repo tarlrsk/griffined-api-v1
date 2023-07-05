@@ -7,7 +7,7 @@ using griffined_api.Dtos.RegistrationRequestDto;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/v1/request/registration/new-course")]
+    [Route("api/v1/request/registration")]
 
     [Authorize(Roles = "ea, master")]
 
@@ -19,12 +19,17 @@ namespace griffined_api.Controllers
             _registrationRequestService = registrationRequestService;
 
         }
-        [HttpPost, Authorize(Roles = "oc, master")]
+        [HttpPost("new-course"), Authorize(Roles = "ep, master")]
         public async Task<ActionResult> AddNewCoursesRequest(NewCoursesRequestDto newCourses)
         {
             var response = await _registrationRequestService.AddNewRequestedCourses(newCourses);
-            return Ok(newCourses);
+            return Ok(response);
         }
-
+        [HttpPost("student-adding"), Authorize(Roles = "ep, master")]
+        public async Task<ActionResult> AddStudentAddingRequest(StudyAddingRequestDto newStudentAdding)
+        {
+            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding);
+            return Ok(response);
+        }
     }
 }
