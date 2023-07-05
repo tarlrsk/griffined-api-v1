@@ -7,8 +7,8 @@ namespace griffined_api.Dtos.StudentDtos
 {
     public class StudentNameResponseDto
     {
-        public int id { get; set; }
-        public string studentId { get; set; } = string.Empty;
+        public int studentId { get; set; }
+        public string studentCode { get; set; } = string.Empty;
         public string fullName { get; set; } = string.Empty;
         public string nickname { get; set; } = string.Empty;
     }

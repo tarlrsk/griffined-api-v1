@@ -206,7 +206,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 newStudentAddingRequest.studyCourse = studyCourse;
                 request.studentAddingRequest.Add(newStudentAddingRequest);
             }
-            
+
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             foreach (var comment in newRequest.comments)
             {
@@ -221,6 +221,79 @@ namespace griffined_api.Services.RegistrationRequestService
             request.type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<RegistrationRequestResponseDto>>> GetAllRegistrationRequests()
+        {
+            var response = new ServiceResponse<List<RegistrationRequestResponseDto>>();
+            var registrationRequests = await _context.RegistrationRequests
+                    .Include(r => r.registrationRequestMembers)
+                        .ThenInclude(m => m.student)
+                    .ToListAsync();
+
+            var data = new List<RegistrationRequestResponseDto>();
+
+            foreach (var registrationRequest in registrationRequests)
+            {
+                var staffs = await _context.Staff.ToListAsync();
+                var requestDto = new RegistrationRequestResponseDto();
+
+                foreach (var student in registrationRequest.registrationRequestMembers)
+                {
+                    var studentDto = new StudentNameResponseDto();
+                    studentDto.studentId = student.student.id;
+                    studentDto.studentCode = student.student.studentId;
+                    studentDto.fullName = student.student.fullName;
+                    studentDto.nickname = student.student.nickname;
+                    requestDto.members.Add(studentDto);
+                }
+
+                requestDto.requestId = registrationRequest.id;
+                requestDto.type = registrationRequest.type;
+                requestDto.registrationStatus = registrationRequest.registrationStatus;
+                requestDto.paymentType = registrationRequest.paymentType;
+                requestDto.paymentStatus = registrationRequest.paymentStatus;
+                requestDto.createdDate = registrationRequest.createdDate;
+                requestDto.paymentError = registrationRequest.paymentError;
+                requestDto.scheduleError = registrationRequest.scheduleError;
+                requestDto.newCourseDetailError = registrationRequest.newCourseDetailError;
+                requestDto.hasSchedule = registrationRequest.hasSchedule;
+
+                var ec = staffs.FirstOrDefault(s => s.id == registrationRequest.byECId);
+                var ea = staffs.FirstOrDefault(s => s.id == registrationRequest.byEAId);
+                var oa = staffs.FirstOrDefault(s => s.id == registrationRequest.byOAId);
+                var cancelledBy = staffs.FirstOrDefault(s => s.id == registrationRequest.cancelledBy);
+
+                if (ec != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.nickname = ec.nickname;
+                    requestDto.byEC = staff;
+                }
+                if (ea != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.nickname = ea.nickname;
+                    requestDto.byEA = staff;
+                }
+                if (oa != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.nickname = oa.nickname;
+                    requestDto.byEA = staff;
+                }
+                if (cancelledBy != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.nickname = cancelledBy.nickname;
+                    requestDto.byEA = staff;
+                }
+
+                data.Add(requestDto);
+
+            }
+            response.Data = data;
             return response;
         }
     }
