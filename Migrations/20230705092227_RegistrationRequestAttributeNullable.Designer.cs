@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230705092227_RegistrationRequestAttributeNullable")]
+    partial class RegistrationRequestAttributeNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -777,27 +780,23 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.StudentAdditionalFile", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("FileName")
+                    b.Property<string>("file")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StudentId")
+                    b.Property<int?>("studentId")
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("id");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
+                    b.HasIndex("studentId");
 
                     b.ToTable("StudentAdditionalFile", (string)null);
                 });
@@ -1439,13 +1438,13 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.StudentAdditionalFile", b =>
                 {
-                    b.HasOne("griffined_api.Models.Student", "Student")
+                    b.HasOne("griffined_api.Models.Student", "student")
                         .WithMany("additionalFiles")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("studentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Student");
+                    b.Navigation("student");
                 });
 
             modelBuilder.Entity("griffined_api.Models.StudentAttendance", b =>

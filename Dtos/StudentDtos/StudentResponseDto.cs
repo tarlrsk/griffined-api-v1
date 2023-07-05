@@ -7,8 +7,8 @@ namespace griffined_api.Dtos.StudentDtos
 {
     public class StudentResponseDto
     {
-        public int id { get; set; }
-        public string studentId { get; set; } = string.Empty;
+        public int StudentId { get; set; }
+        public string StudentCode { get; set; } = string.Empty;
         public string firebaseId { get; set; } = string.Empty;
 
         public string title { get; set; } = string.Empty;
