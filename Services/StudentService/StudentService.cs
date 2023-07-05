@@ -26,7 +26,7 @@ namespace griffined_api.Services.StudentService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile file)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -61,36 +61,36 @@ namespace griffined_api.Services.StudentService
 
             _context.Students.Add(_student);
 
-            if (newStudent.additionalFiles != null && newStudent.additionalFiles.Count > 0)
-            {
-                _student.additionalFiles = new List<StudentAdditionalFile>();
-
-                foreach (var fileRequestDto in newStudent.additionalFiles)
-                {
-                    var file = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
-                    var fileName = file.FileName;
-
-                    using (var stream = fileRequestDto.FileData.OpenReadStream())
-                    {
-                        var storageObject = await _storageClient.UploadObjectAsync(
-                            FIREBASE_BUCKET,
-                            $"students/{fileName}",
-                            null,
-                            stream
-                        );
-
-                        file.URL = storageObject.MediaLink;
-                    }
-
-                    _student.additionalFiles.Add(file);
-                }
-            }
-
             await _context.SaveChangesAsync();
 
             string studentId = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.id % 10000).ToString("0000");
 
             _student.studentId = studentId;
+
+            // if (newStudent.additionalFiles != null && newStudent.additionalFiles.Count > 0)
+            // {
+            //     _student.additionalFiles = new List<StudentAdditionalFile>();
+
+            //     foreach (var fileRequestDto in newStudent.additionalFiles)
+            //     {
+            //         var file = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
+            //         var fileName = Path.GetFileName(fileRequestDto.FileData.Name);
+
+            //         using (var stream = fileRequestDto.FileData.OpenReadStream())
+            //         {
+            //             var storageObject = await _storageClient.UploadObjectAsync(
+            //                 FIREBASE_BUCKET,
+            //                 $"students/{studentId}/{fileName}",
+            //                 null,
+            //                 stream
+            //             );
+
+            //             file.URL = storageObject.MediaLink;
+            //         }
+
+            //         _student.additionalFiles.Add(file);
+            //     }
+            // }
 
             await _context.SaveChangesAsync();
 
