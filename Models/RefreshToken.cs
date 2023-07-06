@@ -8,8 +8,8 @@ namespace griffined_api.Models
 {
     public class RefreshToken
     {
-        public string token { get; set; } = string.Empty;
-        public DateTime created { get; set; } = DateTime.Now;
-        public DateTime expires { get; set; } = DateTime.Now.AddDays(1);
+        public string Token { get; set; } = string.Empty;
+        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Expires { get; set; } = DateTime.Now.AddDays(1);
     }
 }

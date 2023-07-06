@@ -9,16 +9,16 @@ namespace griffined_api.Models
 {
     public class Appointment
     {
-        public int id { get; set; }
+        public int Id { get; set; }
 
-        public string title { get; set; } = string.Empty;
-        public string description { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
 
-        public virtual AppointmentType appointmentType { get; set; }
-        public virtual AppointmentStatus appointmentStatus { get; set; }
+        public virtual AppointmentType AppointmentType { get; set; }
+        public virtual AppointmentStatus AppointmentStatus { get; set; }
 
-        public virtual ICollection<TeacherNotification> teacherNotifications { get; set; } = new List<TeacherNotification>();
-        public virtual ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
-        public virtual ICollection<Schedule> schedules { get; set; } = new List<Schedule>();
+        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
+        public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
+        public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
     }
 }

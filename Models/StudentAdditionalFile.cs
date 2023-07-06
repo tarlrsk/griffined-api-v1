@@ -9,11 +9,13 @@ namespace griffined_api.Models
 {
     public class StudentAdditionalFile
     {
-        public int id { get; set; }
-        public int? studentId { get; set; }
-        public string file { get; set; } = string.Empty;
+        public int Id { get; set; }
+        public int? StudentId { get; set; }
 
-        [ForeignKey(nameof(studentId))]
-        public virtual Student student { get; set; } = new Student();
+        public string FileName { get; set; } = string.Empty;
+        public string URL { get; set; } = string.Empty;
+
+        [ForeignKey(nameof(StudentId))]
+        public virtual Student Student { get; set; } = new Student();
     }
 }

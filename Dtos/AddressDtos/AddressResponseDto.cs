@@ -7,11 +7,11 @@ namespace griffined_api.Dtos.AddressDtos
 {
     public class AddressResponseDto
     {
-        public string address { get; set; } = string.Empty;
-        public string subdistrict { get; set; } = string.Empty;
-        public string district { get; set; } = string.Empty;
-        public string province { get; set; } = string.Empty;
-        public string zipcode { get; set; } = string.Empty;
-        
+        public string Address { get; set; } = string.Empty;
+        public string Subdistrict { get; set; } = string.Empty;
+        public string District { get; set; } = string.Empty;
+        public string Province { get; set; } = string.Empty;
+        public string Zipcode { get; set; } = string.Empty;
+
     }
 }

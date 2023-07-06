@@ -7,12 +7,12 @@ namespace griffined_api.Dtos.RegistrationRequestDto
 {
     public class NewCoursesRequestDto
     {
-        public string? sectionName { get; set; }
+        public string? SectionName { get; set; }
         [Required]
-        public List<int> memberIds { get; set; } = new List<int>();
+        public List<int> MemberIds { get; set; } = new List<int>();
         [Required]
-        public string type {get; set;} = string.Empty;
-        public List<PreferredDayRequestDto> preferredDays { get; set; } = new List<PreferredDayRequestDto>();
-        public List<NewRequestedCourseDto>? courses { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public List<PreferredDayRequestDto> PreferredDays { get; set; } = new List<PreferredDayRequestDto>();
+        public List<NewRequestedCourseDto>? Courses { get; set; }
     }
 }

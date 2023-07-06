@@ -9,16 +9,16 @@ namespace griffined_api.Models
 {
     public class PreferredDayRequest
     {
-        public int id { get; set; }
-        public int? registrationRequestId { get; set; }
+        public int Id { get; set; }
+        public int? RegistrationRequestId { get; set; }
 
-        public string day { get; set; } = string.Empty;
+        public string Day { get; set; } = string.Empty;
         private TimeOnly _fromTime;
-        public string fromTime { get; set; } = string.Empty;
+        public string FromTime { get; set; } = string.Empty;
         private TimeOnly _toTime;
-        public string toTime { get; set; } = string.Empty;
+        public string ToTime { get; set; } = string.Empty;
 
-        [ForeignKey(nameof(registrationRequestId))]
-        public RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        [ForeignKey(nameof(RegistrationRequestId))]
+        public RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
     }
 }

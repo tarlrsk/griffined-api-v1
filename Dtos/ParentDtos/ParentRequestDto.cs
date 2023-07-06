@@ -7,13 +7,13 @@ namespace griffined_api.Dtos.ParentDtos
 {
     public class ParentRequestDto
     {
-        public string fName { get; set; } = string.Empty;
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
-        public string relationship { get; set; } = string.Empty;
-        public string phone { get; set; } = string.Empty;
-        public string email { get; set; } = string.Empty;
-        public string line { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
+        public string Relationship { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Line { get; set; } = string.Empty;
     }
 
 }

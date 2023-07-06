@@ -9,17 +9,17 @@ namespace griffined_api.Models
 {
     public class Comment
     {
-        public int id { get; set; }
-        public int? registrationRequestId { get; set; }
-        public int? staffId { get; set; }
+        public int Id { get; set; }
+        public int? RegistrationRequestId { get; set; }
+        public int? StaffId { get; set; }
 
         public string comment { get; set; } = String.Empty;
-        public DateTime createdDate { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
 
-        [ForeignKey(nameof(registrationRequestId))]
-        public virtual RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        [ForeignKey(nameof(RegistrationRequestId))]
+        public virtual RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
 
-        [ForeignKey(nameof(staffId))]
-        public virtual Staff staff { get; set; } = new Staff();
+        [ForeignKey(nameof(StaffId))]
+        public virtual Staff Staff { get; set; } = new Staff();
     }
 }

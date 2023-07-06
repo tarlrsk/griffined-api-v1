@@ -8,23 +8,23 @@ namespace griffined_api.Dtos.TeacherDtos
     public class GetTeacherDto
     {
         [Required]
-        public int id { get; set; }
+        public int TeacherId { get; set; }
         [Required]
-        public string firebaseId { get; set; } = string.Empty;
+        public string FirebaseId { get; set; } = string.Empty;
         [Required]
-        public string fName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
         [Required]
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
         [Required]
-        public string nickname { get; set; } = string.Empty;
+        public string Nickname { get; set; } = string.Empty;
         [Required]
-        public string phone { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
         [Required]
-        public string email { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         [Required]
-        public string line { get; set; } = string.Empty;
-        public List<WorkTimeResponseDto> workTimes { get; set; } = new List<WorkTimeResponseDto>();
-        public bool isActive { get; set; } = true;
+        public string Line { get; set; } = string.Empty;
+        public List<WorkTimeResponseDto> WorkTimes { get; set; } = new List<WorkTimeResponseDto>();
+        public bool IsActive { get; set; } = true;
     }
 }

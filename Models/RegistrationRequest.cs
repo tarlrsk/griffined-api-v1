@@ -9,29 +9,29 @@ namespace griffined_api.Models
 {
     public class RegistrationRequest
     {
-        public int id { get; set; }
-        public int? byECId { get; set; }
-        public int? byEAId { get; set; }
-        public int? byOAId { get; set; }
-        public int? cancelledBy { get; set; }
+        public int Id { get; set; }
+        public int? ByECId { get; set; }
+        public int? ByEAId { get; set; }
+        public int? ByOAId { get; set; }
+        public int? CancelledBy { get; set; }
 
-        public string? section { get; set; }
-        public DateTime createdDate { get; set; } = DateTime.Now;
-        public string type { get; set; } = string.Empty;
-        public bool paymentError { get; set; }
-        public bool scheduleError { get; set; }
-        public bool newCourseDetailError { get; set; }
-        public bool hasSchedule { get; set; }
-        public virtual RegistrationStatus registrationStatus { get; set; }
+        public string? Section { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public string Type { get; set; } = string.Empty;
+        public bool PaymentError { get; set; }
+        public bool ScheduleError { get; set; }
+        public bool NewCourseDetailError { get; set; }
+        public bool HasSchedule { get; set; }
+        public virtual RegistrationStatus RegistrationStatus { get; set; }
 
-        public virtual PaymentType? paymentType { get; set; }
-        public virtual PaymentStatus? paymentStatus { get; set; }
+        public virtual PaymentType? PaymentType { get; set; }
+        public virtual PaymentStatus? PaymentStatus { get; set; }
 
-        public virtual ICollection<StudentAddingRequest> studentAddingRequest { get; set; } = new List<StudentAddingRequest>();
-        public virtual ICollection<Payment> payment { get; set; } = new List<Payment>();
-        public virtual ICollection<NewCourseRequest> newCourseRequests { get; set; } = new List<NewCourseRequest>();
-        public virtual ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
-        public virtual ICollection<PreferredDayRequest> preferredDayRequests { get; set; } = new List<PreferredDayRequest>();
-        public virtual ICollection<Comment> comments { get; set; } = new List<Comment>();
+        public virtual ICollection<StudentAddingRequest> StudentAddingRequest { get; set; } = new List<StudentAddingRequest>();
+        public virtual ICollection<Payment> Payment { get; set; } = new List<Payment>();
+        public virtual ICollection<NewCourseRequest> NewCourseRequests { get; set; } = new List<NewCourseRequest>();
+        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
+        public virtual ICollection<PreferredDayRequest> PreferredDayRequests { get; set; } = new List<PreferredDayRequest>();
+        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }
