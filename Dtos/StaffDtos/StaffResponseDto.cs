@@ -8,7 +8,7 @@ namespace griffined_api.Dtos.StaffDtos
     public class StaffResponseDto
     {
         [Required]
-        public int Id { get; set; }
+        public int StaffId { get; set; }
         [Required]
         public string FirebaseId { get; set; } = string.Empty;
         [Required]

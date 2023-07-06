@@ -30,7 +30,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             foreach (var memberId in newRequestedCourses.MemberIds)
             {
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == memberId);
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
@@ -185,7 +185,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             foreach (var memberId in newRequest.MemberIds)
             {
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == memberId);
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");

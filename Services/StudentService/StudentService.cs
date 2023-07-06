@@ -63,7 +63,7 @@ namespace griffined_api.Services.StudentService
 
             await _context.SaveChangesAsync();
 
-            string studentCode = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.StudentId % 10000).ToString("0000");
+            string studentCode = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.Id % 10000).ToString("0000");
 
             _student.StudentCode = studentCode;
 
@@ -100,19 +100,19 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int StudentId)
+        public async Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int id)
         {
             var response = new ServiceResponse<List<StudentResponseDto>>();
 
-            var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == StudentId);
+            var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
             if (dbStudent is null)
-                throw new NotFoundException($"Student with ID '{StudentId}' not found.");
+                throw new NotFoundException($"Student with ID '{id}' not found.");
 
             _context.Students.Remove(dbStudent);
 
             if (dbStudent.Parent != null)
             {
-                var dbParent = await _context.Parents.FirstOrDefaultAsync(p => p.StudentId == StudentId);
+                var dbParent = await _context.Parents.FirstOrDefaultAsync(p => p.StudentId == id);
                 if (dbParent is null)
                     throw new NotFoundException("Parent not found.");
                 _context.Parents.Remove(dbParent);
@@ -120,13 +120,13 @@ namespace griffined_api.Services.StudentService
 
             if (dbStudent.Address != null)
             {
-                var dbAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.StudentId == StudentId);
+                var dbAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.StudentId == id);
                 if (dbAddress is null)
                     throw new NotFoundException("Address not found.");
                 _context.Addresses.Remove(dbAddress);
             }
 
-            var dbAdditionalFiles = await _context.StudentAdditionalFiles.Where(f => f.StudentId == StudentId).ToListAsync();
+            var dbAdditionalFiles = await _context.StudentAdditionalFiles.Where(f => f.StudentId == id).ToListAsync();
             if (dbAdditionalFiles is null)
                 throw new NotFoundException($"No additional files found.");
             _context.StudentAdditionalFiles.RemoveRange(dbAdditionalFiles);
@@ -186,7 +186,7 @@ namespace griffined_api.Services.StudentService
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
                 .Include(s => s.AdditionalFiles)
-                .FirstOrDefaultAsync(s => s.StudentId == id);
+                .FirstOrDefaultAsync(s => s.Id == id);
 
             if (dbStudent is null)
                 throw new NotFoundException($"Student with ID '{id}' not found.");
@@ -202,9 +202,9 @@ namespace griffined_api.Services.StudentService
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var student = await _context.Students.Include(s => s.AdditionalFiles).FirstOrDefaultAsync(s => s.StudentId == updatedStudent.StudentId);
+            var student = await _context.Students.Include(s => s.AdditionalFiles).FirstOrDefaultAsync(s => s.Id == updatedStudent.Id);
             if (student is null)
-                throw new NotFoundException($"Student with ID '{updatedStudent.StudentId}' not found.");
+                throw new NotFoundException($"Student with ID '{updatedStudent.Id}' not found.");
 
             // Update the student entity
             _mapper.Map(updatedStudent, student);
@@ -235,7 +235,7 @@ namespace griffined_api.Services.StudentService
 
             if (updatedStudent.Parent != null)
             {
-                var _parent = await _context.Parents.FirstOrDefaultAsync(p => p.StudentId == updatedStudent.StudentId);
+                var _parent = await _context.Parents.FirstOrDefaultAsync(p => p.StudentId == updatedStudent.Id);
                 if (_parent is null)
                 {
                     var parent = new Parent();
@@ -263,7 +263,7 @@ namespace griffined_api.Services.StudentService
 
             if (updatedStudent.Address != null)
             {
-                var _address = await _context.Addresses.FirstOrDefaultAsync(a => a.StudentId == updatedStudent.StudentId);
+                var _address = await _context.Addresses.FirstOrDefaultAsync(a => a.StudentId == updatedStudent.Id);
                 if (_address is null)
                 {
                     var address = new Address();
@@ -324,13 +324,13 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> DisableStudent(int studentId)
+        public async Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
 
             if (student is null)
-                throw new NotFoundException($"Student with ID '{studentId}' not found.");
+                throw new NotFoundException($"Student with ID '{id}' not found.");
 
             student.Status = StudentStatus.Inactive;
             await _context.SaveChangesAsync();
@@ -346,13 +346,13 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> EnableStudent(int studentId)
+        public async Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
 
             if (student is null)
-                throw new NotFoundException($"Student with ID '{studentId}' not found.");
+                throw new NotFoundException($"Student with ID '{id}' not found.");
 
             student.Status = StudentStatus.Active;
             await _context.SaveChangesAsync();
