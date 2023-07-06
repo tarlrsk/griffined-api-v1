@@ -93,7 +93,7 @@ namespace griffinedapi.Migrations
                 name: "Student",
                 columns: table => new
                 {
-                    StudentId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StudentCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirebaseId = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -121,7 +121,7 @@ namespace griffinedapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Student", x => x.StudentId);
+                    table.PrimaryKey("PK_Student", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -319,7 +319,7 @@ namespace griffinedapi.Migrations
                         name: "FK_Address_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -343,7 +343,7 @@ namespace griffinedapi.Migrations
                         name: "FK_Parent_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -369,7 +369,7 @@ namespace griffinedapi.Migrations
                         name: "FK_RegistrationRequestMember_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -390,7 +390,7 @@ namespace griffinedapi.Migrations
                         name: "FK_StudentAdditionalFile_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -573,7 +573,7 @@ namespace griffinedapi.Migrations
                         name: "FK_StudentNotification_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_StudentNotification_StudyCourse_StudyCourseId",
@@ -716,7 +716,7 @@ namespace griffinedapi.Migrations
                         name: "FK_CourseMember_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CourseMember_StudySubject_StudySubjectId",
@@ -813,7 +813,7 @@ namespace griffinedapi.Migrations
                         name: "FK_CancellationRequest_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CancellationRequest_StudyClass_StudyClassId",
@@ -852,7 +852,7 @@ namespace griffinedapi.Migrations
                         name: "FK_StudentAttendance_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
-                        principalColumn: "StudentId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_StudentAttendance_StudyClass_StudyClassId",

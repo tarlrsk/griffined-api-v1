@@ -12,7 +12,7 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230705150157_InitialMigration")]
+    [Migration("20230706071435_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -665,11 +665,11 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.Student", b =>
                 {
-                    b.Property<int>("StudentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CountryOfSchool")
                         .HasColumnType("nvarchar(max)");
@@ -748,7 +748,7 @@ namespace griffinedapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("StudentId");
+                    b.HasKey("Id");
 
                     b.ToTable("Student", (string)null);
                 });
