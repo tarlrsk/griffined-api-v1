@@ -31,5 +31,11 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding);
             return Ok(response);
         }
+        [HttpGet, Authorize(Roles = "ep, ea, oa, master")]
+        public async Task<ActionResult<ServiceResponse<RegistrationRequestResponseDto>>> GetAllRegistrationRequest()
+        {
+            var response = await _registrationRequestService.GetAllRegistrationRequests();
+            return Ok(response);
+        }
     }
 }
