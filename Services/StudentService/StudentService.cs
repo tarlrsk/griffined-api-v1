@@ -67,30 +67,34 @@ namespace griffined_api.Services.StudentService
 
             _student.StudentCode = studentCode;
 
-            // if (newStudent.additionalFiles != null && newStudent.additionalFiles.Count > 0)
-            // {
-            //     _student.additionalFiles = new List<StudentAdditionalFile>();
+            if (files != null && files.Count() > 0)
+            {
+                _student.AdditionalFiles = new List<StudentAdditionalFile>();
 
-            //     foreach (var fileRequestDto in newStudent.additionalFiles)
-            //     {
-            //         var file = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
-            //         var fileName = Path.GetFileName(fileRequestDto.FileData.Name);
+                foreach (var file in files)
+                {
+                    var fileRequestDto = new AddStudentAdditionalFilesRequestDto
+                    {
+                        FileData = file
+                    };
 
-            //         using (var stream = fileRequestDto.FileData.OpenReadStream())
-            //         {
-            //             var storageObject = await _storageClient.UploadObjectAsync(
-            //                 FIREBASE_BUCKET,
-            //                 $"students/{studentId}/{fileName}",
-            //                 null,
-            //                 stream
-            //             );
+                    var fileEntity = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
+                    var fileName = Path.GetFileName(fileRequestDto.FileData.FileName);
 
-            //             file.URL = storageObject.MediaLink;
-            //         }
+                    using (var stream = fileRequestDto.FileData.OpenReadStream())
+                    {
+                        var storageObject = await _storageClient.UploadObjectAsync(
+                            FIREBASE_BUCKET,
+                            $"students/{studentCode}/{fileName}",
+                            null,
+                            stream
+                        );
 
-            //         _student.additionalFiles.Add(file);
-            //     }
-            // }
+                        fileEntity.URL = storageObject.MediaLink;
+                    }
+                    _student.AdditionalFiles.Add(fileEntity);
+                }
+            }
 
             await _context.SaveChangesAsync();
 
