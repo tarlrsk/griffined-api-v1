@@ -222,7 +222,7 @@ namespace griffined_api.Services.RegistrationRequestService
             request.Type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
-            
+
             response.StatusCode = 200;
             return response;
         }
@@ -271,29 +271,29 @@ namespace griffined_api.Services.RegistrationRequestService
                 if (ec != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = ec.Nickname;
-                    staff.fullName = ec.FullName;
+                    staff.Nickname = ec.Nickname;
+                    staff.FullName = ec.FullName;
                     requestDto.ByEC = staff;
                 }
                 if (ea != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = ea.Nickname;
-                    staff.fullName = ea.FullName;
+                    staff.Nickname = ea.Nickname;
+                    staff.FullName = ea.FullName;
                     requestDto.ByEA = staff;
                 }
                 if (oa != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = oa.Nickname;
-                    staff.fullName = oa.FullName;
+                    staff.Nickname = oa.Nickname;
+                    staff.FullName = oa.FullName;
                     requestDto.ByEA = staff;
                 }
                 if (cancelledBy != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = cancelledBy.Nickname;
-                    staff.fullName = cancelledBy.FullName;
+                    staff.Nickname = cancelledBy.Nickname;
+                    staff.FullName = cancelledBy.FullName;
                     requestDto.ByEA = staff;
                 }
 

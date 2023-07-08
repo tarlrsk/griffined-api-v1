@@ -7,9 +7,9 @@ namespace griffined_api.Dtos.StaffDtos
 {
     public class StaffNameOnlyResponseDto
     {
-        public int staffId { get; set; }
-        public string fullName { get; set; } = string.Empty;
-        public string nickname {get; set;} = string.Empty;
+        public int StaffId { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Nickname {get; set;} = string.Empty;
 
     }
 }
