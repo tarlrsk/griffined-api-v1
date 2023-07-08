@@ -9,25 +9,25 @@ namespace griffined_api.Models
 {
     public class Teacher
     {
-        public int id { get; set; }
+        public int Id { get; set; }
 
-        public string firebaseId { get; set; } = string.Empty;
-        public string fName { get; set; } = string.Empty;
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
-        public string nickname { get; set; } = string.Empty;
-        public string phone { get; set; } = string.Empty;
-        public string email { get; set; } = string.Empty;
-        public string line { get; set; } = string.Empty;
-        public bool isActive { get; set; } = true;
+        public string FirebaseId { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
+        public string Nickname { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Line { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
 
-        public virtual ICollection<WorkTime> workTimes { get; set; } = new List<WorkTime>();
-        public virtual ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
-        public virtual ICollection<AppointmentMember> appointmentMembers { get; set; } = new List<AppointmentMember>();
-        public virtual ICollection<StudentReport> studentReports { get; set; } = new List<StudentReport>();
-        public virtual ICollection<TeacherNotification> teacherNotifications { get; set; } = new List<TeacherNotification>();
-        public virtual ICollection<CancellationRequest> cancellationRequests { get; set; } = new List<CancellationRequest>();
+        public virtual ICollection<WorkTime> WorkTimes { get; set; } = new List<WorkTime>();
+        public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
+        public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
+        public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
+        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
+        public virtual ICollection<CancellationRequest> CancellationRequests { get; set; } = new List<CancellationRequest>();
     }
 }

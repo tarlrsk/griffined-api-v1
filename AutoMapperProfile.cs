@@ -12,7 +12,7 @@ namespace griffined_api
             // Student
             CreateMap<Student, StudentResponseDto>();
             CreateMap<AddStudentRequestDto, Student>()
-                .ForMember(dest => dest.additionalFiles, opt => opt.MapFrom(src => src.additionalFiles));
+                .ForMember(dest => dest.AdditionalFiles, opt => opt.MapFrom(src => src.AdditionalFiles));
             CreateMap<UpdateStudentRequestDto, Student>();
 
             // Parent
@@ -25,7 +25,7 @@ namespace griffined_api
 
             // Teacher
             CreateMap<Teacher, GetTeacherDto>()
-                .ForMember(dest => dest.workTimes, opt => opt.MapFrom(src => src.workTimes));
+                .ForMember(dest => dest.WorkTimes, opt => opt.MapFrom(src => src.WorkTimes));
             CreateMap<AddTeacherDto, Teacher>();
             CreateMap<Teacher, AvailableTeacherResponseDto>();
             CreateMap<UpdateTeacherDto, Teacher>();

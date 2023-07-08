@@ -9,25 +9,25 @@ namespace griffined_api.Models
 {
     public class NewCourseRequest
     {
-        public int id { get; set; }
-        public int? registrationRequestId { get; set; }
-        public int? courseId { get; set; }
-        public int? levelId { get; set; }
+        public int Id { get; set; }
+        public int? RegistrationRequestId { get; set; }
+        public int? CourseId { get; set; }
+        public int? LevelId { get; set; }
 
-        public int totalHours { get; set; }
-        public DateTime startDate { get; set; }
-        public DateTime endDate { get; set; }
-        public virtual Method method { get; set; }
+        public int TotalHours { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public virtual Method Method { get; set; }
 
-        public virtual ICollection<NewCourseSubjectRequest> newCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
+        public virtual ICollection<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
 
-        [ForeignKey(nameof(levelId))]
-        public virtual Level? level { get; set; } = new Level();
+        [ForeignKey(nameof(LevelId))]
+        public virtual Level? Level { get; set; } = new Level();
 
-        [ForeignKey(nameof(registrationRequestId))]
-        public virtual RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        [ForeignKey(nameof(RegistrationRequestId))]
+        public virtual RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
 
-        [ForeignKey(nameof(courseId))]
-        public virtual Course course { get; set; } = new Course();
+        [ForeignKey(nameof(CourseId))]
+        public virtual Course Course { get; set; } = new Course();
     }
 }

@@ -8,12 +8,12 @@ namespace griffined_api.Dtos.RegistrationRequestDto
     public class StudyAddingRequestDto
     {
         [Required]
-        public required List<int> memberIds { get; set; }
+        public required List<int> MemberIds { get; set; }
         [Required]
-        public PaymentType paymentType { get; set; }
+        public PaymentType PaymentType { get; set; }
         [Required]
-        public List<int> courseIds{ get; set; } = new List<int>();
+        public List<int> CourseIds { get; set; } = new List<int>();
         [Required]
-        public List<String> comments { get; set; } = new List<String>();
+        public List<String> Comments { get; set; } = new List<String>();
     }
 }

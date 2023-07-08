@@ -9,17 +9,17 @@ namespace griffined_api.Models
 {
     public class NewCourseSubjectRequest
     {
-        public int id { get; set; }
-        public int? subjectId { get; set; }
-        public int? newCourseRequestId { get; set; }
+        public int Id { get; set; }
+        public int? SubjectId { get; set; }
+        public int? NewCourseRequestId { get; set; }
 
-        public int hour { get; set; }
+        public int Hour { get; set; }
 
-        [ForeignKey(nameof(subjectId))]
-        public virtual Subject subject { get; set; } = new Subject();
+        [ForeignKey(nameof(SubjectId))]
+        public virtual Subject Subject { get; set; } = new Subject();
 
-        [ForeignKey(nameof(newCourseRequestId))]
-        public virtual NewCourseRequest newCourseRequest { get; set; } = new NewCourseRequest();
+        [ForeignKey(nameof(NewCourseRequestId))]
+        public virtual NewCourseRequest NewCourseRequest { get; set; } = new NewCourseRequest();
 
     }
 }

@@ -9,14 +9,14 @@ namespace griffined_api.Models
 {
     public class RegistrationRequestMember
     {
-        public int id { get; set; }
-        public int? studentId { get; set; }
-        public int? registrationRequestId { get; set; }
+        public int Id { get; set; }
+        public int? StudentId { get; set; }
+        public int? RegistrationRequestId { get; set; }
 
-        [ForeignKey(nameof(studentId))]
-        public virtual Student student { get; set; } = new Student();
+        [ForeignKey(nameof(StudentId))]
+        public virtual Student Student { get; set; } = new Student();
 
-        [ForeignKey(nameof(registrationRequestId))]
-        public virtual RegistrationRequest registrationRequest { get; set; } = new RegistrationRequest();
+        [ForeignKey(nameof(RegistrationRequestId))]
+        public virtual RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
     }
 }

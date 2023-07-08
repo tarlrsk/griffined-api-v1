@@ -8,6 +8,9 @@ namespace griffined_api.Dtos.StudentAddtionalFilesDtos
     public class StudentAdditionalFilesResponseDto
     {
         [Required]
-        public string file { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
+
+        [Required]
+        public string URL { get; set; } = string.Empty;
     }
 }

@@ -72,549 +72,549 @@ namespace griffined_api.Data
             {
                 entity.ToTable("Address");
 
-                entity.HasOne(e => e.student)
-                    .WithOne(e => e.address)
-                    .HasForeignKey<Address>(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithOne(e => e.Address)
+                    .HasForeignKey<Address>(e => e.StudentId);
             });
 
             modelBuilder.Entity<Appointment>(entity =>
             {
                 entity.ToTable("Appointment");
 
-                entity.HasMany(e => e.appointmentMembers)
-                    .WithOne(e => e.appointment)
-                    .HasForeignKey(e => e.appointmentId);
+                entity.HasMany(e => e.AppointmentMembers)
+                    .WithOne(e => e.Appointment)
+                    .HasForeignKey(e => e.AppointmentId);
 
-                entity.HasMany(e => e.schedules)
-                    .WithOne(e => e.appointment)
-                    .HasForeignKey(e => e.appointmentId);
+                entity.HasMany(e => e.Schedules)
+                    .WithOne(e => e.Appointment)
+                    .HasForeignKey(e => e.AppointmentId);
 
-                entity.HasMany(e => e.teacherNotifications)
-                    .WithOne(e => e.appointment)
-                    .HasForeignKey(e => e.appointmentId);
+                entity.HasMany(e => e.TeacherNotifications)
+                    .WithOne(e => e.Appointment)
+                    .HasForeignKey(e => e.AppointmentId);
             });
 
             modelBuilder.Entity<AppointmentMember>(entity =>
             {
                 entity.ToTable("AppointmentMember");
 
-                entity.HasOne(e => e.appointment)
-                    .WithMany(e => e.appointmentMembers)
-                    .HasForeignKey(e => e.appointmentId);
+                entity.HasOne(e => e.Appointment)
+                    .WithMany(e => e.AppointmentMembers)
+                    .HasForeignKey(e => e.AppointmentId);
 
-                entity.HasOne(e => e.teacher)
-                    .WithMany(e => e.appointmentMembers)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.AppointmentMembers)
+                    .HasForeignKey(e => e.TeacherId);
             });
 
             modelBuilder.Entity<CancellationRequest>(entity =>
             {
                 entity.ToTable("CancellationRequest");
 
-                entity.HasOne(e => e.student)
-                    .WithMany(e => e.cancellationRequests)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithMany(e => e.CancellationRequests)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasOne(e => e.teacher)
-                    .WithMany(e => e.cancellationRequests)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.CancellationRequests)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.cancellationRequests)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.CancellationRequests)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasOne(e => e.studyClass)
-                    .WithMany(e => e.cancellationRequests)
-                    .HasForeignKey(e => e.studyClassId);
+                entity.HasOne(e => e.StudyClass)
+                    .WithMany(e => e.CancellationRequests)
+                    .HasForeignKey(e => e.StudyClassId);
             });
 
             modelBuilder.Entity<Comment>(entity =>
             {
                 entity.ToTable("Comment");
 
-                entity.HasOne(e => e.registrationRequest)
-                    .WithMany(e => e.comments)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.Comments)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasOne(e => e.staff)
-                    .WithMany(e => e.comments)
-                    .HasForeignKey(e => e.staffId);
+                entity.HasOne(e => e.Staff)
+                    .WithMany(e => e.Comments)
+                    .HasForeignKey(e => e.StaffId);
             });
 
             modelBuilder.Entity<Course>(entity =>
             {
                 entity.ToTable("Course");
 
-                entity.HasMany(e => e.subjects)
-                    .WithOne(e => e.course)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasMany(e => e.Subjects)
+                    .WithOne(e => e.Course)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasMany(e => e.studyCourses)
-                    .WithOne(e => e.course)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasMany(e => e.StudyCourses)
+                    .WithOne(e => e.Course)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasMany(e => e.levels)
-                    .WithOne(e => e.course)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasMany(e => e.Levels)
+                    .WithOne(e => e.Course)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasMany(e => e.newCourseRequests)
-                    .WithOne(e => e.course)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasMany(e => e.NewCourseRequests)
+                    .WithOne(e => e.Course)
+                    .HasForeignKey(e => e.CourseId);
             });
 
             modelBuilder.Entity<CourseMember>(entity =>
             {
                 entity.ToTable("CourseMember");
 
-                entity.HasOne(e => e.student)
-                    .WithMany(e => e.courseMembers)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithMany(e => e.CourseMembers)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasOne(e => e.studySubject)
-                    .WithMany(e => e.courseMembers)
-                    .HasForeignKey(e => e.studySubjectId);
+                entity.HasOne(e => e.StudySubject)
+                    .WithMany(e => e.CourseMembers)
+                    .HasForeignKey(e => e.StudySubjectId);
 
-                entity.HasMany(e => e.studentReports)
-                    .WithOne(e => e.courseMember)
-                    .HasForeignKey(e => e.courseMemberId);
+                entity.HasMany(e => e.StudentReports)
+                    .WithOne(e => e.CourseMember)
+                    .HasForeignKey(e => e.CourseMemberId);
             });
 
             modelBuilder.Entity<Level>(entity =>
             {
                 entity.ToTable("Level");
 
-                entity.HasOne(e => e.course)
-                    .WithMany(e => e.levels)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasOne(e => e.Course)
+                    .WithMany(e => e.Levels)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasMany(e => e.newCourseRequests)
-                    .WithOne(e => e.level)
-                    .HasForeignKey(e => e.levelId);
+                entity.HasMany(e => e.NewCourseRequests)
+                    .WithOne(e => e.Level)
+                    .HasForeignKey(e => e.LevelId);
             });
 
             modelBuilder.Entity<NewCourseRequest>(entity =>
             {
                 entity.ToTable("NewCourseRequest");
 
-                entity.HasOne(e => e.registrationRequest)
-                    .WithMany(e => e.newCourseRequests)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.NewCourseRequests)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasOne(e => e.course)
-                    .WithMany(e => e.newCourseRequests)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasOne(e => e.Course)
+                    .WithMany(e => e.NewCourseRequests)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasOne(e => e.level)
-                    .WithMany(e => e.newCourseRequests)
-                    .HasForeignKey(e => e.levelId);
+                entity.HasOne(e => e.Level)
+                    .WithMany(e => e.NewCourseRequests)
+                    .HasForeignKey(e => e.LevelId);
 
-                entity.HasMany(e => e.newCourseSubjectRequests)
-                    .WithOne(e => e.newCourseRequest)
-                    .HasForeignKey(e => e.newCourseRequestId);
+                entity.HasMany(e => e.NewCourseSubjectRequests)
+                    .WithOne(e => e.NewCourseRequest)
+                    .HasForeignKey(e => e.NewCourseRequestId);
             });
 
             modelBuilder.Entity<NewCourseSubjectRequest>(entity =>
             {
                 entity.ToTable("NewCourseSubjectRequest");
 
-                entity.HasOne(e => e.subject)
-                    .WithMany(e => e.newCourseSubjectRequests)
-                    .HasForeignKey(e => e.subjectId);
+                entity.HasOne(e => e.Subject)
+                    .WithMany(e => e.NewCourseSubjectRequests)
+                    .HasForeignKey(e => e.SubjectId);
 
-                entity.HasOne(e => e.newCourseRequest)
-                    .WithMany(e => e.newCourseSubjectRequests)
-                    .HasForeignKey(e => e.newCourseRequestId);
+                entity.HasOne(e => e.NewCourseRequest)
+                    .WithMany(e => e.NewCourseSubjectRequests)
+                    .HasForeignKey(e => e.NewCourseRequestId);
             });
 
             modelBuilder.Entity<Parent>(entity =>
             {
                 entity.ToTable("Parent");
 
-                entity.HasOne(e => e.student)
-                    .WithOne(e => e.parent)
-                    .HasForeignKey<Parent>(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithOne(e => e.Parent)
+                    .HasForeignKey<Parent>(e => e.StudentId);
             });
 
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.ToTable("Payment");
 
-                entity.HasOne(e => e.registrationRequest)
-                    .WithMany(e => e.payment)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.Payment)
+                    .HasForeignKey(e => e.RegistrationRequestId);
             });
 
             modelBuilder.Entity<PreferredDay>(entity =>
             {
                 entity.ToTable("PreferredDay");
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.preferredDays)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.PreferredDays)
+                    .HasForeignKey(e => e.StudyCourseId);
             });
 
             modelBuilder.Entity<PreferredDayRequest>(entity =>
             {
                 entity.ToTable("PreferredDayRequest");
 
-                entity.HasOne(e => e.registrationRequest)
-                    .WithMany(e => e.preferredDayRequests)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.PreferredDayRequests)
+                    .HasForeignKey(e => e.RegistrationRequestId);
             });
 
             modelBuilder.Entity<RegistrationRequest>(entity =>
             {
                 entity.ToTable("RegistrationRequest");
 
-                entity.HasMany(e => e.studentAddingRequest)
-                    .WithOne(e => e.registrationRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasMany(e => e.StudentAddingRequest)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.payment)
-                    .WithOne(e => e.registrationRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasMany(e => e.Payment)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.newCourseRequests)
-                    .WithOne(e => e.registrationRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasMany(e => e.NewCourseRequests)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.registrationRequestMembers)
-                    .WithOne(e => e.registrationRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasMany(e => e.RegistrationRequestMembers)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.preferredDayRequests)
-                    .WithOne(e => e.registrationRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasMany(e => e.PreferredDayRequests)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.comments)
-                    .WithOne(e => e.registrationRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasMany(e => e.Comments)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
             });
 
             modelBuilder.Entity<RegistrationRequestMember>(entity =>
             {
                 entity.ToTable("RegistrationRequestMember");
 
-                entity.HasOne(e => e.student)
-                    .WithMany(e => e.registrationRequestMembers)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithMany(e => e.RegistrationRequestMembers)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasOne(e => e.registrationRequest)
-                    .WithMany(e => e.registrationRequestMembers)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.RegistrationRequestMembers)
+                    .HasForeignKey(e => e.RegistrationRequestId);
             });
 
             modelBuilder.Entity<Schedule>(entity =>
             {
                 entity.ToTable("Schedule");
 
-                entity.HasOne(e => e.studyClass)
-                    .WithOne(e => e.schedule)
-                    .HasForeignKey<StudyClass>(e => e.scheduleId);
+                entity.HasOne(e => e.StudyClass)
+                    .WithOne(e => e.Schedule)
+                    .HasForeignKey<StudyClass>(e => e.ScheduleId);
 
-                entity.HasOne(e => e.appointment)
-                    .WithMany(e => e.schedules)
-                    .HasForeignKey(e => e.appointmentId);
+                entity.HasOne(e => e.Appointment)
+                    .WithMany(e => e.Schedules)
+                    .HasForeignKey(e => e.AppointmentId);
             });
 
             modelBuilder.Entity<Staff>(entity =>
             {
                 entity.ToTable("Staff");
 
-                entity.HasMany(e => e.staffNotifications)
-                    .WithOne(e => e.staff)
-                    .HasForeignKey(e => e.staffId);
+                entity.HasMany(e => e.StaffNotifications)
+                    .WithOne(e => e.Staff)
+                    .HasForeignKey(e => e.StaffId);
 
-                entity.HasMany(e => e.studyCourseHistories)
-                    .WithOne(e => e.byStaff)
-                    .HasForeignKey(e => e.staffId);
+                entity.HasMany(e => e.StudyCourseHistories)
+                    .WithOne(e => e.ByStaff)
+                    .HasForeignKey(e => e.StaffId);
 
-                entity.HasMany(e => e.comments)
-                    .WithOne(e => e.staff)
-                    .HasForeignKey(e => e.staffId);
+                entity.HasMany(e => e.Comments)
+                    .WithOne(e => e.Staff)
+                    .HasForeignKey(e => e.StaffId);
             });
 
             modelBuilder.Entity<StaffNotification>(entity =>
             {
                 entity.ToTable("StaffNotification");
 
-                entity.HasOne(e => e.staff)
-                    .WithMany(e => e.staffNotifications)
-                    .HasForeignKey(e => e.staffId);
+                entity.HasOne(e => e.Staff)
+                    .WithMany(e => e.StaffNotifications)
+                    .HasForeignKey(e => e.StaffId);
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.staffNotifications)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.StaffNotifications)
+                    .HasForeignKey(e => e.StudyCourseId);
             });
 
             modelBuilder.Entity<Student>(entity =>
             {
                 entity.ToTable("Student");
 
-                entity.HasOne(e => e.parent)
-                    .WithOne(e => e.student)
-                    .HasForeignKey<Parent>(e => e.studentId);
+                entity.HasOne(e => e.Parent)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey<Parent>(e => e.StudentId);
 
-                entity.HasOne(e => e.address)
-                    .WithOne(e => e.student)
-                    .HasForeignKey<Address>(e => e.studentId);
+                entity.HasOne(e => e.Address)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey<Address>(e => e.StudentId);
 
-                entity.HasOne(e => e.attendance)
-                    .WithOne(e => e.student)
-                    .HasForeignKey<StudentAttendance>(e => e.studentId);
+                entity.HasOne(e => e.Attendance)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey<StudentAttendance>(e => e.StudentId);
 
-                entity.HasMany(e => e.additionalFiles)
-                    .WithOne(e => e.student)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasMany(e => e.AdditionalFiles)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasMany(e => e.registrationRequestMembers)
-                    .WithOne(e => e.student)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasMany(e => e.RegistrationRequestMembers)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasMany(e => e.courseMembers)
-                    .WithOne(e => e.student)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasMany(e => e.CourseMembers)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasMany(e => e.cancellationRequests)
-                    .WithOne(e => e.student)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasMany(e => e.CancellationRequests)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasMany(e => e.studentNotifications)
-                    .WithOne(e => e.student)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasMany(e => e.StudentNotifications)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
             });
 
             modelBuilder.Entity<StudentAddingRequest>(entity =>
             {
                 entity.ToTable("StudentAddingRequest");
 
-                entity.HasOne(e => e.registrationRequest)
-                    .WithMany(e => e.studentAddingRequest)
-                    .HasForeignKey(e => e.registrationRequestId);
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.StudentAddingRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.studentAddingRequests)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.StudentAddingRequests)
+                    .HasForeignKey(e => e.StudyCourseId);
             });
 
             modelBuilder.Entity<StudentAdditionalFile>(entity =>
             {
                 entity.ToTable("StudentAdditionalFile");
 
-                entity.HasOne(e => e.student)
-                    .WithMany(e => e.additionalFiles)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithMany(e => e.AdditionalFiles)
+                    .HasForeignKey(e => e.StudentId);
             });
 
             modelBuilder.Entity<StudentAttendance>(entity =>
             {
                 entity.ToTable("StudentAttendance");
 
-                entity.HasOne(e => e.student)
-                    .WithOne(e => e.attendance)
-                    .HasForeignKey<StudentAttendance>(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithOne(e => e.Attendance)
+                    .HasForeignKey<StudentAttendance>(e => e.StudentId);
 
-                entity.HasOne(e => e.studyClass)
-                    .WithMany(e => e.attendances)
-                    .HasForeignKey(e => e.studyClassId);
+                entity.HasOne(e => e.StudyClass)
+                    .WithMany(e => e.Attendances)
+                    .HasForeignKey(e => e.StudyClassId);
             });
 
             modelBuilder.Entity<StudentNotification>(entity =>
             {
                 entity.ToTable("StudentNotification");
 
-                entity.HasOne(e => e.student)
-                    .WithMany(e => e.studentNotifications)
-                    .HasForeignKey(e => e.studentId);
+                entity.HasOne(e => e.Student)
+                    .WithMany(e => e.StudentNotifications)
+                    .HasForeignKey(e => e.StudentId);
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.studentNotifications)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.StudentNotifications)
+                    .HasForeignKey(e => e.StudyCourseId);
             });
 
             modelBuilder.Entity<StudentReport>(entity =>
             {
                 entity.ToTable("StudentReport");
 
-                entity.HasOne(e => e.courseMember)
-                    .WithMany(e => e.studentReports)
-                    .HasForeignKey(e => e.courseMemberId);
+                entity.HasOne(e => e.CourseMember)
+                    .WithMany(e => e.StudentReports)
+                    .HasForeignKey(e => e.CourseMemberId);
 
-                entity.HasOne(e => e.teacher)
-                    .WithMany(e => e.studentReports)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.StudentReports)
+                    .HasForeignKey(e => e.TeacherId);
             });
 
             modelBuilder.Entity<StudyClass>(entity =>
             {
                 entity.ToTable("StudyClass");
 
-                entity.HasOne(e => e.schedule)
-                    .WithOne(e => e.studyClass)
-                    .HasForeignKey<StudyClass>(e => e.scheduleId);
+                entity.HasOne(e => e.Schedule)
+                    .WithOne(e => e.StudyClass)
+                    .HasForeignKey<StudyClass>(e => e.ScheduleId);
 
-                entity.HasOne(e => e.studySubject)
-                    .WithMany(e => e.studyClasses)
-                    .HasForeignKey(e => e.studySubjectId);
+                entity.HasOne(e => e.StudySubject)
+                    .WithMany(e => e.StudyClasses)
+                    .HasForeignKey(e => e.StudySubjectId);
 
-                entity.HasOne(e => e.teacher)
-                    .WithMany(e => e.studyClasses)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.StudyClasses)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasMany(e => e.attendances)
-                    .WithOne(e => e.studyClass)
-                    .HasForeignKey(e => e.studyClassId);
+                entity.HasMany(e => e.Attendances)
+                    .WithOne(e => e.StudyClass)
+                    .HasForeignKey(e => e.StudyClassId);
 
-                entity.HasMany(e => e.cancellationRequests)
-                    .WithOne(e => e.studyClass)
-                    .HasForeignKey(e => e.studyClassId);
+                entity.HasMany(e => e.CancellationRequests)
+                    .WithOne(e => e.StudyClass)
+                    .HasForeignKey(e => e.StudyClassId);
             });
 
             modelBuilder.Entity<StudyCourse>(entity =>
             {
                 entity.ToTable("StudyCourse");
 
-                entity.HasOne(e => e.course)
-                    .WithMany(e => e.studyCourses)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasOne(e => e.Course)
+                    .WithMany(e => e.StudyCourses)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasMany(e => e.studentAddingRequests)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.StudentAddingRequests)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.studySubjects)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.StudySubjects)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.preferredDays)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.PreferredDays)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.studyCourseHistories)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.StudyCourseHistories)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.studentNotifications)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.StudentNotifications)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.teacherNotifications)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.TeacherNotifications)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.staffNotifications)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.StaffNotifications)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.cancellationRequests)
-                    .WithOne(e => e.studyCourse)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasMany(e => e.CancellationRequests)
+                    .WithOne(e => e.StudyCourse)
+                    .HasForeignKey(e => e.StudyCourseId);
             });
 
             modelBuilder.Entity<StudyCourseHistory>(entity =>
             {
                 entity.ToTable("StudyCourseHistory");
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.studyCourseHistories)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.StudyCourseHistories)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasOne(e => e.byStaff)
-                    .WithMany(e => e.studyCourseHistories)
-                    .HasForeignKey(e => e.staffId);
+                entity.HasOne(e => e.ByStaff)
+                    .WithMany(e => e.StudyCourseHistories)
+                    .HasForeignKey(e => e.StaffId);
             });
 
             modelBuilder.Entity<StudySubject>(entity =>
             {
                 entity.ToTable("StudySubject");
 
-                entity.HasOne(e => e.subject)
-                    .WithMany(e => e.studySubjects)
-                    .HasForeignKey(e => e.subjectId);
+                entity.HasOne(e => e.Subject)
+                    .WithMany(e => e.StudySubjects)
+                    .HasForeignKey(e => e.SubjectId);
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.studySubjects)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.StudySubjects)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasMany(e => e.courseMembers)
-                    .WithOne(e => e.studySubject)
-                    .HasForeignKey(e => e.studySubjectId);
+                entity.HasMany(e => e.CourseMembers)
+                    .WithOne(e => e.StudySubject)
+                    .HasForeignKey(e => e.StudySubjectId);
 
-                entity.HasMany(e => e.studyClasses)
-                    .WithOne(e => e.studySubject)
-                    .HasForeignKey(e => e.studySubjectId);
+                entity.HasMany(e => e.StudyClasses)
+                    .WithOne(e => e.StudySubject)
+                    .HasForeignKey(e => e.StudySubjectId);
             });
 
             modelBuilder.Entity<Subject>(entity =>
             {
                 entity.ToTable("Subject");
 
-                entity.HasOne(e => e.course)
-                    .WithMany(e => e.subjects)
-                    .HasForeignKey(e => e.courseId);
+                entity.HasOne(e => e.Course)
+                    .WithMany(e => e.Subjects)
+                    .HasForeignKey(e => e.CourseId);
 
-                entity.HasMany(e => e.newCourseSubjectRequests)
-                    .WithOne(e => e.subject)
-                    .HasForeignKey(e => e.subjectId);
+                entity.HasMany(e => e.NewCourseSubjectRequests)
+                    .WithOne(e => e.Subject)
+                    .HasForeignKey(e => e.SubjectId);
 
-                entity.HasMany(e => e.studySubjects)
-                    .WithOne(e => e.subject)
-                    .HasForeignKey(e => e.subjectId);
+                entity.HasMany(e => e.StudySubjects)
+                    .WithOne(e => e.Subject)
+                    .HasForeignKey(e => e.SubjectId);
             });
 
             modelBuilder.Entity<Teacher>(entity =>
             {
                 entity.ToTable("Teacher");
 
-                entity.HasMany(e => e.workTimes)
-                    .WithOne(e => e.teacher)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasMany(e => e.WorkTimes)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasMany(e => e.studyClasses)
-                    .WithOne(e => e.teacher)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasMany(e => e.StudyClasses)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasMany(e => e.appointmentMembers)
-                    .WithOne(e => e.teacher)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasMany(e => e.AppointmentMembers)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasMany(e => e.studentReports)
-                    .WithOne(e => e.teacher)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasMany(e => e.StudentReports)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasMany(e => e.teacherNotifications)
-                    .WithOne(e => e.teacher)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasMany(e => e.TeacherNotifications)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasMany(e => e.cancellationRequests)
-                    .WithOne(e => e.teacher)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasMany(e => e.CancellationRequests)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
             });
 
             modelBuilder.Entity<TeacherNotification>(entity =>
             {
                 entity.ToTable("TeacherNotification");
 
-                entity.HasOne(e => e.teacher)
-                    .WithMany(e => e.teacherNotifications)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.TeacherNotifications)
+                    .HasForeignKey(e => e.TeacherId);
 
-                entity.HasOne(e => e.studyCourse)
-                    .WithMany(e => e.teacherNotifications)
-                    .HasForeignKey(e => e.studyCourseId);
+                entity.HasOne(e => e.StudyCourse)
+                    .WithMany(e => e.TeacherNotifications)
+                    .HasForeignKey(e => e.StudyCourseId);
 
-                entity.HasOne(e => e.appointment)
-                    .WithMany(e => e.teacherNotifications)
-                    .HasForeignKey(e => e.appointmentId);
+                entity.HasOne(e => e.Appointment)
+                    .WithMany(e => e.TeacherNotifications)
+                    .HasForeignKey(e => e.AppointmentId);
             });
 
             modelBuilder.Entity<WorkTime>(entity =>
             {
                 entity.ToTable("WorkTime");
 
-                entity.HasOne(e => e.teacher)
-                    .WithMany(e => e.workTimes)
-                    .HasForeignKey(e => e.teacherId);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.WorkTimes)
+                    .HasForeignKey(e => e.TeacherId);
             });
         }
     }
