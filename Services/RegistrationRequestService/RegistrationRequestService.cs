@@ -171,6 +171,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
+            response.StatusCode = 200;
             return response;
         }
 
@@ -221,6 +222,8 @@ namespace griffined_api.Services.RegistrationRequestService
             request.Type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
+            
+            response.StatusCode = 200;
             return response;
         }
 
@@ -228,8 +231,8 @@ namespace griffined_api.Services.RegistrationRequestService
         {
             var response = new ServiceResponse<List<RegistrationRequestResponseDto>>();
             var registrationRequests = await _context.RegistrationRequests
-                    .Include(r => r.registrationRequestMembers)
-                        .ThenInclude(m => m.student)
+                    .Include(r => r.RegistrationRequestMembers)
+                        .ThenInclude(m => m.Student)
                     .ToListAsync();
 
             var data = new List<RegistrationRequestResponseDto>();
@@ -239,60 +242,65 @@ namespace griffined_api.Services.RegistrationRequestService
                 var staffs = await _context.Staff.ToListAsync();
                 var requestDto = new RegistrationRequestResponseDto();
 
-                foreach (var student in registrationRequest.registrationRequestMembers)
+                foreach (var student in registrationRequest.RegistrationRequestMembers)
                 {
                     var studentDto = new StudentNameResponseDto();
-                    studentDto.studentId = student.student.id;
-                    studentDto.studentCode = student.student.studentId;
-                    studentDto.fullName = student.student.fullName;
-                    studentDto.nickname = student.student.nickname;
-                    requestDto.members.Add(studentDto);
+                    studentDto.StudentId = student.Student.Id;
+                    studentDto.StudentCode = student.Student.StudentCode;
+                    studentDto.FullName = student.Student.FullName;
+                    studentDto.Nickname = student.Student.Nickname;
+                    requestDto.Members.Add(studentDto);
                 }
 
-                requestDto.requestId = registrationRequest.id;
-                requestDto.type = registrationRequest.type;
-                requestDto.registrationStatus = registrationRequest.registrationStatus;
-                requestDto.paymentType = registrationRequest.paymentType;
-                requestDto.paymentStatus = registrationRequest.paymentStatus;
-                requestDto.createdDate = registrationRequest.createdDate;
-                requestDto.paymentError = registrationRequest.paymentError;
-                requestDto.scheduleError = registrationRequest.scheduleError;
-                requestDto.newCourseDetailError = registrationRequest.newCourseDetailError;
-                requestDto.hasSchedule = registrationRequest.hasSchedule;
+                requestDto.RequestId = registrationRequest.Id;
+                requestDto.Type = registrationRequest.Type;
+                requestDto.RegistrationStatus = registrationRequest.RegistrationStatus;
+                requestDto.PaymentType = registrationRequest.PaymentType;
+                requestDto.PaymentStatus = registrationRequest.PaymentStatus;
+                requestDto.CreatedDate = registrationRequest.DateCreated;
+                requestDto.PaymentError = registrationRequest.PaymentError;
+                requestDto.ScheduleError = registrationRequest.ScheduleError;
+                requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
+                requestDto.HasSchedule = registrationRequest.HasSchedule;
 
-                var ec = staffs.FirstOrDefault(s => s.id == registrationRequest.byECId);
-                var ea = staffs.FirstOrDefault(s => s.id == registrationRequest.byEAId);
-                var oa = staffs.FirstOrDefault(s => s.id == registrationRequest.byOAId);
-                var cancelledBy = staffs.FirstOrDefault(s => s.id == registrationRequest.cancelledBy);
+                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByECId);
+                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByEAId);
+                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByOAId);
+                var cancelledBy = staffs.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
                 if (ec != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = ec.nickname;
-                    requestDto.byEC = staff;
+                    staff.nickname = ec.Nickname;
+                    staff.fullName = ec.FullName;
+                    requestDto.ByEC = staff;
                 }
                 if (ea != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = ea.nickname;
-                    requestDto.byEA = staff;
+                    staff.nickname = ea.Nickname;
+                    staff.fullName = ea.FullName;
+                    requestDto.ByEA = staff;
                 }
                 if (oa != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = oa.nickname;
-                    requestDto.byEA = staff;
+                    staff.nickname = oa.Nickname;
+                    staff.fullName = oa.FullName;
+                    requestDto.ByEA = staff;
                 }
                 if (cancelledBy != null)
                 {
                     var staff = new StaffNameOnlyResponseDto();
-                    staff.nickname = cancelledBy.nickname;
-                    requestDto.byEA = staff;
+                    staff.nickname = cancelledBy.Nickname;
+                    staff.fullName = cancelledBy.FullName;
+                    requestDto.ByEA = staff;
                 }
 
                 data.Add(requestDto);
 
             }
+            response.StatusCode = 200;
             response.Data = data;
             return response;
         }

@@ -7,21 +7,21 @@ namespace griffined_api.Dtos.RegistrationRequestDto
 {
     public class RegistrationRequestResponseDto
     {
-        public int requestId { get; set; }
-        public List<StudentNameResponseDto> members { get; set; } = new List<StudentNameResponseDto>();
-        public string section { get; set; } = string.Empty;
-        public string type { get; set; } = string.Empty;
-        public RegistrationStatus registrationStatus { get; set; }
-        public PaymentType? paymentType { get; set; }
-        public PaymentStatus? paymentStatus { get; set; }
-        public DateTime createdDate { get; set; }
-        public bool paymentError { get; set; }
-        public bool scheduleError { get; set; }
-        public bool newCourseDetailError { get; set; }
-        public bool hasSchedule { get; set; }
-        public StaffNameOnlyResponseDto? byEC { get; set; }
-        public StaffNameOnlyResponseDto? byEA { get; set; }
-        public StaffNameOnlyResponseDto? byOA { get; set; }
-        public StaffNameOnlyResponseDto? cancelledBy { get; set; }
+        public int RequestId { get; set; }
+        public List<StudentNameResponseDto> Members { get; set; } = new List<StudentNameResponseDto>();
+        public string Section { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public RegistrationStatus RegistrationStatus { get; set; }
+        public PaymentType? PaymentType { get; set; }
+        public PaymentStatus? PaymentStatus { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public bool PaymentError { get; set; }
+        public bool ScheduleError { get; set; }
+        public bool NewCourseDetailError { get; set; }
+        public bool HasSchedule { get; set; }
+        public StaffNameOnlyResponseDto? ByEC { get; set; }
+        public StaffNameOnlyResponseDto? ByEA { get; set; }
+        public StaffNameOnlyResponseDto? ByOA { get; set; }
+        public StaffNameOnlyResponseDto? CancelledBy { get; set; }
     }
 }
