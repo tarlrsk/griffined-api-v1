@@ -47,6 +47,7 @@ definitions:
             FIREBASE_API_KEY="$PROD_FIREBASE_API_KEY"
             FIREBASE_PROJECT_ID="$PROD_FIREBASE_PROJECT_ID"
             GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+            FIREBASE_BUCKET="$PROD_FIREBASE_BUCKET"
             EOF
 
         artifacts:
@@ -66,6 +67,7 @@ definitions:
             FIREBASE_API_KEY="$STG_FIREBASE_API_KEY"
             FIREBASE_PROJECT_ID="$STG_FIREBASE_PROJECT_ID"
             GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+            FIREBASE_BUCKET="$STG_FIREBASE_BUCKET"
             EOF
         artifacts:
           - 'firebase-config.json'
