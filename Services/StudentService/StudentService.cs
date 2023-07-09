@@ -85,7 +85,7 @@ namespace griffined_api.Services.StudentService
                     {
                         var storageObject = await _storageClient.UploadObjectAsync(
                             FIREBASE_BUCKET,
-                            $"students/{studentCode}/{fileName}",
+                            $"students/{studentCode}/documents/{fileName}",
                             null,
                             stream
                         );
