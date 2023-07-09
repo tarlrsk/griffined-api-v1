@@ -25,6 +25,14 @@ definitions:
           - zip -r main.zip .
         artifacts:
           - 'bin/Publish/main.zip'
+    - step: &updateDB
+        name: Update Database
+        trigger: manual
+        caches:
+          - dotnetcore
+        script:
+          - dotnet tool install --global dotnet-ef
+          - dotnet ef database update
     - step: &prod_env
         name: Add Firebase Credential & Environment File
         script:
@@ -76,6 +84,7 @@ pipelines:
     '{main}':
       - step: *prod_env
       - step: *build
+      - step: *updateDB
       - step:
           name: Deploy Azure App Service Production
           deployment: production
@@ -93,6 +102,7 @@ pipelines:
     '{develop}':
       - step: *stg_env
       - step: *build
+      - step: *updateDB
       - step:
           name: Deploy Azure App Service Staging
           deployment: staging
