@@ -17,6 +17,8 @@ namespace griffined_api.Models
         public int TotalHours { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+
+        public virtual StudyCourseType StudyCourseType { get; set; }
         public virtual Method Method { get; set; }
 
         public virtual ICollection<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
