@@ -11,10 +11,23 @@ namespace griffined_api.Models
     {
         public int Id { get; set; }
         public int? CourseId { get; set; }
+        public int? LevelId { get; set; }
+
+        public string Section { get; set; } = string.Empty;
+
+        public int TotalHour { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+
+        public virtual StudyCourseType StudyCourseType { get; set; }
+        public virtual Method Method { get; set; }
         public virtual CourseStatus Status { get; set; }
 
         [ForeignKey(nameof(CourseId))]
         public virtual Course Course { get; set; } = new Course();
+
+        [ForeignKey(nameof(LevelId))]
+        public virtual Level Level { get; set; } = new Level();
 
         public virtual ICollection<StudentAddingRequest> StudentAddingRequests { get; set; } = new List<StudentAddingRequest>();
         public virtual ICollection<StudySubject> StudySubjects { get; set; } = new List<StudySubject>();

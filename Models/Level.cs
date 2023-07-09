@@ -15,6 +15,7 @@ namespace griffined_api.Models
         public string level { get; set; } = string.Empty;
 
         public virtual ICollection<NewCourseRequest> NewCourseRequests { get; set; } = new List<NewCourseRequest>();
+        public virtual ICollection<StudyCourse> StudyCourses { get; set; } = new List<StudyCourse>();
 
         [ForeignKey(nameof(CourseId))]
         public virtual Course Course { get; set; } = new Course();
