@@ -32,7 +32,8 @@ definitions:
           - dotnetcore
         script:
           - dotnet tool install --global dotnet-ef
-          - dotnet ef database update
+          - export PATH="$PATH:/root/.dotnet/tools"
+          - dotnet-ef database update
     - step: &prod_env
         name: Add Firebase Credential & Environment File
         script:
