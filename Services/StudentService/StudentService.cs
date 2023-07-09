@@ -79,7 +79,7 @@ namespace griffined_api.Services.StudentService
                     };
 
                     var fileEntity = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
-                    var fileName = Path.GetFileName(fileRequestDto.FileData.FileName);
+                    var fileName = file.FileName;
 
                     using (var stream = fileRequestDto.FileData.OpenReadStream())
                     {
@@ -90,6 +90,7 @@ namespace griffined_api.Services.StudentService
                             stream
                         );
 
+                        fileEntity.FileName = fileName;
                         fileEntity.URL = storageObject.MediaLink;
                     }
                     _student.AdditionalFiles.Add(fileEntity);
