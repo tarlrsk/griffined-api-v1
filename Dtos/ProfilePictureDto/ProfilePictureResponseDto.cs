@@ -1,0 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace griffined_api.Dtos.ProfilePictureDto
+{
+    public class ProfilePictureResponseDto
+    {
+        [Required]
+        public string FileName { get; set; } = string.Empty;
+
+        [Required]
+        public string URL { get; set; } = string.Empty;
+    }
+}

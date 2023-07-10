@@ -16,7 +16,7 @@ namespace griffined_api
             CreateMap<UpdateStudentRequestDto, Student>();
 
             // Parent
-            CreateMap<Parent, ParentDtoResponse>();
+            CreateMap<Parent, ParentResponseDto>();
             CreateMap<ParentRequestDto, Parent>();
 
             // Address
@@ -43,6 +43,10 @@ namespace griffined_api
             CreateMap<StudentAdditionalFile, StudentAdditionalFilesResponseDto>();
             CreateMap<AddStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
             CreateMap<UpdateStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
+
+            // Profile Picture
+            CreateMap<ProfilePicture, ProfilePictureResponseDto>();
+            CreateMap<AddProfilePictureRequestDto, ProfilePicture>();
         }
     }
 }

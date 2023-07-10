@@ -20,7 +20,6 @@ namespace griffined_api.Models
         public string LastName { get; set; } = string.Empty;
         public string FullName { get { return FirstName + " " + LastName; } }
         public string Nickname { get; set; } = string.Empty;
-        public string? ProfilePicture { get; set; }
         private DateTime _dob;
         public string DOB { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
         public int Age
@@ -50,6 +49,7 @@ namespace griffined_api.Models
         public int? LastUpdatedBy { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
+        public virtual ProfilePicture? ProfilePicture { get; set; }
         public virtual Parent? Parent { get; set; }
         public virtual Address? Address { get; set; }
         public virtual StudentAttendance? Attendance { get; set; }

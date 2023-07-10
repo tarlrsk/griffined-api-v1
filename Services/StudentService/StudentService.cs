@@ -26,7 +26,7 @@ namespace griffined_api.Services.StudentService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, ICollection<IFormFile> files)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -66,6 +66,33 @@ namespace griffined_api.Services.StudentService
             string studentCode = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.Id % 10000).ToString("0000");
 
             _student.StudentCode = studentCode;
+
+            if (profilePicture != null)
+            {
+                _student.ProfilePicture = new ProfilePicture();
+
+                var pictureRequestDto = new AddProfilePictureRequestDto
+                {
+                    PictureData = profilePicture
+                };
+
+                var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
+                var fileName = profilePicture.FileName;
+
+                using (var stream = pictureRequestDto.PictureData.OpenReadStream())
+                {
+                    var storageObject = await _storageClient.UploadObjectAsync(
+                        FIREBASE_BUCKET,
+                        $"students/{studentCode}/profile/{fileName}",
+                        null,
+                        stream
+                    );
+
+                    pictureEntity.FileName = fileName;
+                    pictureEntity.URL = storageObject.MediaLink;
+                }
+                _student.ProfilePicture = pictureEntity;
+            }
 
             if (files != null && files.Count() > 0)
             {
@@ -218,7 +245,6 @@ namespace griffined_api.Services.StudentService
             student.FirstName = updatedStudent.FirstName;
             student.LastName = updatedStudent.LastName;
             student.Nickname = updatedStudent.Nickname;
-            student.ProfilePicture = updatedStudent.ProfilePicture;
             student.Phone = updatedStudent.Phone;
             student.Line = updatedStudent.Line;
             student.Email = updatedStudent.Email;
