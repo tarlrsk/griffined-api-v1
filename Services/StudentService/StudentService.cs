@@ -13,6 +13,7 @@ namespace griffined_api.Services.StudentService
     {
         private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
         private string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
+        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -34,9 +35,7 @@ namespace griffined_api.Services.StudentService
                         DateTime.ParseExact(newStudent.DOB, "dd-MMMM-yyyy HH:mm:ss", null).ToString("dd/MM/yyyy");
 
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
-
             FirebaseAuthLink firebaseAuthLink;
-
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStudent.Email, password);
@@ -125,6 +124,7 @@ namespace griffined_api.Services.StudentService
             }
 
             await _context.SaveChangesAsync();
+            await addStudentFireStoreAsync(_student);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(_student);
@@ -397,6 +397,20 @@ namespace griffined_api.Services.StudentService
             response.StatusCode = (int)HttpStatusCode.OK;
 
             return response;
+        }
+
+        private async Task addStudentFireStoreAsync(Student student)
+        {
+            FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
+            DocumentReference docRef = db.Collection("users").Document(student.FirebaseId);
+            Dictionary<string, object> studentDoc = new Dictionary<string, object>()
+                {
+                    { "displayName", student.FullName },
+                    { "email", student.Email },
+                    { "id", student.StudentCode },
+                    { "uid", student.FirebaseId }
+                };
+            await docRef.SetAsync(studentDoc);
         }
     }
 }

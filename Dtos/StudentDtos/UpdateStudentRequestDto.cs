@@ -36,8 +36,8 @@ namespace griffined_api.Dtos.StudentDtos
         }
         [Required]
         public string Phone { get; set; } = string.Empty;
-        public string? Line { get; set; }
-        public string? Email { get; set; }
+        public string Line { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string? School { get; set; }
         public string? CountryOfSchool { get; set; }
         public string? LevelOfStudy { get; set; }
