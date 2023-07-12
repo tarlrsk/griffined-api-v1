@@ -16,7 +16,6 @@ namespace griffined_api.Dtos.StudentDtos
         public string LastName { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Nickname { get; set; } = string.Empty;
-        public string? ProfilePicture { get; set; }
         private DateTime _dob;
         public string DOB
         {
@@ -47,7 +46,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? HealthInformation { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public ParentDtoResponse? Parent { get; set; }
+        public ProfilePictureResponseDto? ProfilePicture { get; set; }
+        public ParentResponseDto? Parent { get; set; }
         public AddressResponseDto? Address { get; set; }
         public ICollection<StudentAdditionalFilesResponseDto>? AdditionalFiles { get; set; }
     }

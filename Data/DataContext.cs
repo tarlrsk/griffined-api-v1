@@ -28,6 +28,7 @@ namespace griffined_api.Data
         public virtual DbSet<Parent> Parents { get; set; }
         public virtual DbSet<PreferredDay> PreferredDays { get; set; }
         public virtual DbSet<PreferredDayRequest> PreferredDayRequests { get; set; }
+        public virtual DbSet<ProfilePicture> ProfilePictures { get; set; }
         public virtual DbSet<RegistrationRequest> RegistrationRequests { get; set; }
         public virtual DbSet<RegistrationRequestMember> RegistrationRequestMembers { get; set; }
         public virtual DbSet<Schedule> Schedules { get; set; }
@@ -266,6 +267,15 @@ namespace griffined_api.Data
                     .HasForeignKey(e => e.RegistrationRequestId);
             });
 
+            modelBuilder.Entity<ProfilePicture>(entity =>
+            {
+                entity.ToTable("ProfilePicture");
+
+                entity.HasOne(e => e.Student)
+                    .WithOne(e => e.ProfilePicture)
+                    .HasForeignKey<ProfilePicture>(e => e.StudentId);
+            });
+
             modelBuilder.Entity<RegistrationRequest>(entity =>
             {
                 entity.ToTable("RegistrationRequest");
@@ -354,6 +364,10 @@ namespace griffined_api.Data
             modelBuilder.Entity<Student>(entity =>
             {
                 entity.ToTable("Student");
+
+                entity.HasOne(e => e.ProfilePicture)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey<ProfilePicture>(e => e.StudentId);
 
                 entity.HasOne(e => e.Parent)
                     .WithOne(e => e.Student)
