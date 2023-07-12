@@ -78,50 +78,50 @@ namespace griffined_api.integrations.Firebase
             string customRole = string.Empty;
             string azure_id = string.Empty;
 
-            var master = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "master");
+            var master = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "master");
             if (master != null)
             {
-                azure_id = master.id.ToString();
+                azure_id = master.Id.ToString();
                 customRole = "master";
             }
             else
             {
-                var oa = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Office Admin");
+                var oa = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Office Admin");
                 if (oa != null)
                 {
-                    azure_id = oa.id.ToString();
+                    azure_id = oa.Id.ToString();
                     customRole = "oa";
                 }
                 else
                 {
-                    var ea = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Admin");
+                    var ea = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Education Admin");
                     if (ea != null)
                     {
-                        azure_id = ea.id.ToString();
+                        azure_id = ea.Id.ToString();
                         customRole = "ea";
                     }
                     else
                     {
-                        var ep = await _context.Staff.FirstOrDefaultAsync(u => u.firebaseId == firebaseId && u.role == "Education Planner");
+                        var ep = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Education Planner");
                         if (ep != null)
                         {
-                            azure_id = ep.id.ToString();
+                            azure_id = ep.Id.ToString();
                             customRole = "ep";
                         }
                         else
                         {
-                            var teacher = await _context.Teachers.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
+                            var teacher = await _context.Teachers.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
                             if (teacher != null)
                             {
-                                azure_id = teacher.id.ToString();
+                                azure_id = teacher.Id.ToString();
                                 customRole = "teacher";
                             }
                             else
                             {
-                                var student = await _context.Students.FirstOrDefaultAsync(u => u.firebaseId == firebaseId);
+                                var student = await _context.Students.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
                                 if (student != null)
                                 {
-                                    azure_id = student.id.ToString();
+                                    azure_id = student.Id.ToString();
                                     customRole = "student";
                                 }
                                 else

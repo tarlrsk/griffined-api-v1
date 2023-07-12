@@ -9,20 +9,20 @@ namespace griffined_api.Models
 {
     public class Schedule
     {
-        public int id { get; set; }
-        public int? appointmentId { get; set; }
+        public int Id { get; set; }
+        public int? AppointmentId { get; set; }
 
         private DateTime _date;
-        public string date { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
         private TimeOnly _fromTime;
-        public string fromTime { get; set; } = string.Empty;
+        public string FromTime { get; set; } = string.Empty;
         private TimeOnly _toTime;
-        public string toTime { get; set; } = string.Empty;
+        public string ToTime { get; set; } = string.Empty;
 
-        public virtual ScheduleType type { get; set; }
-        public virtual StudyClass studyClass { get; set; } = new StudyClass();
+        public virtual ScheduleType Type { get; set; }
+        public virtual StudyClass StudyClass { get; set; } = new StudyClass();
 
-        [ForeignKey(nameof(appointmentId))]
-        public virtual Appointment appointment { get; set; } = new Appointment();
+        [ForeignKey(nameof(AppointmentId))]
+        public virtual Appointment Appointment { get; set; } = new Appointment();
     }
 }

@@ -9,17 +9,17 @@ namespace griffined_api.Models
 {
     public class StudySubject
     {
-        public int id { get; set; }
-        public int? subjectId { get; set; }
-        public int? studyCourseId { get; set; }
+        public int Id { get; set; }
+        public int? SubjectId { get; set; }
+        public int? StudyCourseId { get; set; }
 
-        [ForeignKey(nameof(subjectId))]
-        public virtual Subject subject { get; set; } = new Subject();
+        [ForeignKey(nameof(SubjectId))]
+        public virtual Subject Subject { get; set; } = new Subject();
 
-        [ForeignKey(nameof(studyCourseId))]
-        public virtual StudyCourse studyCourse { get; set; } = new StudyCourse();
+        [ForeignKey(nameof(StudyCourseId))]
+        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
 
-        public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
-        public virtual ICollection<StudyClass> studyClasses { get; set; } = new List<StudyClass>();
+        public virtual ICollection<CourseMember> CourseMembers { get; set; } = new List<CourseMember>();
+        public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
     }
 }

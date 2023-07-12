@@ -204,7 +204,7 @@ namespace griffined_api.Services.CheckAvailableService
             var endTime = TimeOnly.Parse("20:00").AddHours(-(hour));
             while (startTime <= endTime)
             {
-                fixPeriod.Add(new AvailableTimeResponseDto { fromTime = startTime.ToString(), toTime = (startTime.AddHours(hour)).ToString() });
+                fixPeriod.Add(new AvailableTimeResponseDto { FromTime = startTime.ToString(), ToTime = (startTime.AddHours(hour)).ToString() });
                 startTime = startTime.AddHours(1);
             }
             return fixPeriod;

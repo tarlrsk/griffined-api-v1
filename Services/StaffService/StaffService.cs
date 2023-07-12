@@ -26,12 +26,12 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            string password = "hog" + newStaff.phone;
+            string password = "hog" + newStaff.Phone;
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
             try
             {
-                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.email, password);
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.Email, password);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace griffined_api.Services.StaffService
             string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
 
             var staff = _mapper.Map<Staff>(newStaff);
-            staff.firebaseId = firebaseId;
+            staff.FirebaseId = firebaseId;
             staff.CreatedBy = id;
             staff.LastUpdatedBy = id;
             _context.Staff.Add(staff);
@@ -63,7 +63,7 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<List<StaffResponseDto>>();
 
-            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id);
             if (dbStaff is null)
                 throw new NotFoundException($"Staff with ID '{id}' not found.");
 
@@ -80,18 +80,18 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<StaffResponseDto>();
 
-            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == id);
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id);
 
             if (staff is null)
                 throw new NotFoundException($"Staff with ID '{id}' not found.");
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                Uid = staff.firebaseId,
+                Uid = staff.FirebaseId,
                 Disabled = true
             });
 
-            staff.isActive = false;
+            staff.IsActive = false;
 
             await _context.SaveChangesAsync();
 
@@ -102,18 +102,18 @@ namespace griffined_api.Services.StaffService
         public async Task<ServiceResponse<StaffResponseDto>> EnableStaff(int id)
         {
             var response = new ServiceResponse<StaffResponseDto>();
-            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == id);
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id);
 
             if (staff is null)
                 throw new NotFoundException($"Staff with ID '{id}' not found.");
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                Uid = staff.firebaseId,
+                Uid = staff.FirebaseId,
                 Disabled = false
             });
 
-            staff.isActive = true;
+            staff.IsActive = true;
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -139,7 +139,7 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<StaffResponseDto>();
 
-            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.id == id);
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id);
 
             if (dbStaff is null)
                 throw new NotFoundException($"Staff with ID '{id}' not found.");
@@ -155,26 +155,26 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.id == updatedStaff.id);
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == updatedStaff.Id);
             if (staff is null)
-                throw new NotFoundException($"Staff with ID '{updatedStaff.id}' not found.");
+                throw new NotFoundException($"Staff with ID '{updatedStaff.Id}' not found.");
 
             _mapper.Map(updatedStaff, staff);
 
-            staff.fName = updatedStaff.fName;
-            staff.lName = updatedStaff.lName;
-            staff.nickname = updatedStaff.nickname;
-            staff.phone = updatedStaff.phone;
-            staff.line = updatedStaff.line;
-            staff.email = updatedStaff.email;
+            staff.FirstName = updatedStaff.FirstName;
+            staff.LastName = updatedStaff.LastName;
+            staff.Nickname = updatedStaff.Nickname;
+            staff.Phone = updatedStaff.Phone;
+            staff.Line = updatedStaff.Line;
+            staff.Email = updatedStaff.Email;
             staff.LastUpdatedBy = id;
 
             await _context.SaveChangesAsync();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                Uid = staff.firebaseId,
-                Email = updatedStaff.email
+                Uid = staff.FirebaseId,
+                Email = updatedStaff.Email
             });
 
             await addStaffFireStoreAsync(staff);
@@ -190,18 +190,16 @@ namespace griffined_api.Services.StaffService
         private async Task addStaffFireStoreAsync(Staff staff)
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
-            DocumentReference docRef = db.Collection("users").Document(staff.firebaseId);
+            DocumentReference docRef = db.Collection("users").Document(staff.FirebaseId);
             Dictionary<string, object> staffDoc = new Dictionary<string, object>()
                 {
-                    { "displayName", staff.fullName },
-                    { "email", staff.email },
-                    { "id", staff.id },
-                    { "role", staff.role },
-                    { "uid", staff.firebaseId}
-
+                    { "displayName", staff.FullName },
+                    { "email", staff.Email },
+                    { "id", staff.Id },
+                    { "role", staff.Role },
+                    { "uid", staff.FirebaseId}
                 };
             await docRef.SetAsync(staffDoc);
         }
-
     }
 }

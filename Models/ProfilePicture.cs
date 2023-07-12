@@ -7,18 +7,15 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class StudentAttendance
+    public class ProfilePicture
     {
         public int Id { get; set; }
         public int? StudentId { get; set; }
-        public int? StudyClassId { get; set; }
 
-        public virtual Attendance Attendance { get; set; }
+        public string FileName { get; set; } = String.Empty;
+        public string URL { get; set; } = String.Empty;
 
         [ForeignKey(nameof(StudentId))]
-        public virtual Student Student { get; set; } = new Student();
-
-        [ForeignKey(nameof(StudyClassId))]
-        public virtual StudyClass StudyClass { get; set; } = new StudyClass();
+        public Student Student { get; set; } = new Student();
     }
 }

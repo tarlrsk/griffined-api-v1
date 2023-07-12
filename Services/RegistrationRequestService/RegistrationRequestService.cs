@@ -24,153 +24,154 @@ namespace griffined_api.Services.RegistrationRequestService
             var response = new ServiceResponse<String>();
             var request = new RegistrationRequest();
 
-            if (newRequestedCourses.memberIds == null || newRequestedCourses.memberIds.Count == 0)
+            if (newRequestedCourses.MemberIds == null || newRequestedCourses.MemberIds.Count == 0)
             {
                 throw new BadRequestException("The memberIds field is required.");
             }
-            foreach (var memberId in newRequestedCourses.memberIds)
+            foreach (var memberId in newRequestedCourses.MemberIds)
             {
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == memberId);
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
                 var member = new RegistrationRequestMember();
-                member.student = dbStudent;
-                request.registrationRequestMembers.Add(member);
+                member.Student = dbStudent;
+                request.RegistrationRequestMembers.Add(member);
             }
 
-            foreach (var newPreferredDay in newRequestedCourses.preferredDays)
+            foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
                 var requestedPreferredDay = new PreferredDayRequest();
-                requestedPreferredDay.day = newPreferredDay.day;
-                requestedPreferredDay.fromTime = newPreferredDay.fromTime;
-                requestedPreferredDay.toTime = newPreferredDay.toTime;
-                request.preferredDayRequests.Add(requestedPreferredDay);
+                requestedPreferredDay.Day = newPreferredDay.Day;
+                requestedPreferredDay.FromTime = newPreferredDay.FromTime;
+                requestedPreferredDay.ToTime = newPreferredDay.ToTime;
+                request.PreferredDayRequests.Add(requestedPreferredDay);
             }
 
-            if (newRequestedCourses.courses == null || newRequestedCourses.courses.Count == 0)
+            if (newRequestedCourses.Courses == null || newRequestedCourses.Courses.Count == 0)
             {
                 throw new BadRequestException("The courses field is required.");
             }
 
-            var requestedCourses = newRequestedCourses.courses.Select(c => c.course).ToList();
+            var requestedCourses = newRequestedCourses.Courses.Select(c => c.Course).ToList();
             var existedCourses = await _context.Courses
-                        .Include(c => c.subjects)
-                        .Include(c => c.levels)
+                        .Include(c => c.Subjects)
+                        .Include(c => c.Levels)
                         .Where(c => requestedCourses.Contains(c.course)).ToListAsync();
 
-            foreach (var newRequestedCourse in newRequestedCourses.courses)
+            foreach (var newRequestedCourse in newRequestedCourses.Courses)
             {
                 var newRequestedCourseRequest = new NewCourseRequest();
-                var course = existedCourses.FirstOrDefault(c => c.course == newRequestedCourse.course);
+                var course = existedCourses.FirstOrDefault(c => c.course == newRequestedCourse.Course);
                 if (course == null)
                 {
                     var newCourse = new Course();
-                    newCourse.course = newRequestedCourse.course;
+                    newCourse.course = newRequestedCourse.Course;
 
-                    if (newRequestedCourse.subjects == null)
+                    if (newRequestedCourse.Subjects == null)
                         throw new BadRequestException("The subjects field is required.");
 
-                    foreach (var subject in newRequestedCourse.subjects)
+                    foreach (var subject in newRequestedCourse.Subjects)
                     {
                         var newSubject = new Subject();
-                        newSubject.subject = subject.subject;
-                        newCourse.subjects.Add(newSubject);
+                        newSubject.subject = subject.Subject;
+                        newCourse.Subjects.Add(newSubject);
                     }
 
-                    if (newRequestedCourse.level != null)
+                    if (newRequestedCourse.Level != null)
                     {
                         var newLevel = new Level();
-                        newLevel.level = newRequestedCourse.level;
-                        newCourse.levels.Add(newLevel);
+                        newLevel.level = newRequestedCourse.Level;
+                        newCourse.Levels.Add(newLevel);
                     }
 
                     _context.Courses.Add(newCourse);
                     await _context.SaveChangesAsync();
                     existedCourses = await _context.Courses
-                        .Include(c => c.subjects)
+                        .Include(c => c.Subjects)
                         .Where(c => requestedCourses.Contains(c.course)).ToListAsync();
 
-                    course = existedCourses.First(c => c.course == newRequestedCourse.course);
+                    course = existedCourses.First(c => c.course == newRequestedCourse.Course);
 
-                    var level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
-                    newRequestedCourseRequest.level = level;
+                    var level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
+                    newRequestedCourseRequest.Level = level;
 
-                    var requestedSubjects = newRequestedCourse.subjects.Select(s => s.subject).ToList();
-                    var existedSubjects = course.subjects.Where(s => requestedSubjects.Contains(s.subject));
-                    foreach (var requestedSubject in newRequestedCourse.subjects)
+                    var requestedSubjects = newRequestedCourse.Subjects.Select(s => s.Subject).ToList();
+                    var existedSubjects = course.Subjects.Where(s => requestedSubjects.Contains(s.subject));
+                    foreach (var requestedSubject in newRequestedCourse.Subjects)
                     {
-                        var subject = existedSubjects.First(s => s.subject == requestedSubject.subject);
+                        var subject = existedSubjects.First(s => s.subject == requestedSubject.Subject);
                         var newRequestedSubject = new NewCourseSubjectRequest();
-                        newRequestedSubject.subject = subject;
-                        newRequestedSubject.hour = requestedSubject.hour;
-                        newRequestedCourseRequest.newCourseSubjectRequests.Add(newRequestedSubject);
+                        newRequestedSubject.Subject = subject;
+                        newRequestedSubject.Hour = requestedSubject.Hour;
+                        newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
                 }
                 else
                 {
-                    if (newRequestedCourse.subjects == null)
-                        throw new BadRequestException($"The subjects field is required for {newRequestedCourse.course}");
-                    foreach (var requestedSubject in newRequestedCourse.subjects)
+                    if (newRequestedCourse.Subjects == null)
+                        throw new BadRequestException($"The subjects field is required for {newRequestedCourse.Course}");
+                    foreach (var requestedSubject in newRequestedCourse.Subjects)
                     {
                         var newRequestedSubject = new NewCourseSubjectRequest();
-                        var subject = course.subjects.FirstOrDefault(s => s.subject == requestedSubject.subject);
+                        var subject = course.Subjects.FirstOrDefault(s => s.subject == requestedSubject.Subject);
                         if (subject == null)
                         {
                             var newSubject = new Subject();
-                            newSubject.subject = requestedSubject.subject;
-                            newSubject.course = course;
+                            newSubject.subject = requestedSubject.Subject;
+                            newSubject.Course = course;
                             _context.Subjects.Add(newSubject);
                             await _context.SaveChangesAsync();
                             existedCourses = await _context.Courses
-                                                .Include(c => c.subjects)
+                                                .Include(c => c.Subjects)
                                                 .Where(c => requestedCourses
                                                 .Contains(c.course)).ToListAsync();
                             course = existedCourses.First(c => c.course == course.course);
 
-                            newRequestedSubject.subject = newSubject;
+                            newRequestedSubject.Subject = newSubject;
                         }
                         else
                         {
-                            newRequestedSubject.subject = subject;
+                            newRequestedSubject.Subject = subject;
                         }
-                        newRequestedSubject.hour = requestedSubject.hour;
-                        newRequestedCourseRequest.newCourseSubjectRequests.Add(newRequestedSubject);
+                        newRequestedSubject.Hour = requestedSubject.Hour;
+                        newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
 
-                    var level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
-                    if (newRequestedCourse.level != null && level != null)
+                    var level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
+                    if (newRequestedCourse.Level != null && level != null)
                     {
                         var newLevel = new Level();
-                        newLevel.level = newRequestedCourse.level;
-                        newLevel.course = course;
+                        newLevel.level = newRequestedCourse.Level;
+                        newLevel.Course = course;
                         _context.Levels.Add(newLevel);
                         await _context.SaveChangesAsync();
                         course = await _context.Courses
-                                            .Include(c => c.subjects)
-                                            .Include(c => c.levels)
-                                            .FirstAsync(c => c.course == newRequestedCourse.course);
-                        level = course.levels.FirstOrDefault(c => c.level == newRequestedCourse.level);
+                                            .Include(c => c.Subjects)
+                                            .Include(c => c.Levels)
+                                            .FirstAsync(c => c.course == newRequestedCourse.Course);
+                        level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
                     }
-                    newRequestedCourseRequest.level = level;
+                    newRequestedCourseRequest.Level = level;
                 }
 
-                newRequestedCourseRequest.course = course;
-                newRequestedCourseRequest.totalHours = newRequestedCourse.totalHours;
-                newRequestedCourseRequest.method = newRequestedCourseRequest.method;
-                newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.startDate);
-                newRequestedCourseRequest.startDate = DateTime.Parse(newRequestedCourse.endDate);
-                request.newCourseRequests.Add(newRequestedCourseRequest);
+                newRequestedCourseRequest.Course = course;
+                newRequestedCourseRequest.TotalHours = newRequestedCourse.TotalHours;
+                newRequestedCourseRequest.Method = newRequestedCourseRequest.Method;
+                newRequestedCourseRequest.StartDate = DateTime.Parse(newRequestedCourse.StartDate);
+                newRequestedCourseRequest.EndDate = DateTime.Parse(newRequestedCourse.EndDate);
+                request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            request.byECId = byECId;
-            request.section = newRequestedCourses.sectionName;
-            request.type = nameof(RegistrationRequestType.NewRequestedCourse);
-            request.registrationStatus = RegistrationStatus.PendingEA;
+            request.ByECId = byECId;
+            request.Section = newRequestedCourses.SectionName;
+            request.Type = nameof(RegistrationRequestType.NewRequestedCourse);
+            request.RegistrationStatus = RegistrationStatus.PendingEA;
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
+            response.StatusCode = 200;
             return response;
         }
 
@@ -179,48 +180,128 @@ namespace griffined_api.Services.RegistrationRequestService
             var response = new ServiceResponse<String>();
             var request = new RegistrationRequest();
 
-            if (newRequest.memberIds == null || newRequest.memberIds.Count == 0)
+            if (newRequest.MemberIds == null || newRequest.MemberIds.Count == 0)
             {
                 throw new BadRequestException("The memberIds field is required.");
             }
-            foreach (var memberId in newRequest.memberIds)
+            foreach (var memberId in newRequest.MemberIds)
             {
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.id == memberId);
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
                 var member = new RegistrationRequestMember();
-                member.student = dbStudent;
-                request.registrationRequestMembers.Add(member);
+                member.Student = dbStudent;
+                request.RegistrationRequestMembers.Add(member);
             }
 
-            foreach (var studyCourseId in newRequest.courseIds)
+            foreach (var studyCourseId in newRequest.CourseIds)
             {
-                var studyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.id == studyCourseId);
+                var studyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.Id == studyCourseId);
                 var newStudentAddingRequest = new StudentAddingRequest();
                 if (studyCourse == null)
                 {
                     throw new NotFoundException($"Study Course with ID {studyCourseId} not found");
                 }
-                newStudentAddingRequest.studyCourse = studyCourse;
-                request.studentAddingRequest.Add(newStudentAddingRequest);
-            }
-            
-            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            foreach (var comment in newRequest.comments)
-            {
-                var newComment = new Comment();
-                newComment.staffId = byECId;
-                request.comments.Add(newComment);
+                newStudentAddingRequest.StudyCourse = studyCourse;
+                request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
-            request.byECId = byECId;
-            request.paymentType = newRequest.paymentType;
-            request.registrationStatus = RegistrationStatus.PendingEA;
-            request.type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
+            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            foreach (var comment in newRequest.Comments)
+            {
+                var newComment = new Comment();
+                newComment.StaffId = byECId;
+                request.Comments.Add(newComment);
+            }
+
+            request.ByECId = byECId;
+            request.PaymentType = newRequest.PaymentType;
+            request.RegistrationStatus = RegistrationStatus.PendingEA;
+            request.Type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
+
+            response.StatusCode = 200;
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<RegistrationRequestResponseDto>>> GetAllRegistrationRequests()
+        {
+            var response = new ServiceResponse<List<RegistrationRequestResponseDto>>();
+            var registrationRequests = await _context.RegistrationRequests
+                    .Include(r => r.RegistrationRequestMembers)
+                        .ThenInclude(m => m.Student)
+                    .ToListAsync();
+
+            var data = new List<RegistrationRequestResponseDto>();
+
+            foreach (var registrationRequest in registrationRequests)
+            {
+                var staffs = await _context.Staff.ToListAsync();
+                var requestDto = new RegistrationRequestResponseDto();
+
+                foreach (var student in registrationRequest.RegistrationRequestMembers)
+                {
+                    var studentDto = new StudentNameResponseDto();
+                    studentDto.StudentId = student.Student.Id;
+                    studentDto.StudentCode = student.Student.StudentCode;
+                    studentDto.FullName = student.Student.FullName;
+                    studentDto.Nickname = student.Student.Nickname;
+                    requestDto.Members.Add(studentDto);
+                }
+
+                requestDto.RequestId = registrationRequest.Id;
+                requestDto.Type = registrationRequest.Type;
+                requestDto.RegistrationStatus = registrationRequest.RegistrationStatus;
+                requestDto.PaymentType = registrationRequest.PaymentType;
+                requestDto.PaymentStatus = registrationRequest.PaymentStatus;
+                requestDto.CreatedDate = registrationRequest.DateCreated;
+                requestDto.PaymentError = registrationRequest.PaymentError;
+                requestDto.ScheduleError = registrationRequest.ScheduleError;
+                requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
+                requestDto.HasSchedule = registrationRequest.HasSchedule;
+
+                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByECId);
+                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByEAId);
+                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByOAId);
+                var cancelledBy = staffs.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
+
+                if (ec != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.Nickname = ec.Nickname;
+                    staff.FullName = ec.FullName;
+                    requestDto.ByEC = staff;
+                }
+                if (ea != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.Nickname = ea.Nickname;
+                    staff.FullName = ea.FullName;
+                    requestDto.ByEA = staff;
+                }
+                if (oa != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.Nickname = oa.Nickname;
+                    staff.FullName = oa.FullName;
+                    requestDto.ByEA = staff;
+                }
+                if (cancelledBy != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto();
+                    staff.Nickname = cancelledBy.Nickname;
+                    staff.FullName = cancelledBy.FullName;
+                    requestDto.ByEA = staff;
+                }
+
+                data.Add(requestDto);
+
+            }
+            response.StatusCode = 200;
+            response.Data = data;
             return response;
         }
     }

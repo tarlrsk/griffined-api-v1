@@ -9,20 +9,20 @@ namespace griffined_api.Models
 {
     public class StaffNotification
     {
-        public int id { get; set; }
-        public int? staffId { get; set; }
-        public int? studyCourseId { get; set; }
+        public int Id { get; set; }
+        public int? StaffId { get; set; }
+        public int? StudyCourseId { get; set; }
 
-        public DateTime dateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
 
-        public bool hasRead { get; set; }
+        public bool IsRead { get; set; }
 
-        public virtual StaffNotificationType type { get; set; }
+        public virtual StaffNotificationType Type { get; set; }
 
-        [ForeignKey(nameof(staffId))]
-        public virtual Staff staff { get; set; } = new Staff();
+        [ForeignKey(nameof(StaffId))]
+        public virtual Staff Staff { get; set; } = new Staff();
 
-        [ForeignKey(nameof(studyCourseId))]
-        public virtual StudyCourse studyCourse { get; set; } = new StudyCourse();
+        [ForeignKey(nameof(StudyCourseId))]
+        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
     }
 }

@@ -8,18 +8,18 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
     public class AvailableTeacherResponseDto
     {
         [Required]
-        public int id { get; set; }
+        public int Id { get; set; }
         [Required]
-        public string firebaseId { get; set; } = string.Empty;
+        public string FirebaseId { get; set; } = string.Empty;
         [Required]
-        public string fName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
         [Required]
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
 
         [Required]
-        public string nickname { get; set; } = string.Empty;
-        public string workType { get; set; } = string.Empty;
-        public bool currentClass { get; set; } = false;
+        public string Nickname { get; set; } = string.Empty;
+        public string WorkType { get; set; } = string.Empty;
+        public bool CurrentClass { get; set; } = false;
     }
 }

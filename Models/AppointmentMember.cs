@@ -9,14 +9,14 @@ namespace griffined_api.Models
 {
     public class AppointmentMember
     {
-        public int id { get; set; }
-        public int? teacherId { get; set; }
-        public int? appointmentId { get; set; }
+        public int Id { get; set; }
+        public int? TeacherId { get; set; }
+        public int? AppointmentId { get; set; }
 
-        [ForeignKey(nameof(appointmentId))]
-        public virtual Appointment appointment { get; set; } = new Appointment();
+        [ForeignKey(nameof(AppointmentId))]
+        public virtual Appointment Appointment { get; set; } = new Appointment();
 
-        [ForeignKey(nameof(teacherId))]
-        public virtual Teacher teacher { get; set; } = new Teacher();
+        [ForeignKey(nameof(TeacherId))]
+        public virtual Teacher Teacher { get; set; } = new Teacher();
     }
 }

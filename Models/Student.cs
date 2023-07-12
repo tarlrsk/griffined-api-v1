@@ -9,19 +9,20 @@ namespace griffined_api.Models
 {
     public class Student
     {
-        public int id { get; set; }
-        public string studentId { get; set; } = string.Empty;
-        public string firebaseId { get; set; } = string.Empty;
+        [Key]
+        public int Id { get; set; }
 
-        public string title { get; set; } = string.Empty;
-        public string fName { get; set; } = string.Empty;
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
-        public string nickname { get; set; } = string.Empty;
-        public string? profilePicture { get; set; }
+        public string StudentCode { get; set; } = string.Empty;
+        public string FirebaseId { get; set; } = string.Empty;
+
+        public string Title { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
+        public string Nickname { get; set; } = string.Empty;
         private DateTime _dob;
-        public string dob { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
-        public int age
+        public string DOB { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
+        public int Age
         {
             get
             {
@@ -31,32 +32,33 @@ namespace griffined_api.Models
                 return _age;
             }
         }
-        public string phone { get; set; } = string.Empty;
-        public string? line { get; set; }
-        public string? email { get; set; }
-        public string? school { get; set; }
-        public string? countryOfSchool { get; set; }
-        public string? levelOfStudy { get; set; }
-        public string? program { get; set; }
-        public string? targetUni { get; set; }
-        public string? targetScore { get; set; }
-        public string? hogInfo { get; set; }
-        public string? healthInfo { get; set; }
+        public string Phone { get; set; } = string.Empty;
+        public string Line { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? School { get; set; }
+        public string? CountryOfSchool { get; set; }
+        public string? LevelOfStudy { get; set; }
+        public string? Program { get; set; }
+        public string? TargetUniversity { get; set; }
+        public string? TargetScore { get; set; }
+        public string? HogInformation { get; set; }
+        public string? HealthInformation { get; set; }
 
-        public StudentStatus status { get; set; }
+        public StudentStatus Status { get; set; }
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
-        public DateTime dateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
 
-        public virtual Parent? parent { get; set; }
-        public virtual Address? address { get; set; }
-        public virtual StudentAttendance? attendance { get; set; }
+        public virtual ProfilePicture? ProfilePicture { get; set; }
+        public virtual Parent? Parent { get; set; }
+        public virtual Address? Address { get; set; }
+        public virtual StudentAttendance? Attendance { get; set; }
 
-        public virtual ICollection<StudentAdditionalFile>? additionalFiles { get; set; }
-        public virtual ICollection<RegistrationRequestMember> registrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
-        public virtual ICollection<CourseMember> courseMembers { get; set; } = new List<CourseMember>();
-        public virtual ICollection<CancellationRequest>? cancellationRequests { get; set; }
-        public virtual ICollection<StudentNotification>? studentNotifications { get; set; }
+        public virtual ICollection<StudentAdditionalFile>? AdditionalFiles { get; set; }
+        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
+        public virtual ICollection<CourseMember> CourseMembers { get; set; } = new List<CourseMember>();
+        public virtual ICollection<CancellationRequest>? CancellationRequests { get; set; }
+        public virtual ICollection<StudentNotification>? StudentNotifications { get; set; }
 
     }
 }
