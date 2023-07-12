@@ -4,6 +4,7 @@ global using griffined_api.Dtos.AddressDtos;
 global using griffined_api.Dtos.AvailableScheduleDtos;
 global using griffined_api.Dtos.ParentDtos;
 global using griffined_api.Dtos.PreferredDayDtos;
+global using griffined_api.Dtos.ProfilePictureDto;
 global using griffined_api.Dtos.StaffDtos;
 global using griffined_api.Dtos.StudentDtos;
 global using griffined_api.Dtos.StudentAddtionalFilesDtos;

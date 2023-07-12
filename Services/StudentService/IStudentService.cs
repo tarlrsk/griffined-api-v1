@@ -10,7 +10,7 @@ namespace griffined_api.Services.StudentService
         Task<ServiceResponse<List<StudentResponseDto>>> GetStudent();
         Task<ServiceResponse<StudentResponseDto>> GetStudentByStudentId(string studentCode);
         Task<ServiceResponse<StudentResponseDto>> GetStudentByToken();
-        Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, ICollection<IFormFile> files);
+        Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files);
         Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent);
         Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int id);
         Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id);
