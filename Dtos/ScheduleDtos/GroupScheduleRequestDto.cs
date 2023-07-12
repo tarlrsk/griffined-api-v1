@@ -22,6 +22,7 @@ namespace griffined_api.Dtos.ScheduleDtos
         [Required]
         public int TotalHours { get; set; }
         public Method Method { get; set; }
+        public List<ScheduleRequestDto> schedules = new List<ScheduleRequestDto>();
 
     }
 }

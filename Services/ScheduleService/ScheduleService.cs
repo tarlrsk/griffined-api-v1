@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Services.ScheduleService
 {
@@ -16,9 +17,27 @@ namespace griffined_api.Services.ScheduleService
             _mapper = mapper;
             _context = context;
         }
-        public Task<ServiceResponse<string>> AddGroupSchedule()
+        public async Task<ServiceResponse<string>> AddGroupSchedule(GroupScheduleRequestDto newSchedule)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<string>();
+
+            var dbCourse = await _context.Courses
+                            .Include(c => c.Subjects.Where(s => newSchedule.SubjectIds.Contains(s.Id)))
+                            .Include(c => c.Levels.FirstOrDefault(l => l.Id == newSchedule.LevelId))
+                            .FirstOrDefaultAsync(c => c.Id == newSchedule.CourseId);
+            if (dbCourse == null || dbCourse.Levels == null)
+            {
+                throw new BadRequestException($"Course or Level is not found");
+            }
+            
+            var studyCourse = new StudyCourse();
+
+            foreach (var newStudySubject in newSchedule.SubjectIds)
+            {
+                studyCourse.Course = dbCourse;
+            }
+
+            return response;
         }
     }
 }
