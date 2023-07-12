@@ -16,8 +16,8 @@ namespace griffined_api.Models
         public string Section { get; set; } = string.Empty;
 
         public int TotalHour { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public virtual StudyCourseType StudyCourseType { get; set; }
         public virtual Method Method { get; set; }
