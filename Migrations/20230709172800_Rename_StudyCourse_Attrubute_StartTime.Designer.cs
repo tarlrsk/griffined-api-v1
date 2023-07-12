@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230709172800_Rename_StudyCourse_Attrubute_StartTime")]
+    partial class RenameStudyCourseAttrubuteStartTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,34 +463,6 @@ namespace griffinedapi.Migrations
                     b.ToTable("PreferredDayRequest", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.ProfilePicture", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("StudentId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId")
-                        .IsUnique();
-
-                    b.ToTable("ProfilePicture", (string)null);
-                });
-
             modelBuilder.Entity("griffined_api.Models.RegistrationRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -748,6 +723,9 @@ namespace griffinedapi.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfilePicture")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Program")
@@ -1422,17 +1400,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("RegistrationRequest");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.ProfilePicture", b =>
-                {
-                    b.HasOne("griffined_api.Models.Student", "Student")
-                        .WithOne("ProfilePicture")
-                        .HasForeignKey("griffined_api.Models.ProfilePicture", "StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("griffined_api.Models.RegistrationRequestMember", b =>
                 {
                     b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
@@ -1780,8 +1747,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("CourseMembers");
 
                     b.Navigation("Parent");
-
-                    b.Navigation("ProfilePicture");
 
                     b.Navigation("RegistrationRequestMembers");
 
