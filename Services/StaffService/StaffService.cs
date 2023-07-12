@@ -198,10 +198,8 @@ namespace griffined_api.Services.StaffService
                     { "id", staff.Id },
                     { "role", staff.Role },
                     { "uid", staff.FirebaseId}
-
                 };
             await docRef.SetAsync(staffDoc);
         }
-
     }
 }

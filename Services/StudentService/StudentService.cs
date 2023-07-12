@@ -13,6 +13,7 @@ namespace griffined_api.Services.StudentService
     {
         private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
         private string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
+        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -26,7 +27,7 @@ namespace griffined_api.Services.StudentService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, ICollection<IFormFile> files)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -34,9 +35,7 @@ namespace griffined_api.Services.StudentService
                         DateTime.ParseExact(newStudent.DOB, "dd-MMMM-yyyy HH:mm:ss", null).ToString("dd/MM/yyyy");
 
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
-
             FirebaseAuthLink firebaseAuthLink;
-
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStudent.Email, password);
@@ -67,32 +66,65 @@ namespace griffined_api.Services.StudentService
 
             _student.StudentCode = studentCode;
 
-            // if (newStudent.additionalFiles != null && newStudent.additionalFiles.Count > 0)
-            // {
-            //     _student.additionalFiles = new List<StudentAdditionalFile>();
+            if (profilePicture != null)
+            {
+                _student.ProfilePicture = new ProfilePicture();
 
-            //     foreach (var fileRequestDto in newStudent.additionalFiles)
-            //     {
-            //         var file = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
-            //         var fileName = Path.GetFileName(fileRequestDto.FileData.Name);
+                var pictureRequestDto = new AddProfilePictureRequestDto
+                {
+                    PictureData = profilePicture
+                };
 
-            //         using (var stream = fileRequestDto.FileData.OpenReadStream())
-            //         {
-            //             var storageObject = await _storageClient.UploadObjectAsync(
-            //                 FIREBASE_BUCKET,
-            //                 $"students/{studentId}/{fileName}",
-            //                 null,
-            //                 stream
-            //             );
+                var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
+                var fileName = profilePicture.FileName;
 
-            //             file.URL = storageObject.MediaLink;
-            //         }
+                using (var stream = pictureRequestDto.PictureData.OpenReadStream())
+                {
+                    var storageObject = await _storageClient.UploadObjectAsync(
+                        FIREBASE_BUCKET,
+                        $"students/{studentCode}/profile/{fileName}",
+                        null,
+                        stream
+                    );
 
-            //         _student.additionalFiles.Add(file);
-            //     }
-            // }
+                    pictureEntity.FileName = fileName;
+                    pictureEntity.URL = storageObject.MediaLink;
+                }
+                _student.ProfilePicture = pictureEntity;
+            }
+
+            if (files != null && files.Count() > 0)
+            {
+                _student.AdditionalFiles = new List<StudentAdditionalFile>();
+
+                foreach (var file in files)
+                {
+                    var fileRequestDto = new AddStudentAdditionalFilesRequestDto
+                    {
+                        FileData = file
+                    };
+
+                    var fileEntity = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
+                    var fileName = file.FileName;
+
+                    using (var stream = fileRequestDto.FileData.OpenReadStream())
+                    {
+                        var storageObject = await _storageClient.UploadObjectAsync(
+                            FIREBASE_BUCKET,
+                            $"students/{studentCode}/documents/{fileName}",
+                            null,
+                            stream
+                        );
+
+                        fileEntity.FileName = fileName;
+                        fileEntity.URL = storageObject.MediaLink;
+                    }
+                    _student.AdditionalFiles.Add(fileEntity);
+                }
+            }
 
             await _context.SaveChangesAsync();
+            await addStudentFireStoreAsync(_student);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(_student);
@@ -213,7 +245,6 @@ namespace griffined_api.Services.StudentService
             student.FirstName = updatedStudent.FirstName;
             student.LastName = updatedStudent.LastName;
             student.Nickname = updatedStudent.Nickname;
-            student.ProfilePicture = updatedStudent.ProfilePicture;
             student.Phone = updatedStudent.Phone;
             student.Line = updatedStudent.Line;
             student.Email = updatedStudent.Email;
@@ -366,6 +397,21 @@ namespace griffined_api.Services.StudentService
             response.StatusCode = (int)HttpStatusCode.OK;
 
             return response;
+        }
+
+        private async Task addStudentFireStoreAsync(Student student)
+        {
+            FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
+            DocumentReference docRef = db.Collection("users").Document(student.FirebaseId);
+            Dictionary<string, object> studentDoc = new Dictionary<string, object>()
+                {
+                    { "displayName", student.FullName },
+                    { "email", student.Email },
+                    { "id", student.StudentCode },
+                    { "role", "student" },
+                    { "uid", student.FirebaseId }
+                };
+            await docRef.SetAsync(studentDoc);
         }
     }
 }
