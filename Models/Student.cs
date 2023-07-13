@@ -9,7 +9,6 @@ namespace griffined_api.Models
 {
     public class Student
     {
-        [Key]
         public int Id { get; set; }
 
         public string StudentCode { get; set; } = string.Empty;
