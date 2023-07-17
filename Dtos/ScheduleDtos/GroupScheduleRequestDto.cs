@@ -18,11 +18,11 @@ namespace griffined_api.Dtos.ScheduleDtos
         public string StartDate { get; set; } = string.Empty;
         [Required]
         public string EndDate { get; set; } = string.Empty;
-        public string HourPerDay { get; set; } = string.Empty;
+        public int HourPerDay { get; set; }
         [Required]
         public int TotalHours { get; set; }
         public Method Method { get; set; }
-        public List<ScheduleRequestDto> schedules = new List<ScheduleRequestDto>();
+        public List<ScheduleRequestDto> schedules { get; set; } = new List<ScheduleRequestDto>();
 
     }
 }
