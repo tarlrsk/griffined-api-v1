@@ -9,8 +9,6 @@ namespace griffined_api.Controllers
     [ApiController]
     [Route("api/v1/request/registration")]
 
-    [Authorize(Roles = "ea, master")]
-
     public class RegistrationRequestController : ControllerBase
     {
         private readonly IRegistrationRequestService _registrationRequestService;
