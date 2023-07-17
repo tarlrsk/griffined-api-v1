@@ -136,7 +136,10 @@ namespace griffined_api.Services.ScheduleService
                             student.Add(dbMember.StudentId);
                         }
                     }
-                    studyCourse.StudySubjects.Add(dbStudySubject.Subject.subject);
+                    studyCourse.StudySubjects.Add(new StudySubjectResponseDto(){
+                        StudySubjectId = dbStudySubject.Id,
+                        Subject = dbStudySubject.Subject.subject,
+                    });
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
                         var schedule = new ScheduleResponseDto()
