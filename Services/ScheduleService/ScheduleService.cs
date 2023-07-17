@@ -89,5 +89,77 @@ namespace griffined_api.Services.ScheduleService
             response.StatusCode = 200;
             return response;
         }
+
+        public async Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse()
+        {
+            var response = new ServiceResponse<List<StudyCourseResponseDto>>();
+            var dbStudyCourses = await _context.StudyCourses
+                                        .Include(c => c.StudySubjects)
+                                            .ThenInclude(s => s.StudyClasses)
+                                                .ThenInclude(c => c.Schedule)
+                                        .Include(c => c.StudySubjects)
+                                            .ThenInclude(s => s.StudyClasses)
+                                                .ThenInclude(c => c.Teacher)
+                                        .Include(c => c.StudySubjects)
+                                            .ThenInclude(s => s.CourseMembers)
+                                        .Include(c => c.StudySubjects)
+                                            .ThenInclude(s => s.Subject)
+                                        .Include(c => c.Course)
+                                        .Include(c => c.Level)
+                                        .Where(c => c.Status == CourseStatus.Ongoing || c.Status == CourseStatus.NotStarted)
+                                        .ToListAsync();
+
+            var studyCourses = new List<StudyCourseResponseDto>();
+            foreach (var dbStudyCourse in dbStudyCourses)
+            {
+                var studyCourse = new StudyCourseResponseDto();
+                studyCourse.StudyCourseId = dbStudyCourse.Id;
+                studyCourse.Section = dbStudyCourse.Section;
+                studyCourse.Course = dbStudyCourse.Course.course;
+                studyCourse.Level = dbStudyCourse.Level.level;
+                studyCourse.TotalHour = dbStudyCourse.TotalHour;
+                studyCourse.StartDate = dbStudyCourse.StartDate.ToString("dd-MMMM-yyyy");
+                studyCourse.EndDate = dbStudyCourse.EndDate.ToString("dd-MMMM-yyyy");
+                studyCourse.Method = dbStudyCourse.Method;
+                studyCourse.StudyCourseType = dbStudyCourse.StudyCourseType;
+                studyCourse.CourseStatus = dbStudyCourse.Status;
+
+                var studentCount = 0;
+                var student = new List<int>();
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    foreach (var dbMember in dbStudySubject.CourseMembers)
+                    {
+                        if (!(student.Exists(s => s == dbMember.StudentId)))
+                        {
+                            studentCount += 1;
+                            student.Add(dbMember.StudentId);
+                        }
+                    }
+                    studyCourse.StudySubjects.Add(dbStudySubject.Subject.subject);
+                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                    {
+                        var schedule = new ScheduleResponseDto()
+                        {
+                            Date = dbStudyClass.Schedule.Date,
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
+                            CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + dbStudyCourse.Level.level,
+                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                            TeacherLastName = dbStudyClass.Teacher.LastName,
+                            TeacherNickName = dbStudyClass.Teacher.Nickname,
+                            // TODO Teacher Work Type
+                        };
+                        studyCourse.Schedule.Add(schedule);
+                    }
+                }
+
+                studyCourse.StudentCount = studentCount;
+                studyCourses.Add(studyCourse);
+            }
+            response.Data = studyCourses;
+            response.StatusCode = 200;
+            return response;
+        }
     }
 }

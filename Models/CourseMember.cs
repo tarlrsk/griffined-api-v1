@@ -10,7 +10,7 @@ namespace griffined_api.Models
     public class CourseMember
     {
         public int Id { get; set; }
-        public int? StudentId { get; set; }
+        public int StudentId { get; set; }
         public int? StudySubjectId { get; set; }
 
         [ForeignKey(nameof(StudentId))]
