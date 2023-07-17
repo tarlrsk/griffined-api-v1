@@ -41,15 +41,15 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "ep, master")]
-        public async Task<ActionResult> AddStudent([FromForm] AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
+        public async Task<ActionResult> AddStudent([FromForm] AddStudentRequestDto newStudent, IFormFile newProfilePicture, ICollection<IFormFile> newFiles)
         {
-            return Ok(await _studentService.AddStudent(newStudent, profilePicture, files));
+            return Ok(await _studentService.AddStudent(newStudent, newProfilePicture, newFiles));
         }
 
         [HttpPut, Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult> UpdateStudent(UpdateStudentRequestDto updatedStudent)
+        public async Task<ActionResult> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile updatedProfilePicture, ICollection<IFormFile> updatedFiles)
         {
-            var response = await _studentService.UpdateStudent(updatedStudent);
+            var response = await _studentService.UpdateStudent(updatedStudent, updatedProfilePicture, updatedFiles);
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);

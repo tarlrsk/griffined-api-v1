@@ -27,7 +27,7 @@ namespace griffined_api.Services.StudentService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile newProfilePicture, ICollection<IFormFile> newFiles)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -66,17 +66,17 @@ namespace griffined_api.Services.StudentService
 
             _student.StudentCode = studentCode;
 
-            if (profilePicture != null)
+            if (newProfilePicture != null)
             {
                 _student.ProfilePicture = new ProfilePicture();
 
                 var pictureRequestDto = new AddProfilePictureRequestDto
                 {
-                    PictureData = profilePicture
+                    PictureData = newProfilePicture
                 };
 
                 var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
-                var fileName = profilePicture.FileName;
+                var fileName = newProfilePicture.FileName;
 
                 using (var stream = pictureRequestDto.PictureData.OpenReadStream())
                 {
@@ -93,11 +93,11 @@ namespace griffined_api.Services.StudentService
                 _student.ProfilePicture = pictureEntity;
             }
 
-            if (files != null && files.Count() > 0)
+            if (newFiles != null && newFiles.Count() > 0)
             {
                 _student.AdditionalFiles = new List<StudentAdditionalFile>();
 
-                foreach (var file in files)
+                foreach (var file in newFiles)
                 {
                     var fileRequestDto = new AddStudentAdditionalFilesRequestDto
                     {
@@ -229,7 +229,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent)
+        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile updatedProfilePicture, ICollection<IFormFile> updatedFiles)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
