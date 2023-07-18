@@ -9,5 +9,6 @@ namespace griffined_api.Services.ScheduleService
     public interface IScheduleService
     {
         Task<ServiceResponse<String>> AddGroupSchedule(GroupScheduleRequestDto newSchedule);
+        Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse();
     }
 }

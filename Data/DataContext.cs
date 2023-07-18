@@ -21,7 +21,6 @@ namespace griffined_api.Data
         public virtual DbSet<CancellationRequest> CancellationRequests { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Course> Courses { get; set; }
-        public virtual DbSet<CourseMember> CourseMembers { get; set; }
         public virtual DbSet<Level> Levels { get; set; }
         public virtual DbSet<NewCourseRequest> NewCourseRequests { get; set; }
         public virtual DbSet<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; }
@@ -161,23 +160,6 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.NewCourseRequests)
                     .WithOne(e => e.Course)
                     .HasForeignKey(e => e.CourseId);
-            });
-
-            modelBuilder.Entity<CourseMember>(entity =>
-            {
-                entity.ToTable("CourseMember");
-
-                entity.HasOne(e => e.Student)
-                    .WithMany(e => e.CourseMembers)
-                    .HasForeignKey(e => e.StudentId);
-
-                entity.HasOne(e => e.StudySubject)
-                    .WithMany(e => e.CourseMembers)
-                    .HasForeignKey(e => e.StudySubjectId);
-
-                entity.HasMany(e => e.StudentReports)
-                    .WithOne(e => e.CourseMember)
-                    .HasForeignKey(e => e.CourseMemberId);
             });
 
             modelBuilder.Entity<Level>(entity =>
@@ -389,10 +371,6 @@ namespace griffined_api.Data
                     .WithOne(e => e.Student)
                     .HasForeignKey(e => e.StudentId);
 
-                entity.HasMany(e => e.CourseMembers)
-                    .WithOne(e => e.Student)
-                    .HasForeignKey(e => e.StudentId);
-
                 entity.HasMany(e => e.CancellationRequests)
                     .WithOne(e => e.Student)
                     .HasForeignKey(e => e.StudentId);
@@ -453,10 +431,6 @@ namespace griffined_api.Data
             modelBuilder.Entity<StudentReport>(entity =>
             {
                 entity.ToTable("StudentReport");
-
-                entity.HasOne(e => e.CourseMember)
-                    .WithMany(e => e.StudentReports)
-                    .HasForeignKey(e => e.CourseMemberId);
 
                 entity.HasOne(e => e.Teacher)
                     .WithMany(e => e.StudentReports)
@@ -557,10 +531,6 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.StudyCourse)
                     .WithMany(e => e.StudySubjects)
                     .HasForeignKey(e => e.StudyCourseId);
-
-                entity.HasMany(e => e.CourseMembers)
-                    .WithOne(e => e.StudySubject)
-                    .HasForeignKey(e => e.StudySubjectId);
 
                 entity.HasMany(e => e.StudyClasses)
                     .WithOne(e => e.StudySubject)
