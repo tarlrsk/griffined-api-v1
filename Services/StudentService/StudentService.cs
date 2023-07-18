@@ -27,7 +27,7 @@ namespace griffined_api.Services.StudentService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile newProfilePicture, ICollection<IFormFile> newFiles)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -66,17 +66,17 @@ namespace griffined_api.Services.StudentService
 
             _student.StudentCode = studentCode;
 
-            if (newProfilePicture != null)
+            if (profilePicture != null)
             {
                 _student.ProfilePicture = new ProfilePicture();
 
                 var pictureRequestDto = new AddProfilePictureRequestDto
                 {
-                    PictureData = newProfilePicture
+                    PictureData = profilePicture
                 };
 
                 var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
-                var fileName = newProfilePicture.FileName;
+                var fileName = profilePicture.FileName;
 
                 using (var stream = pictureRequestDto.PictureData.OpenReadStream())
                 {
@@ -93,11 +93,11 @@ namespace griffined_api.Services.StudentService
                 _student.ProfilePicture = pictureEntity;
             }
 
-            if (newFiles != null && newFiles.Count() > 0)
+            if (files != null && files.Count() > 0)
             {
                 _student.AdditionalFiles = new List<StudentAdditionalFile>();
 
-                foreach (var file in newFiles)
+                foreach (var file in files)
                 {
                     var fileRequestDto = new AddStudentAdditionalFilesRequestDto
                     {
@@ -229,7 +229,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile updatedProfilePicture, ICollection<IFormFile> updatedFiles)
+        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile profilePicture, ICollection<IFormFile> files)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -322,7 +322,7 @@ namespace griffined_api.Services.StudentService
 
             if (student.ProfilePicture != null)
             {
-                if (updatedProfilePicture != null)
+                if (profilePicture != null)
                 {
                     var oldProfilePicture = student.ProfilePicture.URL;
 
@@ -331,9 +331,9 @@ namespace griffined_api.Services.StudentService
                         await DeleteFileFromStorage(oldProfilePicture);
                     }
 
-                    var profilePictureFileName = Path.GetFileName(updatedProfilePicture.FileName);
+                    var profilePictureFileName = Path.GetFileName(profilePicture.FileName);
 
-                    using (var stream = updatedProfilePicture.OpenReadStream())
+                    using (var stream = profilePicture.OpenReadStream())
                     {
                         var storageObject = await _storageClient.UploadObjectAsync(
                             FIREBASE_BUCKET,
@@ -348,7 +348,7 @@ namespace griffined_api.Services.StudentService
 
                 if (student.AdditionalFiles != null)
                 {
-                    if (updatedFiles != null && updatedFiles.Count > 0)
+                    if (files != null && files.Count > 0)
                     {
                         var oldFiles = student.AdditionalFiles.ToList();
 
@@ -362,7 +362,7 @@ namespace griffined_api.Services.StudentService
 
                         student.AdditionalFiles?.Clear();
 
-                        foreach (var file in updatedFiles)
+                        foreach (var file in files)
                         {
                             var fileRequestDto = new AddStudentAdditionalFilesRequestDto
                             {
