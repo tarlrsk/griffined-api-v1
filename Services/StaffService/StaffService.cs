@@ -53,7 +53,7 @@ namespace griffined_api.Services.StaffService
             _context.Staff.Add(staff);
 
             await _context.SaveChangesAsync();
-            await addStaffFireStoreAsync(staff);
+            await AddStaffFireStoreAsync(staff);
 
             response.Data = _mapper.Map<StaffResponseDto>(staff);
             return response;
@@ -177,7 +177,7 @@ namespace griffined_api.Services.StaffService
                 Email = updatedStaff.Email
             });
 
-            await addStaffFireStoreAsync(staff);
+            await AddStaffFireStoreAsync(staff);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StaffResponseDto>(staff);
@@ -187,7 +187,7 @@ namespace griffined_api.Services.StaffService
 
 
 
-        private async Task addStaffFireStoreAsync(Staff staff)
+        private async Task AddStaffFireStoreAsync(Staff staff)
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
             DocumentReference docRef = db.Collection("users").Document(staff.FirebaseId);

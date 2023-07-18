@@ -124,7 +124,7 @@ namespace griffined_api.Services.StudentService
             }
 
             await _context.SaveChangesAsync();
-            await addStudentFireStoreAsync(_student);
+            await AddStudentFireStoreAsync(_student);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<StudentResponseDto>(_student);
@@ -234,7 +234,10 @@ namespace griffined_api.Services.StudentService
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var student = await _context.Students.Include(s => s.AdditionalFiles).FirstOrDefaultAsync(s => s.Id == updatedStudent.Id);
+            var student = await _context.Students
+                            .Include(s => s.ProfilePicture)
+                            .Include(s => s.AdditionalFiles)
+                            .FirstOrDefaultAsync(s => s.Id == updatedStudent.Id);
             if (student is null)
                 throw new NotFoundException($"Student with ID '{updatedStudent.Id}' not found.");
 
@@ -318,32 +321,21 @@ namespace griffined_api.Services.StudentService
                 }
             }
 
-            // if (updatedStudent.AdditionalFiles is not null)
+            // if (updatedProfilePicture != null)
             // {
-            //     var existingFileIds = student.AdditionalFiles?.Select(f => f.Id).ToList();
-            //     var updatedFileIds = updatedStudent.AdditionalFiles.Select(f => f.StudentId).ToList();
+            //     var fileName = Path.GetFileName(updatedProfilePicture.FileName);
 
-            //     // Remove any files that were not included in the updated DTO
-            //     var filesToRemove = student.AdditionalFiles?.Where(f => !updatedFileIds.Contains(f.Id)).ToList();
-            //     if (filesToRemove != null)
+            //     using (var stream = updatedProfilePicture.OpenReadStream())
             //     {
-            //         foreach (var file in filesToRemove)
-            //         {
-            //             student.additionalFiles?.Remove(file);
-            //         }
+            //         var storageObject = await _storageClient.UploadObjectAsync(
+            //             FIREBASE_BUCKET,
+            //             $"students/{student.StudentCode}/profile/{fileName}",
+            //             null,
+            //             stream
+            //         );
 
-            // // Update or add any files that were included in the updated DTO
-            // foreach (var updatedFile in updatedStudent.additionalFiles)
-            // {
-            //     var existingFile = student.additionalFiles?.FirstOrDefault(f => f.id == updatedFile.id);
-            //     if (existingFile is null)
-            //     {
-            //         existingFile = new StudentAdditionalFile();
-            //         student.additionalFiles?.Add(existingFile);
-            //     }
-
-            //     _mapper.Map(updatedFile, existingFile);
-            // }
+            //         if (student.ProfilePicture != null)
+            //             student.ProfilePicture.URL = storageObject.MediaLink;
             //     }
             // }
 
@@ -399,7 +391,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        private async Task addStudentFireStoreAsync(Student student)
+        private async Task AddStudentFireStoreAsync(Student student)
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
             DocumentReference docRef = db.Collection("users").Document(student.FirebaseId);
@@ -412,6 +404,16 @@ namespace griffined_api.Services.StudentService
                     { "uid", student.FirebaseId }
                 };
             await docRef.SetAsync(studentDoc);
+        }
+
+        private async Task DeleteFileFromStorage(string fileUrl)
+        {
+            var storageObject = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, fileUrl, null);
+
+            if (storageObject != null)
+            {
+                await _storageClient.DeleteObjectAsync(storageObject);
+            }
         }
     }
 }
