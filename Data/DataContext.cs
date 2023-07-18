@@ -165,7 +165,7 @@ namespace griffined_api.Data
 
             modelBuilder.Entity<StudySubjectMember>(entity =>
             {
-                entity.ToTable("CourseMember");
+                entity.ToTable("StudySubjectMember");
 
                 entity.HasOne(e => e.Student)
                     .WithMany(e => e.StudySubjectMember)
