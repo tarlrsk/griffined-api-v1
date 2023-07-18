@@ -10,7 +10,7 @@ namespace griffined_api.Models
     public class StudentReport
     {
         public int Id { get; set; }
-        public int? CourseMemberId { get; set; }
+        public int? StudySubjectMemberId { get; set; }
         public int? TeacherId { get; set; }
 
         public string Report { get; set; } = string.Empty;
@@ -20,8 +20,8 @@ namespace griffined_api.Models
         private DateTime _dateUpdated;
         public string DateUpdated { get; set; } = string.Empty;
 
-        [ForeignKey(nameof(CourseMemberId))]
-        public virtual CourseMember CourseMember { get; set; } = new CourseMember();
+        [ForeignKey(nameof(StudySubjectMemberId))]
+        public virtual StudySubjectMember StudySubjectMember { get; set; } = new StudySubjectMember();
 
         [ForeignKey(nameof(TeacherId))]
         public virtual Teacher Teacher { get; set; } = new Teacher();

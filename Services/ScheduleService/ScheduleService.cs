@@ -101,7 +101,7 @@ namespace griffined_api.Services.ScheduleService
                                             .ThenInclude(s => s.StudyClasses)
                                                 .ThenInclude(c => c.Teacher)
                                         .Include(c => c.StudySubjects)
-                                            .ThenInclude(s => s.CourseMembers)
+                                            .ThenInclude(s => s.StudySubjectMember)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.Subject)
                                         .Include(c => c.Course)
@@ -128,7 +128,7 @@ namespace griffined_api.Services.ScheduleService
                 var student = new List<int>();
                 foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
                 {
-                    foreach (var dbMember in dbStudySubject.CourseMembers)
+                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
                         if (!(student.Exists(s => s == dbMember.StudentId)))
                         {

@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class CourseMember
+    public class StudySubjectMember
     {
         public int Id { get; set; }
         public int StudentId { get; set; }
         public int? StudySubjectId { get; set; }
+        public StudySubjectMemberStatus Status { get; set; }
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student Student { get; set; } = new Student();
