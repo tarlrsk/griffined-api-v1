@@ -12,7 +12,6 @@ namespace griffined_api.Dtos.StudentDtos
         public string LastName { get; set; } = string.Empty;
         public string FullName { get { return FirstName + " " + LastName; } }
         public string Nickname { get; set; } = string.Empty;
-        public string? ProfilePicture { get; set; }
         private DateTime _dob;
         public string DOB { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
         public int Age
@@ -38,6 +37,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
 
+        public AddProfilePictureRequestDto? ProfilePicture { get; set; }
         public ParentRequestDto? Parent { get; set; }
         public AddressRequestDto? Address { get; set; }
         public ICollection<AddStudentAdditionalFilesRequestDto>? AdditionalFiles { get; set; }
