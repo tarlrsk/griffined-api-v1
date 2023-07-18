@@ -196,15 +196,15 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.RegistrationRequestMembers.Add(member);
             }
 
-            foreach (var studyCourseId in newRequest.CourseIds)
+            foreach (var studyCourse in newRequest.StudyCourse)
             {
-                var studyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.Id == studyCourseId);
+                var dbStudyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.Id == studyCourse.StudyCourseId);
                 var newStudentAddingRequest = new StudentAddingRequest();
-                if (studyCourse == null)
+                if (dbStudyCourse == null)
                 {
-                    throw new NotFoundException($"Study Course with ID {studyCourseId} not found");
+                    throw new NotFoundException($"Study Course with ID {studyCourse.StudyCourseId} not found");
                 }
-                newStudentAddingRequest.StudyCourse = studyCourse;
+                newStudentAddingRequest.StudyCourse = dbStudyCourse;
                 request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
