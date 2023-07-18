@@ -178,6 +178,7 @@ namespace griffined_api.Services.StudentService
             var dbStudents = await _context.Students
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
+                .Include(s => s.ProfilePicture)
                 .Include(s => s.AdditionalFiles)
                 .Select(s => _mapper.Map<StudentResponseDto>(s))
                 .ToListAsync();
@@ -320,11 +321,13 @@ namespace griffined_api.Services.StudentService
                 }
             }
 
-            if (student.ProfilePicture != null)
+            var _profilePicture = await _context.ProfilePictures.FirstOrDefaultAsync(p => p.StudentId == updatedStudent.Id);
+
+            if (_profilePicture != null)
             {
                 if (profilePicture != null)
                 {
-                    var oldProfilePicture = student.ProfilePicture.URL;
+                    var oldProfilePicture = _profilePicture.URL;
 
                     if (!string.IsNullOrEmpty(oldProfilePicture))
                     {
@@ -342,50 +345,52 @@ namespace griffined_api.Services.StudentService
                             stream
                         );
 
-                        student.ProfilePicture.URL = storageObject.MediaLink;
+                        _profilePicture.URL = storageObject.MediaLink;
                     }
                 }
+            }
 
-                if (student.AdditionalFiles != null)
+            var _additionalFiles = await _context.StudentAdditionalFiles.Where(f => f.StudentId == updatedStudent.Id).ToListAsync();
+
+            if (_additionalFiles != null)
+            {
+                if (files != null && files.Count > 0)
                 {
-                    if (files != null && files.Count > 0)
+                    var oldFiles = _additionalFiles;
+
+                    if (oldFiles != null)
                     {
-                        var oldFiles = student.AdditionalFiles.ToList();
-
-                        if (oldFiles != null)
+                        foreach (var oldFile in oldFiles)
                         {
-                            foreach (var oldFile in oldFiles)
-                            {
-                                await DeleteFileFromStorage(oldFile.URL);
-                            }
+                            await DeleteFileFromStorage(oldFile.URL);
+                        }
+                    }
+
+                    _additionalFiles?.Clear();
+
+                    foreach (var file in files)
+                    {
+                        var fileRequestDto = new AddStudentAdditionalFilesRequestDto
+                        {
+                            FileData = file
+                        };
+
+                        var fileEntity = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
+                        var additionalFileName = Path.GetFileName(fileRequestDto.FileData.FileName);
+
+                        using (var stream = fileRequestDto.FileData.OpenReadStream())
+                        {
+                            var storageObject = await _storageClient.UploadObjectAsync(
+                                FIREBASE_BUCKET,
+                                $"students/{student.StudentCode}/documents/{additionalFileName}",
+                                null,
+                                stream
+                            );
+
+                            fileEntity.URL = storageObject.MediaLink;
                         }
 
-                        student.AdditionalFiles?.Clear();
-
-                        foreach (var file in files)
-                        {
-                            var fileRequestDto = new AddStudentAdditionalFilesRequestDto
-                            {
-                                FileData = file
-                            };
-
-                            var fileEntity = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
-                            var additionalFileName = Path.GetFileName(fileRequestDto.FileData.FileName);
-
-                            using (var stream = fileRequestDto.FileData.OpenReadStream())
-                            {
-                                var storageObject = await _storageClient.UploadObjectAsync(
-                                    FIREBASE_BUCKET,
-                                    $"students/{student.StudentCode}/documents/{additionalFileName}",
-                                    null,
-                                    stream
-                                );
-
-                                fileEntity.URL = storageObject.MediaLink;
-                            }
-
-                            student.AdditionalFiles?.Add(fileEntity);
-                        }
+                        student.AdditionalFiles?.Add(fileEntity);
                     }
                 }
             }
@@ -459,7 +464,7 @@ namespace griffined_api.Services.StudentService
 
         private async Task DeleteFileFromStorage(string fileUrl)
         {
-            var storageObject = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, fileUrl, null);
+            var storageObject = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, fileUrl);
 
             if (storageObject != null)
                 await _storageClient.DeleteObjectAsync(storageObject);
