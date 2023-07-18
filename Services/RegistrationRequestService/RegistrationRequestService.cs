@@ -184,6 +184,9 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 throw new BadRequestException("The memberIds field is required.");
             }
+
+            var dbStudents = new List<Student>();
+            
             foreach (var memberId in newRequest.MemberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
@@ -191,6 +194,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
+                dbStudents.Add(dbStudent);
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
                 request.RegistrationRequestMembers.Add(member);
@@ -198,13 +202,37 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var studyCourse in newRequest.StudyCourse)
             {
-                var dbStudyCourse = await _context.StudyCourses.FirstOrDefaultAsync(s => s.Id == studyCourse.StudyCourseId);
+                var dbStudyCourse = await _context.StudyCourses
+                                                .Include(s => s.StudySubjects)
+                                                .FirstOrDefaultAsync(s => s.Id == studyCourse.StudyCourseId);
                 var newStudentAddingRequest = new StudentAddingRequest();
                 if (dbStudyCourse == null)
                 {
                     throw new NotFoundException($"Study Course with ID {studyCourse.StudyCourseId} not found");
                 }
                 newStudentAddingRequest.StudyCourse = dbStudyCourse;
+
+                foreach (var studySubjectId in studyCourse.StudySubjectIds)
+                {
+                    var dbStudySubject = dbStudyCourse.StudySubjects.FirstOrDefault(s => s.Id == studySubjectId);
+                    if (dbStudySubject == null)
+                    {
+                        throw new NotFoundException($"Study Subject with ID {studySubjectId} not found");
+                    }
+                    newStudentAddingRequest.StudentAddingSubjectRequests.Add(new StudentAddingSubjectRequest()
+                    {
+                        StudySubject = dbStudySubject
+                    });
+
+                    foreach (var dbStudent in dbStudents)
+                    {
+                        dbStudySubject.StudySubjectMember.Add(new StudySubjectMember()
+                        {
+                            Student = dbStudent,
+                            Status = StudySubjectMemberStatus.Pending,
+                        });
+                    }
+                }
                 request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
