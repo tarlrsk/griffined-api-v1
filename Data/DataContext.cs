@@ -21,7 +21,7 @@ namespace griffined_api.Data
         public virtual DbSet<CancellationRequest> CancellationRequests { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Course> Courses { get; set; }
-        public virtual DbSet<StudySubjectMember> CourseMembers { get; set; }
+        public virtual DbSet<StudySubjectMember> StudySubjectMember { get; set; }
         public virtual DbSet<Level> Levels { get; set; }
         public virtual DbSet<NewCourseRequest> NewCourseRequests { get; set; }
         public virtual DbSet<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; }
@@ -456,7 +456,7 @@ namespace griffined_api.Data
 
                 entity.HasOne(e => e.StudySubjectMember)
                     .WithMany(e => e.StudentReports)
-                    .HasForeignKey(e => e.StudySubjectMember);
+                    .HasForeignKey(e => e.StudySubjectMemberId);
 
                 entity.HasOne(e => e.Teacher)
                     .WithMany(e => e.StudentReports)
