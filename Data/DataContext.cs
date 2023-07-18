@@ -36,6 +36,7 @@ namespace griffined_api.Data
         public virtual DbSet<StaffNotification> StaffNotifications { get; set; }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<StudentAddingRequest> StudentAddingRequests { get; set; }
+        public virtual DbSet<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; }
         public virtual DbSet<StudentAdditionalFile> StudentAdditionalFiles { get; set; }
         public virtual DbSet<StudentAttendance> StudentAttendances { get; set; }
         public virtual DbSet<StudentNotification> StudentNotifications { get; set; }
@@ -413,6 +414,19 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.StudyCourse)
                     .WithMany(e => e.StudentAddingRequests)
                     .HasForeignKey(e => e.StudyCourseId);
+            });
+
+            modelBuilder.Entity<StudentAddingSubjectRequest>(entity =>
+            {
+                entity.ToTable("StudentAddingSubjectRequest");
+
+                entity.HasOne(e => e.StudentAddingRequest)
+                    .WithMany(e => e.StudentAddingSubjectRequests)
+                    .HasForeignKey(e => e.StudentAddingRequestId);
+
+                entity.HasOne(e => e.StudySubject)
+                    .WithMany(e => e.StudentAddingSubjectRequests)
+                    .HasForeignKey(e => e.StudySubjectId);
             });
 
             modelBuilder.Entity<StudentAdditionalFile>(entity =>
