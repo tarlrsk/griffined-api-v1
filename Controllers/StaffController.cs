@@ -21,7 +21,7 @@ namespace griffined_api.Controllers
             return Ok(await _staffService.GetStaff());
         }
 
-        [HttpGet("{id}"), Authorize(Roles = "ep, ea, oa, master")]
+        [HttpGet("{id}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetStaffById(int id)
         {
             var response = await _staffService.GetStaffById(id);
@@ -49,7 +49,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpDelete("{id}"), Authorize(Roles = "oa, master")]
-        public async Task<ActionResult> DeleteEPById(int id)
+        public async Task<ActionResult> DeleteECById(int id)
         {
             var response = await _staffService.DeleteStaff(id);
             if (response.Data is null)
