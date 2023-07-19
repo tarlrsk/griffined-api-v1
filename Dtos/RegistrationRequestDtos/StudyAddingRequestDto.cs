@@ -12,7 +12,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         [Required]
         public PaymentType PaymentType { get; set; }
         [Required]
-        public List<int> CourseIds { get; set; } = new List<int>();
+        public List<StudyAddingCourseRequestDto> StudyCourse { get; set; } = new List<StudyAddingCourseRequestDto>();
         [Required]
         public List<String> Comments { get; set; } = new List<String>();
     }
