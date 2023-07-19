@@ -21,5 +21,7 @@ namespace griffined_api.Models
 
         public virtual ICollection<StudySubjectMember> StudySubjectMember { get; set; } = new List<StudySubjectMember>();
         public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
+
+        public virtual ICollection<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; } = new List<StudentAddingSubjectRequest>();
     }
 }
