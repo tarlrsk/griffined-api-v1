@@ -102,11 +102,11 @@ namespace griffined_api.integrations.Firebase
                     }
                     else
                     {
-                        var ep = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Education Planner");
-                        if (ep != null)
+                        var ec = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Education Counsellor");
+                        if (ec != null)
                         {
-                            azure_id = ep.Id.ToString();
-                            customRole = "ep";
+                            azure_id = ec.Id.ToString();
+                            customRole = "ec";
                         }
                         else
                         {
