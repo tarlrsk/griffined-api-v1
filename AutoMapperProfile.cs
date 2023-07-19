@@ -42,6 +42,7 @@ namespace griffined_api
             // Additional Files
             CreateMap<StudentAdditionalFile, StudentAdditionalFilesResponseDto>();
             CreateMap<AddStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
+            CreateMap<UpdateStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
 
             // Profile Picture
             CreateMap<ProfilePicture, ProfilePictureResponseDto>();
