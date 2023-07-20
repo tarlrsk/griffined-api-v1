@@ -168,6 +168,18 @@ namespace griffined_api.Services.RegistrationRequestService
             request.Section = newRequestedCourses.SectionName;
             request.Type = nameof(RegistrationRequestType.NewRequestedCourse);
             request.RegistrationStatus = RegistrationStatus.PendingEA;
+
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
+            if(staff == null)
+            {
+                throw new BadRequestException($"Staff with ID {byECId} is not found.");
+            }
+            foreach (var comment in newRequestedCourses.Comments)
+            {
+                var newComment = new Comment();
+                newComment.Staff = staff;
+                request.Comments.Add(newComment);
+            }
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
@@ -237,10 +249,15 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
+            if(staff == null)
+            {
+                throw new BadRequestException($"Staff with ID {byECId} is not found.");
+            }
             foreach (var comment in newRequest.Comments)
             {
                 var newComment = new Comment();
-                newComment.StaffId = byECId;
+                newComment.Staff = staff;
                 request.Comments.Add(newComment);
             }
 

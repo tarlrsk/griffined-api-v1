@@ -14,5 +14,6 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public string Type { get; set; } = string.Empty;
         public List<PreferredDayRequestDto> PreferredDays { get; set; } = new List<PreferredDayRequestDto>();
         public List<NewRequestedCourseDto>? Courses { get; set; }
+        public List<String> Comments { get; set; } = new List<String>();
     }
 }
