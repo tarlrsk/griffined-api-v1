@@ -47,9 +47,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPut, Authorize(Roles = "ep, ea, oa, master")]
-        public async Task<ActionResult> UpdateStudent(UpdateStudentRequestDto updatedStudent)
+        public async Task<ActionResult> UpdateStudent([FromForm] UpdateStudentRequestDto updatedStudent, IFormFile profilePicture, ICollection<IFormFile> files)
         {
-            var response = await _studentService.UpdateStudent(updatedStudent);
+            var response = await _studentService.UpdateStudent(updatedStudent, profilePicture, files);
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);
