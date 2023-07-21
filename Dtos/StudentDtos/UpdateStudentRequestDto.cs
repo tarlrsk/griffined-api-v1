@@ -46,9 +46,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
 
-        public UpdateProfilePictureRequestDto? ProfilePicture { get; set; }
         public ParentRequestDto? Parent { get; set; }
         public AddressRequestDto? Address { get; set; }
-        public ICollection<UpdateStudentAdditionalFilesRequestDto>? AdditionalFiles { get; set; }
     }
 }
