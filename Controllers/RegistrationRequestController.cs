@@ -17,19 +17,19 @@ namespace griffined_api.Controllers
             _registrationRequestService = registrationRequestService;
 
         }
-        [HttpPost("new-course"), Authorize(Roles = "ep, master")]
+        [HttpPost("new-course"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> AddNewCoursesRequest(NewCoursesRequestDto newCourses)
         {
             var response = await _registrationRequestService.AddNewRequestedCourses(newCourses);
             return Ok(response);
         }
-        [HttpPost("student-adding"), Authorize(Roles = "ep, master")]
+        [HttpPost("student-adding"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> AddStudentAddingRequest(StudyAddingRequestDto newStudentAdding)
         {
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding);
             return Ok(response);
         }
-        [HttpGet, Authorize(Roles = "ep, ea, oa, master")]
+        [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult<ServiceResponse<RegistrationRequestResponseDto>>> GetAllRegistrationRequest()
         {
             var response = await _registrationRequestService.GetAllRegistrationRequests();
