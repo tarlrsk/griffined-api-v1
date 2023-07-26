@@ -164,5 +164,11 @@ namespace griffined_api.Services.ScheduleService
             response.StatusCode = 200;
             return response;
         }
+
+        public async Task<ServiceResponse<String>> AddNewStudyClass(NewStudyClassScheduleRequestDto newSchedule, int requestId)
+        {
+            var response = new ServiceResponse<String>();
+            return response;
+        }
     }
 }
