@@ -14,9 +14,9 @@ namespace griffined_api.Models
 
         public string Day { get; set; } = string.Empty;
         private TimeOnly _fromTime;
-        public string FromTime { get; set; } = string.Empty;
+        public string FromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
         private TimeOnly _toTime;
-        public string ToTime { get; set; } = string.Empty;
+        public string ToTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
 
         [ForeignKey(nameof(RegistrationRequestId))]
         public RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
