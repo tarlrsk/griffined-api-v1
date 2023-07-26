@@ -7,7 +7,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
 {
     public class NewCoursesRequestDto
     {
-        public string? SectionName { get; set; }
+        public string? Section { get; set; }
         [Required]
         public List<int> MemberIds { get; set; } = new List<int>();
         [Required]
