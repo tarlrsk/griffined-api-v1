@@ -39,10 +39,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
                 request.RegistrationRequestMembers.Add(member);
-                if (newRequestedCourses.MemberIds.Count() == 1)
-                {
-                    newRequestedCourses.Section = dbStudent.Nickname + "/" + dbStudent.FirstName;
-                }
             }
 
             if (newRequestedCourses.Type == StudyCourseType.Private && newRequestedCourses.MemberIds.Count() == 1)
