@@ -38,7 +38,21 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
                 request.RegistrationRequestMembers.Add(member);
+                if (newRequestedCourses.MemberIds.Count() == 1)
+                {
+                    newRequestedCourses.Section = dbStudent.Nickname + "/" + dbStudent.FirstName;
+                }
             }
+
+            if (newRequestedCourses.Type == StudyCourseType.Private && newRequestedCourses.MemberIds.Count() == 1)
+            {
+                var student = request.RegistrationRequestMembers.ElementAt(0).Student;
+                request.Section = student.Nickname + "/" + student.FirstName;
+            }
+            else if (newRequestedCourses.Section != null && newRequestedCourses.Section != "" && newRequestedCourses.Type != StudyCourseType.Private)
+                request.Section = newRequestedCourses.Section;
+            else
+                throw new BadRequestException("Bad Request on Section Field, or MemberIds Field, or Type Field");
 
             foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
@@ -163,14 +177,14 @@ namespace griffined_api.Services.RegistrationRequestService
                 newRequestedCourseRequest.EndDate = DateTime.Parse(newRequestedCourse.EndDate);
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
+
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             request.ByECId = byECId;
-            request.Section = newRequestedCourses.SectionName;
             request.Type = nameof(RegistrationRequestType.NewRequestedCourse);
             request.RegistrationStatus = RegistrationStatus.PendingEA;
 
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
-            if(staff == null)
+            if (staff == null)
             {
                 throw new BadRequestException($"Staff with ID {byECId} is not found.");
             }
@@ -198,7 +212,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
             var dbStudents = new List<Student>();
-            
+
             foreach (var memberId in newRequest.MemberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
@@ -250,7 +264,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
-            if(staff == null)
+            if (staff == null)
             {
                 throw new BadRequestException($"Staff with ID {byECId} is not found.");
             }

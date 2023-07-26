@@ -15,7 +15,7 @@ namespace griffined_api.Models
         public int? ByOAId { get; set; }
         public int? CancelledBy { get; set; }
 
-        public string? Section { get; set; }
+        public string Section { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public string Type { get; set; } = string.Empty;
         public bool PaymentError { get; set; }
