@@ -41,6 +41,16 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.RegistrationRequestMembers.Add(member);
             }
 
+            if (newRequestedCourses.Type == StudyCourseType.Private && newRequestedCourses.MemberIds.Count() == 1)
+            {
+                var student = request.RegistrationRequestMembers.ElementAt(0).Student;
+                request.Section = student.Nickname + "/" + student.FirstName;
+            }
+            else if (newRequestedCourses.Section != null && newRequestedCourses.Section != "" && newRequestedCourses.Type != StudyCourseType.Private)
+                request.Section = newRequestedCourses.Section;
+            else
+                throw new BadRequestException("Bad Request on Section Field, or MemberIds Field, or Type Field");
+
             foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
                 var requestedPreferredDay = new PreferredDayRequest();
@@ -164,9 +174,9 @@ namespace griffined_api.Services.RegistrationRequestService
                 newRequestedCourseRequest.EndDate = DateTime.Parse(newRequestedCourse.EndDate);
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
+
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             request.ByECId = byECId;
-            request.Section = newRequestedCourses.Section;
             request.Type = nameof(RegistrationRequestType.NewRequestedCourse);
             request.RegistrationStatus = RegistrationStatus.PendingEA;
 
