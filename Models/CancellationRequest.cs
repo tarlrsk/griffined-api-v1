@@ -17,7 +17,7 @@ namespace griffined_api.Models
         public int? StudyClassId { get; set; }
 
         private DateTime _requestedDate;
-        public string RequestedDate { get; set; } = string.Empty;
+        public string RequestedDate { get { return _requestedDate.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _requestedDate = DateTime.Parse(value); } }
         public virtual CancellationRole Role { get; set; }
 
         [ForeignKey(nameof(StudentId))]
