@@ -1,4 +1,5 @@
 using Firebase.Auth;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using System;
 using System.Collections.Generic;
@@ -83,12 +84,17 @@ namespace griffined_api.Services.StudentService
                     var storageObject = await _storageClient.UploadObjectAsync(
                         FIREBASE_BUCKET,
                         $"students/{studentCode}/profile/{fileName}",
-                        null,
+                        profilePicture.ContentType,
                         stream
                     );
 
                     pictureEntity.FileName = fileName;
-                    pictureEntity.URL = storageObject.MediaLink;
+
+                    UrlSigner urlSigner = UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")));
+                    string url = await urlSigner.SignAsync(storageObject.Bucket, $"students/{studentCode}/profile/{fileName}", TimeSpan.FromHours(1));
+
+                    pictureEntity.URL = url;
+
                 }
                 _student.ProfilePicture = pictureEntity;
             }
@@ -112,7 +118,7 @@ namespace griffined_api.Services.StudentService
                         var storageObject = await _storageClient.UploadObjectAsync(
                             FIREBASE_BUCKET,
                             $"students/{studentCode}/documents/{fileName}",
-                            null,
+                            file.ContentType,
                             stream
                         );
 
