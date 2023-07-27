@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class PreferredDayRequest
+    public class NewCoursePreferredDayRequest
     {
         public int Id { get; set; }
         public int? RegistrationRequestId { get; set; }
