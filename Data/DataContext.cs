@@ -26,8 +26,7 @@ namespace griffined_api.Data
         public virtual DbSet<NewCourseRequest> NewCourseRequests { get; set; }
         public virtual DbSet<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; }
         public virtual DbSet<Parent> Parents { get; set; }
-        public virtual DbSet<PreferredDay> PreferredDays { get; set; }
-        public virtual DbSet<PreferredDayRequest> PreferredDayRequests { get; set; }
+        public virtual DbSet<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; }
         public virtual DbSet<ProfilePicture> ProfilePictures { get; set; }
         public virtual DbSet<RegistrationRequest> RegistrationRequests { get; set; }
         public virtual DbSet<RegistrationRequestMember> RegistrationRequestMembers { get; set; }
@@ -250,21 +249,12 @@ namespace griffined_api.Data
                     .HasForeignKey(e => e.RegistrationRequestId);
             });
 
-            modelBuilder.Entity<PreferredDay>(entity =>
+            modelBuilder.Entity<NewCoursePreferredDayRequest>(entity =>
             {
-                entity.ToTable("PreferredDay");
-
-                entity.HasOne(e => e.StudyCourse)
-                    .WithMany(e => e.PreferredDays)
-                    .HasForeignKey(e => e.StudyCourseId);
-            });
-
-            modelBuilder.Entity<PreferredDayRequest>(entity =>
-            {
-                entity.ToTable("PreferredDayRequest");
+                entity.ToTable("NewCoursePreferredDayRequest");
 
                 entity.HasOne(e => e.RegistrationRequest)
-                    .WithMany(e => e.PreferredDayRequests)
+                    .WithMany(e => e.NewCoursePreferredDayRequests)
                     .HasForeignKey(e => e.RegistrationRequestId);
             });
 
@@ -297,7 +287,7 @@ namespace griffined_api.Data
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.PreferredDayRequests)
+                entity.HasMany(e => e.NewCoursePreferredDayRequests)
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
 
@@ -519,10 +509,6 @@ namespace griffined_api.Data
                     .HasForeignKey(e => e.StudyCourseId);
 
                 entity.HasMany(e => e.StudySubjects)
-                    .WithOne(e => e.StudyCourse)
-                    .HasForeignKey(e => e.StudyCourseId);
-
-                entity.HasMany(e => e.PreferredDays)
                     .WithOne(e => e.StudyCourse)
                     .HasForeignKey(e => e.StudyCourseId);
 
