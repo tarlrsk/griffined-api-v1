@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230727162134_Rename_PreferredDayModel")]
+    partial class RenamePreferredDayModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,7 +264,7 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("RegistrationRequestId");
 
-                    b.ToTable("NewCoursePreferredDayRequest", (string)null);
+                    b.ToTable("NewCoursePreferredDayRequests");
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
@@ -402,6 +405,37 @@ namespace griffinedapi.Migrations
                     b.HasIndex("RegistrationRequestId");
 
                     b.ToTable("Payment", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.PreferredDay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Day")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FromTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ToTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudyCourseId");
+
+                    b.ToTable("PreferredDay", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.ProfilePicture", b =>
@@ -1354,7 +1388,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.NewCourseRequest", "NewCourseRequest")
                         .WithMany("NewCourseSubjectRequests")
                         .HasForeignKey("NewCourseRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.Subject", "Subject")
@@ -1388,6 +1422,17 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.Navigation("RegistrationRequest");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.PreferredDay", b =>
+                {
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("PreferredDays")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StudyCourse");
                 });
 
             modelBuilder.Entity("griffined_api.Models.ProfilePicture", b =>
@@ -1801,6 +1846,8 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.StudyCourse", b =>
                 {
                     b.Navigation("CancellationRequests");
+
+                    b.Navigation("PreferredDays");
 
                     b.Navigation("StaffNotifications");
 

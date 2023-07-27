@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 
 namespace griffined_api.Services.RegistrationRequestService
@@ -38,10 +39,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
                 request.RegistrationRequestMembers.Add(member);
-                if (newRequestedCourses.MemberIds.Count() == 1)
-                {
-                    newRequestedCourses.Section = dbStudent.Nickname + "/" + dbStudent.FirstName;
-                }
             }
 
             if (newRequestedCourses.Type == StudyCourseType.Private && newRequestedCourses.MemberIds.Count() == 1)
@@ -56,11 +53,11 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
-                var requestedPreferredDay = new PreferredDayRequest();
+                var requestedPreferredDay = new NewCoursePreferredDayRequest();
                 requestedPreferredDay.Day = newPreferredDay.Day;
                 requestedPreferredDay.FromTime = newPreferredDay.FromTime;
                 requestedPreferredDay.ToTime = newPreferredDay.ToTime;
-                request.PreferredDayRequests.Add(requestedPreferredDay);
+                request.NewCoursePreferredDayRequests.Add(requestedPreferredDay);
             }
 
             if (newRequestedCourses.Courses == null || newRequestedCourses.Courses.Count == 0)
@@ -192,6 +189,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var newComment = new Comment();
                 newComment.Staff = staff;
+                newComment.comment = comment;
                 request.Comments.Add(newComment);
             }
             _context.RegistrationRequests.Add(request);
@@ -272,6 +270,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var newComment = new Comment();
                 newComment.Staff = staff;
+                newComment.comment = comment;
                 request.Comments.Add(newComment);
             }
 
@@ -286,7 +285,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<List<RegistrationRequestResponseDto>>> GetAllRegistrationRequests()
+        public async Task<ServiceResponse<List<RegistrationRequestResponseDto>>> ListRegistrationRequests()
         {
             var response = new ServiceResponse<List<RegistrationRequestResponseDto>>();
             var registrationRequests = await _context.RegistrationRequests
@@ -361,6 +360,96 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             response.StatusCode = 200;
             response.Data = data;
+            return response;
+        }
+        public async Task<ServiceResponse<RegistrationRequestEAMyRequestInfoResponseDto>> EAGetMyRequestInfo(int requestId)
+        {
+            var response = new ServiceResponse<RegistrationRequestEAMyRequestInfoResponseDto>();
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.NewCourseSubjectRequests)
+                                    .ThenInclude(s => s.Subject)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Course)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Level)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.NewCoursePreferredDayRequests)
+                            .Include(r => r.Comments)
+                            .FirstOrDefaultAsync(r => r.Id == requestId);
+            
+            if(dbRequest == null)
+                throw new BadRequestException($"Request with ID {requestId} is not found.");
+
+            var requestDetail = new RegistrationRequestEAMyRequestInfoResponseDto();
+            requestDetail.RequestId = dbRequest.Id;
+            requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
+            
+            foreach (var dbMember in dbRequest.RegistrationRequestMembers)
+            {
+                var member = new StudentNameResponseDto(){
+                    StudentId = dbMember.Student.Id,
+                    StudentCode = dbMember.Student.StudentCode,
+                    FullName = dbMember.Student.FullName,
+                    Nickname = dbMember.Student.Nickname,
+                };
+                requestDetail.Members.Add(member);
+            }
+
+            foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
+            {
+                var preferredDay = new PreferredDayResponseDto(){
+                    Day = dbPreferredDay.Day,
+                    FromTime = dbPreferredDay.FromTime,
+                    ToTime = dbPreferredDay.ToTime,
+                };
+                requestDetail.PreferredDays.Add(preferredDay);
+            }
+
+            foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
+            {
+                var requestedCourse = new RequestedCourseResponseDto(){
+                    CourseId = dbRequestedCourse.Course.Id,
+                    Course = dbRequestedCourse.Course.course,
+                    LevelId = dbRequestedCourse.LevelId,
+                    Level = dbRequestedCourse.Level?.level,
+                    TotalHours = dbRequestedCourse.TotalHours,
+                    StartDate = dbRequestedCourse.StartDate.ToString("dd-MMMM-yyyy"),
+                    EndDate = dbRequestedCourse.EndDate.ToString("ddd-MMMM-yyyy"),
+                    Method = dbRequestedCourse.Method,
+                };
+                foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                {
+                    var requestSubject = new RequestedSubjectResponseDto(){
+                        SubjectId = dbRequestSubject.Subject.Id,
+                        Subject = dbRequestSubject.Subject.subject,
+                        Hour = dbRequestSubject.Hour,
+                    };
+                    requestedCourse.subjects.Add(requestSubject);
+                }
+                requestDetail.Courses.Add(requestedCourse);
+            }
+
+            foreach (var dbComment in dbRequest.Comments)
+            {
+                var comment = new CommentResponseDto();
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
+                if(staff == null)
+                    throw new InternalServerException("Something went wrong on staff comment");
+                
+                comment.StaffId = staff.Id;
+                comment.Role = staff.Role;
+                comment.FullName = staff.FullName;
+                comment.CreatedAt = dbComment.DateCreated.ToString("dd-MMMM-yyyy HH:mm:ss");
+                comment.Comment = dbComment.comment;
+                requestDetail.Comments.Add(comment);
+            }
+
+            response.StatusCode = 200;
+            response.Data = requestDetail;
+
             return response;
         }
     }
