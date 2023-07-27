@@ -53,16 +53,6 @@ namespace griffined_api.Services.TeacherService
             await addStaffFireStoreAsync(teacher);
             _context.Teachers.Add(teacher);
 
-            if (newTeacher.WorkTimes != null)
-            {
-                teacher.WorkTimes = new List<WorkTime>();
-                foreach (var workTime in newTeacher.WorkTimes)
-                {
-                    var day = _mapper.Map<WorkTime>(workTime);
-                    teacher.WorkTimes.Add(day);
-                }
-            }
-
             await _context.SaveChangesAsync();
             await addStaffFireStoreAsync(teacher);
 
