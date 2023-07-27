@@ -53,11 +53,11 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
-                var requestedPreferredDay = new PreferredDayRequest();
+                var requestedPreferredDay = new NewCoursePreferredDayRequest();
                 requestedPreferredDay.Day = newPreferredDay.Day;
                 requestedPreferredDay.FromTime = newPreferredDay.FromTime;
                 requestedPreferredDay.ToTime = newPreferredDay.ToTime;
-                request.PreferredDayRequests.Add(requestedPreferredDay);
+                request.NewCoursePreferredDayRequests.Add(requestedPreferredDay);
             }
 
             if (newRequestedCourses.Courses == null || newRequestedCourses.Courses.Count == 0)
@@ -375,7 +375,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(c => c.Level)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                            .Include(r => r.PreferredDayRequests)
+                            .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.Comments)
                             .FirstOrDefaultAsync(r => r.Id == requestId);
             
@@ -398,7 +398,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Members.Add(member);
             }
 
-            foreach (var dbPreferredDay in dbRequest.PreferredDayRequests)
+            foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
             {
                 var preferredDay = new PreferredDayResponseDto(){
                     Day = dbPreferredDay.Day,
