@@ -33,9 +33,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("new-study-courses/{requestId}")]
-        public async Task<ActionResult> AddNewStudyCourses(NewStudyClassScheduleRequestDto newStudyClass, int requestId)
+        public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
-            return Ok(await _scheduleService.AddNewStudyClass(newStudyClass, requestId));
+            return Ok(await _scheduleService.AddNewStudyClass(newStudyClasses, requestId));
         } 
     }
 }
