@@ -30,14 +30,14 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
-        public async Task<ActionResult<ServiceResponse<RegistrationRequestResponseDto>>> GetAllRegistrationRequest()
+        public async Task<ActionResult> GetAllRegistrationRequest()
         {
             var response = await _registrationRequestService.ListRegistrationRequests();
             return Ok(response);
         }
         
         [HttpGet("ea/my-request/{requestId}"), Authorize(Roles = "ea, master")]
-        public async Task<ActionResult<ServiceResponse<RegistrationRequestEAMyRequestInfoResponseDto>>> EAGetMyRequestInfo(int requestId)
+        public async Task<ActionResult> EAGetMyRequestInfo(int requestId)
         {
             var response = await _registrationRequestService.EAGetMyRequestInfo(requestId);
             return Ok(response);
