@@ -98,7 +98,6 @@ namespace griffined_api.Services.ScheduleService
                                             .ThenInclude(s => s.Subject)
                                         .Include(c => c.Course)
                                         .Include(c => c.Level)
-                                        .Where(c => c.Status == CourseStatus.Ongoing || c.Status == CourseStatus.NotStarted)
                                         .ToListAsync();
 
             var studyCourses = new List<StudyCourseResponseDto>();
