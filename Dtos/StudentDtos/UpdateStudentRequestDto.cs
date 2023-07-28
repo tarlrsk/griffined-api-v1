@@ -8,7 +8,7 @@ namespace griffined_api.Dtos.StudentDtos
     public class UpdateStudentRequestDto
     {
         [Required]
-        public int Id { get; set; }
+        public string StudentCode { get; set; } = string.Empty;
         [Required]
         public string FirebaseId { get; set; } = string.Empty;
         [Required]
