@@ -13,7 +13,7 @@ namespace griffined_api.Models
         public int? StudentId { get; set; }
 
         public string FileName { get; set; } = string.Empty;
-        public string URL { get; set; } = string.Empty;
+        public string ObjectName { get; set; } = string.Empty; // specific path to the file
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student Student { get; set; } = new Student();
