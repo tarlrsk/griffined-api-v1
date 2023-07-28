@@ -69,6 +69,8 @@ namespace griffined_api.Services.StudentService
 
             _student.StudentCode = studentCode;
 
+            var data = _mapper.Map<StudentResponseDto>(_student);
+
             if (profilePicture != null)
             {
                 _student.ProfilePicture = new ProfilePicture();
@@ -80,22 +82,31 @@ namespace griffined_api.Services.StudentService
 
                 var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
                 var fileName = profilePicture.FileName;
+                var objectName = $"students/{studentCode}/profile/{fileName}";
 
                 using (var stream = pictureRequestDto.PictureData.OpenReadStream())
                 {
                     var storageObject = await _storageClient.UploadObjectAsync(
                         FIREBASE_BUCKET,
-                        $"students/{studentCode}/profile/{fileName}",
+                        objectName,
                         profilePicture.ContentType,
                         stream
                     );
 
-                    string url = await _urlSigner.SignAsync(storageObject.Bucket, $"students/{studentCode}/profile/{fileName}", TimeSpan.FromHours(1));
                     pictureEntity.FileName = fileName;
-                    // pictureEntity.URL = url;
-
+                    pictureEntity.ObjectName = objectName;
                 }
+                string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                var pictureResponseDto = new ProfilePictureResponseDto
+                {
+                    FileName = pictureEntity.FileName,
+                    ContentType = profilePicture.ContentType,
+                    URL = url
+                };
+
                 _student.ProfilePicture = pictureEntity;
+                data.ProfilePicture = pictureResponseDto;
             }
 
             if (files != null && files.Count() > 0)
@@ -111,20 +122,31 @@ namespace griffined_api.Services.StudentService
 
                     var fileEntity = _mapper.Map<StudentAdditionalFile>(fileRequestDto);
                     var fileName = file.FileName;
+                    var objectName = $"students/{studentCode}/documents/{fileName}";
 
                     using (var stream = fileRequestDto.FileData.OpenReadStream())
                     {
                         var storageObject = await _storageClient.UploadObjectAsync(
                             FIREBASE_BUCKET,
-                            $"students/{studentCode}/documents/{fileName}",
+                            objectName,
                             file.ContentType,
                             stream
                         );
 
                         fileEntity.FileName = fileName;
-                        // fileEntity.URL = storageObject.MediaLink;
+                        fileEntity.ObjectName = objectName;
                     }
+                    string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                    var fileResponseDto = new StudentAdditionalFilesResponseDto
+                    {
+                        FileName = fileEntity.FileName,
+                        ContentType = file.ContentType,
+                        URL = url
+                    };
+
                     _student.AdditionalFiles.Add(fileEntity);
+                    data.AdditionalFiles?.Add(fileResponseDto);
                 }
             }
 
@@ -132,7 +154,7 @@ namespace griffined_api.Services.StudentService
             await AddStudentFireStoreAsync(_student);
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<StudentResponseDto>(_student);
+            response.Data = data;
 
             return response;
         }
@@ -181,17 +203,61 @@ namespace griffined_api.Services.StudentService
             var response = new ServiceResponse<List<StudentResponseDto>>();
 
             var dbStudents = await _context.Students
+                .Include(s => s.ProfilePicture)
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
                 .Include(s => s.AdditionalFiles)
-                .Select(s => _mapper.Map<StudentResponseDto>(s))
                 .ToListAsync();
 
             if (dbStudents is null)
                 throw new NotFoundException("No students found.");
 
+            var data = dbStudents.Select(s => _mapper.Map<StudentResponseDto>(s)).ToList();
+
+            for (int i = 0; i < dbStudents.Count; i++)
+            {
+                var student = dbStudents[i];
+                if (student.ProfilePicture != null)
+                {
+                    string objectName = student.ProfilePicture.ObjectName;
+
+                    var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                    string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                    var pictureResponseDto = new ProfilePictureResponseDto
+                    {
+                        FileName = student.ProfilePicture.FileName,
+                        ContentType = objectMetaData.ContentType,
+                        URL = url
+                    };
+
+                    data[i].ProfilePicture = pictureResponseDto;
+                }
+
+                data[i].AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
+                if (student.AdditionalFiles != null && student.AdditionalFiles.Count != 0)
+                {
+                    foreach (var file in student.AdditionalFiles)
+                    {
+                        string objectName = file.ObjectName;
+
+                        var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                        string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                        var fileResponseDto = new StudentAdditionalFilesResponseDto
+                        {
+                            FileName = file.FileName,
+                            ContentType = objectMetaData.ContentType,
+                            URL = url
+                        };
+
+                        data[i].AdditionalFiles?.Add(fileResponseDto);
+                    }
+                }
+            }
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = dbStudents;
+            response.Data = data;
 
             return response;
         }
@@ -201,15 +267,58 @@ namespace griffined_api.Services.StudentService
             var response = new ServiceResponse<StudentResponseDto>();
 
             var dbStudent = await _context.Students
+                .Include(s => s.ProfilePicture)
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
                 .Include(s => s.AdditionalFiles)
                 .FirstOrDefaultAsync(s => s.StudentCode == studentCode);
+
             if (dbStudent is null)
                 throw new NotFoundException($"Student with ID '{studentCode}' not found.");
 
+            var data = _mapper.Map<StudentResponseDto>(dbStudent);
+
+            if (dbStudent.ProfilePicture != null)
+            {
+                string objectName = dbStudent.ProfilePicture.ObjectName;
+
+                var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                var pictureResponseDto = new ProfilePictureResponseDto
+                {
+                    FileName = dbStudent.ProfilePicture.FileName,
+                    ContentType = objectMetaData.ContentType,
+                    URL = url
+                };
+
+                data.ProfilePicture = pictureResponseDto;
+            }
+
+            if (dbStudent.AdditionalFiles != null && dbStudent.AdditionalFiles.Count != 0)
+            {
+                data.AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
+
+                foreach (var file in dbStudent.AdditionalFiles)
+                {
+                    string objectName = file.ObjectName;
+
+                    var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                    string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                    var fileResponseDto = new StudentAdditionalFilesResponseDto
+                    {
+                        FileName = file.FileName,
+                        ContentType = objectMetaData.ContentType,
+                        URL = url
+                    };
+
+                    data.AdditionalFiles.Add(fileResponseDto);
+                }
+            }
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<StudentResponseDto>(dbStudent);
+            response.Data = data;
 
             return response;
         }
@@ -228,8 +337,49 @@ namespace griffined_api.Services.StudentService
             if (dbStudent is null)
                 throw new NotFoundException($"Student with ID '{id}' not found.");
 
+            var data = _mapper.Map<StudentResponseDto>(dbStudent);
+
+            if (dbStudent.ProfilePicture != null)
+            {
+                string objectName = dbStudent.ProfilePicture.ObjectName;
+
+                var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                var pictureResponseDto = new ProfilePictureResponseDto
+                {
+                    FileName = dbStudent.ProfilePicture.FileName,
+                    ContentType = objectMetaData.ContentType,
+                    URL = url
+                };
+
+                data.ProfilePicture = pictureResponseDto;
+            }
+
+            if (dbStudent.AdditionalFiles != null && dbStudent.AdditionalFiles.Count != 0)
+            {
+                data.AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
+
+                foreach (var file in dbStudent.AdditionalFiles)
+                {
+                    string objectName = file.ObjectName;
+
+                    var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                    string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                    var fileResponseDto = new StudentAdditionalFilesResponseDto
+                    {
+                        FileName = file.FileName,
+                        ContentType = objectMetaData.ContentType,
+                        URL = url
+                    };
+
+                    data.AdditionalFiles.Add(fileResponseDto);
+                }
+            }
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<StudentResponseDto>(dbStudent);
+            response.Data = data;
 
             return response;
         }
