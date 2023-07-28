@@ -19,13 +19,15 @@ namespace griffined_api.Services.StudentService
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly StorageClient _storageClient;
+        private readonly UrlSigner _urlSigner;
 
-        public StudentService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, StorageClient storageClient)
+        public StudentService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, StorageClient storageClient, UrlSigner urlSigner)
         {
             _httpContextAccessor = httpContextAccessor;
             _context = context;
             _mapper = mapper;
             _storageClient = storageClient;
+            _urlSigner = urlSigner;
         }
 
         public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
@@ -88,11 +90,8 @@ namespace griffined_api.Services.StudentService
                         stream
                     );
 
+                    string url = await _urlSigner.SignAsync(storageObject.Bucket, $"students/{studentCode}/profile/{fileName}", TimeSpan.FromHours(1));
                     pictureEntity.FileName = fileName;
-
-                    UrlSigner urlSigner = UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")));
-                    string url = await urlSigner.SignAsync(storageObject.Bucket, $"students/{studentCode}/profile/{fileName}", TimeSpan.FromHours(1));
-
                     pictureEntity.URL = url;
 
                 }

@@ -84,6 +84,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
 
 var storageClient = StorageClient.Create();
+var urlSigner = UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")));
 builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
 
 builder.Services.ConfigureSwaggerGen(setup =>
