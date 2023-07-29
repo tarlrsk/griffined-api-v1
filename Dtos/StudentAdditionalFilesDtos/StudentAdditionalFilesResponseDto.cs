@@ -11,6 +11,9 @@ namespace griffined_api.Dtos.StudentAddtionalFilesDtos
         public string FileName { get; set; } = string.Empty;
 
         [Required]
+        public string ContentType { get; set; } = string.Empty;
+
+        [Required]
         public string URL { get; set; } = string.Empty;
     }
 }

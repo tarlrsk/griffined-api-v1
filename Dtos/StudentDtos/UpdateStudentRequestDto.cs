@@ -8,7 +8,7 @@ namespace griffined_api.Dtos.StudentDtos
     public class UpdateStudentRequestDto
     {
         [Required]
-        public int Id { get; set; }
+        public string StudentCode { get; set; } = string.Empty;
         [Required]
         public string FirebaseId { get; set; } = string.Empty;
         [Required]
@@ -20,7 +20,6 @@ namespace griffined_api.Dtos.StudentDtos
         public string FullName { get { return FirstName + " " + LastName; } }
         [Required]
         public string Nickname { get; set; } = string.Empty;
-        public string? ProfilePicture { get; set; }
         private DateTime _dob;
         [Required]
         public string DOB { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
@@ -46,8 +45,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+
         public ParentRequestDto? Parent { get; set; }
         public AddressRequestDto? Address { get; set; }
-        public ICollection<UpdateStudentAdditionalFilesRequestDto>? AdditionalFiles { get; set; }
     }
 }
