@@ -6,7 +6,7 @@ using griffined_api.Dtos.CommentDtos;
 
 namespace griffined_api.Dtos.RegistrationRequestDto
 {
-    public class RegistrationRequestEAMyRequestInfoResponseDto
+    public class RegistrationRequestPendingEADetailResponseDto
     {
         public int RequestId { get; set; }
         public string Section { get; set; } = string.Empty;
