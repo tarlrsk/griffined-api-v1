@@ -11,6 +11,8 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public string Course { get; set; } = string.Empty;
         public string? Level { get; set; }
         [Required]
+        public Method Method { get; set; }
+        [Required]
         public int TotalHours { get; set; }
         [Required]
         public string StartDate { get; set; } = string.Empty;
