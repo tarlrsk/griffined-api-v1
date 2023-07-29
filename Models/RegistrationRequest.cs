@@ -17,7 +17,7 @@ namespace griffined_api.Models
 
         public string Section { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public string Type { get; set; } = string.Empty;
+        public RegistrationRequestType Type { get; set; }
         public bool PaymentError { get; set; }
         public bool ScheduleError { get; set; }
         public bool NewCourseDetailError { get; set; }
@@ -32,6 +32,6 @@ namespace griffined_api.Models
         public virtual ICollection<NewCourseRequest> NewCourseRequests { get; set; } = new List<NewCourseRequest>();
         public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public virtual ICollection<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; } = new List<NewCoursePreferredDayRequest>();
-        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; } = new List<RegistrationRequestComment>();
     }
 }

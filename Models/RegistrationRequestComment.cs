@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class Comment
+    public class RegistrationRequestComment
     {
         public int Id { get; set; }
         public int? RegistrationRequestId { get; set; }
