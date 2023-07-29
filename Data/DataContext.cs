@@ -19,7 +19,7 @@ namespace griffined_api.Data
         public virtual DbSet<Appointment> Appointments { get; set; }
         public virtual DbSet<AppointmentMember> AppointmentMembers { get; set; }
         public virtual DbSet<CancellationRequest> CancellationRequests { get; set; }
-        public virtual DbSet<Comment> Comments { get; set; }
+        public virtual DbSet<RegistrationRequestComment> RegistrationRequestComments { get; set; }
         public virtual DbSet<Course> Courses { get; set; }
         public virtual DbSet<StudySubjectMember> StudySubjectMember { get; set; }
         public virtual DbSet<Level> Levels { get; set; }
@@ -129,16 +129,16 @@ namespace griffined_api.Data
                     .HasForeignKey(e => e.StudyClassId);
             });
 
-            modelBuilder.Entity<Comment>(entity =>
+            modelBuilder.Entity<RegistrationRequestComment>(entity =>
             {
-                entity.ToTable("Comment");
+                entity.ToTable("RegistrationRequestComment");
 
                 entity.HasOne(e => e.RegistrationRequest)
-                    .WithMany(e => e.Comments)
+                    .WithMany(e => e.RegistrationRequestComments)
                     .HasForeignKey(e => e.RegistrationRequestId);
 
                 entity.HasOne(e => e.Staff)
-                    .WithMany(e => e.Comments)
+                    .WithMany(e => e.RegistrationRequestComments)
                     .HasForeignKey(e => e.StaffId);
             });
 
@@ -291,7 +291,7 @@ namespace griffined_api.Data
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.Comments)
+                entity.HasMany(e => e.RegistrationRequestComments)
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
             });
@@ -334,7 +334,7 @@ namespace griffined_api.Data
                     .WithOne(e => e.ByStaff)
                     .HasForeignKey(e => e.StaffId);
 
-                entity.HasMany(e => e.Comments)
+                entity.HasMany(e => e.RegistrationRequestComments)
                     .WithOne(e => e.Staff)
                     .HasForeignKey(e => e.StaffId);
             });

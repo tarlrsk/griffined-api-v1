@@ -170,7 +170,7 @@ namespace griffined_api.Services.ScheduleService
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
-                            .Include(r => r.Comments)
+                            .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId);
 
             if (dbRequest == null)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230729124403_Change_RegistrationRequestType_To_Enum")]
+    partial class ChangeRegistrationRequestTypeToEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,6 +162,38 @@ namespace griffinedapi.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("CancellationRequest", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("RegistrationRequestId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StaffId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistrationRequestId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Comment", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Course", b =>
@@ -454,38 +489,6 @@ namespace griffinedapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RegistrationRequest", (string)null);
-                });
-
-            modelBuilder.Entity("griffined_api.Models.RegistrationRequestComment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("RegistrationRequestId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StaffId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<string>("comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegistrationRequestId");
-
-                    b.HasIndex("StaffId");
-
-                    b.ToTable("RegistrationRequestComment", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.RegistrationRequestMember", b =>
@@ -1280,6 +1283,25 @@ namespace griffinedapi.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("griffined_api.Models.Comment", b =>
+                {
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("Comments")
+                        .HasForeignKey("RegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Staff", "Staff")
+                        .WithMany("Comments")
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RegistrationRequest");
+
+                    b.Navigation("Staff");
+                });
+
             modelBuilder.Entity("griffined_api.Models.Level", b =>
                 {
                     b.HasOne("griffined_api.Models.Course", "Course")
@@ -1375,25 +1397,6 @@ namespace griffinedapi.Migrations
                         .HasForeignKey("griffined_api.Models.ProfilePicture", "StudentId");
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.RegistrationRequestComment", b =>
-                {
-                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
-                        .WithMany("RegistrationRequestComments")
-                        .HasForeignKey("RegistrationRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("griffined_api.Models.Staff", "Staff")
-                        .WithMany("RegistrationRequestComments")
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("RegistrationRequest");
-
-                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("griffined_api.Models.RegistrationRequestMember", b =>
@@ -1729,13 +1732,13 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.RegistrationRequest", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("NewCoursePreferredDayRequests");
 
                     b.Navigation("NewCourseRequests");
 
                     b.Navigation("Payment");
-
-                    b.Navigation("RegistrationRequestComments");
 
                     b.Navigation("RegistrationRequestMembers");
 
@@ -1749,7 +1752,7 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.Staff", b =>
                 {
-                    b.Navigation("RegistrationRequestComments");
+                    b.Navigation("Comments");
 
                     b.Navigation("StaffNotifications");
 

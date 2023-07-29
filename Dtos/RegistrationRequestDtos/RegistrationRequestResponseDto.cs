@@ -10,7 +10,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public int RequestId { get; set; }
         public List<StudentNameResponseDto> Members { get; set; } = new List<StudentNameResponseDto>();
         public string Section { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
+        public RegistrationRequestType Type { get; set; }
         public RegistrationStatus RegistrationStatus { get; set; }
         public PaymentType? PaymentType { get; set; }
         public PaymentStatus? PaymentStatus { get; set; }

@@ -176,7 +176,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             request.ByECId = byECId;
-            request.Type = nameof(RegistrationRequestType.NewRequestedCourse);
+            request.Type = RegistrationRequestType.NewRequestedCourse;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
 
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
@@ -186,10 +186,10 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             foreach (var comment in newRequestedCourses.Comments)
             {
-                var newComment = new Comment();
+                var newComment = new RegistrationRequestComment();
                 newComment.Staff = staff;
                 newComment.comment = comment;
-                request.Comments.Add(newComment);
+                request.RegistrationRequestComments.Add(newComment);
             }
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
@@ -267,16 +267,16 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             foreach (var comment in newRequest.Comments)
             {
-                var newComment = new Comment();
+                var newComment = new RegistrationRequestComment();
                 newComment.Staff = staff;
                 newComment.comment = comment;
-                request.Comments.Add(newComment);
+                request.RegistrationRequestComments.Add(newComment);
             }
 
             request.ByECId = byECId;
             request.PaymentType = newRequest.PaymentType;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
-            request.Type = nameof(RegistrationRequestType.StudentAdding); //TODO Change request.type to enum if need
+            request.Type = RegistrationRequestType.StudentAdding;
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
@@ -375,7 +375,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
-                            .Include(r => r.Comments)
+                            .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId);
             
             if(dbRequest == null)
@@ -431,7 +431,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Courses.Add(requestedCourse);
             }
 
-            foreach (var dbComment in dbRequest.Comments)
+            foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
                 var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
