@@ -52,14 +52,6 @@ namespace griffined_api.Services.ScheduleService
                 {
                     if (newSchedule.SubjectId == newStudySubject.Id)
                     {
-                        var schedule = new Schedule()
-                        {
-                            Date = newSchedule.Date,
-                            FromTime = newSchedule.FromTime,
-                            ToTime = newSchedule.ToTime,
-                            Type = ScheduleType.Class,
-                        };
-
                         var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId);
                         if (teacher == null)
                             throw new BadRequestException($"Teacher with ID {newSchedule.TeacherId} is not found.");
@@ -106,7 +98,6 @@ namespace griffined_api.Services.ScheduleService
                                             .ThenInclude(s => s.Subject)
                                         .Include(c => c.Course)
                                         .Include(c => c.Level)
-                                        .Where(c => c.Status == CourseStatus.Ongoing || c.Status == CourseStatus.NotStarted)
                                         .ToListAsync();
 
             var studyCourses = new List<StudyCourseResponseDto>();
@@ -116,7 +107,7 @@ namespace griffined_api.Services.ScheduleService
                 studyCourse.StudyCourseId = dbStudyCourse.Id;
                 studyCourse.Section = dbStudyCourse.Section;
                 studyCourse.Course = dbStudyCourse.Course.course;
-                studyCourse.Level = dbStudyCourse.Level.level;
+                studyCourse.Level = dbStudyCourse.Level?.level;
                 studyCourse.TotalHour = dbStudyCourse.TotalHour;
                 studyCourse.StartDate = dbStudyCourse.StartDate.ToString("dd-MMMM-yyyy");
                 studyCourse.EndDate = dbStudyCourse.EndDate.ToString("dd-MMMM-yyyy");
@@ -136,7 +127,8 @@ namespace griffined_api.Services.ScheduleService
                             student.Add(dbMember.StudentId);
                         }
                     }
-                    studyCourse.StudySubjects.Add(new StudySubjectResponseDto(){
+                    studyCourse.StudySubjects.Add(new StudySubjectResponseDto()
+                    {
                         StudySubjectId = dbStudySubject.Id,
                         Subject = dbStudySubject.Subject.subject,
                     });
@@ -147,7 +139,7 @@ namespace griffined_api.Services.ScheduleService
                             Date = dbStudyClass.Schedule.Date,
                             FromTime = dbStudyClass.Schedule.FromTime,
                             ToTime = dbStudyClass.Schedule.ToTime,
-                            CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + dbStudyCourse.Level.level,
+                            CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickName = dbStudyClass.Teacher.Nickname,
@@ -161,6 +153,91 @@ namespace griffined_api.Services.ScheduleService
                 studyCourses.Add(studyCourse);
             }
             response.Data = studyCourses;
+            response.StatusCode = 200;
+            return response;
+        }
+
+        public async Task<ServiceResponse<String>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.NewCourseSubjectRequests)
+                                    .ThenInclude(s => s.Subject)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Course)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Level)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.NewCoursePreferredDayRequests)
+                            .Include(r => r.Comments)
+                            .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (dbRequest == null)
+                throw new BadRequestException($"Request with ID {requestId} is not found.");
+
+            var dbTeachers = await _context.Teachers.ToListAsync();
+
+            foreach (var dbNewRequestedCourse in dbRequest.NewCourseRequests)
+            {
+                var studyCourse = new StudyCourse()
+                {
+                    Course = dbNewRequestedCourse.Course,
+                    Level = dbNewRequestedCourse.Level,
+                    Section = dbRequest.Section,
+                    TotalHour = dbNewRequestedCourse.TotalHours,
+                    StartDate = dbNewRequestedCourse.StartDate,
+                    EndDate = dbNewRequestedCourse.EndDate,
+                    StudyCourseType = dbNewRequestedCourse.StudyCourseType,
+                    Method = dbNewRequestedCourse.Method,
+                    Status = CourseStatus.Pending
+                };
+                foreach (var dbNewRequestedSubject in dbNewRequestedCourse.NewCourseSubjectRequests)
+                {
+                    var studySubject = new StudySubject()
+                    {
+                        Subject = dbNewRequestedSubject.Subject
+                    };
+                    foreach (var student in dbRequest.RegistrationRequestMembers)
+                    {
+                        var member = new StudySubjectMember()
+                        {
+                            Student = student.Student,
+                            Status = StudySubjectMemberStatus.Pending,
+                        };
+                        studySubject.StudySubjectMember.Add(member);
+                    }
+                    var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.Id && c.CourseId == dbNewRequestedCourse.Id);
+                    foreach(var requestedStudyClass in requestedStudyClasses)
+                    {
+                        var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId);
+                        if(dbTeacher == null)
+                            throw new BadRequestException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
+                        
+                         var studyClass = new StudyClass()
+                        {
+                            isMakeup = false,
+                            ClassNumber = requestedStudyClass.ClassNo,
+                            Teacher = dbTeacher,
+                            Schedule = new Schedule()
+                            {
+                                Date = requestedStudyClass.Date,
+                                FromTime = requestedStudyClass.FromTime,
+                                ToTime = requestedStudyClass.ToTime,
+                                Type = ScheduleType.Class,
+                            }
+                        };
+                        studySubject.StudyClasses.Add(studyClass);
+                    }
+                    studyCourse.StudySubjects.Add(studySubject);
+                }
+                _context.StudyCourses.Add(studyCourse);
+            }
+
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingPayment;
+            await _context.SaveChangesAsync();
+            
+            var response = new ServiceResponse<String>();
             response.StatusCode = 200;
             return response;
         }

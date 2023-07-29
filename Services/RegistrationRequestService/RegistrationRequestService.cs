@@ -21,7 +21,6 @@ namespace griffined_api.Services.RegistrationRequestService
 
         public async Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
         {
-            // TODO Add Comment on Request
             var response = new ServiceResponse<String>();
             var request = new RegistrationRequest();
 
