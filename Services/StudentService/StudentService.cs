@@ -391,6 +391,8 @@ namespace griffined_api.Services.StudentService
 
             var student = await _context.Students
                             .Include(s => s.ProfilePicture)
+                            .Include(s => s.Parent)
+                            .Include(s => s.Address)
                             .Include(s => s.AdditionalFiles)
                             .FirstOrDefaultAsync(s => s.StudentCode == updatedStudent.StudentCode);
             if (student is null)
@@ -453,7 +455,7 @@ namespace griffined_api.Services.StudentService
 
             if (updatedStudent.Address != null)
             {
-                var _address = await _context.Addresses.FirstOrDefaultAsync(a => a.Student.StudentCode == updatedStudent.StudentCode);
+                var _address = await _context.Addresses.FirstOrDefaultAsync(a => a.Student != null && a.Student.StudentCode == updatedStudent.StudentCode);
                 if (_address is null)
                 {
                     var address = new Address();
@@ -490,8 +492,6 @@ namespace griffined_api.Services.StudentService
                         await DeleteFileFromStorage(oldObjectName);
                     }
 
-                    student.ProfilePicture = new ProfilePicture();
-
                     var pictureRequestDto = new AddProfilePictureRequestDto
                     {
                         PictureData = profilePicture
@@ -522,7 +522,8 @@ namespace griffined_api.Services.StudentService
                         URL = url
                     };
 
-                    student.ProfilePicture = pictureEntity;
+                    student.ProfilePicture.FileName = pictureEntity.FileName;
+                    student.ProfilePicture.ObjectName = pictureEntity.ObjectName;
                     data.ProfilePicture = pictureResponseDto;
                 }
 
@@ -539,12 +540,13 @@ namespace griffined_api.Services.StudentService
                                 string oldObjectName = oldFile.ObjectName;
                                 var oldObjectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, oldObjectName);
                                 await DeleteFileFromStorage(oldObjectName);
+                                _context.StudentAdditionalFiles.Remove(oldFile);
                             }
                         }
 
                         student.AdditionalFiles?.Clear();
 
-                        student.AdditionalFiles = new List<StudentAdditionalFile>();
+                        data.AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
 
                         foreach (var file in files)
                         {
@@ -578,7 +580,7 @@ namespace griffined_api.Services.StudentService
                                 URL = url
                             };
 
-                            student.AdditionalFiles.Add(fileEntity);
+                            student.AdditionalFiles?.Add(fileEntity);
                             data.AdditionalFiles?.Add(fileResponseDto);
                         }
                     }
