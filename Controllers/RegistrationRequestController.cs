@@ -36,10 +36,10 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         
-        [HttpGet("ea/my-request/{requestId}"), Authorize(Roles = "ea, master")]
-        public async Task<ActionResult> EAGetMyRequestInfo(int requestId)
+        [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> GetPendingEADetail(int requestId)
         {
-            var response = await _registrationRequestService.EAGetMyRequestInfo(requestId);
+            var response = await _registrationRequestService.GetPendingEADetail(requestId);
             return Ok(response);
         }
     }

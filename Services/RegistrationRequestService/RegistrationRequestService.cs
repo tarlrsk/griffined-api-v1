@@ -361,9 +361,9 @@ namespace griffined_api.Services.RegistrationRequestService
             response.Data = data;
             return response;
         }
-        public async Task<ServiceResponse<RegistrationRequestEAMyRequestInfoResponseDto>> EAGetMyRequestInfo(int requestId)
+        public async Task<ServiceResponse<RegistrationRequestPendingEADetailResponseDto>> GetPendingEADetail(int requestId)
         {
-            var response = new ServiceResponse<RegistrationRequestEAMyRequestInfoResponseDto>();
+            var response = new ServiceResponse<RegistrationRequestPendingEADetailResponseDto>();
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
                                 .ThenInclude(c => c.NewCourseSubjectRequests)
@@ -376,12 +376,13 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.RegistrationRequestComments)
-                            .FirstOrDefaultAsync(r => r.Id == requestId);
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse 
+                                                && r.RegistrationStatus == RegistrationStatus.PendingEA);
             
             if(dbRequest == null)
-                throw new BadRequestException($"Request with ID {requestId} is not found.");
+                throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
 
-            var requestDetail = new RegistrationRequestEAMyRequestInfoResponseDto();
+            var requestDetail = new RegistrationRequestPendingEADetailResponseDto();
             requestDetail.RequestId = dbRequest.Id;
             requestDetail.Section = dbRequest.Section;
             requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
