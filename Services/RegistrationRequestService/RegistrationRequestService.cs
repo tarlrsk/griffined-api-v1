@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
+using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -376,20 +377,21 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.RegistrationRequestComments)
-                            .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse 
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
                                                 && r.RegistrationStatus == RegistrationStatus.PendingEA);
-            
-            if(dbRequest == null)
+
+            if (dbRequest == null)
                 throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto();
             requestDetail.RequestId = dbRequest.Id;
             requestDetail.Section = dbRequest.Section;
             requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
-            
+
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
             {
-                var member = new StudentNameResponseDto(){
+                var member = new StudentNameResponseDto()
+                {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
                     FullName = dbMember.Student.FullName,
@@ -400,7 +402,8 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
             {
-                var preferredDay = new PreferredDayResponseDto(){
+                var preferredDay = new PreferredDayResponseDto()
+                {
                     Day = dbPreferredDay.Day,
                     FromTime = dbPreferredDay.FromTime,
                     ToTime = dbPreferredDay.ToTime,
@@ -410,7 +413,8 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
             {
-                var requestedCourse = new RequestedCourseResponseDto(){
+                var requestedCourse = new RequestedCourseResponseDto()
+                {
                     CourseId = dbRequestedCourse.Course.Id,
                     Course = dbRequestedCourse.Course.course,
                     LevelId = dbRequestedCourse.LevelId,
@@ -422,7 +426,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 };
                 foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
                 {
-                    var requestSubject = new RequestedSubjectResponseDto(){
+                    var requestSubject = new RequestedSubjectResponseDto()
+                    {
                         SubjectId = dbRequestSubject.Subject.Id,
                         Subject = dbRequestSubject.Subject.subject,
                         Hour = dbRequestSubject.Hour,
@@ -436,9 +441,9 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var comment = new CommentResponseDto();
                 var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if(staff == null)
+                if (staff == null)
                     throw new InternalServerException("Something went wrong on staff comment");
-                
+
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
@@ -452,5 +457,141 @@ namespace griffined_api.Services.RegistrationRequestService
 
             return response;
         }
+        public async Task<ServiceResponse<RegistrationRequestPendingPaymentResponseDto>> GetPendingPaymentDetail(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.NewCourseSubjectRequests)
+                                    .ThenInclude(s => s.Subject)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Course)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Level)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.StudyCourse)
+                                    .ThenInclude(c => c!.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Schedule)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.StudyCourse)
+                                    .ThenInclude(c => c!.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Teacher)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.NewCoursePreferredDayRequests)
+                            .Include(r => r.RegistrationRequestComments)
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
+                                                && r.RegistrationStatus == RegistrationStatus.PendingPayment);
+
+            if (dbRequest == null)
+                throw new BadRequestException($"Pending Payment Request with ID {requestId} is not found.");
+
+            var requestDetail = new RegistrationRequestPendingPaymentResponseDto();
+            requestDetail.RequestId = dbRequest.Id;
+            requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
+
+            foreach (var dbMember in dbRequest.RegistrationRequestMembers)
+            {
+                var member = new StudentNameResponseDto()
+                {
+                    StudentId = dbMember.Student.Id,
+                    StudentCode = dbMember.Student.StudentCode,
+                    FullName = dbMember.Student.FullName,
+                    Nickname = dbMember.Student.Nickname,
+                };
+                requestDetail.Members.Add(member);
+            }
+
+            foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
+            {
+                var preferredDay = new PreferredDayResponseDto()
+                {
+                    Day = dbPreferredDay.Day,
+                    FromTime = dbPreferredDay.FromTime,
+                    ToTime = dbPreferredDay.ToTime,
+                };
+                requestDetail.PreferredDays.Add(preferredDay);
+            }
+
+
+            var rawSchedules = new List<ScheduleResponseDto>();
+            foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
+            {
+                var requestedCourse = new RequestedCourseResponseDto()
+                {
+                    CourseId = dbRequestedCourse.Course.Id,
+                    Course = dbRequestedCourse.Course.course,
+                    LevelId = dbRequestedCourse.LevelId,
+                    Level = dbRequestedCourse.Level?.level,
+                    TotalHours = dbRequestedCourse.TotalHours,
+                    StartDate = dbRequestedCourse.StartDate.ToString("dd-MMMM-yyyy"),
+                    EndDate = dbRequestedCourse.EndDate.ToString("ddd-MMMM-yyyy"),
+                    Method = dbRequestedCourse.Method,
+                };
+                foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                {
+                    var requestSubject = new RequestedSubjectResponseDto()
+                    {
+                        SubjectId = dbRequestSubject.Subject.Id,
+                        Subject = dbRequestSubject.Subject.subject,
+                        Hour = dbRequestSubject.Hour,
+                    };
+                    requestedCourse.subjects.Add(requestSubject);
+                }
+                requestDetail.Courses.Add(requestedCourse);
+
+                if (dbRequestedCourse.StudyCourse == null)
+                    throw new InternalServerException($"New Course with ID {dbRequestedCourse.Id} does not contain any StudyCourse");
+
+                foreach (var dbStudySubject in dbRequestedCourse.StudyCourse.StudySubjects)
+                {
+                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                    {
+                        var schedule = new ScheduleResponseDto()
+                        {
+                            ClassNo = dbStudyClass.ClassNumber,
+                            Date = dbStudyClass.Schedule.Date,
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
+                            CourseSubject = dbRequestedCourse.Course.course + " "
+                                            + (dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId)).Subject.subject
+                                            + " " + (dbRequestedCourse.Level?.level ?? ""),
+                            TeacherId = dbStudyClass.Teacher.Id,
+                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                            TeacherLastName = dbStudyClass.Teacher.LastName,
+                            TeacherNickName = dbStudyClass.Teacher.Nickname,
+                            //TODO Teacher Work Type
+                        };
+                        rawSchedules.Add(schedule);
+                    }
+                }
+            }
+
+            requestDetail.Schedules = rawSchedules.OrderBy(s => DateTime.ParseExact(s.Date + s.FromTime, "dd-MMMM-yyyyHH:mm", null)).ToList();
+
+            foreach (var dbComment in dbRequest.RegistrationRequestComments)
+            {
+                var comment = new CommentResponseDto();
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
+                if (staff == null)
+                    throw new InternalServerException("Something went wrong on staff comment");
+
+                comment.StaffId = staff.Id;
+                comment.Role = staff.Role;
+                comment.FullName = staff.FullName;
+                comment.CreatedAt = dbComment.DateCreated.ToString("dd-MMMM-yyyy HH:mm:ss");
+                comment.Comment = dbComment.comment;
+                requestDetail.Comments.Add(comment);
+            }
+
+            var response = new ServiceResponse<RegistrationRequestPendingPaymentResponseDto>();
+            response.Data = requestDetail;
+            response.StatusCode = 200;
+            return response;
+        }
     }
+
+
 }
