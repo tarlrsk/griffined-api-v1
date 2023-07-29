@@ -391,6 +391,7 @@ namespace griffined_api.Services.StudentService
 
         public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile profilePicture, ICollection<IFormFile> files)
         {
+            // TODO new logic for firebase files, current logic is temporarily
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
