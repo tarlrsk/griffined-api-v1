@@ -214,9 +214,8 @@ namespace griffined_api.Services.StudentService
 
             var data = dbStudents.Select(s => _mapper.Map<StudentResponseDto>(s)).ToList();
 
-            for (int i = 0; i < dbStudents.Count; i++)
+            foreach (var student in dbStudents)
             {
-                var student = dbStudents[i];
                 if (student.ProfilePicture != null)
                 {
                     string objectName = student.ProfilePicture.ObjectName;
@@ -231,27 +230,33 @@ namespace griffined_api.Services.StudentService
                         URL = url
                     };
 
-                    data[i].ProfilePicture = pictureResponseDto;
+                    var index = dbStudents.IndexOf(student);
+                    data[index].ProfilePicture = pictureResponseDto;
                 }
 
-                data[i].AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
-                if (student.AdditionalFiles != null && student.AdditionalFiles.Count != 0)
+                var studentAdditionalFiles = data.FirstOrDefault(s => s.StudentCode == student.StudentCode)?.AdditionalFiles;
+                if (studentAdditionalFiles != null)
                 {
-                    foreach (var file in student.AdditionalFiles)
+                    studentAdditionalFiles.Clear();
+
+                    if (student.AdditionalFiles != null && student.AdditionalFiles.Count != 0)
                     {
-                        string objectName = file.ObjectName;
-
-                        var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
-                        string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
-
-                        var fileResponseDto = new StudentAdditionalFilesResponseDto
+                        foreach (var file in student.AdditionalFiles)
                         {
-                            FileName = file.FileName,
-                            ContentType = objectMetaData.ContentType,
-                            URL = url
-                        };
+                            string objectName = file.ObjectName;
 
-                        data[i].AdditionalFiles?.Add(fileResponseDto);
+                            var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+                            string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+
+                            var fileResponseDto = new StudentAdditionalFilesResponseDto
+                            {
+                                FileName = file.FileName,
+                                ContentType = objectMetaData.ContentType,
+                                URL = url
+                            };
+
+                            studentAdditionalFiles.Add(fileResponseDto);
+                        }
                     }
                 }
             }
