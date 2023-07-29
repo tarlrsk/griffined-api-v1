@@ -168,7 +168,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
                 newRequestedCourseRequest.Course = course;
                 newRequestedCourseRequest.TotalHours = newRequestedCourse.TotalHours;
-                newRequestedCourseRequest.Method = newRequestedCourseRequest.Method;
+                newRequestedCourseRequest.Method = newRequestedCourse.Method;
                 newRequestedCourseRequest.StartDate = DateTime.Parse(newRequestedCourse.StartDate);
                 newRequestedCourseRequest.EndDate = DateTime.Parse(newRequestedCourse.EndDate);
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
