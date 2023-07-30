@@ -48,7 +48,7 @@ namespace griffined_api.Services.ScheduleService
             {
                 var studySubject = new StudySubject();
                 var classNumber = 1;
-                foreach (var newSchedule in newRequestedSchedule.schedules)
+                foreach (var newSchedule in newRequestedSchedule.Schedules)
                 {
                     if (newSchedule.SubjectId == newStudySubject.Id)
                     {
@@ -140,12 +140,13 @@ namespace griffined_api.Services.ScheduleService
                             FromTime = dbStudyClass.Schedule.FromTime,
                             ToTime = dbStudyClass.Schedule.ToTime,
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                            TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickName = dbStudyClass.Teacher.Nickname,
                             // TODO Teacher Work Type
                         };
-                        studyCourse.Schedule.Add(schedule);
+                        studyCourse.Schedules.Add(schedule);
                     }
                 }
 
@@ -169,7 +170,6 @@ namespace griffined_api.Services.ScheduleService
                                 .ThenInclude(c => c.Level)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                            .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId);
 
@@ -190,7 +190,8 @@ namespace griffined_api.Services.ScheduleService
                     EndDate = dbNewRequestedCourse.EndDate,
                     StudyCourseType = dbNewRequestedCourse.StudyCourseType,
                     Method = dbNewRequestedCourse.Method,
-                    Status = CourseStatus.Pending
+                    Status = CourseStatus.Pending,
+                    NewCourseRequest = dbNewRequestedCourse,
                 };
                 foreach (var dbNewRequestedSubject in dbNewRequestedCourse.NewCourseSubjectRequests)
                 {

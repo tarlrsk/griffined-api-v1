@@ -20,6 +20,7 @@ namespace griffined_api.Models
 
         public virtual StudyCourseType StudyCourseType { get; set; }
         public virtual Method Method { get; set; }
+        public int? StudyCourseId { get; set; }
 
         public virtual ICollection<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; } = new List<NewCourseSubjectRequest>();
 
@@ -31,5 +32,7 @@ namespace griffined_api.Models
 
         [ForeignKey(nameof(CourseId))]
         public virtual Course Course { get; set; } = new Course();
+        [ForeignKey(nameof(StudyCourseId))]
+        public virtual StudyCourse? StudyCourse { get; set; }
     }
 }
