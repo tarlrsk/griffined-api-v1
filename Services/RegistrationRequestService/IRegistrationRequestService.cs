@@ -12,6 +12,6 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<String>> AddStudentAddingRequest(StudyAddingRequestDto newRequest);
         Task<ServiceResponse<List<RegistrationRequestResponseDto>>> ListRegistrationRequests();
         Task<ServiceResponse<RegistrationRequestPendingEADetailResponseDto>> GetPendingEADetail(int requestId);
-        Task<ServiceResponse<RegistrationRequestPendingPaymentResponseDto>> GetPendingECDetail(int requestId);
+        Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId);
     }
 }

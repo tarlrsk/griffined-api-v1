@@ -7,7 +7,7 @@ using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Dtos.RegistrationRequestDto
 {
-    public class RegistrationRequestPendingPaymentResponseDto
+    public class RegistrationRequestPendingECResponseDto
     {
         public int RequestId { get; set; }
         public string Section { get; set; } = string.Empty;
