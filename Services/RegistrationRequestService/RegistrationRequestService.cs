@@ -386,6 +386,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto();
             requestDetail.RequestId = dbRequest.Id;
             requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationRequestType = dbRequest.Type;
             requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
@@ -457,7 +458,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             return response;
         }
-        public async Task<ServiceResponse<RegistrationRequestPendingPaymentResponseDto>> GetPendingPaymentDetail(int requestId)
+        public async Task<ServiceResponse<RegistrationRequestPendingPaymentResponseDto>> GetPendingECDetail(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
@@ -490,6 +491,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var requestDetail = new RegistrationRequestPendingPaymentResponseDto();
             requestDetail.RequestId = dbRequest.Id;
             requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationRequestType = dbRequest.Type;
             requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
