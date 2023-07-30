@@ -12,7 +12,7 @@ namespace Extensions.DateTimeExtensions
         }
 
         // Extension method to covert String to DateTime. This method returns null if parsing is failed.
-        public static DateTime? ToDateTime(this string dateString, string format = "dd-MMMM-yyyy")
+        public static DateTime? ToDate(this string dateString, string format = "dd-MMMM-yyyy")
         {
             if (DateTime.TryParseExact(dateString, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime result))
             {
