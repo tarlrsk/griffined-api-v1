@@ -482,7 +482,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
-                                                && r.RegistrationStatus == RegistrationStatus.PendingPayment);
+                                                && r.RegistrationStatus == RegistrationStatus.PendingEC);
 
             if (dbRequest == null)
                 throw new BadRequestException($"Pending Payment Request with ID {requestId} is not found.");

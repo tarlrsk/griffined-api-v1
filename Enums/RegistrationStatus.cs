@@ -5,12 +5,11 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 
-namespace griffined_api.Models
+namespace griffined_api.Enums
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum RegistrationStatus
     {
-        PendingPayment,
         PendingEC,
         PendingEA,
         PendingOA,

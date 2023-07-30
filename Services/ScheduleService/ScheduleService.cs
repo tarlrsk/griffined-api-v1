@@ -235,7 +235,7 @@ namespace griffined_api.Services.ScheduleService
                 _context.StudyCourses.Add(studyCourse);
             }
 
-            dbRequest.RegistrationStatus = RegistrationStatus.PendingPayment;
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             await _context.SaveChangesAsync();
             
             var response = new ServiceResponse<String>();
