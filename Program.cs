@@ -11,6 +11,7 @@ global using griffined_api.Dtos.StudentAddtionalFilesDtos;
 global using griffined_api.Dtos.TeacherDtos;
 global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
+global using griffined_api.Enums;
 global using griffined_api.Exceptions;
 global using griffined_api.Middlewares;
 global using griffined_api.Models;
