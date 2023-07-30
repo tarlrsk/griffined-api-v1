@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    public class Payment
+    public class RegistrationRequestPaymentFile
     {
         public int Id { get; set; }
         public int? RegistrationRequestId { get; set; }
 
-        public string File { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
+        public string ObjectName { get; set; } = string.Empty; // specific path to the file
 
         [ForeignKey(nameof(RegistrationRequestId))]
-        public virtual RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
+        public virtual RegistrationRequest? RegistrationRequest { get; set; }
     }
 }
