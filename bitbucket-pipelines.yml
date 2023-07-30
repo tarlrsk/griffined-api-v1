@@ -25,6 +25,15 @@ definitions:
           - zip -r main.zip .
         artifacts:
           - 'bin/Publish/main.zip'
+    - step: &buildNoZip
+        name: 'Dotnet Core Build'
+        caches:
+          - dotnetcore
+        script:
+          - dotnet build
+          - dotnet publish -c Release -o ./bin/Publish
+        artifacts:
+          - 'bin/Publish/main.zip'
     - step: &updateDB
         name: Update Database
         trigger: manual
@@ -78,10 +87,10 @@ pipelines:
   pull-requests:
     '{feature/*,refactor/*,update/*,migration/*,fix/*,test/*}':
       - step: *stg_env
-      - step: *build
+      - step: *buildNoZip
     '{hotfix/*}':
       - step: *prod_env
-      - step: *build
+      - step: *buildNoZip
     
   branches:
     '{main}':

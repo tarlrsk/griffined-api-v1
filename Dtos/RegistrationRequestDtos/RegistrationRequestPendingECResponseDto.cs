@@ -7,14 +7,15 @@ using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Dtos.RegistrationRequestDto
 {
-    public class RegistrationRequestPendingPaymentResponseDto
+    public class RegistrationRequestPendingECResponseDto
     {
         public int RequestId { get; set; }
         public string Section { get; set; } = string.Empty;
+        public RegistrationRequestType RegistrationRequestType { get; set; }
         public List<StudentNameResponseDto> Members { get; set; } = new List<StudentNameResponseDto>();
         public List<PreferredDayResponseDto> PreferredDays { get; set; } = new List<PreferredDayResponseDto>();
         public List<RequestedCourseResponseDto> Courses { get; set; } = new List<RequestedCourseResponseDto>();
-        public List<ScheduleResponseDto> Schedules {get;set;} = new List<ScheduleResponseDto>();
+        public List<ScheduleResponseDto> Schedules { get; set; } = new List<ScheduleResponseDto>();
         public RegistrationStatus RegistrationStatus { get; set; }
         public List<CommentResponseDto> Comments { get; set; } = new List<CommentResponseDto>();
     }
