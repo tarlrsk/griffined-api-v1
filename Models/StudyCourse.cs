@@ -28,6 +28,7 @@ namespace griffined_api.Models
 
         [ForeignKey(nameof(LevelId))]
         public virtual Level? Level { get; set; } = new Level();
+        public virtual NewCourseRequest? NewCourseRequest { get; set; }
 
         public virtual ICollection<StudentAddingRequest> StudentAddingRequests { get; set; } = new List<StudentAddingRequest>();
         public virtual ICollection<StudySubject> StudySubjects { get; set; } = new List<StudySubject>();

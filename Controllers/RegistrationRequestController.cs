@@ -42,5 +42,12 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.GetPendingEADetail(requestId);
             return Ok(response);
         }
+
+        [HttpGet("pending-payment/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> GetPendingPaymentDetail(int requestId)
+        {
+            var response = await _registrationRequestService.GetPendingPaymentDetail(requestId);
+            return Ok(response);
+        }
     }
 }

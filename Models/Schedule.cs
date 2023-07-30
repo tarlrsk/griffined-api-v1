@@ -13,7 +13,7 @@ namespace griffined_api.Models
         public int? AppointmentId { get; set; }
 
         private DateTime _date;
-        public string Date { get { return _date.ToString("dd-MMMM-yyyy HH:mm:ss");} set {_date = DateTime.Parse(value);} }
+        public string Date { get { return _date.ToString("dd-MMMM-yyyy");} set {_date = DateTime.Parse(value);} }
         private TimeOnly _fromTime;
         public string FromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
         private TimeOnly _toTime;

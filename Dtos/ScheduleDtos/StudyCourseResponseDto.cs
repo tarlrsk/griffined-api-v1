@@ -19,6 +19,6 @@ namespace griffined_api.Dtos.ScheduleDtos
         public List<StudySubjectResponseDto> StudySubjects { get; set; } = new List<StudySubjectResponseDto>();
         public StudyCourseType StudyCourseType { get; set; }
         public CourseStatus CourseStatus { get; set; }
-        public List<ScheduleResponseDto> Schedule { get; set; } = new List<ScheduleResponseDto>();
+        public List<ScheduleResponseDto> Schedules { get; set; } = new List<ScheduleResponseDto>();
     }
 }
