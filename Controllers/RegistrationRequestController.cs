@@ -43,8 +43,8 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("pending-payment/{requestId}"), Authorize(Roles = "ea, master")]
-        public async Task<ActionResult> GetPendingPaymentDetail(int requestId)
+        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> GetPendingECDetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingECDetail(requestId);
             return Ok(response);
