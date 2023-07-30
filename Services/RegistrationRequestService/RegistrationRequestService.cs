@@ -386,6 +386,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto();
             requestDetail.RequestId = dbRequest.Id;
             requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationRequestType = dbRequest.Type;
             requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
@@ -457,7 +458,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             return response;
         }
-        public async Task<ServiceResponse<RegistrationRequestPendingPaymentResponseDto>> GetPendingPaymentDetail(int requestId)
+        public async Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
@@ -487,9 +488,10 @@ namespace griffined_api.Services.RegistrationRequestService
             if (dbRequest == null)
                 throw new BadRequestException($"Pending Payment Request with ID {requestId} is not found.");
 
-            var requestDetail = new RegistrationRequestPendingPaymentResponseDto();
+            var requestDetail = new RegistrationRequestPendingECResponseDto();
             requestDetail.RequestId = dbRequest.Id;
             requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationRequestType = dbRequest.Type;
             requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
@@ -586,7 +588,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Comments.Add(comment);
             }
 
-            var response = new ServiceResponse<RegistrationRequestPendingPaymentResponseDto>();
+            var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>();
             response.Data = requestDetail;
             response.StatusCode = 200;
             return response;
