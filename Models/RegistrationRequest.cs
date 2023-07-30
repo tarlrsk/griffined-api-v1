@@ -28,8 +28,8 @@ namespace griffined_api.Models
         public virtual PaymentStatus? PaymentStatus { get; set; }
 
         public virtual ICollection<StudentAddingRequest> StudentAddingRequest { get; set; } = new List<StudentAddingRequest>();
-        public virtual ICollection<Payment> Payment { get; set; } = new List<Payment>();
         public virtual ICollection<NewCourseRequest> NewCourseRequests { get; set; } = new List<NewCourseRequest>();
+        public virtual ICollection<RegistrationRequestPaymentFile> RegistrationRequestPaymentFiles { get; set; } = new List<RegistrationRequestPaymentFile>();
         public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public virtual ICollection<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; } = new List<NewCoursePreferredDayRequest>();
         public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; } = new List<RegistrationRequestComment>();

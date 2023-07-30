@@ -29,6 +29,7 @@ namespace griffined_api.Data
         public virtual DbSet<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; }
         public virtual DbSet<ProfilePicture> ProfilePictures { get; set; }
         public virtual DbSet<RegistrationRequest> RegistrationRequests { get; set; }
+        public virtual DbSet<RegistrationRequestPaymentFile> RegistrationRequestPaymentFiles { get; set; }
         public virtual DbSet<RegistrationRequestMember> RegistrationRequestMembers { get; set; }
         public virtual DbSet<Schedule> Schedules { get; set; }
         public virtual DbSet<Staff> Staff { get; set; }
@@ -244,15 +245,6 @@ namespace griffined_api.Data
                     .HasForeignKey<Parent>(e => e.StudentId);
             });
 
-            modelBuilder.Entity<Payment>(entity =>
-            {
-                entity.ToTable("Payment");
-
-                entity.HasOne(e => e.RegistrationRequest)
-                    .WithMany(e => e.Payment)
-                    .HasForeignKey(e => e.RegistrationRequestId);
-            });
-
             modelBuilder.Entity<NewCoursePreferredDayRequest>(entity =>
             {
                 entity.ToTable("NewCoursePreferredDayRequest");
@@ -279,10 +271,6 @@ namespace griffined_api.Data
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
 
-                entity.HasMany(e => e.Payment)
-                    .WithOne(e => e.RegistrationRequest)
-                    .HasForeignKey(e => e.RegistrationRequestId);
-
                 entity.HasMany(e => e.NewCourseRequests)
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
@@ -295,8 +283,21 @@ namespace griffined_api.Data
                     .WithOne(e => e.RegistrationRequest)
                     .HasForeignKey(e => e.RegistrationRequestId);
 
+                entity.HasMany(e => e.RegistrationRequestPaymentFiles)
+                    .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
+
                 entity.HasMany(e => e.RegistrationRequestComments)
                     .WithOne(e => e.RegistrationRequest)
+                    .HasForeignKey(e => e.RegistrationRequestId);
+            });
+
+            modelBuilder.Entity<RegistrationRequestPaymentFile>(entity =>
+            {
+                entity.ToTable("RegistrationRequestPaymentFile");
+
+                entity.HasOne(e => e.RegistrationRequest)
+                    .WithMany(e => e.RegistrationRequestPaymentFiles)
                     .HasForeignKey(e => e.RegistrationRequestId);
             });
 
