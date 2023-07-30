@@ -39,7 +39,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? CountryOfSchool { get; set; }
         public string? LevelOfStudy { get; set; }
         public string? Program { get; set; }
-        public DateTime D1ateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
         public string? TargetUniversity { get; set; }
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
