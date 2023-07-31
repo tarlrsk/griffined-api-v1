@@ -49,5 +49,12 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.GetPendingECDetail(requestId);
             return Ok(response);
         }
+
+        [HttpPut("submit-payment"), Authorize(Roles = "ec, master")]
+        public async Task<ActionResult> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> paymentFile)
+        {
+            var response = await _registrationRequestService.SubmitPayment(requestId, paymentType, paymentFile);
+            return Ok(response);
+        }
     }
 }

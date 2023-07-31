@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
+using Google.Cloud.Storage.V1;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -13,11 +14,19 @@ namespace griffined_api.Services.RegistrationRequestService
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public RegistrationRequestService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IFirebaseService _firebaseService;
+        public RegistrationRequestService
+        (
+            IMapper mapper,
+            DataContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IFirebaseService firebaseService
+        )
         {
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
+            _firebaseService = firebaseService;
         }
 
         public async Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
@@ -590,6 +599,49 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>();
             response.Data = requestDetail;
+            response.StatusCode = 200;
+            return response;
+        }
+
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> paymentFiles)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                                    .Include(r => r.RegistrationRequestPaymentFiles)
+                                    .FirstOrDefaultAsync(
+                                    r => r.Id == requestId
+                                    && r.RegistrationStatus == RegistrationStatus.PendingEC);
+            if (dbRequest == null)
+                throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
+
+            var incomingFileName = paymentFiles.Select(f => f.FileName).ToList();
+            var deleteFiles = dbRequest.RegistrationRequestPaymentFiles
+                                        .Where(f => !incomingFileName
+                                        .Contains(f.FileName))
+                                        .ToList();
+            foreach (var deleteFile in deleteFiles)
+            {
+                await _firebaseService.DeleteStorageFile(deleteFile.ObjectName);
+                dbRequest.RegistrationRequestPaymentFiles.Remove(deleteFile);
+            }
+
+            foreach (var paymentFile in paymentFiles)
+            {
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, paymentFile);
+                if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.FileName == paymentFile.FileName))
+                {
+                    dbRequest.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
+                    {
+                        FileName = paymentFile.FileName,
+                        ObjectName = objectName,
+                    });
+                }
+            }
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
+            // TODO Store PaymentById
+            await _context.SaveChangesAsync();
+
+
+            var response = new ServiceResponse<String>();
             response.StatusCode = 200;
             return response;
         }
