@@ -28,11 +28,11 @@ namespace griffined_api.integrations
             var response = new ServiceResponse<ChangeUserPasswordDto>();
         }
 
-        public async Task<String> UploadRegistrationRequestPaymentFile(int requestId, IFormFile file)
+        public async Task<String> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file)
         {
             var fileName = file.FileName;
-            var year = DateTime.Now.Year.ToString();
-            var month = DateTime.Now.Month.ToString().ToLower();
+            var year = createdDate.Year.ToString();
+            var month = createdDate.ToString("MMMM").ToLower();
             var objectName = $"registration-requests/{year}/{month}/{requestId}/{fileName}";
             using (var stream = file.OpenReadStream())
                 {
