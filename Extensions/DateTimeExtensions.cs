@@ -12,13 +12,13 @@ namespace Extensions.DateTimeExtensions
         }
 
         // Extension method to convert TimeOnly to String (format: HH:mm:ss)
-        public static string ToTimeString(this TimeOnly time, string format = "HH:mm:ss")
+        public static string ToTimeString(this TimeOnly time, string format = "HH:mm")
         {
             return time.ToString(format, CultureInfo.InvariantCulture);
         }
 
         // Extension method to convert DateTime to String (format: dd-MMMM-yyyy HH:mm:ss).
-        public static string ToDateTimeString(this DateTime dateTime, string format = "dd-MMMM-yy HH:mm:ss")
+        public static string ToDateTimeString(this DateTime dateTime, string format = "dd-MMMM-yy HH:mm")
         {
             return dateTime.ToString(format, CultureInfo.InvariantCulture);
         }
