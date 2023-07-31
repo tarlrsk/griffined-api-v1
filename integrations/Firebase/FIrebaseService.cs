@@ -33,7 +33,7 @@ namespace griffined_api.integrations
             var fileName = file.FileName;
             var year = DateTime.Now.Year.ToString();
             var month = DateTime.Now.Month.ToString().ToLower();
-            var objectName = $"registration-requests/{year}/{month}/{requestId}{fileName}";
+            var objectName = $"registration-requests/{year}/{month}/{requestId}/{fileName}";
             using (var stream = file.OpenReadStream())
                 {
                     var storageObject = await _storageClient.UploadObjectAsync(
