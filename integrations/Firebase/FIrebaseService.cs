@@ -32,7 +32,7 @@ namespace griffined_api.integrations
         {
             var fileName = file.FileName;
             var year = createdDate.Year.ToString();
-            var month = createdDate.ToString("MMMM").ToLower();
+            var month = $"{createdDate.Month.ToString()}-{createdDate.ToString("MMMM").ToLower()}";
             var objectName = $"registration-requests/{year}/{month}/{requestId}/{fileName}";
             using (var stream = file.OpenReadStream())
                 {

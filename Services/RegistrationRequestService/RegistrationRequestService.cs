@@ -6,6 +6,7 @@ using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using Google.Cloud.Storage.V1;
+using System.Net;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -204,7 +205,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
 
@@ -290,7 +291,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             return response;
         }
 
@@ -367,7 +368,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 data.Add(requestDto);
 
             }
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             response.Data = data;
             return response;
         }
@@ -462,7 +463,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Comments.Add(comment);
             }
 
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             response.Data = requestDetail;
 
             return response;
@@ -599,7 +600,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>();
             response.Data = requestDetail;
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             return response;
         }
 
@@ -642,7 +643,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
 
             var response = new ServiceResponse<String>();
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             return response;
         }
     }
