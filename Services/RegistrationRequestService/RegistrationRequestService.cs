@@ -291,7 +291,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
 
@@ -368,7 +368,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 data.Add(requestDto);
 
             }
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             response.Data = data;
             return response;
         }
@@ -463,7 +463,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Comments.Add(comment);
             }
 
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             response.Data = requestDetail;
 
             return response;
@@ -600,7 +600,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>();
             response.Data = requestDetail;
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
 
@@ -627,6 +627,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var paymentFile in paymentFiles)
             {
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, paymentFile);
                 if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.FileName == paymentFile.FileName))
                 {
                     var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, paymentFile);
@@ -643,7 +644,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
 
             var response = new ServiceResponse<String>();
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
     }
