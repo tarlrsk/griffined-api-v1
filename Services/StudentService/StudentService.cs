@@ -138,7 +138,7 @@ namespace griffined_api.Services.StudentService
                     }
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                    var fileResponseDto = new StudentAdditionalFilesResponseDto
+                    var fileResponseDto = new FilesResponseDto
                     {
                         FileName = fileEntity.FileName,
                         ContentType = file.ContentType,
@@ -248,7 +248,7 @@ namespace griffined_api.Services.StudentService
                             var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                             string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                            var fileResponseDto = new StudentAdditionalFilesResponseDto
+                            var fileResponseDto = new FilesResponseDto
                             {
                                 FileName = file.FileName,
                                 ContentType = objectMetaData.ContentType,
@@ -302,7 +302,7 @@ namespace griffined_api.Services.StudentService
 
             if (dbStudent.AdditionalFiles != null && dbStudent.AdditionalFiles.Count != 0)
             {
-                data.AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
+                data.AdditionalFiles = new List<FilesResponseDto>();
 
                 foreach (var file in dbStudent.AdditionalFiles)
                 {
@@ -311,7 +311,7 @@ namespace griffined_api.Services.StudentService
                     var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                    var fileResponseDto = new StudentAdditionalFilesResponseDto
+                    var fileResponseDto = new FilesResponseDto
                     {
                         FileName = file.FileName,
                         ContentType = objectMetaData.ContentType,
@@ -363,7 +363,7 @@ namespace griffined_api.Services.StudentService
 
             if (dbStudent.AdditionalFiles != null && dbStudent.AdditionalFiles.Count != 0)
             {
-                data.AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
+                data.AdditionalFiles = new List<FilesResponseDto>();
 
                 foreach (var file in dbStudent.AdditionalFiles)
                 {
@@ -372,7 +372,7 @@ namespace griffined_api.Services.StudentService
                     var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                    var fileResponseDto = new StudentAdditionalFilesResponseDto
+                    var fileResponseDto = new FilesResponseDto
                     {
                         FileName = file.FileName,
                         ContentType = objectMetaData.ContentType,
@@ -551,7 +551,7 @@ namespace griffined_api.Services.StudentService
 
                         student.AdditionalFiles?.Clear();
 
-                        data.AdditionalFiles = new List<StudentAdditionalFilesResponseDto>();
+                        data.AdditionalFiles = new List<FilesResponseDto>();
 
                         foreach (var file in files)
                         {
@@ -578,7 +578,7 @@ namespace griffined_api.Services.StudentService
                             }
                             string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                            var fileResponseDto = new StudentAdditionalFilesResponseDto
+                            var fileResponseDto = new FilesResponseDto
                             {
                                 FileName = fileEntity.FileName,
                                 ContentType = file.ContentType,
