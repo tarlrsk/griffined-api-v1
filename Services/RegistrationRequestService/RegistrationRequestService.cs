@@ -604,7 +604,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> paymentFiles)
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> newPaymentFiles)
         {
             var dbRequest = await _context.RegistrationRequests
                                     .Include(r => r.RegistrationRequestPaymentFiles)
@@ -614,7 +614,7 @@ namespace griffined_api.Services.RegistrationRequestService
             if (dbRequest == null)
                 throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
 
-            var incomingFileName = paymentFiles.Select(f => f.FileName).ToList();
+            var incomingFileName = newPaymentFiles.Select(f => f.FileName).ToList();
             var deleteFiles = dbRequest.RegistrationRequestPaymentFiles
                                         .Where(f => !incomingFileName
                                         .Contains(f.FileName))
@@ -625,15 +625,14 @@ namespace griffined_api.Services.RegistrationRequestService
                 dbRequest.RegistrationRequestPaymentFiles.Remove(deleteFile);
             }
 
-            foreach (var paymentFile in paymentFiles)
+            foreach (var newPaymentFile in newPaymentFiles)
             {
-                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, paymentFile);
-                if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.FileName == paymentFile.FileName))
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
+                if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.FileName == newPaymentFile.FileName))
                 {
-                    var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, paymentFile);
                     dbRequest.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
                     {
-                        FileName = paymentFile.FileName,
+                        FileName = newPaymentFile.FileName,
                         ObjectName = objectName,
                     });
                 }
