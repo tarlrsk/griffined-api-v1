@@ -491,8 +491,6 @@ namespace griffined_api.Services.StudentService
                 {
                     string oldObjectName = student.ProfilePicture.ObjectName;
 
-                    var oldObjectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, oldObjectName);
-
                     if (!string.IsNullOrEmpty(oldObjectName))
                     {
                         await DeleteFileFromStorage(oldObjectName);
