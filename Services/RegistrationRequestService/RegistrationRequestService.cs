@@ -696,8 +696,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     LevelId = dbRequestedCourse.LevelId,
                     Level = dbRequestedCourse.Level?.level,
                     TotalHours = dbRequestedCourse.TotalHours,
-                    StartDate = DateTimeExtensions.ToDateString(dbRequestedCourse.StartDate),
-                    EndDate = DateTimeExtensions.ToDateString(dbRequestedCourse.EndDate),
+                    StartDate = dbRequestedCourse.StartDate.ToDateString(),
+                    EndDate = dbRequestedCourse.EndDate.ToDateString(),
                     Method = dbRequestedCourse.Method,
                 };
                 foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
@@ -735,7 +735,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
-                comment.CreatedAt = DateTimeExtensions.ToDateTimeString(dbComment.DateCreated);
+                comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
                 comment.Comment = dbComment.comment;
                 requestDetail.Comments.Add(comment);
             }
