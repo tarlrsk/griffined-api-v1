@@ -544,7 +544,6 @@ namespace griffined_api.Services.StudentService
                             foreach (var oldFile in oldFiles)
                             {
                                 string oldObjectName = oldFile.ObjectName;
-                                var oldObjectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, oldObjectName);
                                 await DeleteFileFromStorage(oldObjectName);
                                 _context.StudentAdditionalFiles.Remove(oldFile);
                             }

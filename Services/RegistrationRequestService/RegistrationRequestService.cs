@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
+using Google.Cloud.Storage.V1;
+using System.Net;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -13,11 +15,19 @@ namespace griffined_api.Services.RegistrationRequestService
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public RegistrationRequestService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IFirebaseService _firebaseService;
+        public RegistrationRequestService
+        (
+            IMapper mapper,
+            DataContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IFirebaseService firebaseService
+        )
         {
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
+            _firebaseService = firebaseService;
         }
 
         public async Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
@@ -195,7 +205,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
 
@@ -281,7 +291,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
 
@@ -358,7 +368,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 data.Add(requestDto);
 
             }
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             response.Data = data;
             return response;
         }
@@ -453,7 +463,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Comments.Add(comment);
             }
 
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             response.Data = requestDetail;
 
             return response;
@@ -590,7 +600,50 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>();
             response.Data = requestDetail;
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
+            return response;
+        }
+
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> newPaymentFiles)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                                    .Include(r => r.RegistrationRequestPaymentFiles)
+                                    .FirstOrDefaultAsync(
+                                    r => r.Id == requestId
+                                    && r.RegistrationStatus == RegistrationStatus.PendingEC);
+            if (dbRequest == null)
+                throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
+
+            var incomingFileName = newPaymentFiles.Select(f => f.FileName).ToList();
+            var deleteFiles = dbRequest.RegistrationRequestPaymentFiles
+                                        .Where(f => !incomingFileName
+                                        .Contains(f.FileName))
+                                        .ToList();
+            foreach (var deleteFile in deleteFiles)
+            {
+                await _firebaseService.DeleteStorageFile(deleteFile.ObjectName);
+                dbRequest.RegistrationRequestPaymentFiles.Remove(deleteFile);
+            }
+
+            foreach (var newPaymentFile in newPaymentFiles)
+            {
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
+                if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
+                {
+                    dbRequest.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
+                    {
+                        FileName = newPaymentFile.FileName,
+                        ObjectName = objectName,
+                    });
+                }
+            }
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
+            // TODO Store PaymentById
+            await _context.SaveChangesAsync();
+
+
+            var response = new ServiceResponse<String>();
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
     }

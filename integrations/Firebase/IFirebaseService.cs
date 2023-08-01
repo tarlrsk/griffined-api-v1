@@ -8,5 +8,7 @@ namespace griffined_api.integrations.Firebase
     public interface IFirebaseService
     {
         Task ChangePasswordWithUid(string uid, string newPassword);
+        Task<String> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file);
+        Task DeleteStorageFile(string objectName);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using griffined_api.Dtos.ScheduleDtos;
 
@@ -78,7 +79,7 @@ namespace griffined_api.Services.ScheduleService
             }
             _context.StudyCourses.Add(studyCourse);
             await _context.SaveChangesAsync();
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             return response;
         }
 
@@ -154,7 +155,7 @@ namespace griffined_api.Services.ScheduleService
                 studyCourses.Add(studyCourse);
             }
             response.Data = studyCourses;
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             return response;
         }
 
@@ -239,7 +240,7 @@ namespace griffined_api.Services.ScheduleService
             await _context.SaveChangesAsync();
             
             var response = new ServiceResponse<String>();
-            response.StatusCode = 200;
+            response.StatusCode = (int)HttpStatusCode.OK;;
             return response;
         }
     }
