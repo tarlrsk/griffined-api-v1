@@ -18,7 +18,7 @@ namespace Extensions.DateTimeExtensions
         }
 
         // Extension method to convert DateTime to String (format: dd-MMMM-yyyy HH:mm:ss).
-        public static string ToDateTimeString(this DateTime dateTime, string format = "dd-MMMM-yy HH:mm")
+        public static string ToDateTimeString(this DateTime dateTime, string format = "dd-MMMM-yy HH:mm:ss")
         {
             return dateTime.ToString(format, CultureInfo.InvariantCulture);
         }
