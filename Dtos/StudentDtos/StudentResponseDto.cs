@@ -1,3 +1,4 @@
+using Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +20,8 @@ namespace griffined_api.Dtos.StudentDtos
         private DateTime _dob;
         public string DOB
         {
-            get { return _dob.ToString("dd-MMMM-yyyy", System.Globalization.CultureInfo.InvariantCulture); }
-            set { _dob = DateTime.Parse(value, System.Globalization.CultureInfo.InvariantCulture); }
+            get { return _dob.ToDateString(); }
+            set { _dob = DOB.ToDateTime(); }
         }
         public int Age
         {
@@ -39,7 +40,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? CountryOfSchool { get; set; }
         public string? LevelOfStudy { get; set; }
         public string? Program { get; set; }
-        public DateTime D1ateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
         public string? TargetUniversity { get; set; }
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
