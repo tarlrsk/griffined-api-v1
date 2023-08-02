@@ -31,7 +31,7 @@ namespace griffined_api.Services.StudentService
             _urlSigner = urlSigner;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile profilePicture, ICollection<IFormFile> files)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile? profilePicture, ICollection<IFormFile>? files)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -230,12 +230,14 @@ namespace griffined_api.Services.StudentService
 
                     var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+                    ulong? size = objectMetaData.Size;
 
                     var pictureResponseDto = new FilesResponseDto
                     {
                         FileName = student.ProfilePicture.FileName,
                         ContentType = objectMetaData.ContentType,
-                        URL = url
+                        URL = url,
+                        Size = size
                     };
 
                     data[index].ProfilePicture = pictureResponseDto;
@@ -254,14 +256,15 @@ namespace griffined_api.Services.StudentService
 
                             var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                             string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+                            ulong? size = objectMetaData.Size;
 
                             var fileResponseDto = new FilesResponseDto
                             {
                                 FileName = file.FileName,
                                 ContentType = objectMetaData.ContentType,
-                                URL = url
+                                URL = url,
+                                Size = size
                             };
-
                             studentAdditionalFiles.Add(fileResponseDto);
                         }
                     }
@@ -296,12 +299,14 @@ namespace griffined_api.Services.StudentService
 
                 var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                 string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+                ulong? size = objectMetaData.Size;
 
                 var pictureResponseDto = new FilesResponseDto
                 {
                     FileName = dbStudent.ProfilePicture.FileName,
                     ContentType = objectMetaData.ContentType,
-                    URL = url
+                    URL = url,
+                    Size = size
                 };
 
                 data.ProfilePicture = pictureResponseDto;
@@ -317,12 +322,14 @@ namespace griffined_api.Services.StudentService
 
                     var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+                    ulong? size = objectMetaData.Size;
 
                     var fileResponseDto = new FilesResponseDto
                     {
                         FileName = file.FileName,
                         ContentType = objectMetaData.ContentType,
-                        URL = url
+                        URL = url,
+                        Size = size
                     };
 
                     data.AdditionalFiles.Add(fileResponseDto);
@@ -357,12 +364,14 @@ namespace griffined_api.Services.StudentService
 
                 var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                 string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+                ulong? size = objectMetaData.Size;
 
                 var pictureResponseDto = new FilesResponseDto
                 {
                     FileName = dbStudent.ProfilePicture.FileName,
                     ContentType = objectMetaData.ContentType,
-                    URL = url
+                    URL = url,
+                    Size = size
                 };
 
                 data.ProfilePicture = pictureResponseDto;
@@ -378,12 +387,14 @@ namespace griffined_api.Services.StudentService
 
                     var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+                    ulong? size = objectMetaData.Size;
 
                     var fileResponseDto = new FilesResponseDto
                     {
                         FileName = file.FileName,
                         ContentType = objectMetaData.ContentType,
-                        URL = url
+                        URL = url,
+                        Size = size
                     };
 
                     data.AdditionalFiles.Add(fileResponseDto);
@@ -396,7 +407,7 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile profilePicture, ICollection<IFormFile> files)
+        public async Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile? profilePicture, ICollection<IFormFile>? files)
         {
             // TODO new logic for firebase files, current logic is temporarily
             var response = new ServiceResponse<StudentResponseDto>();
@@ -443,16 +454,16 @@ namespace griffined_api.Services.StudentService
 
             if (updatedStudent.Parent != null)
             {
-                var _parent = await _context.Parents.FirstOrDefaultAsync(p => p.Student.StudentCode == updatedStudent.StudentCode);
+                var _parent = await _context.Parents.FirstOrDefaultAsync(p => p.Student != null && p.Student.StudentCode == updatedStudent.StudentCode);
                 if (_parent is null)
                 {
                     var parent = new Parent();
-                    parent.FirstName = updatedStudent.Parent.FirstName;
-                    parent.LastName = updatedStudent.Parent.LastName;
-                    parent.Relationship = updatedStudent.Parent.Relationship;
-                    parent.Email = updatedStudent.Parent.Email;
-                    parent.Line = updatedStudent.Parent.Line;
-                    parent.Phone = updatedStudent.Parent.Phone;
+                    parent.FirstName = updatedStudent.Parent.FirstName!;
+                    parent.LastName = updatedStudent.Parent.LastName!;
+                    parent.Relationship = updatedStudent.Parent.Relationship!;
+                    parent.Email = updatedStudent.Parent.Email!;
+                    parent.Line = updatedStudent.Parent.Line!;
+                    parent.Phone = updatedStudent.Parent.Phone!;
                     parent.Student = student;
                     await _context.AddAsync(parent);
                 }
@@ -460,11 +471,11 @@ namespace griffined_api.Services.StudentService
                 {
                     _mapper.Map(updatedStudent.Parent, _parent);
 
-                    _parent.FirstName = updatedStudent.Parent.FirstName;
-                    _parent.LastName = updatedStudent.Parent.LastName;
-                    _parent.Relationship = updatedStudent.Parent.Relationship;
-                    _parent.Email = updatedStudent.Parent.Email;
-                    _parent.Line = updatedStudent.Parent.Line;
+                    _parent.FirstName = updatedStudent.Parent.FirstName!;
+                    _parent.LastName = updatedStudent.Parent.LastName!;
+                    _parent.Relationship = updatedStudent.Parent.Relationship!;
+                    _parent.Email = updatedStudent.Parent.Email!;
+                    _parent.Line = updatedStudent.Parent.Line!;
                 }
 
             }
@@ -475,11 +486,11 @@ namespace griffined_api.Services.StudentService
                 if (_address is null)
                 {
                     var address = new Address();
-                    address.address = updatedStudent.Address.Address;
-                    address.Subdistrict = updatedStudent.Address.Subdistrict;
-                    address.District = updatedStudent.Address.District;
-                    address.Province = updatedStudent.Address.Province;
-                    address.Zipcode = updatedStudent.Address.Zipcode;
+                    address.address = updatedStudent.Address.Address!;
+                    address.Subdistrict = updatedStudent.Address.Subdistrict!;
+                    address.District = updatedStudent.Address.District!;
+                    address.Province = updatedStudent.Address.Province!;
+                    address.Zipcode = updatedStudent.Address.Zipcode!;
                     address.Student = student;
                     await _context.AddAsync(address);
                 }
@@ -487,11 +498,11 @@ namespace griffined_api.Services.StudentService
                 {
                     _mapper.Map(updatedStudent.Address, _address);
 
-                    _address.address = updatedStudent.Address.Address;
-                    _address.Subdistrict = updatedStudent.Address.Subdistrict;
-                    _address.District = updatedStudent.Address.District;
-                    _address.Province = updatedStudent.Address.Province;
-                    _address.Zipcode = updatedStudent.Address.Zipcode;
+                    _address.address = updatedStudent.Address.Address!;
+                    _address.Subdistrict = updatedStudent.Address.Subdistrict!;
+                    _address.District = updatedStudent.Address.District!;
+                    _address.Province = updatedStudent.Address.Province!;
+                    _address.Zipcode = updatedStudent.Address.Zipcode!;
                 }
             }
 

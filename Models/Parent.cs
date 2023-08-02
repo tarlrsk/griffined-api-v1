@@ -21,7 +21,7 @@ namespace griffined_api.Models
         public string Line { get; set; } = string.Empty;
 
         [ForeignKey(nameof(StudentId))]
-        public virtual Student Student { get; set; } = new Student();
+        public virtual Student? Student { get; set; } = new Student();
 
 
     }

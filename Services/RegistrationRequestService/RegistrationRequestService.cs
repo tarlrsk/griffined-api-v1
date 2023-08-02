@@ -716,12 +716,15 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbPaymentFile in dbRequest.RegistrationRequestPaymentFiles)
             {
                 var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
-                var ObjectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                ulong? size = objectMetaData.Size;
+
                 requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
                     FileName = dbPaymentFile.FileName,
-                    ContentType = ObjectMetaData.ContentType,
-                    URL = url
+                    ContentType = objectMetaData.ContentType,
+                    URL = url,
+                    Size = size
                 });
             }
 
