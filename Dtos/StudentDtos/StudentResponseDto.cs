@@ -47,7 +47,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? HealthInformation { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public ProfilePictureResponseDto? ProfilePicture { get; set; }
+        public FilesResponseDto? ProfilePicture { get; set; }
         public ParentResponseDto? Parent { get; set; }
         public AddressResponseDto? Address { get; set; }
         public ICollection<FilesResponseDto>? AdditionalFiles { get; set; }
