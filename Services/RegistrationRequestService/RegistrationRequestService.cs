@@ -1,3 +1,4 @@
+using Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,8 +66,8 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var requestedPreferredDay = new NewCoursePreferredDayRequest();
                 requestedPreferredDay.Day = newPreferredDay.Day;
-                requestedPreferredDay.FromTime = newPreferredDay.FromTime;
-                requestedPreferredDay.ToTime = newPreferredDay.ToTime;
+                requestedPreferredDay.FromTime = newPreferredDay.FromTime.ToTimeSpan();
+                requestedPreferredDay.ToTime = newPreferredDay.ToTime.ToTimeSpan();
                 request.NewCoursePreferredDayRequests.Add(requestedPreferredDay);
             }
 
@@ -416,8 +417,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 var preferredDay = new PreferredDayResponseDto()
                 {
                     Day = dbPreferredDay.Day,
-                    FromTime = dbPreferredDay.FromTime,
-                    ToTime = dbPreferredDay.ToTime,
+                    FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
+                    ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),
                 };
                 requestDetail.PreferredDays.Add(preferredDay);
             }
@@ -521,8 +522,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 var preferredDay = new PreferredDayResponseDto()
                 {
                     Day = dbPreferredDay.Day,
-                    FromTime = dbPreferredDay.FromTime,
-                    ToTime = dbPreferredDay.ToTime,
+                    FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
+                    ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),
                 };
                 requestDetail.PreferredDays.Add(preferredDay);
             }
@@ -564,9 +565,9 @@ namespace griffined_api.Services.RegistrationRequestService
                         var schedule = new ScheduleResponseDto()
                         {
                             ClassNo = dbStudyClass.ClassNumber,
-                            Date = dbStudyClass.Schedule.Date,
-                            FromTime = dbStudyClass.Schedule.FromTime,
-                            ToTime = dbStudyClass.Schedule.ToTime,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                             CourseSubject = dbRequestedCourse.Course.course + " "
                                             + (dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId)).Subject.subject
                                             + " " + (dbRequestedCourse.Level?.level ?? ""),

@@ -11,8 +11,8 @@ namespace Extensions.DateTimeExtensions
             return dateTime.ToString(format, CultureInfo.InvariantCulture);
         }
 
-        // Extension method to convert TimeOnly to String (format: HH:mm:ss)
-        public static string ToTimeString(this TimeOnly time, string format = "HH:mm")
+        // Extension method to convert TimeOnly to String (format: HH:mm)
+        public static string ToTimeSpanString(this TimeSpan time, string format = "HH:mm")
         {
             return time.ToString(format, CultureInfo.InvariantCulture);
         }
@@ -38,12 +38,12 @@ namespace Extensions.DateTimeExtensions
             }
         }
 
-        // Extension method to convert String to TimeOnly. This method throws an argument exception when the time format or time string is invalid.
-        public static TimeOnly ToTime(this string timeString)
+        // Extension method to convert String to TimeSpan. This method throws an argument exception when the time format or time string is invalid.
+        public static TimeSpan ToTimeSpan(this string timeString)
         {
-            TimeOnly result;
+            TimeSpan result;
 
-            if (TimeOnly.TryParse(timeString, out result))
+            if (TimeSpan.TryParse(timeString, out result))
             {
                 return result;
             }

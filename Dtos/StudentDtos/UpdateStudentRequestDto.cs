@@ -1,3 +1,4 @@
+using Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,15 +21,14 @@ namespace griffined_api.Dtos.StudentDtos
         public string FullName { get { return FirstName + " " + LastName; } }
         [Required]
         public string Nickname { get; set; } = string.Empty;
-        private DateTime _dob;
-        [Required]
-        public string DOB { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
+
+        public string DOB { get; set; } = string.Empty;
         public int Age
         {
             get
             {
                 int _age = 0;
-                _age = DateTime.Now.Subtract(_dob).Days;
+                _age = DateTime.Now.Subtract(DOB.ToDateTime()).Days;
                 _age /= 365;
                 return _age;
             }

@@ -1,3 +1,4 @@
+using Extensions.DateTimeExtensions;
 using Firebase.Auth;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
@@ -34,8 +35,7 @@ namespace griffined_api.Services.StudentService
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            string password = newStudent.Nickname.ToLower() +
-                        DateTime.ParseExact(newStudent.DOB, "dd-MMMM-yyyy HH:mm:ss", null).ToString("dd/MM/yyyy");
+            string password = newStudent.Nickname.ToLower() + newStudent.DOB.ToDateTime().ToString("dd/MM/yyyy");
 
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
@@ -57,6 +57,7 @@ namespace griffined_api.Services.StudentService
             string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
 
             var _student = _mapper.Map<Student>(newStudent);
+            _student.DOB = newStudent.DOB.ToDateTime();
             _student.FirebaseId = firebaseId;
             _student.CreatedBy = id;
             _student.LastUpdatedBy = id;
@@ -70,6 +71,8 @@ namespace griffined_api.Services.StudentService
             _student.StudentCode = studentCode;
 
             var data = _mapper.Map<StudentResponseDto>(_student);
+
+            data.DOB = _student.DOB.ToDateString();
 
             if (profilePicture != null)
             {
@@ -216,6 +219,11 @@ namespace griffined_api.Services.StudentService
 
             foreach (var student in dbStudents)
             {
+                var index = dbStudents.IndexOf(student);
+
+                var studentDOB = student.DOB.ToDateString();
+                data[index].DOB = studentDOB;
+
                 if (student.ProfilePicture != null)
                 {
                     string objectName = student.ProfilePicture.ObjectName;
@@ -230,7 +238,6 @@ namespace griffined_api.Services.StudentService
                         URL = url
                     };
 
-                    var index = dbStudents.IndexOf(student);
                     data[index].ProfilePicture = pictureResponseDto;
                 }
 
@@ -412,6 +419,7 @@ namespace griffined_api.Services.StudentService
             student.FirstName = updatedStudent.FirstName;
             student.LastName = updatedStudent.LastName;
             student.Nickname = updatedStudent.Nickname;
+            student.DOB = updatedStudent.DOB.ToDateTime();
             student.Phone = updatedStudent.Phone;
             student.Line = updatedStudent.Line;
             student.Email = updatedStudent.Email;
@@ -430,6 +438,8 @@ namespace griffined_api.Services.StudentService
                 Uid = updatedStudent.FirebaseId,
                 Email = updatedStudent.Email
             });
+
+            data.DOB = student.DOB.ToDateString();
 
             if (updatedStudent.Parent != null)
             {
@@ -490,8 +500,6 @@ namespace griffined_api.Services.StudentService
                 if (profilePicture != null)
                 {
                     string oldObjectName = student.ProfilePicture.ObjectName;
-
-                    var oldObjectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, oldObjectName);
 
                     if (!string.IsNullOrEmpty(oldObjectName))
                     {
