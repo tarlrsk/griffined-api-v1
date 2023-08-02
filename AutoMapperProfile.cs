@@ -40,11 +40,10 @@ namespace griffined_api
             CreateMap<UpdateStaffRequestDto, Staff>();
 
             // Additional Files
-            CreateMap<StudentAdditionalFile, StudentAdditionalFilesResponseDto>();
+            CreateMap<StudentAdditionalFile, FilesResponseDto>();
             CreateMap<AddStudentAdditionalFilesRequestDto, StudentAdditionalFile>();
 
             // Profile Picture
-            CreateMap<ProfilePicture, ProfilePictureResponseDto>();
             CreateMap<AddProfilePictureRequestDto, ProfilePicture>();
         }
     }

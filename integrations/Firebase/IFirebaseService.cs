@@ -9,6 +9,8 @@ namespace griffined_api.integrations.Firebase
     {
         Task ChangePasswordWithUid(string uid, string newPassword);
         Task<String> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file);
-        Task DeleteStorageFile(string objectName);
+        Task DeleteStorageFileByObjectName(string objectName);
+        Task<String> GetUrlByObjectName(string objectName);
+        Task<Google.Apis.Storage.v1.Data.Object> GetObjectByObjectName(string objectName);
     }
 }

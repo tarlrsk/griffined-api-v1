@@ -85,7 +85,7 @@ definitions:
           
 pipelines:
   pull-requests:
-    '{feature/*,refactor/*,update/*,migration/*,fix/*,test/*}':
+    '{feature/*,refactor/*,update/*,migration/*,migrations/*,fix/*,test/*}':
       - step: *stg_env
       - step: *buildNoZip
     '{hotfix/*}':

@@ -8,6 +8,7 @@ using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using Google.Cloud.Storage.V1;
 using System.Net;
+using Extensions.DateTimeExtensions;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -622,7 +623,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                         .ToList();
             foreach (var deleteFile in deleteFiles)
             {
-                await _firebaseService.DeleteStorageFile(deleteFile.ObjectName);
+                await _firebaseService.DeleteStorageFileByObjectName(deleteFile.ObjectName);
                 dbRequest.RegistrationRequestPaymentFiles.Remove(deleteFile);
             }
 
@@ -645,6 +646,104 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var response = new ServiceResponse<String>();
             response.StatusCode = (int)HttpStatusCode.OK; ;
+            return response;
+        }
+
+        public async Task<ServiceResponse<RegistrationRequestPendingOAResponseDto>> GetPendingOADetail(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.NewCourseSubjectRequests)
+                                    .ThenInclude(s => s.Subject)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Course)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.Level)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.RegistrationRequestPaymentFiles)
+                            .Include(r => r.RegistrationRequestComments)
+                            .FirstOrDefaultAsync(r => r.Id == requestId
+                                                && r.RegistrationStatus == RegistrationStatus.PendingOA);
+
+            if (dbRequest == null)
+                throw new BadRequestException($"Pending Payment Request with ID {requestId} is not found.");
+
+            var requestDetail = new RegistrationRequestPendingOAResponseDto();
+            requestDetail.RequestId = dbRequest.Id;
+            requestDetail.Section = dbRequest.Section;
+            requestDetail.RegistrationRequestType = dbRequest.Type;
+            requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
+            requestDetail.PaymentType = dbRequest.PaymentType;
+
+            foreach (var dbMember in dbRequest.RegistrationRequestMembers)
+            {
+                var member = new StudentNameResponseDto()
+                {
+                    StudentId = dbMember.Student.Id,
+                    StudentCode = dbMember.Student.StudentCode,
+                    FullName = dbMember.Student.FullName,
+                    Nickname = dbMember.Student.Nickname,
+                };
+                requestDetail.Members.Add(member);
+            }
+
+            foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
+            {
+                var requestedCourse = new RequestedCourseResponseDto()
+                {
+                    CourseId = dbRequestedCourse.Course.Id,
+                    Course = dbRequestedCourse.Course.course,
+                    LevelId = dbRequestedCourse.LevelId,
+                    Level = dbRequestedCourse.Level?.level,
+                    TotalHours = dbRequestedCourse.TotalHours,
+                    StartDate = dbRequestedCourse.StartDate.ToDateString(),
+                    EndDate = dbRequestedCourse.EndDate.ToDateString(),
+                    Method = dbRequestedCourse.Method,
+                };
+                foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                {
+                    var requestSubject = new RequestedSubjectResponseDto()
+                    {
+                        SubjectId = dbRequestSubject.Subject.Id,
+                        Subject = dbRequestSubject.Subject.subject,
+                        Hour = dbRequestSubject.Hour,
+                    };
+                    requestedCourse.subjects.Add(requestSubject);
+                }
+                requestDetail.Courses.Add(requestedCourse);
+            }
+
+            foreach (var dbPaymentFile in dbRequest.RegistrationRequestPaymentFiles)
+            {
+                var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
+                var ObjectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                requestDetail.PaymentFiles.Add(new FilesResponseDto
+                {
+                    FileName = dbPaymentFile.FileName,
+                    ContentType = ObjectMetaData.ContentType,
+                    URL = url
+                });
+            }
+
+            foreach (var dbComment in dbRequest.RegistrationRequestComments)
+            {
+                var comment = new CommentResponseDto();
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
+                if (staff == null)
+                    throw new InternalServerException("Something went wrong on staff comment");
+
+                comment.StaffId = staff.Id;
+                comment.Role = staff.Role;
+                comment.FullName = staff.FullName;
+                comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
+                comment.Comment = dbComment.comment;
+                requestDetail.Comments.Add(comment);
+            }
+
+            var response = new ServiceResponse<RegistrationRequestPendingOAResponseDto>();
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = requestDetail;
             return response;
         }
     }

@@ -28,7 +28,7 @@ namespace griffined_api.integrations
             var response = new ServiceResponse<ChangeUserPasswordDto>();
         }
 
-        public async Task<String> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file)
+        public async Task<string> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file)
         {
             var fileName = file.FileName;
             var year = createdDate.Year.ToString();
@@ -45,7 +45,7 @@ namespace griffined_api.integrations
                 }
             return objectName;
         }
-        public async Task DeleteStorageFile(string objectName)
+        public async Task DeleteStorageFileByObjectName(string objectName)
         {
             var storageObject = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
 
@@ -53,6 +53,20 @@ namespace griffined_api.integrations
                 await _storageClient.DeleteObjectAsync(storageObject);
             else
                 throw new InternalServerException($"Cannot Retrieve Object From {objectName}");
+        }
+
+        public async Task<string> GetUrlByObjectName(string objectName)
+        {
+            string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
+            return url;
+        }
+
+        public async Task<Google.Apis.Storage.v1.Data.Object> GetObjectByObjectName(string objectName)
+        {
+            var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+            if (objectMetaData == null)
+                throw new InternalServerException("ObjectMetaData is not found");
+            return objectMetaData;
         }
     }
 }
