@@ -98,7 +98,7 @@ namespace griffined_api.Services.StudentService
                 }
                 string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                var pictureResponseDto = new ProfilePictureResponseDto
+                var pictureResponseDto = new FilesResponseDto
                 {
                     FileName = pictureEntity.FileName,
                     ContentType = profilePicture.ContentType,
@@ -223,7 +223,7 @@ namespace griffined_api.Services.StudentService
                     var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                    var pictureResponseDto = new ProfilePictureResponseDto
+                    var pictureResponseDto = new FilesResponseDto
                     {
                         FileName = student.ProfilePicture.FileName,
                         ContentType = objectMetaData.ContentType,
@@ -290,7 +290,7 @@ namespace griffined_api.Services.StudentService
                 var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                 string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                var pictureResponseDto = new ProfilePictureResponseDto
+                var pictureResponseDto = new FilesResponseDto
                 {
                     FileName = dbStudent.ProfilePicture.FileName,
                     ContentType = objectMetaData.ContentType,
@@ -351,7 +351,7 @@ namespace griffined_api.Services.StudentService
                 var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
                 string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                var pictureResponseDto = new ProfilePictureResponseDto
+                var pictureResponseDto = new FilesResponseDto
                 {
                     FileName = dbStudent.ProfilePicture.FileName,
                     ContentType = objectMetaData.ContentType,
@@ -521,7 +521,7 @@ namespace griffined_api.Services.StudentService
                     }
                     string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
 
-                    var pictureResponseDto = new ProfilePictureResponseDto
+                    var pictureResponseDto = new FilesResponseDto
                     {
                         FileName = pictureEntity.FileName,
                         ContentType = profilePicture.ContentType,
