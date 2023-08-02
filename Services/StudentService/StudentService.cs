@@ -458,12 +458,12 @@ namespace griffined_api.Services.StudentService
                 if (_parent is null)
                 {
                     var parent = new Parent();
-                    parent.FirstName = updatedStudent.Parent.FirstName!;
-                    parent.LastName = updatedStudent.Parent.LastName!;
-                    parent.Relationship = updatedStudent.Parent.Relationship!;
-                    parent.Email = updatedStudent.Parent.Email!;
-                    parent.Line = updatedStudent.Parent.Line!;
-                    parent.Phone = updatedStudent.Parent.Phone!;
+                    parent.FirstName = updatedStudent.Parent.FirstName;
+                    parent.LastName = updatedStudent.Parent.LastName;
+                    parent.Relationship = updatedStudent.Parent.Relationship;
+                    parent.Email = updatedStudent.Parent.Email;
+                    parent.Line = updatedStudent.Parent.Line;
+                    parent.Phone = updatedStudent.Parent.Phone;
                     parent.Student = student;
                     await _context.AddAsync(parent);
                 }
@@ -486,11 +486,11 @@ namespace griffined_api.Services.StudentService
                 if (_address is null)
                 {
                     var address = new Address();
-                    address.address = updatedStudent.Address.Address!;
-                    address.Subdistrict = updatedStudent.Address.Subdistrict!;
-                    address.District = updatedStudent.Address.District!;
-                    address.Province = updatedStudent.Address.Province!;
-                    address.Zipcode = updatedStudent.Address.Zipcode!;
+                    address.address = updatedStudent.Address.Address;
+                    address.Subdistrict = updatedStudent.Address.Subdistrict;
+                    address.District = updatedStudent.Address.District;
+                    address.Province = updatedStudent.Address.Province;
+                    address.Zipcode = updatedStudent.Address.Zipcode;
                     address.Student = student;
                     await _context.AddAsync(address);
                 }
@@ -498,11 +498,11 @@ namespace griffined_api.Services.StudentService
                 {
                     _mapper.Map(updatedStudent.Address, _address);
 
-                    _address.address = updatedStudent.Address.Address!;
-                    _address.Subdistrict = updatedStudent.Address.Subdistrict!;
-                    _address.District = updatedStudent.Address.District!;
-                    _address.Province = updatedStudent.Address.Province!;
-                    _address.Zipcode = updatedStudent.Address.Zipcode!;
+                    _address.address = updatedStudent.Address.Address;
+                    _address.Subdistrict = updatedStudent.Address.Subdistrict;
+                    _address.District = updatedStudent.Address.District;
+                    _address.Province = updatedStudent.Address.Province;
+                    _address.Zipcode = updatedStudent.Address.Zipcode;
                 }
             }
 
