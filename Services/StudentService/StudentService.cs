@@ -35,8 +35,7 @@ namespace griffined_api.Services.StudentService
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-            string password = newStudent.Nickname.ToLower() +
-                        DateTime.ParseExact(newStudent.DOB, "dd-MMMM-yyyy HH:mm:ss", null).ToString("dd/MM/yyyy");
+            string password = newStudent.Nickname.ToLower() + newStudent.DOB.ToDateTime().ToString("dd/MM/yyyy");
 
             FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
@@ -58,6 +57,7 @@ namespace griffined_api.Services.StudentService
             string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
 
             var _student = _mapper.Map<Student>(newStudent);
+            _student.DOB = newStudent.DOB.ToDateTime();
             _student.FirebaseId = firebaseId;
             _student.CreatedBy = id;
             _student.LastUpdatedBy = id;
