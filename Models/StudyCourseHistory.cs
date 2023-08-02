@@ -14,8 +14,7 @@ namespace griffined_api.Models
         public int? StaffId { get; set; }
 
         public string Description { get; set; } = string.Empty;
-        private DateTime _dateUpdated;
-        public string DateUpdated { get { return _dateUpdated.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dateUpdated = DateTime.Parse(value); } }
+        public DateTime DateUpdated { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
         public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();

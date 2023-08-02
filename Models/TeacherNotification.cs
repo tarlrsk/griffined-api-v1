@@ -16,7 +16,7 @@ namespace griffined_api.Models
 
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public virtual TeacherNotificationType Type { get; set; }
-        public bool isRead { get; set; }
+        public bool hasRead { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
         public virtual Teacher Teacher { get; set; } = new Teacher();

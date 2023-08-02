@@ -15,7 +15,7 @@ namespace griffined_api.Models
 
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
-        public bool IsRead { get; set; }
+        public bool hasRead { get; set; }
 
         public virtual StaffNotificationType Type { get; set; }
 

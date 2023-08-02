@@ -1,3 +1,4 @@
+using Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,9 +65,9 @@ namespace griffined_api.Services.ScheduleService
                             Teacher = teacher,
                             Schedule = new Schedule()
                             {
-                                Date = newSchedule.Date,
-                                FromTime = newSchedule.FromTime,
-                                ToTime = newSchedule.ToTime,
+                                Date = newSchedule.Date.ToDateTime(),
+                                FromTime = newSchedule.FromTime.ToTimeSpan(),
+                                ToTime = newSchedule.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
                             }
                         };
@@ -79,7 +80,7 @@ namespace griffined_api.Services.ScheduleService
             }
             _context.StudyCourses.Add(studyCourse);
             await _context.SaveChangesAsync();
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
 
@@ -137,9 +138,9 @@ namespace griffined_api.Services.ScheduleService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
-                            Date = dbStudyClass.Schedule.Date,
-                            FromTime = dbStudyClass.Schedule.FromTime,
-                            ToTime = dbStudyClass.Schedule.ToTime,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
@@ -155,7 +156,7 @@ namespace griffined_api.Services.ScheduleService
                 studyCourses.Add(studyCourse);
             }
             response.Data = studyCourses;
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
 
@@ -210,22 +211,22 @@ namespace griffined_api.Services.ScheduleService
                         studySubject.StudySubjectMember.Add(member);
                     }
                     var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.Id && c.CourseId == dbNewRequestedCourse.Id);
-                    foreach(var requestedStudyClass in requestedStudyClasses)
+                    foreach (var requestedStudyClass in requestedStudyClasses)
                     {
                         var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId);
-                        if(dbTeacher == null)
+                        if (dbTeacher == null)
                             throw new BadRequestException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
-                        
-                         var studyClass = new StudyClass()
+
+                        var studyClass = new StudyClass()
                         {
                             isMakeup = false,
                             ClassNumber = requestedStudyClass.ClassNo,
                             Teacher = dbTeacher,
                             Schedule = new Schedule()
                             {
-                                Date = requestedStudyClass.Date,
-                                FromTime = requestedStudyClass.FromTime,
-                                ToTime = requestedStudyClass.ToTime,
+                                Date = requestedStudyClass.Date.ToDateTime(),
+                                FromTime = requestedStudyClass.FromTime.ToTimeSpan(),
+                                ToTime = requestedStudyClass.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
                             }
                         };
@@ -238,9 +239,9 @@ namespace griffined_api.Services.ScheduleService
 
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             await _context.SaveChangesAsync();
-            
+
             var response = new ServiceResponse<String>();
-            response.StatusCode = (int)HttpStatusCode.OK;;
+            response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
         }
     }

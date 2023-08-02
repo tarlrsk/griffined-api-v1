@@ -13,10 +13,8 @@ namespace griffined_api.Models
         public int? TeacherId { get; set; }
 
         public string Day { get; set; } = string.Empty;
-        private TimeOnly _fromTime;
-        public string FromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
-        private TimeOnly _toTime;
-        public string ToTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
+        public TimeSpan FromTime { get; set; }
+        public TimeSpan ToTime { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
         public Teacher? Teacher { get; set; }
