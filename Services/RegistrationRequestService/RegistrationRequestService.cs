@@ -8,7 +8,6 @@ using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using Google.Cloud.Storage.V1;
 using System.Net;
-using Extensions.DateTimeExtensions;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
