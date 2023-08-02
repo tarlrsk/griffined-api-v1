@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace griffined_api.Dtos.StudentAddtionalFilesDtos
+namespace griffined_api.Dtos.General
 {
-    public class StudentAdditionalFilesResponseDto
+    public class FilesResponseDto
     {
         [Required]
         public string FileName { get; set; } = string.Empty;

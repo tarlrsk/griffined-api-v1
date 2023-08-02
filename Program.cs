@@ -2,6 +2,7 @@ global using AutoMapper;
 global using griffined_api.Data;
 global using griffined_api.Dtos.AddressDtos;
 global using griffined_api.Dtos.AvailableScheduleDtos;
+global using griffined_api.Dtos.General;
 global using griffined_api.Dtos.ParentDtos;
 global using griffined_api.Dtos.PreferredDayDtos;
 global using griffined_api.Dtos.ProfilePictureDto;
