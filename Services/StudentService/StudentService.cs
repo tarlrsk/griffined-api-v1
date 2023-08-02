@@ -419,6 +419,7 @@ namespace griffined_api.Services.StudentService
             student.FirstName = updatedStudent.FirstName;
             student.LastName = updatedStudent.LastName;
             student.Nickname = updatedStudent.Nickname;
+            student.DOB = updatedStudent.DOB.ToDateTime();
             student.Phone = updatedStudent.Phone;
             student.Line = updatedStudent.Line;
             student.Email = updatedStudent.Email;
@@ -437,6 +438,8 @@ namespace griffined_api.Services.StudentService
                 Uid = updatedStudent.FirebaseId,
                 Email = updatedStudent.Email
             });
+
+            data.DOB = student.DOB.ToDateString();
 
             if (updatedStudent.Parent != null)
             {
