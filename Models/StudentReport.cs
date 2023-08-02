@@ -15,10 +15,8 @@ namespace griffined_api.Models
 
         public string Report { get; set; } = string.Empty;
         public virtual Progression Progression { get; set; }
-        private DateTime _dateUploaded;
-        public string DateUploaded { get { return _dateUploaded.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dateUploaded = DateTime.Parse(value); } }
-        private DateTime _dateUpdated;
-        public string DateUpdated { get { return _dateUpdated.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dateUpdated = DateTime.Parse(value); } }
+        public DateTime DateUploaded { get; set; }
+        public DateTime DateUpdated { get; set; }
 
         [ForeignKey(nameof(StudySubjectMemberId))]
         public virtual StudySubjectMember StudySubjectMember { get; set; } = new StudySubjectMember();
