@@ -72,6 +72,8 @@ namespace griffined_api.Services.StudentService
 
             var data = _mapper.Map<StudentResponseDto>(_student);
 
+            data.DOB = _student.DOB.ToDateString();
+
             if (profilePicture != null)
             {
                 _student.ProfilePicture = new ProfilePicture();
