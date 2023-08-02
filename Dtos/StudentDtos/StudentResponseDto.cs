@@ -17,18 +17,13 @@ namespace griffined_api.Dtos.StudentDtos
         public string LastName { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Nickname { get; set; } = string.Empty;
-        private DateTime _dob;
-        public string DOB
-        {
-            get { return _dob.ToDateString(); }
-            set { _dob = DOB.ToDateTime(); }
-        }
+        public string DOB { get; set; } = string.Empty;
         public int Age
         {
             get
             {
                 int _age = 0;
-                _age = DateTime.Now.Subtract(_dob).Days;
+                _age = DateTime.Now.Subtract(DOB.ToDateTime()).Days;
                 _age /= 365;
                 return _age;
             }

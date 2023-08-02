@@ -1,3 +1,4 @@
+using Extensions.DateTimeExtensions;
 using Firebase.Auth;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
@@ -216,6 +217,11 @@ namespace griffined_api.Services.StudentService
 
             foreach (var student in dbStudents)
             {
+                var index = dbStudents.IndexOf(student);
+
+                var studentDOB = student.DOB.ToDateString();
+                data[index].DOB = studentDOB;
+
                 if (student.ProfilePicture != null)
                 {
                     string objectName = student.ProfilePicture.ObjectName;
@@ -230,7 +236,6 @@ namespace griffined_api.Services.StudentService
                         URL = url
                     };
 
-                    var index = dbStudents.IndexOf(student);
                     data[index].ProfilePicture = pictureResponseDto;
                 }
 
