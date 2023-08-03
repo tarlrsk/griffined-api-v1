@@ -36,14 +36,14 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         
-        [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, master")]
+        [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, ec, master")]
         public async Task<ActionResult> GetPendingEADetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingEADetail(requestId);
             return Ok(response);
         }
 
-        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, master")]
+        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, master")]
         public async Task<ActionResult> GetPendingECDetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingECDetail(requestId);
@@ -57,10 +57,17 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         
-        [HttpGet("pending-oa/{requestId}"), Authorize(Roles = "oa, master")]
+        [HttpGet("pending-oa/{requestId}"), Authorize(Roles = "ec, oa, master")]
         public async Task<ActionResult> GetPendingOADetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingOADetail(requestId);
+            return Ok(response);
+        }
+
+        [HttpPut("approve-payment/{requestId}"), Authorize(Roles = "oa, master")]
+        public async Task<ActionResult> ApprovePayment(int requestId)
+        {
+            var response = await _registrationRequestService.ApprovePayment(requestId);
             return Ok(response);
         }
     }
