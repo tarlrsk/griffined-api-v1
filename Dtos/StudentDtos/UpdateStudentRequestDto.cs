@@ -48,5 +48,7 @@ namespace griffined_api.Dtos.StudentDtos
 
         public ParentRequestDto? Parent { get; set; }
         public AddressRequestDto? Address { get; set; }
+
+        public List<String>? FilesToDelete { get; set; }
     }
 }
