@@ -8,7 +8,6 @@ using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using Google.Cloud.Storage.V1;
 using System.Net;
-using Extensions.DateTimeExtensions;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -603,7 +602,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> newPaymentFiles)
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newFiles)
         {
             var dbRequest = await _context.RegistrationRequests
                                     .Include(r => r.RegistrationRequestPaymentFiles)
@@ -613,18 +612,17 @@ namespace griffined_api.Services.RegistrationRequestService
             if (dbRequest == null)
                 throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
 
-            var incomingFileName = newPaymentFiles.Select(f => f.FileName).ToList();
-            var deleteFiles = dbRequest.RegistrationRequestPaymentFiles
-                                        .Where(f => !incomingFileName
+            var removeFiles = dbRequest.RegistrationRequestPaymentFiles
+                                        .Where(f => paymentRequest.removeFileName
                                         .Contains(f.FileName))
                                         .ToList();
-            foreach (var deleteFile in deleteFiles)
+            foreach (var file in removeFiles)
             {
-                await _firebaseService.DeleteStorageFileByObjectName(deleteFile.ObjectName);
-                dbRequest.RegistrationRequestPaymentFiles.Remove(deleteFile);
+                await _firebaseService.DeleteStorageFileByObjectName(file.ObjectName);
+                dbRequest.RegistrationRequestPaymentFiles.Remove(file);
             }
 
-            foreach (var newPaymentFile in newPaymentFiles)
+            foreach (var newPaymentFile in newFiles)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
                 if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
