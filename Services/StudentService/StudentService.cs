@@ -21,14 +21,16 @@ namespace griffined_api.Services.StudentService
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly StorageClient _storageClient;
         private readonly UrlSigner _urlSigner;
+        private readonly IFirebaseService _firebaseService;
 
-        public StudentService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, StorageClient storageClient, UrlSigner urlSigner)
+        public StudentService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, StorageClient storageClient, UrlSigner urlSigner, IFirebaseService firebaseService)
         {
             _httpContextAccessor = httpContextAccessor;
             _context = context;
             _mapper = mapper;
             _storageClient = storageClient;
             _urlSigner = urlSigner;
+            _firebaseService = firebaseService;
         }
 
         public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile? newProfilePicture, ICollection<IFormFile>? newFiles)

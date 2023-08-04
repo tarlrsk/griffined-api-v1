@@ -36,12 +36,12 @@ namespace griffined_api.Dtos.StudentDtos
         public string? LevelOfStudy { get; set; }
         public string? Program { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public DateTime ExpiryDate { get; set; } = new DateTime(2030, 12, 31);
+        public DateTime ExpiryDate { get; set; }
         public string? TargetUniversity { get; set; }
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
-        public StudentStatus status { get; set; } = StudentStatus.Active;
+        public StudentStatus status { get; set; } = StudentStatus.Inactive;
 
         public FilesResponseDto? ProfilePicture { get; set; }
         public ParentResponseDto? Parent { get; set; }
