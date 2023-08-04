@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using griffined_api.Dtos.RegistrationRequestDto;
+using Newtonsoft.Json;
 
 namespace griffined_api.Controllers
 {
@@ -24,9 +25,12 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         [HttpPost("student-adding"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudentAddingRequest(StudyAddingRequestDto newStudentAdding)
+        public async Task<ActionResult> AddStudentAddingRequest([FromForm] string newStudentAdding, List<IFormFile> newFile)
         {
-            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding);
+            var newStudentAddingDto = JsonConvert.DeserializeObject<StudentAddingRequestDto>(newStudentAdding);
+            if (newStudentAddingDto == null)
+                throw new InternalServerException("Cannot Map Object");
+            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAddingDto, newFile);
             return Ok(response);
         }
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
