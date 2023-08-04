@@ -741,6 +741,42 @@ namespace griffined_api.Services.RegistrationRequestService
             response.Data = requestDetail;
             return response;
         }
+
+        public async Task<ServiceResponse<string>> ApprovePayment(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                                    .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(r => r.StudyCourse)
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA) 
+                            ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
+                            
+            foreach(var member in dbRequest.RegistrationRequestMembers)
+            {
+                foreach(var studySubjectMember in member.Student.StudySubjectMember)
+                {
+                    studySubjectMember.Status = StudySubjectMemberStatus.Success;
+                }
+            }
+            
+            foreach(var newCourseRequest in dbRequest.NewCourseRequests)
+            {
+                if(newCourseRequest.StudyCourse != null)
+                    newCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
+            }
+            dbRequest.PaymentStatus = PaymentStatus.Complete;
+            dbRequest.RegistrationStatus = RegistrationStatus.Completed;
+            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+            return response;
+        }
     }
 
 
