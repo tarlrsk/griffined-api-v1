@@ -13,7 +13,8 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<List<RegistrationRequestResponseDto>>> ListRegistrationRequests();
         Task<ServiceResponse<RegistrationRequestPendingEADetailResponseDto>> GetPendingEADetail(int requestId);
         Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId);
-        Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> newPaymentFiles);
+        Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newPaymentFiles);
         Task<ServiceResponse<RegistrationRequestPendingOAResponseDto>> GetPendingOADetail(int requestId);
+        Task<ServiceResponse<string>> ApprovePayment(int requestId);
     }
 }

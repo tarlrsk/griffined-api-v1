@@ -35,32 +35,39 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.ListRegistrationRequests();
             return Ok(response);
         }
-        
-        [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, master")]
+
+        [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, ec, master")]
         public async Task<ActionResult> GetPendingEADetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingEADetail(requestId);
             return Ok(response);
         }
 
-        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, master")]
+        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, master")]
         public async Task<ActionResult> GetPendingECDetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingECDetail(requestId);
             return Ok(response);
         }
 
-        [HttpPut("submit-payment"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> paymentFile)
+        [HttpPut("submit-payment/{requestId}"), Authorize(Roles = "ec, master")]
+        public async Task<ActionResult> SubmitPayment(int requestId, [FromForm] SubmitPaymentRequestDto request, List<IFormFile> newFile)
         {
-            var response = await _registrationRequestService.SubmitPayment(requestId, paymentType, paymentFile);
+            var response = await _registrationRequestService.SubmitPayment(requestId, request, newFile);
             return Ok(response);
         }
-        
-        [HttpGet("pending-oa/{requestId}"), Authorize(Roles = "oa, master")]
+
+        [HttpGet("pending-oa/{requestId}"), Authorize(Roles = "ec, oa, master")]
         public async Task<ActionResult> GetPendingOADetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingOADetail(requestId);
+            return Ok(response);
+        }
+
+        [HttpPut("approve-payment/{requestId}"), Authorize(Roles = "oa, master")]
+        public async Task<ActionResult> ApprovePayment(int requestId)
+        {
+            var response = await _registrationRequestService.ApprovePayment(requestId);
             return Ok(response);
         }
     }

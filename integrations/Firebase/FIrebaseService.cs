@@ -12,10 +12,12 @@ namespace griffined_api.integrations
         private string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
         private readonly StorageClient _storageClient;
         private readonly UrlSigner _urlSigner;
-        public FirebaseService(StorageClient storageClient, UrlSigner urlSigner)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public FirebaseService(StorageClient storageClient, UrlSigner urlSigner, IHttpContextAccessor httpContextAccessor)
         {
             _storageClient = storageClient;
             _urlSigner = urlSigner;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task ChangePasswordWithUid(string uid, string newPassword)
         {
@@ -26,6 +28,12 @@ namespace griffined_api.integrations
             };
             UserRecord userRecord = await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
             var response = new ServiceResponse<ChangeUserPasswordDto>();
+        }
+
+        public int GetAzureIdWithToken()
+        {
+            var azureId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            return azureId;
         }
 
         public async Task<string> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file)

@@ -15,17 +15,14 @@ namespace griffined_api.Services.RegistrationRequestService
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseService _firebaseService;
         public RegistrationRequestService
         (
             IMapper mapper,
             DataContext context,
-            IHttpContextAccessor httpContextAccessor,
             IFirebaseService firebaseService
         )
         {
-            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
             _firebaseService = firebaseService;
@@ -186,7 +183,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
 
-            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            int byECId = _firebaseService.GetAzureIdWithToken();
             request.ByECId = byECId;
             request.Type = RegistrationRequestType.NewRequestedCourse;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
@@ -271,7 +268,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
-            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            int byECId = _firebaseService.GetAzureIdWithToken();
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
             if (staff == null)
             {
@@ -605,7 +602,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, PaymentType paymentType, List<IFormFile> newPaymentFiles)
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newFiles)
         {
             var dbRequest = await _context.RegistrationRequests
                                     .Include(r => r.RegistrationRequestPaymentFiles)
@@ -615,18 +612,17 @@ namespace griffined_api.Services.RegistrationRequestService
             if (dbRequest == null)
                 throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
 
-            var incomingFileName = newPaymentFiles.Select(f => f.FileName).ToList();
-            var deleteFiles = dbRequest.RegistrationRequestPaymentFiles
-                                        .Where(f => !incomingFileName
+            var removeFiles = dbRequest.RegistrationRequestPaymentFiles
+                                        .Where(f => paymentRequest.removeFileName
                                         .Contains(f.FileName))
                                         .ToList();
-            foreach (var deleteFile in deleteFiles)
+            foreach (var file in removeFiles)
             {
-                await _firebaseService.DeleteStorageFileByObjectName(deleteFile.ObjectName);
-                dbRequest.RegistrationRequestPaymentFiles.Remove(deleteFile);
+                await _firebaseService.DeleteStorageFileByObjectName(file.ObjectName);
+                dbRequest.RegistrationRequestPaymentFiles.Remove(file);
             }
 
-            foreach (var newPaymentFile in newPaymentFiles)
+            foreach (var newPaymentFile in newFiles)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
                 if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
@@ -639,7 +635,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
             dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
-            // TODO Store PaymentById
+            dbRequest.PaymentByECId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
 
@@ -746,6 +742,42 @@ namespace griffined_api.Services.RegistrationRequestService
             var response = new ServiceResponse<RegistrationRequestPendingOAResponseDto>();
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = requestDetail;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> ApprovePayment(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                                    .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(r => r.StudyCourse)
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA) 
+                            ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
+                            
+            foreach(var member in dbRequest.RegistrationRequestMembers)
+            {
+                foreach(var studySubjectMember in member.Student.StudySubjectMember)
+                {
+                    studySubjectMember.Status = StudySubjectMemberStatus.Success;
+                }
+            }
+            
+            foreach(var newCourseRequest in dbRequest.NewCourseRequests)
+            {
+                if(newCourseRequest.StudyCourse != null)
+                    newCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
+            }
+            dbRequest.PaymentStatus = PaymentStatus.Complete;
+            dbRequest.RegistrationStatus = RegistrationStatus.Completed;
+            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
             return response;
         }
     }
