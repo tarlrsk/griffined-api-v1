@@ -13,11 +13,13 @@ namespace griffined_api.Services.ScheduleService
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ScheduleService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IFirebaseService _firebaseService;
+        public ScheduleService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
         {
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
+            _firebaseService = firebaseService;
         }
         public async Task<ServiceResponse<string>> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
         {
@@ -173,10 +175,10 @@ namespace griffined_api.Services.ScheduleService
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.RegistrationRequestComments)
-                            .FirstOrDefaultAsync(r => r.Id == requestId);
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
 
             if (dbRequest == null)
-                throw new BadRequestException($"Request with ID {requestId} is not found.");
+                throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
 
             var dbTeachers = await _context.Teachers.ToListAsync();
 
@@ -238,6 +240,7 @@ namespace griffined_api.Services.ScheduleService
             }
 
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
+            dbRequest.ByEAId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<String>();

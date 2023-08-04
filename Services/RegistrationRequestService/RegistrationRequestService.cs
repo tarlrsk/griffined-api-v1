@@ -15,17 +15,14 @@ namespace griffined_api.Services.RegistrationRequestService
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseService _firebaseService;
         public RegistrationRequestService
         (
             IMapper mapper,
             DataContext context,
-            IHttpContextAccessor httpContextAccessor,
             IFirebaseService firebaseService
         )
         {
-            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
             _firebaseService = firebaseService;
@@ -186,7 +183,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
 
-            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            int byECId = _firebaseService.GetAzureIdWithToken();
             request.ByECId = byECId;
             request.Type = RegistrationRequestType.NewRequestedCourse;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
@@ -271,7 +268,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
-            int byECId = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            int byECId = _firebaseService.GetAzureIdWithToken();
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
             if (staff == null)
             {
@@ -638,8 +635,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
             dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
-            dbRequest.PaymentType = paymentRequest.PaymentType;
-            // TODO Store PaymentById
+            dbRequest.PaymentByECId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
 

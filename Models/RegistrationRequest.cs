@@ -11,6 +11,7 @@ namespace griffined_api.Models
     {
         public int Id { get; set; }
         public int? ByECId { get; set; }
+        public int? PaymentByECId { get; set; }
         public int? ByEAId { get; set; }
         public int? ByOAId { get; set; }
         public int? CancelledBy { get; set; }
