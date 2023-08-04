@@ -777,6 +777,23 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             return response;
         }
+        
+        public async Task<ServiceResponse<string>> DeclinePayment(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
+                            ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
+            dbRequest.PaymentError = true;
+            dbRequest.PaymentStatus = PaymentStatus.Incomplete;
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
+            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            await _context.SaveChangesAsync();
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+            return response;
+        }
     }
 
 

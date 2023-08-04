@@ -70,5 +70,12 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.ApprovePayment(requestId);
             return Ok(response);
         }
+
+        [HttpPut("decline-payment/{requestId}"), Authorize(Roles= "oa, master")]
+        public async Task<ActionResult> DeclinePayment(int requestId)
+        {
+            var response = await _registrationRequestService.DeclinePayment(requestId);
+            return Ok(response);
+        }
     }
 }
