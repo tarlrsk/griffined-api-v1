@@ -10,10 +10,10 @@ namespace griffined_api.Models
     public class RegistrationRequest
     {
         public int Id { get; set; }
-        public int? ByECId { get; set; }
-        public int? PaymentByECId { get; set; }
-        public int? ByEAId { get; set; }
-        public int? ByOAId { get; set; }
+        public int? CreatedByStaffId { get; set; }
+        public int? PaymentByStaffId { get; set; }
+        public int? ScheduledByStaffId { get; set; }
+        public int? ApprovedByStaffId { get; set; }
         public int? CancelledBy { get; set; }
 
         public string Section { get; set; } = string.Empty;
