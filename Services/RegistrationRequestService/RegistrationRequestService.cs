@@ -778,6 +778,14 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     studySubjectMember.Status = StudySubjectMemberStatus.Success;
                 }
+
+                if (member.Student.Status == StudentStatus.OnProcess)
+                    member.Student.Status = StudentStatus.Active;
+
+                foreach (var course in dbRequest.NewCourseRequests)
+                {
+                    member.Student.ExpiryDate = course.EndDate;
+                }
             }
 
             foreach (var newCourseRequest in dbRequest.NewCourseRequests)
