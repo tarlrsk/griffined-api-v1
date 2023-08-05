@@ -13,11 +13,11 @@ namespace griffined_api.Models
         public int Id { get; set; }
         public int? StudentId { get; set; }
 
-        public string address { get; set; } = string.Empty;
-        public string Subdistrict { get; set; } = string.Empty;
-        public string District { get; set; } = string.Empty;
-        public string Province { get; set; } = string.Empty;
-        public string Zipcode { get; set; } = string.Empty;
+        public string? address { get; set; } = string.Empty;
+        public string? Subdistrict { get; set; } = string.Empty;
+        public string? District { get; set; } = string.Empty;
+        public string? Province { get; set; } = string.Empty;
+        public string? Zipcode { get; set; } = string.Empty;
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student? Student { get; set; }

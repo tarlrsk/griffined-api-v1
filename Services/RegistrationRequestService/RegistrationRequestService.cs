@@ -1,13 +1,15 @@
 using Extensions.DateTimeExtensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Google.Cloud.Storage.V1;
+using Google.Rpc;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
-using Google.Cloud.Storage.V1;
+using griffined_api.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -40,10 +42,17 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var memberId in newRequestedCourses.MemberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
+
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
+
+                if (dbStudent.Status == StudentStatus.Inactive)
+                {
+                    dbStudent.Status = StudentStatus.OnProcess;
+                }
+
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
                 request.RegistrationRequestMembers.Add(member);
@@ -222,10 +231,17 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var memberId in newRequest.MemberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
+
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
+
+                if (dbStudent.Status == StudentStatus.Inactive)
+                {
+                    dbStudent.Status = StudentStatus.OnProcess;
+                }
+
                 dbStudents.Add(dbStudent);
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
@@ -726,12 +742,15 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbPaymentFile in dbRequest.RegistrationRequestPaymentFiles)
             {
                 var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
-                var ObjectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                ulong? size = objectMetaData.Size;
+
                 requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
                     FileName = dbPaymentFile.FileName,
-                    ContentType = ObjectMetaData.ContentType,
-                    URL = url
+                    ContentType = objectMetaData.ContentType,
+                    URL = url,
+                    Size = size
                 });
             }
 
@@ -764,20 +783,28 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(s => s.StudySubjectMember)
                             .Include(r => r.NewCourseRequests)
                                 .ThenInclude(r => r.StudyCourse)
-                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA) 
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
-                            
-            foreach(var member in dbRequest.RegistrationRequestMembers)
+
+            foreach (var member in dbRequest.RegistrationRequestMembers)
             {
-                foreach(var studySubjectMember in member.Student.StudySubjectMember)
+                foreach (var studySubjectMember in member.Student.StudySubjectMember)
                 {
                     studySubjectMember.Status = StudySubjectMemberStatus.Success;
                 }
+
+                if (member.Student.Status == StudentStatus.OnProcess)
+                    member.Student.Status = StudentStatus.Active;
+
+                foreach (var course in dbRequest.NewCourseRequests)
+                {
+                    member.Student.ExpiryDate = course.EndDate;
+                }
             }
-            
-            foreach(var newCourseRequest in dbRequest.NewCourseRequests)
+
+            foreach (var newCourseRequest in dbRequest.NewCourseRequests)
             {
-                if(newCourseRequest.StudyCourse != null)
+                if (newCourseRequest.StudyCourse != null)
                     newCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
             }
             dbRequest.PaymentStatus = PaymentStatus.Complete;
