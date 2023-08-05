@@ -36,6 +36,7 @@ namespace griffined_api.integrations
             return azureId;
         }
 
+        // Google Storage
         public async Task<string> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file)
         {
             var fileName = file.FileName;

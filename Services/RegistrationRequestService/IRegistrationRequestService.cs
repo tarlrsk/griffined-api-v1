@@ -16,5 +16,6 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newPaymentFiles);
         Task<ServiceResponse<RegistrationRequestPendingOAResponseDto>> GetPendingOADetail(int requestId);
         Task<ServiceResponse<string>> ApprovePayment(int requestId);
+        Task<ServiceResponse<string>> DeclinePayment(int requestId);
     }
 }
