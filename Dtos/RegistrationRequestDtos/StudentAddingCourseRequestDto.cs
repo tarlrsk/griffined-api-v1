@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.RegistrationRequestDto
 {
-    public class StudyAddingCourseRequestDto
+    public class StudentAddingCourseRequestDto
     {
         [Required]
         public int StudyCourseId { get; set; }

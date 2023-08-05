@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230802150508_Fix_Nullable_Parent_Address_Model")]
+    partial class FixNullableParentAddressModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -378,13 +381,16 @@ namespace griffinedapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ApprovedByStaffId")
+                    b.Property<int?>("ByEAId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ByECId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ByOAId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CancelledBy")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CreatedByStaffId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateCreated")
@@ -395,9 +401,6 @@ namespace griffinedapi.Migrations
 
                     b.Property<bool>("NewCourseDetailError")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("PaymentByStaffId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("PaymentError")
                         .HasColumnType("bit");
@@ -413,9 +416,6 @@ namespace griffinedapi.Migrations
 
                     b.Property<bool>("ScheduleError")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("ScheduledByStaffId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Section")
                         .IsRequired()

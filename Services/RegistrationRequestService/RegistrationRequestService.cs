@@ -1,13 +1,15 @@
 using Extensions.DateTimeExtensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Google.Cloud.Storage.V1;
+using Google.Rpc;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
-using Google.Cloud.Storage.V1;
+using griffined_api.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -40,10 +42,17 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var memberId in newRequestedCourses.MemberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
+
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
+
+                if (dbStudent.Status == StudentStatus.Inactive)
+                {
+                    dbStudent.Status = StudentStatus.OnProcess;
+                }
+
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
                 request.RegistrationRequestMembers.Add(member);
@@ -184,7 +193,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
             int byECId = _firebaseService.GetAzureIdWithToken();
-            request.ByECId = byECId;
+            request.CreatedByStaffId = byECId;
             request.Type = RegistrationRequestType.NewRequestedCourse;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
 
@@ -207,9 +216,9 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> AddStudentAddingRequest(StudyAddingRequestDto newRequest)
+        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> newFiles)
         {
-            var response = new ServiceResponse<String>();
+            var response = new ServiceResponse<string>();
             var request = new RegistrationRequest();
 
             if (newRequest.MemberIds == null || newRequest.MemberIds.Count == 0)
@@ -222,10 +231,17 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var memberId in newRequest.MemberIds)
             {
                 var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
+
                 if (dbStudent == null)
                 {
                     throw new NotFoundException($"Student with ID {memberId} not found.");
                 }
+
+                if (dbStudent.Status == StudentStatus.Inactive)
+                {
+                    dbStudent.Status = StudentStatus.OnProcess;
+                }
+
                 dbStudents.Add(dbStudent);
                 var member = new RegistrationRequestMember();
                 member.Student = dbStudent;
@@ -282,11 +298,25 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.RegistrationRequestComments.Add(newComment);
             }
 
-            request.ByECId = byECId;
+            request.CreatedByStaffId = byECId;
             request.PaymentType = newRequest.PaymentType;
-            request.RegistrationStatus = RegistrationStatus.PendingEA;
+            request.RegistrationStatus = RegistrationStatus.PendingOA;
             request.Type = RegistrationRequestType.StudentAdding;
             _context.RegistrationRequests.Add(request);
+            await _context.SaveChangesAsync();
+
+            foreach (var newPaymentFile in newFiles)
+            {
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
+                if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
+                {
+                    request.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
+                    {
+                        FileName = newPaymentFile.FileName,
+                        ObjectName = objectName,
+                    });
+                }
+            }
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK; ;
@@ -329,9 +359,9 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
                 requestDto.HasSchedule = registrationRequest.HasSchedule;
 
-                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByECId);
-                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByEAId);
-                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByOAId);
+                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
+                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
                 var cancelledBy = staffs.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
                 if (ec != null)
@@ -635,7 +665,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
             dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
-            dbRequest.PaymentByECId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.PaymentByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
 
@@ -779,12 +809,15 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbPaymentFile in dbRequest.RegistrationRequestPaymentFiles)
             {
                 var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
-                var ObjectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                ulong? size = objectMetaData.Size;
+
                 requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
                     FileName = dbPaymentFile.FileName,
-                    ContentType = ObjectMetaData.ContentType,
-                    URL = url
+                    ContentType = objectMetaData.ContentType,
+                    URL = url,
+                    Size = size
                 });
             }
 
@@ -826,6 +859,14 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     studySubjectMember.Status = StudySubjectMemberStatus.Success;
                 }
+
+                if (member.Student.Status == StudentStatus.OnProcess)
+                    member.Student.Status = StudentStatus.Active;
+
+                foreach (var course in dbRequest.NewCourseRequests)
+                {
+                    member.Student.ExpiryDate = course.EndDate;
+                }
             }
 
             foreach (var newCourseRequest in dbRequest.NewCourseRequests)
@@ -835,7 +876,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             dbRequest.PaymentStatus = PaymentStatus.Complete;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
-            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -853,7 +894,7 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.PaymentError = true;
             dbRequest.PaymentStatus = PaymentStatus.Incomplete;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
-            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
             var response = new ServiceResponse<string>
             {

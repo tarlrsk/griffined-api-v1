@@ -12,6 +12,6 @@ namespace griffined_api.Enums
     {
         Active,
         Inactive,
-        Inprocess
+        OnProcess
     }
 }
