@@ -665,6 +665,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
             dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
+            dbRequest.PaymentType = paymentRequest.PaymentType;
             dbRequest.PaymentByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
@@ -762,6 +763,10 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Schedule)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.RegistrationRequestPaymentFiles)
+                            .Include(r => r.RegistrationRequestComments)
                             .FirstAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA
                             && r.Type == RegistrationRequestType.StudentAdding);
 
@@ -934,7 +939,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
                 }
             }
-            return rawSchedules.OrderBy(s => (s.Date + s.FromTime).ToDateTime()).ToList();
+            return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
         private List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
         {
@@ -967,7 +972,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
                 }
             }
-            return rawSchedules.OrderBy(s => (s.Date + s.FromTime).ToDateTime()).ToList();
+            return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
     }
 
