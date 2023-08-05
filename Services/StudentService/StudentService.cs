@@ -416,11 +416,11 @@ namespace griffined_api.Services.StudentService
                 {
                     _mapper.Map(updatedStudent.Parent, _parent);
 
-                    _parent.FirstName = updatedStudent.Parent.FirstName!;
-                    _parent.LastName = updatedStudent.Parent.LastName!;
-                    _parent.Relationship = updatedStudent.Parent.Relationship!;
-                    _parent.Email = updatedStudent.Parent.Email!;
-                    _parent.Line = updatedStudent.Parent.Line!;
+                    _parent.FirstName = updatedStudent.Parent.FirstName;
+                    _parent.LastName = updatedStudent.Parent.LastName;
+                    _parent.Relationship = updatedStudent.Parent.Relationship;
+                    _parent.Email = updatedStudent.Parent.Email;
+                    _parent.Line = updatedStudent.Parent.Line;
                 }
 
             }
