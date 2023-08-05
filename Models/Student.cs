@@ -46,7 +46,7 @@ namespace griffined_api.Models
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public DateTime ExpiryDate { get; set; }
+        public DateTime ExpiryDate { get; set; } = new DateTime(2030, 12, 31);
 
         public virtual ProfilePicture? ProfilePicture { get; set; }
         public virtual Parent? Parent { get; set; }

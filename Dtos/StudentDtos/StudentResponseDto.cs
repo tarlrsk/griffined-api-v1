@@ -36,7 +36,7 @@ namespace griffined_api.Dtos.StudentDtos
         public string? LevelOfStudy { get; set; }
         public string? Program { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public DateTime ExpiryDate { get; set; }
+        public DateTime ExpiryDate { get; set; } = new DateTime(2030, 12, 31);
         public string? TargetUniversity { get; set; }
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
