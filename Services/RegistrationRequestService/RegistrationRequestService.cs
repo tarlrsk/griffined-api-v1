@@ -216,9 +216,9 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> AddStudentAddingRequest(StudyAddingRequestDto newRequest)
+        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> newFiles)
         {
-            var response = new ServiceResponse<String>();
+            var response = new ServiceResponse<string>();
             var request = new RegistrationRequest();
 
             if (newRequest.MemberIds == null || newRequest.MemberIds.Count == 0)
@@ -300,9 +300,23 @@ namespace griffined_api.Services.RegistrationRequestService
 
             request.ByECId = byECId;
             request.PaymentType = newRequest.PaymentType;
-            request.RegistrationStatus = RegistrationStatus.PendingEA;
+            request.RegistrationStatus = RegistrationStatus.PendingOA;
             request.Type = RegistrationRequestType.StudentAdding;
             _context.RegistrationRequests.Add(request);
+            await _context.SaveChangesAsync();
+
+            foreach (var newPaymentFile in newFiles)
+            {
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
+                if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
+                {
+                    request.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
+                    {
+                        FileName = newPaymentFile.FileName,
+                        ObjectName = objectName,
+                    });
+                }
+            }
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK; ;
