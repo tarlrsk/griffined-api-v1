@@ -25,12 +25,9 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         [HttpPost("student-adding"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudentAddingRequest([FromForm] string newStudentAdding, List<IFormFile> newFile)
+        public async Task<ActionResult> AddStudentAddingRequest(StudentAddingRequestDto newStudentAdding, List<IFormFile> newFile)
         {
-            var newStudentAddingDto = JsonConvert.DeserializeObject<StudentAddingRequestDto>(newStudentAdding);
-            if (newStudentAddingDto == null)
-                throw new InternalServerException("Cannot Map Object");
-            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAddingDto, newFile);
+            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding, newFile);
             return Ok(response);
         }
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
