@@ -201,7 +201,8 @@ namespace griffined_api.Services.ScheduleService
                 {
                     var studySubject = new StudySubject()
                     {
-                        Subject = dbNewRequestedSubject.Subject
+                        Subject = dbNewRequestedSubject.Subject,
+                        Hour = dbNewRequestedSubject.Hour,
                     };
                     foreach (var student in dbRequest.RegistrationRequestMembers)
                     {
