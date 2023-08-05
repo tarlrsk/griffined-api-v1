@@ -193,7 +193,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
             int byECId = _firebaseService.GetAzureIdWithToken();
-            request.ByECId = byECId;
+            request.CreatedByStaffId = byECId;
             request.Type = RegistrationRequestType.NewRequestedCourse;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
 
@@ -298,7 +298,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 request.RegistrationRequestComments.Add(newComment);
             }
 
-            request.ByECId = byECId;
+            request.CreatedByStaffId = byECId;
             request.PaymentType = newRequest.PaymentType;
             request.RegistrationStatus = RegistrationStatus.PendingOA;
             request.Type = RegistrationRequestType.StudentAdding;
@@ -359,9 +359,9 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
                 requestDto.HasSchedule = registrationRequest.HasSchedule;
 
-                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByECId);
-                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByEAId);
-                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ByOAId);
+                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
+                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
                 var cancelledBy = staffs.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
                 if (ec != null)
@@ -665,7 +665,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
             dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
-            dbRequest.PaymentByECId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.PaymentByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
 
@@ -809,7 +809,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             dbRequest.PaymentStatus = PaymentStatus.Complete;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
-            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -818,7 +818,7 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             return response;
         }
-        
+
         public async Task<ServiceResponse<string>> DeclinePayment(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
@@ -827,7 +827,7 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.PaymentError = true;
             dbRequest.PaymentStatus = PaymentStatus.Incomplete;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
-            dbRequest.ByOAId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
             var response = new ServiceResponse<string>
             {
