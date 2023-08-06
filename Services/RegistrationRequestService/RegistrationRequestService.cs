@@ -908,6 +908,8 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
+
+        // Private Service
         private List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
         {
             var rawSchedules = new List<ScheduleResponseDto>();
