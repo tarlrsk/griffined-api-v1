@@ -30,6 +30,7 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding, newFile);
             return Ok(response);
         }
+
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetAllRegistrationRequest()
         {
@@ -72,7 +73,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("decline-payment/{requestId}"), Authorize(Roles= "oa, master")]
+        [HttpPut("decline-payment/{requestId}"), Authorize(Roles = "oa, master")]
         public async Task<ActionResult> DeclinePayment(int requestId)
         {
             var response = await _registrationRequestService.DeclinePayment(requestId);
