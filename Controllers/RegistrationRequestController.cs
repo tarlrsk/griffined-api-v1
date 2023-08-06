@@ -41,6 +41,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         
+
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetAllRegistrationRequest()
         {

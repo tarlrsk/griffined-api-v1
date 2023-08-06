@@ -12,6 +12,7 @@ namespace griffined_api.Models
         public int Id { get; set; }
         public int? SubjectId { get; set; }
         public int? StudyCourseId { get; set; }
+        public int Hour { get; set; }
 
         [ForeignKey(nameof(SubjectId))]
         public virtual Subject Subject { get; set; } = new Subject();

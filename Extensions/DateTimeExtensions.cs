@@ -12,7 +12,7 @@ namespace Extensions.DateTimeExtensions
         }
 
         // Extension method to convert TimeOnly to String (format: HH:mm)
-        public static string ToTimeSpanString(this TimeSpan time, string format = "HH:mm")
+        public static string ToTimeSpanString(this TimeSpan time, string format = @"hh\:mm")
         {
             return time.ToString(format, CultureInfo.InvariantCulture);
         }
