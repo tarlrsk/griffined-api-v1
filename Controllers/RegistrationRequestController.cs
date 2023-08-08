@@ -78,9 +78,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPut("approve-payment/{requestId}"), Authorize(Roles = "oa, master")]
-        public async Task<ActionResult> ApprovePayment(int requestId)
+        public async Task<ActionResult> ApprovePayment(int requestId, PaymentStatus paymentStatus)
         {
-            var response = await _registrationRequestService.ApprovePayment(requestId);
+            var response = await _registrationRequestService.ApprovePayment(requestId, paymentStatus);
             return Ok(response);
         }
 

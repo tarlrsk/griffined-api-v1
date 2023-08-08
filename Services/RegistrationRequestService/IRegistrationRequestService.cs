@@ -15,7 +15,7 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId);
         Task<ServiceResponse<string>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newPaymentFiles);
         Task<ServiceResponse<RegistrationRequestPendingOAResponseDto>> GetPendingOADetail(int requestId);
-        Task<ServiceResponse<string>> ApprovePayment(int requestId);
+        Task<ServiceResponse<string>> ApprovePayment(int requestId, PaymentStatus paymentStatus);
         Task<ServiceResponse<string>> DeclinePayment(int requestId);
     }
 }

@@ -847,7 +847,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> ApprovePayment(int requestId)
+        public async Task<ServiceResponse<string>> ApprovePayment(int requestId, PaymentStatus paymentStatus)
         {
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.RegistrationRequestMembers)
@@ -879,7 +879,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 if (newCourseRequest.StudyCourse != null)
                     newCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
             }
-            dbRequest.PaymentStatus = PaymentStatus.Complete;
+            dbRequest.PaymentStatus = paymentStatus;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
             dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
