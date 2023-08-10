@@ -9,6 +9,6 @@ namespace griffined_api.Dtos.RegistrationRequestDto
     {
         [Required]
         public PaymentType PaymentType { get; set; }
-        public List<string> removeFileName { get; set; } = new List<string>();
+        public List<string> FilesToDelete { get; set; } = new List<string>();
     }
 }

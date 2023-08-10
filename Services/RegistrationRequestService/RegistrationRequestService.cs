@@ -643,7 +643,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
 
             var removeFiles = dbRequest.RegistrationRequestPaymentFiles
-                                        .Where(f => paymentRequest.removeFileName
+                                        .Where(f => paymentRequest.FilesToDelete
                                         .Contains(f.FileName))
                                         .ToList();
             foreach (var file in removeFiles)
