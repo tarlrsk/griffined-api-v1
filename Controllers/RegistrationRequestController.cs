@@ -32,12 +32,12 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("student-adding-backup"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudentAddingRequest2([FromForm] string newStudentAdding, List<IFormFile> newFile)
+        public async Task<ActionResult> AddStudentAddingRequest2([FromForm] string newStudentAdding, List<IFormFile> filesToUpload)
         {
             var newStudentAddingDto = JsonConvert.DeserializeObject<StudentAddingRequestDto>(newStudentAdding);
             if (newStudentAddingDto == null)
                 throw new InternalServerException("Cannot Map Object");
-            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAddingDto, newFile);
+            var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAddingDto, filesToUpload);
             return Ok(response);
         }
         
@@ -64,9 +64,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPut("submit-payment/{requestId}"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> SubmitPayment(int requestId, [FromForm] SubmitPaymentRequestDto request, List<IFormFile> newFile)
+        public async Task<ActionResult> SubmitPayment(int requestId, [FromForm] SubmitPaymentRequestDto request, List<IFormFile> filesToUpload)
         {
-            var response = await _registrationRequestService.SubmitPayment(requestId, request, newFile);
+            var response = await _registrationRequestService.SubmitPayment(requestId, request, filesToUpload);
             return Ok(response);
         }
 
