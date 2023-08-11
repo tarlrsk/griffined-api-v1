@@ -17,6 +17,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public List<RequestedCourseResponseDto> Courses { get; set; } = new List<RequestedCourseResponseDto>();
         public List<ScheduleResponseDto> Schedules { get; set; } = new List<ScheduleResponseDto>();
         public RegistrationStatus RegistrationStatus { get; set; }
+        public List<FilesResponseDto> PaymentFiles { get; set; } = new List<FilesResponseDto>();
         public List<CommentResponseDto> Comments { get; set; } = new List<CommentResponseDto>();
     }
 }
