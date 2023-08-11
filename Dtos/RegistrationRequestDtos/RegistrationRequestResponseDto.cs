@@ -18,7 +18,6 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public bool PaymentError { get; set; }
         public bool ScheduleError { get; set; }
         public bool NewCourseDetailError { get; set; }
-        public bool HasSchedule { get; set; }
         public StaffNameOnlyResponseDto? ByEC { get; set; }
         public StaffNameOnlyResponseDto? ByEA { get; set; }
         public StaffNameOnlyResponseDto? ByOA { get; set; }

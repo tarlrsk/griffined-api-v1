@@ -357,7 +357,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.PaymentError = registrationRequest.PaymentError;
                 requestDto.ScheduleError = registrationRequest.ScheduleError;
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
-                requestDto.HasSchedule = registrationRequest.HasSchedule;
 
                 var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
