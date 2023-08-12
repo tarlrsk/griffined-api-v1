@@ -216,6 +216,7 @@ namespace griffined_api.Services.StudentService
             var data = dbStudents.Select(s =>
             {
                 var studentDto = _mapper.Map<StudentResponseDto>(s);
+                studentDto.StudentId = s.Id;
                 studentDto.DOB = s.DOB.ToDateString();
                 return studentDto;
             }).ToList();
@@ -242,6 +243,7 @@ namespace griffined_api.Services.StudentService
 
             var data = _mapper.Map<StudentResponseDto>(dbStudent);
 
+            data.StudentId = dbStudent.Id;
             data.DOB = dbStudent.DOB.ToDateString();
 
             if (dbStudent.ProfilePicture != null)
@@ -309,6 +311,7 @@ namespace griffined_api.Services.StudentService
 
             var data = _mapper.Map<StudentResponseDto>(dbStudent);
 
+            data.StudentId = dbStudent.Id;
             data.DOB = dbStudent.DOB.ToDateString();
 
             if (dbStudent.ProfilePicture != null)
