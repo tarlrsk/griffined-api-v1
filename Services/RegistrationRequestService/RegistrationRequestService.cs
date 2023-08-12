@@ -1103,6 +1103,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
@@ -1136,6 +1137,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),

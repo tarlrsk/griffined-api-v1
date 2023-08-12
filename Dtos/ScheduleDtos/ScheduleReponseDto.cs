@@ -7,6 +7,7 @@ namespace griffined_api.Dtos.ScheduleDtos
 {
     public class ScheduleResponseDto
     {
+        public int StudyClassId { get; set; }
         public int ClassNo { get; set; }
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
