@@ -162,7 +162,7 @@ namespace griffined_api.Services.ScheduleService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
+        public async Task<ServiceResponse<string>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
@@ -174,7 +174,6 @@ namespace griffined_api.Services.ScheduleService
                                 .ThenInclude(c => c.Level)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                            .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
 
             if (dbRequest == null)
@@ -246,6 +245,39 @@ namespace griffined_api.Services.ScheduleService
 
             var response = new ServiceResponse<String>();
             response.StatusCode = (int)HttpStatusCode.OK; ;
+            return response;
+        }
+
+       public async Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude( c => c.StudyCourse)
+                                    .ThenInclude(c => c!.StudySubjects)
+                                        .ThenInclude(s => s.Subject)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude( c => c.StudyCourse)
+                                    .ThenInclude(c => c!.Course)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
+            if (dbRequest == null)
+                throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+            
+            var dbTeachers = await _context.Teachers.ToListAsync();
+
+            foreach(var dbNewCourseRequests in dbRequest.NewCourseRequests)
+            {
+                if(dbNewCourseRequests.StudyCourse == null)
+                    throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
+                
+                foreach(var dbStudySubject in dbNewCourseRequests.StudyCourse.StudySubjects)
+                {
+                    
+                }
+            }
+
+            var response = new ServiceResponse<string>();
             return response;
         }
     }
