@@ -25,7 +25,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         [HttpPost("student-adding"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudentAddingRequest([FromForm]StudentAddingRequestDto newStudentAdding, List<IFormFile> filesToUpload)
+        public async Task<ActionResult> AddStudentAddingRequest([FromForm]StudentAddingRequestDto newStudentAdding, [Required] List<IFormFile> filesToUpload)
         {
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding, filesToUpload);
             return Ok(response);
