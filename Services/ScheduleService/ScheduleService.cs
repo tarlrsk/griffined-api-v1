@@ -213,7 +213,7 @@ namespace griffined_api.Services.ScheduleService
                         };
                         studySubject.StudySubjectMember.Add(member);
                     }
-                    var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.Id && c.CourseId == dbNewRequestedCourse.Id);
+                    var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.SubjectId && c.CourseId == dbNewRequestedCourse.CourseId);
                     foreach (var requestedStudyClass in requestedStudyClasses)
                     {
                         var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId);
