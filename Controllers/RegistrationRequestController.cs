@@ -55,6 +55,20 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.GetPendingEADetail(requestId);
             return Ok(response);
         }
+        
+        [HttpPut("decline-schedule/{requestId}"), Authorize(Roles = "ec, master")]
+        public async Task<ActionResult> DeclineSchedule(int requestId)
+        {
+            var response = await _registrationRequestService.DeclineSchedule(requestId);
+            return Ok(response);
+        }
+
+        [HttpGet("pending-ea2/{requestId}"), Authorize(Roles = "ea, ec, master")]
+        public async Task<ActionResult> GetPendingEADetail2(int requestId)
+        {
+            var response = await _registrationRequestService.GetPendingEADetail2(requestId);
+            return Ok(response);
+        }
 
         [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, master")]
         public async Task<ActionResult> GetPendingECDetail(int requestId)
