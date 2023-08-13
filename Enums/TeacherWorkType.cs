@@ -11,7 +11,7 @@ namespace griffined_api.Enums
     public enum TeacherWorkType
     {
         Normal,
-        OT,
+        Overtime,
         Special
     }
 }
