@@ -20,7 +20,7 @@ namespace griffined_api.Dtos.ScheduleDtos
         public int TeacherId { get; set; }
         public string TeacherFirstName { get; set; } = string.Empty;
         public string TeacherLastName { get; set; } = string.Empty;
-        public string TeacherNickName { get; set; } = string.Empty;
+        public string TeacherNickname { get; set; } = string.Empty;
         public TeacherWorkType TeacherWorkType { get; set; }
     }
 }
