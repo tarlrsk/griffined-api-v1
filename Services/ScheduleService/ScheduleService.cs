@@ -151,7 +151,7 @@ namespace griffined_api.Services.ScheduleService
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickName = dbStudyClass.Teacher.Nickname,
+                            TeacherNickname = dbStudyClass.Teacher.Nickname,
                             // TODO Teacher Work Type
                         };
                         studyCourse.Schedules.Add(schedule);
