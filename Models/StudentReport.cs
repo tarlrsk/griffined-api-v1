@@ -13,10 +13,12 @@ namespace griffined_api.Models
         public int? StudySubjectMemberId { get; set; }
         public int? TeacherId { get; set; }
 
-        public string Report { get; set; } = string.Empty;
-        public virtual Progression Progression { get; set; }
-        public DateTime DateUploaded { get; set; }
+        public string FileName { get; set; } = string.Empty;
+        public string ObjectName { get; set; } = string.Empty;
+        public DateTime DateUploaded { get; set; } = DateTime.Now;
         public DateTime DateUpdated { get; set; }
+
+        public virtual Progression Progression { get; set; }
 
         [ForeignKey(nameof(StudySubjectMemberId))]
         public virtual StudySubjectMember StudySubjectMember { get; set; } = new StudySubjectMember();
