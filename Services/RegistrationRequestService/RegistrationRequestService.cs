@@ -1,10 +1,12 @@
 using Extensions.DateTimeExtensions;
+using Google.Api;
 using Google.Cloud.Storage.V1;
 using Google.Rpc;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Enums;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -495,6 +497,134 @@ namespace griffined_api.Services.RegistrationRequestService
 
             return response;
         }
+
+        public async Task<ServiceResponse<string>> DeclineSchedule(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC)
+                            ?? throw new BadRequestException($"Pending EC with Request ID {requestId} is not found.");
+
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingEA;
+            dbRequest.ScheduleError = true;
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<RegistrationRequestPendingEADetail2ResponseDto>> GetPendingEADetail2(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                        .Include(r => r.NewCourseRequests)
+                            .ThenInclude(c => c.NewCourseSubjectRequests)
+                                .ThenInclude(s => s.Subject)
+                        .Include(r => r.NewCourseRequests)
+                            .ThenInclude(c => c.Course)
+                        .Include(r => r.NewCourseRequests)
+                            .ThenInclude(c => c.Level)
+                        .Include(r => r.NewCourseRequests)
+                            .ThenInclude(c => c.StudyCourse)
+                                .ThenInclude(c => c!.StudySubjects)
+                                    .ThenInclude(s => s.StudyClasses)
+                                        .ThenInclude(c => c.Schedule)
+                        .Include(r => r.NewCourseRequests)
+                            .ThenInclude(c => c.StudyCourse)
+                                .ThenInclude(c => c!.StudySubjects)
+                                    .ThenInclude(s => s.StudyClasses)
+                                        .ThenInclude(c => c.Teacher)
+                        .Include(r => r.RegistrationRequestMembers)
+                            .ThenInclude(m => m.Student)
+                        .Include(r => r.NewCoursePreferredDayRequests)
+                        .Include(r => r.RegistrationRequestPaymentFiles)
+                        .Include(r => r.RegistrationRequestComments)
+                        .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA
+                        && r.Type == RegistrationRequestType.NewRequestedCourse)
+                        ?? throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+
+            var requestDetail = new RegistrationRequestPendingEADetail2ResponseDto
+            {
+                RequestId = dbRequest.Id,
+                Section = dbRequest.Section,
+                RegistrationRequestType = dbRequest.Type,
+                RegistrationStatus = dbRequest.RegistrationStatus
+            };
+
+            foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
+            {
+                var requestedCourse = new RequestedCourseResponseDto()
+                {
+                    Section = dbRequestedCourse.StudyCourse?.Section,
+                    CourseId = dbRequestedCourse.Course.Id,
+                    Course = dbRequestedCourse.Course.course,
+                    LevelId = dbRequestedCourse.LevelId,
+                    Level = dbRequestedCourse.Level?.level,
+                    TotalHours = dbRequestedCourse.TotalHours,
+                    StartDate = dbRequestedCourse.StartDate.ToDateString(),
+                    EndDate = dbRequestedCourse.EndDate.ToDateString(),
+                    Method = dbRequestedCourse.Method,
+                };
+                foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                {
+                    var requestSubject = new RequestedSubjectResponseDto()
+                    {
+                        SubjectId = dbRequestSubject.Subject.Id,
+                        Subject = dbRequestSubject.Subject.subject,
+                        Hour = dbRequestSubject.Hour,
+                    };
+                    requestedCourse.subjects.Add(requestSubject);
+                }
+                requestDetail.Courses.Add(requestedCourse);
+            }
+            requestDetail.Schedules = NewCourseRequestMapScheduleDto(dbRequest.NewCourseRequests);
+            foreach (var dbMember in dbRequest.RegistrationRequestMembers)
+            {
+                var member = new StudentNameResponseDto()
+                {
+                    StudentId = dbMember.Student.Id,
+                    StudentCode = dbMember.Student.StudentCode,
+                    FullName = dbMember.Student.FullName,
+                    Nickname = dbMember.Student.Nickname,
+                };
+                requestDetail.Members.Add(member);
+            }
+
+            foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
+            {
+                var preferredDay = new PreferredDayResponseDto()
+                {
+                    Day = dbPreferredDay.Day,
+                    FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
+                    ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),
+                };
+                requestDetail.PreferredDays.Add(preferredDay);
+            }
+
+            foreach (var dbComment in dbRequest.RegistrationRequestComments)
+            {
+                var comment = new CommentResponseDto();
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
+                if (staff == null)
+                    throw new InternalServerException("Something went wrong on staff comment");
+
+                comment.StaffId = staff.Id;
+                comment.Role = staff.Role;
+                comment.FullName = staff.FullName;
+                comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
+                comment.Comment = dbComment.comment;
+                requestDetail.Comments.Add(comment);
+            }
+
+            var response = new ServiceResponse<RegistrationRequestPendingEADetail2ResponseDto>
+            {
+                Data = requestDetail,
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
+
         public async Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC)
@@ -973,6 +1103,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
@@ -1006,6 +1137,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
