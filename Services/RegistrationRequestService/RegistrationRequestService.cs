@@ -1,4 +1,3 @@
-using Azure.Core;
 using Extensions.DateTimeExtensions;
 using Google.Api;
 using Google.Cloud.Storage.V1;
