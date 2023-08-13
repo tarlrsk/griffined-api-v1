@@ -29,7 +29,7 @@ namespace griffined_api.Services.StudentReportService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentReport(int StudySubjectMemberId, string studentCode, Progression progression, IFormFile? fileToUpload)
+        public async Task<ServiceResponse<string>> AddStudentReport(int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
         {
             var response = new ServiceResponse<string>();
 
@@ -37,7 +37,7 @@ namespace griffined_api.Services.StudentReportService
                     .Include(ss => ss.StudySubjectMember)
                         .ThenInclude(m => m.Student)
                     .Include(ss => ss.Subject)
-                    .FirstOrDefaultAsync(ss => ss.StudySubjectMember.Any(m => m.Id == StudySubjectMemberId));
+                    .FirstOrDefaultAsync(ss => ss.Id == studySubjectId);
 
             if (dbStudySubject == null)
                 throw new NotFoundException("No subject found.");
@@ -47,12 +47,14 @@ namespace griffined_api.Services.StudentReportService
             if (dbMember == null)
                 throw new NotFoundException("No student found.");
 
+            int teacherId = _firebaseService.GetAzureIdWithToken();
+
             if (fileToUpload != null)
             {
                 var studentReport = new StudentReport();
 
                 studentReport.StudySubjectMemberId = dbMember.Id;
-                studentReport.TeacherId = _firebaseService.GetAzureIdWithToken();
+                studentReport.TeacherId = teacherId;
                 studentReport.DateUpdated = DateTime.Now;
                 studentReport.Progression = progression;
 
@@ -65,6 +67,9 @@ namespace griffined_api.Services.StudentReportService
                 var fileName = fileToUpload.FileName;
                 var objectName = $"students/{studentCode}/{dbStudySubject.Subject.subject}/{progression}";
 
+                studentReport.FileName = fileName;
+                studentReport.ObjectName = objectName;
+
                 using (var stream = reportRequestDto.ReportData.OpenReadStream())
                 {
                     var storageObject = await _storageClient.UploadObjectAsync(
@@ -73,9 +78,6 @@ namespace griffined_api.Services.StudentReportService
                         fileToUpload.ContentType,
                         stream
                     );
-
-                    reportEntity.FileName = fileName;
-                    reportEntity.ObjectName = objectName;
                 }
                 string url = await _firebaseService.GetUrlByObjectName(objectName);
 
