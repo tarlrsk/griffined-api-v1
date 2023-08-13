@@ -213,7 +213,13 @@ namespace griffined_api.Services.StudentService
             if (dbStudents is null)
                 throw new NotFoundException("No students found.");
 
-            var data = dbStudents.Select(s => _mapper.Map<StudentResponseDto>(s)).ToList();
+            var data = dbStudents.Select(s =>
+            {
+                var studentDto = _mapper.Map<StudentResponseDto>(s);
+                studentDto.StudentId = s.Id;
+                studentDto.DOB = s.DOB.ToDateString();
+                return studentDto;
+            }).ToList();
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
@@ -236,6 +242,9 @@ namespace griffined_api.Services.StudentService
                 throw new NotFoundException($"Student with ID '{studentCode}' not found.");
 
             var data = _mapper.Map<StudentResponseDto>(dbStudent);
+
+            data.StudentId = dbStudent.Id;
+            data.DOB = dbStudent.DOB.ToDateString();
 
             if (dbStudent.ProfilePicture != null)
             {
@@ -301,6 +310,9 @@ namespace griffined_api.Services.StudentService
                 throw new NotFoundException($"Student with ID '{id}' not found.");
 
             var data = _mapper.Map<StudentResponseDto>(dbStudent);
+
+            data.StudentId = dbStudent.Id;
+            data.DOB = dbStudent.DOB.ToDateString();
 
             if (dbStudent.ProfilePicture != null)
             {

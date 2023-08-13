@@ -357,7 +357,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.PaymentError = registrationRequest.PaymentError;
                 requestDto.ScheduleError = registrationRequest.ScheduleError;
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
-                requestDto.HasSchedule = registrationRequest.HasSchedule;
 
                 var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
@@ -498,7 +497,19 @@ namespace griffined_api.Services.RegistrationRequestService
         }
         public async Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId)
         {
-            var dbRequest = await _context.RegistrationRequests
+            var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC)
+                                                                ?? throw new BadRequestException($"Pending EC Request with ID {requestId} is not found.");
+
+            var requestDetail = new RegistrationRequestPendingECResponseDto
+            {
+                RequestId = dbRequest.Id,
+                Section = dbRequest.Section,
+                RegistrationRequestType = dbRequest.Type,
+                RegistrationStatus = dbRequest.RegistrationStatus
+            };
+            if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
+            {
+                dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
                                 .ThenInclude(c => c.NewCourseSubjectRequests)
                                     .ThenInclude(s => s.Subject)
@@ -519,18 +530,95 @@ namespace griffined_api.Services.RegistrationRequestService
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
+                            .Include(r => r.RegistrationRequestPaymentFiles)
                             .Include(r => r.RegistrationRequestComments)
-                            .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
-                                                && r.RegistrationStatus == RegistrationStatus.PendingEC);
+                            .FirstAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC
+                            && r.Type == RegistrationRequestType.NewRequestedCourse);
 
-            if (dbRequest == null)
-                throw new BadRequestException($"Pending Payment Request with ID {requestId} is not found.");
+                foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
+                {
+                    var requestedCourse = new RequestedCourseResponseDto()
+                    {
+                        Section = dbRequestedCourse.StudyCourse?.Section,
+                        CourseId = dbRequestedCourse.Course.Id,
+                        Course = dbRequestedCourse.Course.course,
+                        LevelId = dbRequestedCourse.LevelId,
+                        Level = dbRequestedCourse.Level?.level,
+                        TotalHours = dbRequestedCourse.TotalHours,
+                        StartDate = dbRequestedCourse.StartDate.ToDateString(),
+                        EndDate = dbRequestedCourse.EndDate.ToDateString(),
+                        Method = dbRequestedCourse.Method,
+                    };
+                    foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                    {
+                        var requestSubject = new RequestedSubjectResponseDto()
+                        {
+                            SubjectId = dbRequestSubject.Subject.Id,
+                            Subject = dbRequestSubject.Subject.subject,
+                            Hour = dbRequestSubject.Hour,
+                        };
+                        requestedCourse.subjects.Add(requestSubject);
+                    }
+                    requestDetail.Courses.Add(requestedCourse);
+                }
+                requestDetail.Schedules = NewCourseRequestMapScheduleDto(dbRequest.NewCourseRequests);
+            }
+            else
+            {
+                dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.StudySubjects)
+                                        .ThenInclude(c => c.Subject)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Teacher)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Schedule)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.NewCoursePreferredDayRequests)
+                            .Include(r => r.RegistrationRequestPaymentFiles)
+                            .Include(r => r.RegistrationRequestComments)
+                            .FirstAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC
+                            && r.Type == RegistrationRequestType.StudentAdding);
 
-            var requestDetail = new RegistrationRequestPendingECResponseDto();
-            requestDetail.RequestId = dbRequest.Id;
-            requestDetail.Section = dbRequest.Section;
-            requestDetail.RegistrationRequestType = dbRequest.Type;
-            requestDetail.RegistrationStatus = dbRequest.RegistrationStatus;
+                foreach (var dbStudentAddingRequest in dbRequest.StudentAddingRequest)
+                {
+                    var requestedCourse = new RequestedCourseResponseDto()
+                    {
+                        Section = dbStudentAddingRequest.StudyCourse?.Section,
+                        CourseId = dbStudentAddingRequest.StudyCourse!.Course.Id,
+                        Course = dbStudentAddingRequest.StudyCourse.Course.course,
+                        LevelId = dbStudentAddingRequest.StudyCourse.LevelId,
+                        Level = dbStudentAddingRequest.StudyCourse.Level?.level,
+                        TotalHours = dbStudentAddingRequest.StudyCourse.TotalHour,
+                        StartDate = dbStudentAddingRequest.StudyCourse.StartDate.ToDateString(),
+                        EndDate = dbStudentAddingRequest.StudyCourse.EndDate.ToDateString(),
+                        Method = dbStudentAddingRequest.StudyCourse.Method,
+                    };
+                    foreach (var dbStudySubject in dbStudentAddingRequest.StudyCourse.StudySubjects)
+                    {
+                        var requestSubject = new RequestedSubjectResponseDto()
+                        {
+                            SubjectId = dbStudySubject.Subject.Id,
+                            Subject = dbStudySubject.Subject.subject,
+                            Hour = dbStudySubject.Hour,
+                        };
+                        requestedCourse.subjects.Add(requestSubject);
+                    }
+                    requestDetail.Courses.Add(requestedCourse);
+                }
+                requestDetail.Schedules = StudentAddingRequestMapScheduleDto(dbRequest.StudentAddingRequest);
+            }
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
             {
@@ -555,61 +643,20 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.PreferredDays.Add(preferredDay);
             }
 
-
-            var rawSchedules = new List<ScheduleResponseDto>();
-            foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
+            foreach (var dbPaymentFile in dbRequest.RegistrationRequestPaymentFiles)
             {
-                var requestedCourse = new RequestedCourseResponseDto()
-                {
-                    CourseId = dbRequestedCourse.Course.Id,
-                    Course = dbRequestedCourse.Course.course,
-                    LevelId = dbRequestedCourse.LevelId,
-                    Level = dbRequestedCourse.Level?.level,
-                    TotalHours = dbRequestedCourse.TotalHours,
-                    StartDate = dbRequestedCourse.StartDate.ToString("dd-MMMM-yyyy"),
-                    EndDate = dbRequestedCourse.EndDate.ToString("ddd-MMMM-yyyy"),
-                    Method = dbRequestedCourse.Method,
-                };
-                foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
-                {
-                    var requestSubject = new RequestedSubjectResponseDto()
-                    {
-                        SubjectId = dbRequestSubject.Subject.Id,
-                        Subject = dbRequestSubject.Subject.subject,
-                        Hour = dbRequestSubject.Hour,
-                    };
-                    requestedCourse.subjects.Add(requestSubject);
-                }
-                requestDetail.Courses.Add(requestedCourse);
+                var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
+                var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
+                ulong? size = objectMetaData.Size;
 
-                if (dbRequestedCourse.StudyCourse == null)
-                    throw new InternalServerException($"New Course with ID {dbRequestedCourse.Id} does not contain any StudyCourse");
-
-                foreach (var dbStudySubject in dbRequestedCourse.StudyCourse.StudySubjects)
+                requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
-                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
-                    {
-                        var schedule = new ScheduleResponseDto()
-                        {
-                            ClassNo = dbStudyClass.ClassNumber,
-                            Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            CourseSubject = dbRequestedCourse.Course.course + " "
-                                            + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
-                                            + " " + (dbRequestedCourse.Level?.level ?? ""),
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickName = dbStudyClass.Teacher.Nickname,
-                            //TODO Teacher Work Type
-                        };
-                        rawSchedules.Add(schedule);
-                    }
-                }
+                    FileName = dbPaymentFile.FileName,
+                    ContentType = objectMetaData.ContentType,
+                    URL = url,
+                    Size = size
+                });
             }
-
-            requestDetail.Schedules = rawSchedules.OrderBy(s => DateTime.ParseExact(s.Date + s.FromTime, "dd-MMMM-yyyyHH:mm", null)).ToList();
 
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
@@ -621,14 +668,16 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
-                comment.CreatedAt = dbComment.DateCreated.ToString("dd-MMMM-yyyy HH:mm:ss");
+                comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
                 comment.Comment = dbComment.comment;
                 requestDetail.Comments.Add(comment);
             }
 
-            var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>();
-            response.Data = requestDetail;
-            response.StatusCode = (int)HttpStatusCode.OK; ;
+            var response = new ServiceResponse<RegistrationRequestPendingECResponseDto>
+            {
+                Data = requestDetail,
+                StatusCode = (int)HttpStatusCode.OK
+            };
             return response;
         }
 
@@ -678,7 +727,7 @@ namespace griffined_api.Services.RegistrationRequestService
         public async Task<ServiceResponse<RegistrationRequestPendingOAResponseDto>> GetPendingOADetail(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
-                                                                ?? throw new BadRequestException($"Pending Payment Request with ID {requestId} is not found.");
+                                                                ?? throw new BadRequestException($"Pending OA Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingOAResponseDto
             {
@@ -770,7 +819,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             .FirstAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA
                             && r.Type == RegistrationRequestType.StudentAdding);
 
-                foreach(var dbStudentAddingRequest in dbRequest.StudentAddingRequest)
+                foreach (var dbStudentAddingRequest in dbRequest.StudentAddingRequest)
                 {
                     var requestedCourse = new RequestedCourseResponseDto()
                     {
