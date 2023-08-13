@@ -218,7 +218,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> newFiles)
+        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> filesToUpload)
         {
             var response = new ServiceResponse<string>();
             var request = new RegistrationRequest();
@@ -307,7 +307,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            foreach (var newPaymentFile in newFiles)
+            foreach (var newPaymentFile in filesToUpload)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
                 if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
@@ -811,7 +811,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newFiles)
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> filesToUpload)
         {
             var dbRequest = await _context.RegistrationRequests
                                     .Include(r => r.RegistrationRequestPaymentFiles)
@@ -831,7 +831,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 dbRequest.RegistrationRequestPaymentFiles.Remove(file);
             }
 
-            foreach (var newPaymentFile in newFiles)
+            foreach (var newPaymentFile in filesToUpload)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
                 if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))

@@ -41,9 +41,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudent([FromForm] AddStudentRequestDto newStudent, IFormFile? newProfilePicture, List<IFormFile>? files)
+        public async Task<ActionResult> AddStudent([FromForm] AddStudentRequestDto newStudent, IFormFile? newProfilePicture, List<IFormFile>? filesToUpload)
         {
-            return Ok(await _studentService.AddStudent(newStudent, newProfilePicture, files));
+            return Ok(await _studentService.AddStudent(newStudent, newProfilePicture, filesToUpload));
         }
 
         [HttpPut, Authorize(Roles = "ec, ea, oa, master")]
