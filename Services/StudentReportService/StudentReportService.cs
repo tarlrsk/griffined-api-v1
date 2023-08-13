@@ -33,16 +33,7 @@ namespace griffined_api.Services.StudentReportService
         {
             var response = new ServiceResponse<string>();
 
-            var dbStudySubject = await _context.StudySubjects
-                    .Include(ss => ss.StudySubjectMember)
-                        .ThenInclude(m => m.Student)
-                    .Include(ss => ss.Subject)
-                    .FirstOrDefaultAsync(ss => ss.Id == studySubjectId);
-
-            if (dbStudySubject == null)
-                throw new NotFoundException("No subject found.");
-
-            var dbMember = dbStudySubject.StudySubjectMember.FirstOrDefault(m => m.Student.StudentCode == studentCode);
+            var dbMember = await _context.StudySubjectMember.FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
 
             if (dbMember == null)
                 throw new NotFoundException("No student found.");
@@ -65,7 +56,7 @@ namespace griffined_api.Services.StudentReportService
 
                 var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
                 var fileName = fileToUpload.FileName;
-                var objectName = $"students/{studentCode}/{dbStudySubject.Subject.subject}/{progression}";
+                var objectName = $"students/{studentCode}/{studySubjectId}/{progression}";
 
                 studentReport.FileName = fileName;
                 studentReport.ObjectName = objectName;
