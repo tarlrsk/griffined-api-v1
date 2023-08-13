@@ -5,13 +5,13 @@
 namespace griffinedapi.Migrations
 {
     /// <inheritdoc />
-    public partial class AddHasScheduledAgain : Migration
+    public partial class AddHasScheduleRegisReq : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "HasScheduled",
+                name: "HasSchedule",
                 table: "RegistrationRequest",
                 type: "bit",
                 nullable: false,
@@ -22,7 +22,7 @@ namespace griffinedapi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "HasScheduled",
+                name: "HasSchedule",
                 table: "RegistrationRequest");
         }
     }

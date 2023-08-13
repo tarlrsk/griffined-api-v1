@@ -12,8 +12,8 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230813175828_Add_HasScheduled_Again")]
-    partial class AddHasScheduledAgain
+    [Migration("20230813183910_Add_HasSchedule_RegisReq")]
+    partial class AddHasScheduleRegisReq
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -393,7 +393,7 @@ namespace griffinedapi.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("HasScheduled")
+                    b.Property<bool>("HasSchedule")
                         .HasColumnType("bit");
 
                     b.Property<bool>("NewCourseDetailError")

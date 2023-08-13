@@ -245,7 +245,7 @@ namespace griffined_api.Services.ScheduleService
 
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ScheduledByStaffId = _firebaseService.GetAzureIdWithToken();
-            dbRequest.HasScheduled = true;
+            dbRequest.HasSchedule = true;
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<String>();

@@ -22,7 +22,7 @@ namespace griffined_api.Models
         public bool PaymentError { get; set; }
         public bool ScheduleError { get; set; }
         public bool NewCourseDetailError { get; set; }
-        public bool HasScheduled { get; set; }
+        public bool HasSchedule { get; set; }
         public virtual RegistrationStatus RegistrationStatus { get; set; }
 
         public virtual PaymentType? PaymentType { get; set; }

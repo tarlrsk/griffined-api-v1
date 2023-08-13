@@ -359,7 +359,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.PaymentError = registrationRequest.PaymentError;
                 requestDto.ScheduleError = registrationRequest.ScheduleError;
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
-                requestDto.HasScheduled = registrationRequest.HasScheduled;
+                requestDto.HasSchedule = registrationRequest.HasSchedule;
 
                 var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
@@ -1208,7 +1208,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 PaymentError = dbRequest.PaymentError,
                 ScheduleError = dbRequest.ScheduleError,
                 NewCourseDetailError = dbRequest.NewCourseDetailError,
-                HasScheduled = dbRequest.HasScheduled,
+                HasSchedule = dbRequest.HasSchedule,
             };
 
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
@@ -1363,11 +1363,11 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
 
-            var staffs = await _context.Staff.ToListAsync();
-            var ec = staffs.FirstOrDefault(s => s.Id == dbRequest.CreatedByStaffId);
-            var ea = staffs.FirstOrDefault(s => s.Id == dbRequest.ScheduledByStaffId);
-            var oa = staffs.FirstOrDefault(s => s.Id == dbRequest.ApprovedByStaffId);
-            var cancelledBy = staffs.FirstOrDefault(s => s.Id == dbRequest.CancelledBy);
+            var dbStaff = await _context.Staff.ToListAsync();
+            var ec = dbStaff.FirstOrDefault(s => s.Id == dbRequest.CreatedByStaffId);
+            var ea = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ScheduledByStaffId);
+            var oa = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ApprovedByStaffId);
+            var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == dbRequest.CancelledBy);
 
             if (ec != null)
             {

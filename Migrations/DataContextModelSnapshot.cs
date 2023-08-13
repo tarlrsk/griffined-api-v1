@@ -390,7 +390,7 @@ namespace griffinedapi.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("HasScheduled")
+                    b.Property<bool>("HasSchedule")
                         .HasColumnType("bit");
 
                     b.Property<bool>("NewCourseDetailError")
