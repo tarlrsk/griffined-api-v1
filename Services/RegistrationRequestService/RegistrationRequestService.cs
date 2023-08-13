@@ -1221,8 +1221,10 @@ namespace griffined_api.Services.RegistrationRequestService
                     });
                 }
             }
+            
+            if(dbRequest.PaymentStatus != null)
+                dbRequest.PaymentStatus = updatePayment.PaymentStatus;
 
-            dbRequest.PaymentStatus = updatePayment.PaymentStatus;
             await _context.SaveChangesAsync();
             
             var response = new ServiceResponse<string>
