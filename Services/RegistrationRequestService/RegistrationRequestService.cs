@@ -218,7 +218,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> newFiles)
+        public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> filesToUpload)
         {
             var response = new ServiceResponse<string>();
             var request = new RegistrationRequest();
@@ -307,7 +307,7 @@ namespace griffined_api.Services.RegistrationRequestService
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            foreach (var newPaymentFile in newFiles)
+            foreach (var newPaymentFile in filesToUpload)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
                 if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
@@ -811,7 +811,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> newFiles)
+        public async Task<ServiceResponse<String>> SubmitPayment(int requestId, SubmitPaymentRequestDto paymentRequest, List<IFormFile> filesToUpload)
         {
             var dbRequest = await _context.RegistrationRequests
                                     .Include(r => r.RegistrationRequestPaymentFiles)
@@ -831,7 +831,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 dbRequest.RegistrationRequestPaymentFiles.Remove(file);
             }
 
-            foreach (var newPaymentFile in newFiles)
+            foreach (var newPaymentFile in filesToUpload)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
                 if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
@@ -1031,33 +1031,71 @@ namespace griffined_api.Services.RegistrationRequestService
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                                    .ThenInclude(s => s.StudySubjectMember)
                             .Include(r => r.NewCourseRequests)
                                 .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudySubjectMember)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
 
             foreach (var member in dbRequest.RegistrationRequestMembers)
             {
-                foreach (var studySubjectMember in member.Student.StudySubjectMember)
-                {
-                    studySubjectMember.Status = StudySubjectMemberStatus.Success;
-                }
-
                 if (member.Student.Status == StudentStatus.OnProcess)
                     member.Student.Status = StudentStatus.Active;
 
                 foreach (var course in dbRequest.NewCourseRequests)
                 {
-                    member.Student.ExpiryDate = course.EndDate;
+                    if (member.Student.ExpiryDate < course.EndDate)
+                    {
+                        member.Student.ExpiryDate = course.EndDate;
+                    }
+                }
+            }
+            if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
+            {
+                foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
+                {
+                    if (dbNewCourseRequest.StudyCourse != null)
+                    {
+                        dbNewCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
+                        foreach (var dbStudySubject in dbNewCourseRequest.StudyCourse.StudySubjects)
+                        {
+                            foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
+                            {
+                                dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                            }
+                        }
+                    }
+
+                    if (dbNewCourseRequest.StudyCourse == null)
+                        throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
+
+
+                }
+            }
+            else
+            {
+                var studentIdList = dbRequest.RegistrationRequestMembers.Select(s => s.StudentId).ToList();
+                foreach (var dbStudentAddingRequest in dbRequest.StudentAddingRequest)
+                {
+                    if (dbStudentAddingRequest.StudyCourse != null)
+                    {
+                        foreach (var dbStudySubject in dbStudentAddingRequest.StudyCourse.StudySubjects)
+                        {
+                            foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember.Where(s => studentIdList.Contains(s.StudentId)))
+                            {
+                                dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                            }
+                        }
+                    }
                 }
             }
 
-            foreach (var newCourseRequest in dbRequest.NewCourseRequests)
-            {
-                if (newCourseRequest.StudyCourse != null)
-                    newCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
-            }
+
             dbRequest.PaymentStatus = paymentStatus;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
             dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
@@ -1080,6 +1118,71 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> CancelRequest(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudySubjectMember)
+                            .FirstOrDefaultAsync(r => r.Id == requestId && (r.RegistrationStatus == RegistrationStatus.PendingEC || r.RegistrationStatus == RegistrationStatus.PendingEA))
+                            ?? throw new BadRequestException($"PendingEC OR PendingOA Request with ID {requestId} is not found");
+
+            if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
+            {
+                foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
+                {
+                    if (dbNewCourseRequest.StudyCourse != null)
+                    {
+                        dbNewCourseRequest.StudyCourse.Status = CourseStatus.Cancelled;
+                        foreach (var dbStudySubject in dbNewCourseRequest.StudyCourse.StudySubjects)
+                        {
+                            foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
+                            {
+                                dbStudySubjectMember.Status = StudySubjectMemberStatus.Cancelled;
+                            }
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                var studentIdList = dbRequest.RegistrationRequestMembers.Select(s => s.StudentId).ToList();
+                foreach (var dbStudentAddingRequest in dbRequest.StudentAddingRequest)
+                {
+                    if (dbStudentAddingRequest.StudyCourse != null)
+                    {
+                        foreach (var dbStudySubject in dbStudentAddingRequest.StudyCourse.StudySubjects)
+                        {
+                            foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember.Where(s => studentIdList.Contains(s.StudentId)))
+                            {
+                                dbStudySubjectMember.Status = StudySubjectMemberStatus.Cancelled;
+                            }
+                        }
+                    }
+                }
+            }
+
+            dbRequest.RegistrationStatus = RegistrationStatus.Cancelled;
+            dbRequest.CancelledBy = _firebaseService.GetAzureIdWithToken();
+
+            await _context.SaveChangesAsync();
+
+
             var response = new ServiceResponse<string>
             {
                 StatusCode = (int)HttpStatusCode.OK

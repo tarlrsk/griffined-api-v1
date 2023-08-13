@@ -25,7 +25,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
         [HttpPost("student-adding"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudentAddingRequest([FromForm]StudentAddingRequestDto newStudentAdding, [Required] List<IFormFile> filesToUpload)
+        public async Task<ActionResult> AddStudentAddingRequest([FromForm] StudentAddingRequestDto newStudentAdding, [Required] List<IFormFile> filesToUpload)
         {
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAdding, filesToUpload);
             return Ok(response);
@@ -40,7 +40,7 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAddingDto, filesToUpload);
             return Ok(response);
         }
-        
+
 
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetAllRegistrationRequest()
@@ -55,7 +55,7 @@ namespace griffined_api.Controllers
             var response = await _registrationRequestService.GetPendingEADetail(requestId);
             return Ok(response);
         }
-        
+
         [HttpPut("decline-schedule/{requestId}"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> DeclineSchedule(int requestId)
         {
@@ -102,6 +102,13 @@ namespace griffined_api.Controllers
         public async Task<ActionResult> DeclinePayment(int requestId)
         {
             var response = await _registrationRequestService.DeclinePayment(requestId);
+            return Ok(response);
+        }
+
+        [HttpPut("cancel/{requestId}"), Authorize(Roles = "ec,ea, master")]
+        public async Task<ActionResult> CancelRequest(int requestId)
+        {
+            var response = await _registrationRequestService.CancelRequest(requestId);
             return Ok(response);
         }
     }

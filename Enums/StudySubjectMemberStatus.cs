@@ -11,6 +11,7 @@ namespace griffined_api.Enums
     public enum StudySubjectMemberStatus
     {
         Pending,
-        Success
+        Success,
+        Cancelled
     }
 }
