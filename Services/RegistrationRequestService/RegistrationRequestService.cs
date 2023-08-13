@@ -335,7 +335,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var data = new List<RegistrationRequestResponseDto>();
 
-            var staffs = await _context.Staff.ToListAsync();
+            var dbStaff = await _context.Staff.ToListAsync();
             foreach (var registrationRequest in registrationRequests)
             {
                 var requestDto = new RegistrationRequestResponseDto();
@@ -361,10 +361,10 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
                 requestDto.HasSchedule = registrationRequest.HasSchedule;
 
-                var ec = staffs.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
-                var ea = staffs.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
-                var oa = staffs.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
-                var cancelledBy = staffs.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
+                var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
+                var ea = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var oa = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
+                var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
                 if (ec != null)
                 {
