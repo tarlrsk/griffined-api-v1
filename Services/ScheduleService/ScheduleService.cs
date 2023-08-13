@@ -144,6 +144,10 @@ namespace griffined_api.Services.ScheduleService
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                            CourseId = dbStudyCourse.Course.Id,
+                            CourseName = dbStudyCourse.Course.course,
+                            SubjectId = dbStudySubject.Subject.Id,
+                            SubjectName = dbStudySubject.Subject.subject,
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
@@ -213,7 +217,7 @@ namespace griffined_api.Services.ScheduleService
                         };
                         studySubject.StudySubjectMember.Add(member);
                     }
-                    var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.Id && c.CourseId == dbNewRequestedCourse.Id);
+                    var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.SubjectId && c.CourseId == dbNewRequestedCourse.CourseId);
                     foreach (var requestedStudyClass in requestedStudyClasses)
                     {
                         var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId);
