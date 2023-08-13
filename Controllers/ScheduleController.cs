@@ -37,5 +37,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _scheduleService.AddNewStudyClass(newStudyClasses, requestId));
         } 
+
+        [HttpPut("new-study-courses/{requestId}")]
+        public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
+        {
+            return Ok(await _scheduleService.EditStudyClassByRegisRequest(request, requestId));
+        }
     }
 }

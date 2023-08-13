@@ -166,7 +166,7 @@ namespace griffined_api.Services.ScheduleService
             return response;
         }
 
-        public async Task<ServiceResponse<String>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
+        public async Task<ServiceResponse<string>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
@@ -178,7 +178,6 @@ namespace griffined_api.Services.ScheduleService
                                 .ThenInclude(c => c.Level)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                            .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
 
             if (dbRequest == null)
@@ -250,6 +249,78 @@ namespace griffined_api.Services.ScheduleService
 
             var response = new ServiceResponse<String>();
             response.StatusCode = (int)HttpStatusCode.OK; ;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId)
+        {
+            if (requestDto.ClassToDelete.Count() != 0)
+            {
+                var dbStudyClasses = await _context.StudyClasses.Where(s => requestDto.ClassToDelete.Contains(s.Id)).ToListAsync();
+                foreach (var dbStudyClass in dbStudyClasses)
+                {
+                    dbStudyClass.Status = ClassStatus.Deleted;
+                }
+            }
+
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.StudyCourse)
+                                    .ThenInclude(c => c!.StudySubjects)
+                                        .ThenInclude(s => s.Subject)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(c => c.StudyCourse)
+                                    .ThenInclude(c => c!.Course)
+                            .Include(r => r.RegistrationRequestMembers)
+                                .ThenInclude(m => m.Student)
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
+                if (dbRequest == null)
+                    throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+
+            if (requestDto.ClassToAdd.Count() != 0)
+            {
+                var dbTeachers = await _context.Teachers.ToListAsync();
+
+                foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
+                {
+                    if (dbNewCourseRequest.StudyCourse == null)
+                        throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
+
+
+                    foreach (var dbStudySubject in dbNewCourseRequest.StudyCourse.StudySubjects)
+                    {
+                        var newStudyClasses = requestDto.ClassToAdd
+                                            .Where(c => c.CourseId == dbNewCourseRequest.CourseId
+                                            && c.SubjectId == dbStudySubject.SubjectId);
+
+                        foreach (var newStudyClass in newStudyClasses)
+                        {
+                            var studyClass = new StudyClass
+                            {
+                                ClassNumber = newStudyClass.ClassNo,
+                                Teacher = dbTeachers.FirstOrDefault(t => t.Id == newStudyClass.TeacherId) ?? throw new Exception($"Cannot Find Teacher ID {newStudyClass.TeacherId}"),
+                                Schedule = new Schedule
+                                {
+                                    Date = newStudyClass.Date.ToDateTime(),
+                                    FromTime = newStudyClass.FromTime.ToTimeSpan(),
+                                    ToTime = newStudyClass.ToTime.ToTimeSpan(),
+                                    Type = ScheduleType.Class,
+                                }
+                            };
+                            dbStudySubject.StudyClasses.Add(studyClass);
+                        }
+                    }
+                }
+            }
+
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
+            dbRequest.ScheduledByStaffId = _firebaseService.GetAzureIdWithToken();
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
             return response;
         }
     }

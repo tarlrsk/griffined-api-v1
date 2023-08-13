@@ -13,6 +13,8 @@ namespace griffined_api.Enums
         None,
         Check,
         Unchecked,
-        PendingCancellation
+        PendingCancellation,
+        Cancelled,
+        Deleted,
     }
 }
