@@ -31,7 +31,7 @@ namespace griffined_api.Services.StudentService
             _firebaseService = firebaseService;
         }
 
-        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile? newProfilePicture, List<IFormFile>? newFiles)
+        public async Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile? newProfilePicture, List<IFormFile>? filesToUpload)
         {
             var response = new ServiceResponse<StudentResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
@@ -112,11 +112,11 @@ namespace griffined_api.Services.StudentService
                 data.ProfilePicture = pictureResponseDto;
             }
 
-            if (newFiles != null && newFiles.Count() > 0)
+            if (filesToUpload != null && filesToUpload.Count() > 0)
             {
                 _student.AdditionalFiles = new List<StudentAdditionalFile>();
 
-                foreach (var file in newFiles)
+                foreach (var file in filesToUpload)
                 {
                     var fileRequestDto = new AddStudentAdditionalFilesRequestDto
                     {
