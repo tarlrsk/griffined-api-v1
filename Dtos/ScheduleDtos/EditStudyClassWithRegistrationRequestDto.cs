@@ -7,7 +7,7 @@ namespace griffined_api.Dtos.ScheduleDtos
 {
     public class EditStudyClassByRegistrationRequestDto
     {
-        public List<int> ClassToDelete = new List<int>();
-        public List<NewStudyClassScheduleRequestDto> ClassToAdd = new List<NewStudyClassScheduleRequestDto>();
+        public List<int> ClassToDelete { get; set; } = new List<int>();
+        public List<NewStudyClassScheduleRequestDto> ClassToAdd { get; set; } = new List<NewStudyClassScheduleRequestDto>();
     }
 }

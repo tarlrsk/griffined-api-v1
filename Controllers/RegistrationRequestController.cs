@@ -32,7 +32,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("student-adding-backup"), Authorize(Roles = "ec, master")]
-        public async Task<ActionResult> AddStudentAddingRequest2([FromForm] string newStudentAdding, List<IFormFile> filesToUpload)
+        public async Task<ActionResult> AddStudentAddingRequest2([FromForm] string newStudentAdding, [Required] List<IFormFile> filesToUpload)
         {
             var newStudentAddingDto = JsonConvert.DeserializeObject<StudentAddingRequestDto>(newStudentAdding);
             if (newStudentAddingDto == null)

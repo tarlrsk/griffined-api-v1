@@ -248,36 +248,75 @@ namespace griffined_api.Services.ScheduleService
             return response;
         }
 
-       public async Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId)
+        public async Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId)
         {
+            if (requestDto.ClassToDelete.Count() != 0)
+            {
+                var dbStudyClasses = await _context.StudyClasses.Where(s => requestDto.ClassToDelete.Contains(s.Id)).ToListAsync();
+                foreach (var dbStudyClass in dbStudyClasses)
+                {
+                    dbStudyClass.Status = ClassStatus.Deleted;
+                }
+            }
+
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
-                                .ThenInclude( c => c.StudyCourse)
+                                .ThenInclude(c => c.StudyCourse)
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.Subject)
                             .Include(r => r.NewCourseRequests)
-                                .ThenInclude( c => c.StudyCourse)
+                                .ThenInclude(c => c.StudyCourse)
                                     .ThenInclude(c => c!.Course)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
-            if (dbRequest == null)
-                throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
-            
-            var dbTeachers = await _context.Teachers.ToListAsync();
+                if (dbRequest == null)
+                    throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
 
-            foreach(var dbNewCourseRequests in dbRequest.NewCourseRequests)
+            if (requestDto.ClassToAdd.Count() != 0)
             {
-                if(dbNewCourseRequests.StudyCourse == null)
-                    throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
-                
-                foreach(var dbStudySubject in dbNewCourseRequests.StudyCourse.StudySubjects)
+                var dbTeachers = await _context.Teachers.ToListAsync();
+
+                foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
                 {
-                    
+                    if (dbNewCourseRequest.StudyCourse == null)
+                        throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
+
+
+                    foreach (var dbStudySubject in dbNewCourseRequest.StudyCourse.StudySubjects)
+                    {
+                        var newStudyClasses = requestDto.ClassToAdd
+                                            .Where(c => c.CourseId == dbNewCourseRequest.CourseId
+                                            && c.SubjectId == dbStudySubject.SubjectId);
+
+                        foreach (var newStudyClass in newStudyClasses)
+                        {
+                            var studyClass = new StudyClass
+                            {
+                                ClassNumber = newStudyClass.ClassNo,
+                                Teacher = dbTeachers.FirstOrDefault(t => t.Id == newStudyClass.TeacherId) ?? throw new Exception($"Cannot Find Teacher ID {newStudyClass.TeacherId}"),
+                                Schedule = new Schedule
+                                {
+                                    Date = newStudyClass.Date.ToDateTime(),
+                                    FromTime = newStudyClass.FromTime.ToTimeSpan(),
+                                    ToTime = newStudyClass.ToTime.ToTimeSpan(),
+                                    Type = ScheduleType.Class,
+                                }
+                            };
+                            dbStudySubject.StudyClasses.Add(studyClass);
+                        }
+                    }
                 }
             }
 
-            var response = new ServiceResponse<string>();
+            dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
+            dbRequest.ScheduledByStaffId = _firebaseService.GetAzureIdWithToken();
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
             return response;
         }
     }
