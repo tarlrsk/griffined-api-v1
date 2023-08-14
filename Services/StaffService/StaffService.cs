@@ -151,8 +151,11 @@ namespace griffined_api.Services.StaffService
             if (dbStaff is null)
                 throw new NotFoundException($"Staff with ID '{id}' not found.");
 
+            var staff = _mapper.Map<StaffResponseDto>(dbStaff);
+            staff.StaffId = dbStaff.Id;
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<StaffResponseDto>(dbStaff);
+            response.Data = staff;
 
             return response;
         }
