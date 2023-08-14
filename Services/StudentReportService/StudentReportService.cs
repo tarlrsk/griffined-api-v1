@@ -40,6 +40,11 @@ namespace griffined_api.Services.StudentReportService
 
             int teacherId = _firebaseService.GetAzureIdWithToken();
 
+            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == progression);
+
+            if (existingReport != null)
+                throw new BadRequestException("Report already existed");
+
             if (fileToUpload != null)
             {
                 var studentReport = new StudentReport();
