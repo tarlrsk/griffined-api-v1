@@ -96,37 +96,39 @@ pipelines:
     '{main}':
       - step: *prod_env
       - step: *build
-      - step: *updateDB
-      - step:
-          name: Deploy Azure App Service Production
-          deployment: production
-          trigger: manual
-          script:
-            - pipe: atlassian/azure-web-apps-deploy:1.1.0
-              variables:
-                AZURE_APP_ID: $AZURE_APP_ID
-                AZURE_PASSWORD: $AZURE_PASSWORD
-                AZURE_TENANT_ID: $AZURE_TENANT_ID
-                AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
-                AZURE_APP_NAME: $AZURE_APP_NAME
-                ZIP_FILE: 'bin/Publish/main.zip'
-                DEBUG: 'true'
+      - parallel:
+        - step: *updateDB
+        - step:
+            name: Deploy Azure App Service Production
+            deployment: production
+            trigger: manual
+            script:
+              - pipe: atlassian/azure-web-apps-deploy:1.1.0
+                variables:
+                  AZURE_APP_ID: $AZURE_APP_ID
+                  AZURE_PASSWORD: $AZURE_PASSWORD
+                  AZURE_TENANT_ID: $AZURE_TENANT_ID
+                  AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+                  AZURE_APP_NAME: $AZURE_APP_NAME
+                  ZIP_FILE: 'bin/Publish/main.zip'
+                  DEBUG: 'true'
     '{develop}':
       - step: *stg_env
       - step: *build
-      - step: *updateDB
-      - step:
-          name: Deploy Azure App Service Staging
-          deployment: staging
-          trigger: manual
-          script:
-            - pipe: atlassian/azure-web-apps-deploy:1.1.0
-              variables:
-                AZURE_APP_ID: $AZURE_APP_ID
-                AZURE_PASSWORD: $AZURE_PASSWORD
-                AZURE_TENANT_ID: $AZURE_TENANT_ID
-                AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
-                AZURE_APP_NAME: $AZURE_APP_NAME
-                ZIP_FILE: 'bin/Publish/main.zip'
-                DEBUG: 'true'
+      - parallel:
+        - step: *updateDB
+        - step:
+            name: Deploy Azure App Service Staging
+            deployment: staging
+            trigger: manual
+            script:
+              - pipe: atlassian/azure-web-apps-deploy:1.1.0
+                variables:
+                  AZURE_APP_ID: $AZURE_APP_ID
+                  AZURE_PASSWORD: $AZURE_PASSWORD
+                  AZURE_TENANT_ID: $AZURE_TENANT_ID
+                  AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+                  AZURE_APP_NAME: $AZURE_APP_NAME
+                  ZIP_FILE: 'bin/Publish/main.zip'
+                  DEBUG: 'true'
                 
