@@ -783,8 +783,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     FileName = dbPaymentFile.FileName,
                     ContentType = objectMetaData.ContentType,
-                    URL = url,
-                    Size = size
+                    URL = url
                 });
             }
 
@@ -1000,8 +999,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     FileName = dbPaymentFile.FileName,
                     ContentType = objectMetaData.ContentType,
-                    URL = url,
-                    Size = size
+                    URL = url
                 });
             }
 
