@@ -44,14 +44,14 @@ namespace griffined_api.integrations
             var month = $"{createdDate.Month.ToString()}-{createdDate.ToString("MMMM").ToLower()}";
             var objectName = $"registration-requests/{year}/{month}/{requestId}/{fileName}";
             using (var stream = file.OpenReadStream())
-                {
-                    var storageObject = await _storageClient.UploadObjectAsync(
-                        FIREBASE_BUCKET,
-                        objectName,
-                        file.ContentType,
-                        stream
-                    );
-                }
+            {
+                var storageObject = await _storageClient.UploadObjectAsync(
+                    FIREBASE_BUCKET,
+                    objectName,
+                    file.ContentType,
+                    stream
+                );
+            }
             return objectName;
         }
         public async Task DeleteStorageFileByObjectName(string objectName)
@@ -68,6 +68,16 @@ namespace griffined_api.integrations
         {
             string url = await _urlSigner.SignAsync(FIREBASE_BUCKET, objectName, TimeSpan.FromHours(1));
             return url;
+        }
+
+        public async Task<string> GetContentTypeByObjectName(string objectName)
+        {
+            var objectMetaData = await _storageClient.GetObjectAsync(FIREBASE_BUCKET, objectName);
+            if (objectMetaData == null)
+                throw new InternalServerException("ObjectMetaData is not found.");
+
+            var contentType = objectMetaData.ContentType;
+            return contentType;
         }
 
         public async Task<Google.Apis.Storage.v1.Data.Object> GetObjectByObjectName(string objectName)
