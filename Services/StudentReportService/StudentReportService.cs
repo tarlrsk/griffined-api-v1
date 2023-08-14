@@ -86,15 +86,17 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentReportResponseDto>> GetStudentReport(int studySubjectId, string studentCode)
+        public async Task<ServiceResponse<StudentReportResponseDto>> GetStudentReport(int studyCourseId, string studentCode)
         {
             var response = new ServiceResponse<StudentReportResponseDto>();
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudySubject)
+                                        .ThenInclude(ss => ss.StudyCourse)
+                                    .Include(m => m.StudySubject)
                                         .ThenInclude(ss => ss.Subject)
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubject.StudyCourseId == studyCourseId);
 
             if (dbMember == null)
                 throw new NotFoundException("No student found.");
@@ -105,48 +107,50 @@ namespace griffined_api.Services.StudentReportService
 
             var data = new StudentReportResponseDto
             {
+                StudyCourseId = studyCourseId,
+                course = dbMember.StudySubject.StudyCourse.Course.course,
                 StudentCode = studentCode,
-                StudySubject = new Dtos.ScheduleDtos.StudySubjectResponseDto
-                {
-                    StudySubjectId = studySubjectId,
-                    Subject = dbMember.StudySubject.Subject.subject
-                },
-                FiftyPercentReport = fiftyPercentReport != null
-                ? new ReportFileResponseDto
-                {
-                    Progression = Progression.FiftyPercent,
-                    File = new FilesResponseDto
-                    {
-                        FileName = fiftyPercentReport.FileName,
-                        ContentType = await _firebaseService.GetContentTypeByObjectName(fiftyPercentReport.ObjectName),
-                        URL = await _firebaseService.GetUrlByObjectName(fiftyPercentReport.ObjectName)
-                    }
-                }
-                : null,
-                HundredPercentReport = hundredPercentReport != null
-                ? new ReportFileResponseDto
-                {
-                    Progression = Progression.HundredPercent,
-                    File = new FilesResponseDto
-                    {
-                        FileName = hundredPercentReport.FileName,
-                        ContentType = await _firebaseService.GetContentTypeByObjectName(hundredPercentReport.ObjectName),
-                        URL = await _firebaseService.GetUrlByObjectName(hundredPercentReport.ObjectName)
-                    }
-                }
-                : null,
-                SpecialReport = specialReport != null
-                ? new ReportFileResponseDto
-                {
-                    Progression = Progression.Special,
-                    File = new FilesResponseDto
-                    {
-                        FileName = specialReport.FileName,
-                        ContentType = await _firebaseService.GetContentTypeByObjectName(specialReport.ObjectName),
-                        URL = await _firebaseService.GetUrlByObjectName(specialReport.ObjectName)
-                    }
-                }
-                : null
+                // StudySubject = new Dtos.ScheduleDtos.StudySubjectResponseDto
+                // {
+                //     StudySubjectId = studySubjectId,
+                //     Subject = dbMember.StudySubject.Subject.subject
+                // },
+                // FiftyPercentReport = fiftyPercentReport != null
+                // ? new ReportFileResponseDto
+                // {
+                //     Progression = Progression.FiftyPercent,
+                //     File = new FilesResponseDto
+                //     {
+                //         FileName = fiftyPercentReport.FileName,
+                //         ContentType = await _firebaseService.GetContentTypeByObjectName(fiftyPercentReport.ObjectName),
+                //         URL = await _firebaseService.GetUrlByObjectName(fiftyPercentReport.ObjectName)
+                //     }
+                // }
+                // : null,
+                // HundredPercentReport = hundredPercentReport != null
+                // ? new ReportFileResponseDto
+                // {
+                //     Progression = Progression.HundredPercent,
+                //     File = new FilesResponseDto
+                //     {
+                //         FileName = hundredPercentReport.FileName,
+                //         ContentType = await _firebaseService.GetContentTypeByObjectName(hundredPercentReport.ObjectName),
+                //         URL = await _firebaseService.GetUrlByObjectName(hundredPercentReport.ObjectName)
+                //     }
+                // }
+                // : null,
+                // SpecialReport = specialReport != null
+                // ? new ReportFileResponseDto
+                // {
+                //     Progression = Progression.Special,
+                //     File = new FilesResponseDto
+                //     {
+                //         FileName = specialReport.FileName,
+                //         ContentType = await _firebaseService.GetContentTypeByObjectName(specialReport.ObjectName),
+                //         URL = await _firebaseService.GetUrlByObjectName(specialReport.ObjectName)
+                //     }
+                // }
+                // : null
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;

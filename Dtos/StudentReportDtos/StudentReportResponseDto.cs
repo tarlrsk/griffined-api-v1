@@ -8,10 +8,10 @@ namespace griffined_api.Dtos.StudentReportDtos
 {
     public class StudentReportResponseDto
     {
+        public int StudyCourseId { get; set; }
+        public string course { get; set; } = string.Empty;
         public string StudentCode { get; set; } = string.Empty;
-        public StudySubjectResponseDto StudySubject { get; set; } = new StudySubjectResponseDto();
-        public ReportFileResponseDto? FiftyPercentReport { get; set; }
-        public ReportFileResponseDto? HundredPercentReport { get; set; }
-        public ReportFileResponseDto? SpecialReport { get; set; }
+        public List<StudySubjectReportResponseDto> Report { get; set; } = new List<StudySubjectReportResponseDto>();
+
     }
 }
