@@ -778,7 +778,6 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
                 var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
-                ulong? size = objectMetaData.Size;
 
                 requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
@@ -994,7 +993,6 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
                 var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
-                ulong? size = objectMetaData.Size;
 
                 requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
@@ -1378,14 +1376,12 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var url = await _firebaseService.GetUrlByObjectName(dbPaymentFile.ObjectName);
                 var objectMetaData = await _firebaseService.GetObjectByObjectName(dbPaymentFile.ObjectName);
-                ulong? size = objectMetaData.Size;
 
                 requestDetail.PaymentFiles.Add(new FilesResponseDto
                 {
                     FileName = dbPaymentFile.FileName,
                     ContentType = objectMetaData.ContentType,
                     URL = url,
-                    Size = size
                 });
             }
 
