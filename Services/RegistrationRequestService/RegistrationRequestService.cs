@@ -1192,6 +1192,50 @@ namespace griffined_api.Services.RegistrationRequestService
         }
 
 
+        public async Task<ServiceResponse<string>> UpdatePayment(int requestId, UpdatePaymentRequestDto updatePayment)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.RegistrationRequestPaymentFiles)
+                            .FirstOrDefaultAsync(r => r.Id == requestId 
+                            && r.RegistrationStatus == RegistrationStatus.Completed)
+                            ?? throw new NotFoundException($"Complete Payment with ID {requestId} is not found.");
+
+            var removeFiles = dbRequest.RegistrationRequestPaymentFiles
+                                        .Where(f => updatePayment.FilesToDelete
+                                        .Contains(f.FileName))
+                                        .ToList();
+            foreach (var file in removeFiles)
+            {
+                await _firebaseService.DeleteStorageFileByObjectName(file.ObjectName);
+                dbRequest.RegistrationRequestPaymentFiles.Remove(file);
+            }
+
+            foreach (var newPaymentFile in updatePayment.FilesToUpload)
+            {
+                var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(requestId, dbRequest.DateCreated, newPaymentFile);
+                if (!dbRequest.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
+                {
+                    dbRequest.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
+                    {
+                        FileName = newPaymentFile.FileName,
+                        ObjectName = objectName,
+                    });
+                }
+            }
+            
+            if(dbRequest.PaymentStatus != null)
+                dbRequest.PaymentStatus = updatePayment.PaymentStatus;
+
+            await _context.SaveChangesAsync();
+            
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+            return response;
+        }
+
+
         public async Task<ServiceResponse<CompletedResponseDto>> GetCompletedRequest(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId)
