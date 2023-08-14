@@ -258,8 +258,7 @@ namespace griffined_api.Services.StudentService
                 {
                     FileName = dbStudent.ProfilePicture.FileName,
                     ContentType = objectMetaData.ContentType,
-                    URL = url,
-                    Size = size
+                    URL = url
                 };
 
                 data.ProfilePicture = pictureResponseDto;
@@ -281,8 +280,7 @@ namespace griffined_api.Services.StudentService
                     {
                         FileName = file.FileName,
                         ContentType = objectMetaData.ContentType,
-                        URL = url,
-                        Size = size
+                        URL = url
                     };
 
                     data.AdditionalFiles.Add(fileResponseDto);
@@ -326,8 +324,7 @@ namespace griffined_api.Services.StudentService
                 {
                     FileName = dbStudent.ProfilePicture.FileName,
                     ContentType = objectMetaData.ContentType,
-                    URL = url,
-                    Size = size
+                    URL = url
                 };
 
                 data.ProfilePicture = pictureResponseDto;
@@ -349,8 +346,7 @@ namespace griffined_api.Services.StudentService
                     {
                         FileName = file.FileName,
                         ContentType = objectMetaData.ContentType,
-                        URL = url,
-                        Size = size
+                        URL = url
                     };
 
                     data.AdditionalFiles.Add(fileResponseDto);

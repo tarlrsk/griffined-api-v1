@@ -15,7 +15,5 @@ namespace griffined_api.Dtos.General
 
         [Required]
         public string URL { get; set; } = string.Empty;
-
-        public ulong? Size { get; set; }
     }
 }
