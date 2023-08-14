@@ -117,5 +117,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _registrationRequestService.UpdatePayment(requestId, updatePaymentRequest));
         }
+
+        [HttpGet("completed/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> GetCompletedRequest(int requestId)
+        {
+            return Ok(await _registrationRequestService.GetCompletedRequest(requestId));
+        }
     }
 }
