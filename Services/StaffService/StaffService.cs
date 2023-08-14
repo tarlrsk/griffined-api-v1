@@ -123,14 +123,21 @@ namespace griffined_api.Services.StaffService
 
         public async Task<ServiceResponse<List<StaffResponseDto>>> GetStaff()
         {
-            var response = new ServiceResponse<List<StaffResponseDto>>();
             var dbStaff = await _context.Staff.ToListAsync();
 
-            if (dbStaff is null)
-                throw new NotFoundException("No staff found.");
+            var data = dbStaff.Select(s =>
+            {
+                var staffDto = _mapper.Map<StaffResponseDto>(s);
+                staffDto.StaffId = s.Id;
+                return staffDto;
+            }).ToList();
 
-            response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = dbStaff.Select(e => _mapper.Map<StaffResponseDto>(e)).ToList();
+
+            var response = new ServiceResponse<List<StaffResponseDto>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
 
             return response;
         }
@@ -144,8 +151,11 @@ namespace griffined_api.Services.StaffService
             if (dbStaff is null)
                 throw new NotFoundException($"Staff with ID '{id}' not found.");
 
+            var staff = _mapper.Map<StaffResponseDto>(dbStaff);
+            staff.StaffId = dbStaff.Id;
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<StaffResponseDto>(dbStaff);
+            response.Data = staff;
 
             return response;
         }
