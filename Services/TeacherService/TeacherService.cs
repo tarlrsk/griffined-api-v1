@@ -90,12 +90,16 @@ namespace griffined_api.Services.TeacherService
             var dbTeachers = await _context.Teachers
                 .Include(t => t.WorkTimes)
                 .ToListAsync();
-
-            if (dbTeachers is null)
-                throw new NotFoundException("No teachers found.");
+            
+            var data = dbTeachers.Select(s =>
+            {
+                var teacherDto = _mapper.Map<GetTeacherDto>(s);
+                teacherDto.TeacherId = s.Id;
+                return teacherDto;
+            }).ToList();
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = dbTeachers.Select(t => _mapper.Map<GetTeacherDto>(t)).ToList();
+            response.Data = data;
 
             return response;
         }
@@ -111,8 +115,11 @@ namespace griffined_api.Services.TeacherService
             if (dbTeacher is null)
                 throw new NotFoundException($"Teacher with ID {id} not found.");
 
+            var data = _mapper.Map<GetTeacherDto>(dbTeacher);
+            data.TeacherId = dbTeacher.Id;
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
+            response.Data = data;
 
             return response;
         }
