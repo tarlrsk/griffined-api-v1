@@ -70,7 +70,6 @@ namespace griffined_api.Services.StudentReportService
                         stream
                     );
                 }
-                string url = await _firebaseService.GetUrlByObjectName(objectName);
 
                 dbMember.StudentReports.Add(studentReport);
             }
