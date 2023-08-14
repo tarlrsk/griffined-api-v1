@@ -1547,6 +1547,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
 
+                requestDetail.StudyCourseType = dbRequest.NewCourseRequests.ElementAt(0).StudyCourseType;
+
                 foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
                 {
                     var requestedCourse = new RequestedCourseResponseDto()
@@ -1560,6 +1562,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         StartDate = dbRequestedCourse.StartDate.ToDateString(),
                         EndDate = dbRequestedCourse.EndDate.ToDateString(),
                         Method = dbRequestedCourse.Method,
+                        StudyCourseType = dbRequestedCourse.StudyCourseType,
                     };
                     foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
                     {
@@ -1614,6 +1617,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         StartDate = dbStudentAddingRequest.StudyCourse.StartDate.ToDateString(),
                         EndDate = dbStudentAddingRequest.StudyCourse.EndDate.ToDateString(),
                         Method = dbStudentAddingRequest.StudyCourse.Method,
+                        StudyCourseType = dbStudentAddingRequest.StudyCourseType,
                     };
                     foreach (var dbStudySubject in dbStudentAddingRequest.StudyCourse.StudySubjects)
                     {
