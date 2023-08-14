@@ -12,6 +12,7 @@ namespace griffined_api.Models
         public int Id { get; set; }
         public int? RegistrationRequestId { get; set; }
         public int? StudyCourseId { get; set; }
+        public StudyCourseType StudyCourseType { get; set; }
 
         [ForeignKey(nameof(RegistrationRequestId))]
         public RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
@@ -19,6 +20,6 @@ namespace griffined_api.Models
         [ForeignKey(nameof(StudyCourseId))]
         public StudyCourse StudyCourse { get; set; } = new StudyCourse();
         public virtual ICollection<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; } = new List<StudentAddingSubjectRequest>();
-        
+
     }
 }
