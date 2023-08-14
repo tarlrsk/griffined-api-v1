@@ -17,6 +17,15 @@ namespace griffined_api.Controllers
             _studentReportService = studentReportService;
         }
 
+        [HttpGet, Authorize(Roles = "teacher, master")]
+        public async Task<ActionResult> GetStudentReport(int studySubjectId, string studentCode)
+        {
+            var response = await _studentReportService.GetStudentReport(studySubjectId, studentCode);
+            if (response == null)
+                return NotFound(response);
+            return Ok(response);
+        }
+
         [HttpPost, Authorize(Roles = "teacher, master")]
         public async Task<ActionResult> AddStudentReport([FromForm] int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
         {
