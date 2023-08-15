@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using griffined_api.Dtos.ScheduleDtos;
+using griffined_api.Dtos.StudyCourseDtos;
 
-namespace griffined_api.Services.ScheduleService
+namespace griffined_api.Services.StudyCourseService
 {
-    public interface IScheduleService
+    public interface IStudyCourseService
     {
         Task<ServiceResponse<String>> AddGroupSchedule(GroupScheduleRequestDto newSchedule);
         Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse();

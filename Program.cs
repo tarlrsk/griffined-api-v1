@@ -22,7 +22,7 @@ global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
 global using griffined_api.Services.TeacherService;
 global using griffined_api.Services.RegistrationRequestService;
-global using griffined_api.Services.ScheduleService;
+global using griffined_api.Services.StudyCourseService;
 global using griffined_api.integrations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
@@ -65,7 +65,7 @@ builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IStudentReportService, StudentReportService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
-builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<IStudyCourseService, StudyCourseService>();
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
