@@ -3,45 +3,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using griffined_api.Dtos.RegistrationRequestDto;
-using griffined_api.Dtos.ScheduleDtos;
+using griffined_api.Dtos.StudyCourseDtos;
 
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/v1/schedule")]
+    [Route("api/v1/study-course")]
 
     [Authorize(Roles = "ea, master")]
 
-    public class ScheduleController : ControllerBase
+    public class StudyCourseController : ControllerBase
     {
-        private readonly IScheduleService _scheduleService;
-        public ScheduleController(IScheduleService scheduleService)
+        private readonly IStudyCourseService _studyCourseService;
+        public StudyCourseController(IStudyCourseService studyCourseService)
         {
-            _scheduleService = scheduleService;
+            _studyCourseService = studyCourseService;
 
         }
         [HttpPost("group"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
         {
-            return Ok(await _scheduleService.AddGroupSchedule(newRequestedSchedule));
+            return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
         }
 
-        [HttpGet("study-courses"), Authorize(Roles = "ec, oa, master")]
+        [HttpGet(), Authorize(Roles = "ec, oa, master")]
         public async Task<ActionResult> GetAllStudyCourse()
         {
-            return Ok(await _scheduleService.GetAllStudyCourse());
+            return Ok(await _studyCourseService.GetAllStudyCourse());
         }
 
-        [HttpPost("new-study-courses/{requestId}")]
+        [HttpPost("new/{requestId}")]
         public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
-            return Ok(await _scheduleService.AddNewStudyClass(newStudyClasses, requestId));
+            return Ok(await _studyCourseService.AddNewStudyClass(newStudyClasses, requestId));
         } 
 
-        [HttpPut("new-study-courses/{requestId}")]
+        [HttpPut("new/{requestId}")]
         public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
         {
-            return Ok(await _scheduleService.EditStudyClassByRegisRequest(request, requestId));
+            return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
         }
     }
 }
