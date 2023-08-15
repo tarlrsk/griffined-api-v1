@@ -86,7 +86,7 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentReportResponseDto>> GetStudentReport(int studyCourseId, string studentCode)
+        public async Task<ServiceResponse<StudentReportResponseDto>> StudentGetStudentReport(int studyCourseId, string studentCode)
         {
             var response = new ServiceResponse<StudentReportResponseDto>();
 
