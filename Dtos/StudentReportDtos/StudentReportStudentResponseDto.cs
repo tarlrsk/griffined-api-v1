@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StudentReportDtos
 {
-    public class StudentReportResponseDto
+    public class StudentReportStudentResponseDto
     {
         public int StudyCourseId { get; set; }
         public string course { get; set; } = string.Empty;

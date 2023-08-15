@@ -86,9 +86,9 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentReportResponseDto>> StudentGetStudentReport(int studyCourseId, string studentCode)
+        public async Task<ServiceResponse<StudentReportStudentResponseDto>> StudentGetStudentReport(int studyCourseId, string studentCode)
         {
-            var response = new ServiceResponse<StudentReportResponseDto>();
+            var response = new ServiceResponse<StudentReportStudentResponseDto>();
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudySubject)
@@ -154,7 +154,7 @@ namespace griffined_api.Services.StudentReportService
 
             var reportDtoList = await Task.WhenAll(reportDto);
 
-            var data = new StudentReportResponseDto
+            var data = new StudentReportStudentResponseDto
             {
                 StudyCourseId = studyCourseId,
                 course = dbMember.StudySubject.StudyCourse.Course.course,
