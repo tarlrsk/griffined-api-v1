@@ -68,7 +68,7 @@ namespace griffined_api.Services.RegistrationRequestService
             else if (newRequestedCourses.Section != null && newRequestedCourses.Section != "" && newRequestedCourses.Type != StudyCourseType.Private)
                 request.Section = newRequestedCourses.Section;
             else
-                throw new BadRequestException("Bad Request on Section Field, or MemberIds Field, or Type Field");
+                throw new BadRequestException("Missing Section Field, or MemberIds Field, or Type Field");
 
             foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
@@ -205,7 +205,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
             if (staff == null)
             {
-                throw new BadRequestException($"Staff with ID {byECId} is not found.");
+                throw new NotFoundException($"Staff with ID {byECId} is not found.");
             }
             foreach (var comment in newRequestedCourses.Comments)
             {
@@ -297,7 +297,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
             if (staff == null)
             {
-                throw new BadRequestException($"Staff with ID {byECId} is not found.");
+                throw new NotFoundException($"Staff with ID {byECId} is not found.");
             }
             foreach (var comment in newRequest.Comments)
             {
@@ -449,7 +449,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                                 && r.RegistrationStatus == RegistrationStatus.PendingEA);
 
             if (dbRequest == null)
-                throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+                throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto
             {
@@ -535,7 +535,7 @@ namespace griffined_api.Services.RegistrationRequestService
         {
             var dbRequest = await _context.RegistrationRequests
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC)
-                            ?? throw new BadRequestException($"Pending EC with Request ID {requestId} is not found.");
+                            ?? throw new NotFoundException($"Pending EC with Request ID {requestId} is not found.");
 
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEA;
             dbRequest.ScheduleError = true;
@@ -575,7 +575,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         .Include(r => r.RegistrationRequestComments)
                         .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA
                         && r.Type == RegistrationRequestType.NewRequestedCourse)
-                        ?? throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+                        ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingEADetail2ResponseDto
             {
@@ -664,7 +664,7 @@ namespace griffined_api.Services.RegistrationRequestService
         public async Task<ServiceResponse<RegistrationRequestPendingECResponseDto>> GetPendingECDetail(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEC)
-                                                                ?? throw new BadRequestException($"Pending EC Request with ID {requestId} is not found.");
+                                                                ?? throw new NotFoundException($"Pending EC Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingECResponseDto
             {
@@ -858,7 +858,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     r => r.Id == requestId
                                     && r.RegistrationStatus == RegistrationStatus.PendingEC);
             if (dbRequest == null)
-                throw new BadRequestException($"Pending EC request with ID {requestId} is not found.");
+                throw new NotFoundException($"Pending EC request with ID {requestId} is not found.");
 
             var removeFiles = dbRequest.RegistrationRequestPaymentFiles
                                         .Where(f => paymentRequest.FilesToDelete
@@ -896,7 +896,7 @@ namespace griffined_api.Services.RegistrationRequestService
         public async Task<ServiceResponse<RegistrationRequestPendingOAResponseDto>> GetPendingOADetail(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
-                                                                ?? throw new BadRequestException($"Pending OA Request with ID {requestId} is not found.");
+                                                                ?? throw new NotFoundException($"Pending OA Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingOAResponseDto
             {
@@ -1082,7 +1082,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudySubjectMember)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
-                            ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
+                            ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
 
             foreach (var member in dbRequest.RegistrationRequestMembers)
             {
@@ -1154,7 +1154,7 @@ namespace griffined_api.Services.RegistrationRequestService
         {
             var dbRequest = await _context.RegistrationRequests
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
-                            ?? throw new BadRequestException($"PendingOA Request with ID {requestId} is not found");
+                            ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
             dbRequest.PaymentError = true;
             dbRequest.PaymentStatus = PaymentStatus.Incomplete;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
@@ -1181,7 +1181,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudySubjectMember)
                             .FirstOrDefaultAsync(r => r.Id == requestId && (r.RegistrationStatus == RegistrationStatus.PendingEC || r.RegistrationStatus == RegistrationStatus.PendingEA))
-                            ?? throw new BadRequestException($"PendingEC OR PendingOA Request with ID {requestId} is not found");
+                            ?? throw new NotFoundException($"PendingEC OR PendingOA Request with ID {requestId} is not found");
 
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
