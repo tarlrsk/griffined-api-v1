@@ -26,19 +26,19 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
         }
 
-        [HttpGet("study-courses"), Authorize(Roles = "ec, oa, master")]
+        [HttpGet(), Authorize(Roles = "ec, oa, master")]
         public async Task<ActionResult> GetAllStudyCourse()
         {
             return Ok(await _studyCourseService.GetAllStudyCourse());
         }
 
-        [HttpPost("new-study-courses/{requestId}")]
+        [HttpPost("new/{requestId}")]
         public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
             return Ok(await _studyCourseService.AddNewStudyClass(newStudyClasses, requestId));
         } 
 
-        [HttpPut("new-study-courses/{requestId}")]
+        [HttpPut("new/{requestId}")]
         public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
         {
             return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
