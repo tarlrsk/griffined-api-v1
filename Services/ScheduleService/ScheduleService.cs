@@ -31,7 +31,7 @@ namespace griffined_api.Services.ScheduleService
                             .FirstOrDefaultAsync(c => c.Id == newRequestedSchedule.CourseId);
             if (dbCourse == null || dbCourse.Levels == null)
             {
-                throw new BadRequestException($"Course or Level is not found");
+                throw new NotFoundException($"Course or Level is not found");
             }
 
             var studyCourse = new StudyCourse();
@@ -58,7 +58,7 @@ namespace griffined_api.Services.ScheduleService
                     {
                         var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId);
                         if (teacher == null)
-                            throw new BadRequestException($"Teacher with ID {newSchedule.TeacherId} is not found.");
+                            throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
 
                         var studyClass = new StudyClass()
                         {
@@ -181,7 +181,7 @@ namespace griffined_api.Services.ScheduleService
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
 
             if (dbRequest == null)
-                throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+                throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             var dbTeachers = await _context.Teachers.ToListAsync();
 
@@ -221,7 +221,7 @@ namespace griffined_api.Services.ScheduleService
                     {
                         var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId);
                         if (dbTeacher == null)
-                            throw new BadRequestException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
+                            throw new NotFoundException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
 
                         var studyClass = new StudyClass()
                         {
@@ -276,7 +276,7 @@ namespace griffined_api.Services.ScheduleService
                                 .ThenInclude(m => m.Student)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
                 if (dbRequest == null)
-                    throw new BadRequestException($"Pending EA Request with ID {requestId} is not found.");
+                    throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             if (requestDto.ClassToAdd.Count() != 0)
             {
