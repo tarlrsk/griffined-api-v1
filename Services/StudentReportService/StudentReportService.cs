@@ -109,7 +109,7 @@ namespace griffined_api.Services.StudentReportService
             var reportDto = dbMember.StudentReports.Select(async report =>
             new StudySubjectReportResponseDto
             {
-                StudySubject = new Dtos.ScheduleDtos.StudySubjectResponseDto
+                StudySubject = new Dtos.StudyCourseDtos.StudySubjectResponseDto
                 {
                     StudySubjectId = dbMember.StudySubject.Id,
                     Subject = dbMember.StudySubject.Subject.subject

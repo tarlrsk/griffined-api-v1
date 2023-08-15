@@ -1,4 +1,4 @@
-using griffined_api.Dtos.ScheduleDtos;
+using griffined_api.Dtos.StudyCourseDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

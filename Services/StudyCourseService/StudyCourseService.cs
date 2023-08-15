@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using griffined_api.Dtos.ScheduleDtos;
+using griffined_api.Dtos.StudyCourseDtos;
 
-namespace griffined_api.Services.ScheduleService
+namespace griffined_api.Services.StudyCourseService
 {
-    public class ScheduleService : IScheduleService
+    public class StudyCourseService : IStudyCourseService
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseService _firebaseService;
-        public ScheduleService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
+        public StudyCourseService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
         {
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
