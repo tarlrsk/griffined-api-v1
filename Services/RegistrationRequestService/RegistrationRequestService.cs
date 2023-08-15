@@ -1452,7 +1452,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<CompletedCancellationResponseDto>> GetCancelledRequest(int requestId)
+        public async Task<ServiceResponse<CompletedCancellationResponseDto>> GetCancellationRequest(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId
                                                                 && r.RegistrationStatus == RegistrationStatus.Cancelled)
