@@ -1277,12 +1277,12 @@ namespace griffined_api.Services.RegistrationRequestService
         }
 
 
-        public async Task<ServiceResponse<CompletedCancelledResponseDto>> GetCompletedRequest(int requestId)
+        public async Task<ServiceResponse<CompletedCancellationResponseDto>> GetCompletedRequest(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId)
                                                                 ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
 
-            var requestDetail = new CompletedCancelledResponseDto
+            var requestDetail = new CompletedCancellationResponseDto
             {
                 RequestId = dbRequest.Id,
                 Section = dbRequest.Section,
@@ -1493,7 +1493,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.ByEA = staff;
             }
 
-            var response = new ServiceResponse<CompletedCancelledResponseDto>
+            var response = new ServiceResponse<CompletedCancellationResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = requestDetail,
@@ -1501,13 +1501,13 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<CompletedCancelledResponseDto>> GetCancelledRequest(int requestId)
+        public async Task<ServiceResponse<CompletedCancellationResponseDto>> GetCancellationRequest(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == requestId
                                                                 && r.RegistrationStatus == RegistrationStatus.Cancelled)
                                                                 ?? throw new NotFoundException($"Cancelled Request with ID {requestId} is not found.");
 
-            var requestDetail = new CompletedCancelledResponseDto
+            var requestDetail = new CompletedCancellationResponseDto
             {
                 RequestId = dbRequest.Id,
                 Section = dbRequest.Section,
@@ -1718,7 +1718,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.ByEA = staff;
             }
 
-            var response = new ServiceResponse<CompletedCancelledResponseDto>
+            var response = new ServiceResponse<CompletedCancellationResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = requestDetail,

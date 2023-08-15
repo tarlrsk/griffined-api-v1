@@ -127,7 +127,7 @@ namespace griffined_api.Controllers
         [HttpGet("cancelled/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetCancelledRequest(int requestId)
         {
-            return Ok(await _registrationRequestService.GetCancelledRequest(requestId));
+            return Ok(await _registrationRequestService.GetCancellationRequest(requestId));
         }
     }
 }
