@@ -4,7 +4,7 @@ using Google.Cloud.Storage.V1;
 using Google.Rpc;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
-using griffined_api.Dtos.ScheduleDtos;
+using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Enums;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System;
