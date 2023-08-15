@@ -169,6 +169,121 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
+        public async Task<ServiceResponse<StudentReportTeacherResponseDto>> TeacherGetStudentReport(int studyCourseId)
+        {
+            var response = new ServiceResponse<StudentReportTeacherResponseDto>();
+
+            var dbMembers = await _context.StudySubjectMember
+                        .Include(m => m.StudySubject)
+                            .ThenInclude(ss => ss.StudyCourse)
+                                .ThenInclude(sc => sc.Course)
+                        .Include(m => m.StudySubject)
+                            .ThenInclude(ss => ss.Subject)
+                        .Include(m => m.StudentReports)
+                        .Include(m => m.Student)
+                        .Where(m => m.StudySubject.StudyCourseId == studyCourseId)
+                        .ToListAsync();
+
+            dbMembers = dbMembers
+                        .GroupBy(m => m.StudentId)
+                        .Select(group => group.First())
+                        .ToList();
+
+            var data = new StudentReportTeacherResponseDto
+            {
+                StudyCourseId = studyCourseId,
+                Course = dbMembers.First().StudySubject.StudyCourse.Course.course,
+                Students = new List<StudentReportWithStudentResponseDto>()
+            };
+
+            foreach (var member in dbMembers)
+            {
+                var studentReportDto = new StudentReportWithStudentResponseDto
+                {
+                    StudentId = member.StudentId,
+                    StudentCode = member.Student.StudentCode,
+                    FirstName = member.Student.FirstName,
+                    LastName = member.Student.LastName,
+                    Nickname = member.Student.Nickname,
+                    Subjects = new List<StudySubjectReportResponseDto>()
+                };
+
+                foreach (var subject in member.StudySubject.StudyCourse.StudySubjects)
+                {
+                    var subjectReportDto = new StudySubjectReportResponseDto
+                    {
+                        StudySubject = new Dtos.StudyCourseDtos.StudySubjectResponseDto
+                        {
+                            StudySubjectId = subject.Id,
+                            Subject = subject.Subject.subject
+                        },
+                        FiftyPercentReport = null,
+                        HundredPercentReport = null,
+                        SpecialReport = null
+                    };
+
+                    var fiftyPercentReport = member.StudentReports.FirstOrDefault(report =>
+                        report.Progression == Progression.FiftyPercent && report.StudySubjectMember.StudySubjectId == subject.Id);
+
+                    var hundredPercentReport = member.StudentReports.FirstOrDefault(report =>
+                        report.Progression == Progression.HundredPercent && report.StudySubjectMember.StudySubjectId == subject.Id);
+
+                    var specialReport = member.StudentReports.FirstOrDefault(report =>
+                        report.Progression == Progression.Special && report.StudySubjectMember.StudySubjectId == subject.Id);
+
+                    if (fiftyPercentReport != null)
+                    {
+                        subjectReportDto.FiftyPercentReport = new ReportFileResponseDto
+                        {
+                            Progression = Progression.FiftyPercent,
+                            File = new FilesResponseDto
+                            {
+                                FileName = fiftyPercentReport.FileName,
+                                ContentType = await _firebaseService.GetContentTypeByObjectName(fiftyPercentReport.ObjectName),
+                                URL = await _firebaseService.GetUrlByObjectName(fiftyPercentReport.ObjectName)
+                            }
+                        };
+                    }
+
+                    if (hundredPercentReport != null)
+                    {
+                        subjectReportDto.HundredPercentReport = new ReportFileResponseDto
+                        {
+                            Progression = Progression.HundredPercent,
+                            File = new FilesResponseDto
+                            {
+                                FileName = hundredPercentReport.FileName,
+                                ContentType = await _firebaseService.GetContentTypeByObjectName(hundredPercentReport.ObjectName),
+                                URL = await _firebaseService.GetUrlByObjectName(hundredPercentReport.ObjectName)
+                            }
+                        };
+                    }
+
+                    if (specialReport != null)
+                    {
+                        subjectReportDto.SpecialReport = new ReportFileResponseDto
+                        {
+                            Progression = Progression.Special,
+                            File = new FilesResponseDto
+                            {
+                                FileName = specialReport.FileName,
+                                ContentType = await _firebaseService.GetContentTypeByObjectName(specialReport.ObjectName),
+                                URL = await _firebaseService.GetUrlByObjectName(specialReport.ObjectName)
+                            }
+                        };
+                    }
+
+                    studentReportDto.Subjects.Add(subjectReportDto);
+                }
+
+                data.Students.Add(studentReportDto);
+            }
+
+            response.Data = data;
+            response.StatusCode = (int)HttpStatusCode.OK;
+            return response;
+        }
+
         public async Task<ServiceResponse<string>> UpdateStudentReport(int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
         {
             var response = new ServiceResponse<string>();
