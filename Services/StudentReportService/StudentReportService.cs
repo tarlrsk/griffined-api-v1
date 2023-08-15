@@ -33,7 +33,9 @@ namespace griffined_api.Services.StudentReportService
         {
             var response = new ServiceResponse<string>();
 
-            var dbMember = await _context.StudySubjectMember.FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
+            var dbMember = await _context.StudySubjectMember
+                                    .Include(m => m.StudentReports)
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
 
             if (dbMember == null)
                 throw new NotFoundException("No student found.");
@@ -61,7 +63,7 @@ namespace griffined_api.Services.StudentReportService
 
                 var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
                 var fileName = fileToUpload.FileName;
-                var objectName = $"students/{studentCode}/{studySubjectId}/{progression}";
+                var objectName = $"students/{studentCode}/study subjects/{studySubjectId}/{progression}/{fileName}";
 
                 studentReport.FileName = fileName;
                 studentReport.ObjectName = objectName;
@@ -164,6 +166,76 @@ namespace griffined_api.Services.StudentReportService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> UpdateStudentReport(int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
+        {
+            var response = new ServiceResponse<string>();
+
+            var dbMember = await _context.StudySubjectMember
+                                    .Include(m => m.StudentReports)
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
+
+            if (dbMember == null)
+                throw new NotFoundException("No student found.");
+
+            if (dbMember.StudentReports != null)
+            {
+                if (fileToUpload != null)
+                {
+                    var reportRequestDto = new AddStudentReportRequestDto
+                    {
+                        ReportData = fileToUpload
+                    };
+
+                    var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
+                    var fileName = fileToUpload.FileName;
+                    var objectName = $"students/{studentCode}/study subjects/{studySubjectId}/{progression}/{fileName}";
+
+                    using (var stream = reportRequestDto.ReportData.OpenReadStream())
+                    {
+                        var storageObject = await _storageClient.UploadObjectAsync(
+                            FIREBASE_BUCKET,
+                            objectName,
+                            fileToUpload.ContentType,
+                            stream
+                        );
+
+                        reportEntity.FileName = fileName;
+                        reportEntity.ObjectName = objectName;
+                    }
+
+                    var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == progression);
+
+                    if (existingReport != null)
+                    {
+                        if (fileToUpload.FileName != existingReport.FileName)
+                        {
+                            await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
+                            _context.StudentReports.Remove(existingReport);
+
+                            dbMember.StudentReports.Add(reportEntity);
+                            existingReport.DateUpdated = DateTime.Now;
+                        }
+                        else
+                        {
+                            existingReport.FileName = reportEntity.FileName;
+                            existingReport.ObjectName = reportEntity.ObjectName;
+                            existingReport.DateUpdated = DateTime.Now;
+                        }
+                    }
+                    else
+                    {
+                        dbMember.StudentReports.Add(reportEntity);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = "success";
             return response;
         }
     }
