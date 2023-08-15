@@ -33,7 +33,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
+        [HttpPut, Authorize(Roles = "teacher, master")]
         public async Task<ActionResult> UpdateStudentReport([FromForm] int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
         {
             var response = await _studentReportService.UpdateStudentReport(studySubjectId, studentCode, progression, fileToUpload);
