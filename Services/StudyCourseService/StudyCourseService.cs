@@ -275,8 +275,8 @@ namespace griffined_api.Services.StudyCourseService
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
-                if (dbRequest == null)
-                    throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
+            if (dbRequest == null)
+                throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             if (requestDto.ClassToAdd.Count() != 0)
             {
@@ -322,6 +322,60 @@ namespace griffined_api.Services.StudyCourseService
             {
                 StatusCode = (int)HttpStatusCode.OK,
             };
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<EnrolledStudyCourseResponseDto>>> ListAllStudyCourseByStudentToken()
+        {
+            var studentId = _firebaseService.GetAzureIdWithToken();
+            var dbStudyCourses = await _context.StudySubjectMember
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.StudyCourse)
+                                        .ThenInclude(s => s.Course)
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.StudyCourse)
+                                        .ThenInclude(s => s.Level)
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Where(s => s.StudentId == studentId)
+                                .GroupBy(m => m.StudySubject.StudyCourse)
+                                .Select(group => new
+                                {
+                                    StudyCourse = group.Key,
+                                    StudySubjects = group.Select(m => m.StudySubject)
+                                })
+                                .ToListAsync();
+            
+            var responseData = new List<EnrolledStudyCourseResponseDto>();
+            foreach(var dbStudyCourse in dbStudyCourses)
+            {
+                var studyCourse = new EnrolledStudyCourseResponseDto{
+                    Section = dbStudyCourse.StudyCourse.Section,
+                    StudyCourseId = dbStudyCourse.StudyCourse.Id,
+                    Course = dbStudyCourse.StudyCourse.Course.course,
+                    Level = dbStudyCourse.StudyCourse.Level?.level,
+                    LevelId = dbStudyCourse.StudyCourse.Level?.Id,
+                    StudyCourseType = dbStudyCourse.StudyCourse.StudyCourseType,
+                };
+                foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    var studySubject = new StudySubjectResponseDto{
+                        StudySubjectId = dbStudySubject.Id,
+                        Subject = dbStudySubject.Subject.subject,
+                    };
+                    studyCourse.StudySubjects.Add(studySubject);
+                }
+                responseData.Add(studyCourse);
+            }
+
+            var response = new ServiceResponse<List<EnrolledStudyCourseResponseDto>>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = responseData,
+            };
+
+
+            
             return response;
         }
     }

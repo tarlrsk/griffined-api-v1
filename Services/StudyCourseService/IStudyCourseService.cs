@@ -12,5 +12,6 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse();
         Task<ServiceResponse<string>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId);
         Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId);
+        Task<ServiceResponse<List<EnrolledStudyCourseResponseDto>>> ListAllStudyCourseByStudentToken();
     }
 }
