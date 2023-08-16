@@ -7,6 +7,6 @@ namespace griffined_api.Services.CourseService
 {
     public interface ICourseService
     {
-        Task<ServiceResponse<CourseResponseDto>> ListAllCourseSubjectLevel();
+        Task<ServiceResponse<List<CourseResponseDto>>> ListAllCourseSubjectLevel();
     }
 }
