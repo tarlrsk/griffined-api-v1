@@ -83,5 +83,11 @@ namespace griffined_api.Controllers
                 return NotFound(response);
             return Ok(response);
         }
+
+        [HttpPut("change-password/{uid}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> ChangePasswordWithFirebaseUid(string uid, ChangeUserPasswordDto password)
+        {
+            return Ok(await _studentService.ChangePasswordWithFirebaseId(uid, password));
+        }
     }
 }
