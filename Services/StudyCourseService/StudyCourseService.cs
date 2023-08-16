@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using griffined_api.Dtos.StudyCourseDtos;
-using Google.Api;
 
 namespace griffined_api.Services.StudyCourseService
 {
