@@ -32,9 +32,6 @@ namespace griffined_api.Services.CourseService
                                     .Include(c => c.Levels)
                                     .ToListAsync();
 
-            if (dbCourses is null)
-                throw new NotFoundException("No courses found.");
-
             var data = new List<CourseResponseDto>();
 
             foreach (var course in dbCourses)
