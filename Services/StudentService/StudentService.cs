@@ -637,6 +637,20 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
+        public async Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid,ChangeUserPasswordDto password)
+        {
+            if (password.Password != password.VerifyPassword)
+                throw new BadRequestException("Both Password must be the same");
+
+            await _firebaseService.ChangePasswordWithUid(uid,password.Password);
+
+            var response = new ServiceResponse<string>{
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+
+        }
+
         private async Task AddStudentFireStoreAsync(Student student)
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
