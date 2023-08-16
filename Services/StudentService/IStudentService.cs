@@ -15,6 +15,6 @@ namespace griffined_api.Services.StudentService
         Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int id);
         Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id);
         Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id);
-
+        Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password);
     }
 }
