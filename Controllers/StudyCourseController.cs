@@ -43,5 +43,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
         }
+
+        [HttpGet("student/by-token")]
+        public async Task<ActionResult> ListAllStudyCourseByStudentToken()
+        {
+            return Ok(await _studyCourseService.ListAllStudyCourseByStudentToken());
+        }
     }
 }
