@@ -10,8 +10,6 @@ namespace griffined_api.Controllers
     [ApiController]
     [Route("api/v1/study-course")]
 
-    [Authorize(Roles = "ea, master")]
-
     public class StudyCourseController : ControllerBase
     {
         private readonly IStudyCourseService _studyCourseService;
@@ -32,19 +30,19 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.GetAllStudyCourse());
         }
 
-        [HttpPost("new/{requestId}")]
+        [HttpPost("new/{requestId}"), Authorize(Roles = "ea, master")]
         public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
             return Ok(await _studyCourseService.AddNewStudyClass(newStudyClasses, requestId));
         } 
 
-        [HttpPut("new/{requestId}")]
+        [HttpPut("new/{requestId}"), Authorize(Roles= "ea, master")]
         public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
         {
             return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
         }
 
-        [HttpGet("student/by-token")]
+        [HttpGet("student/by-token"), Authorize(Roles= "student")]
         public async Task<ActionResult> ListAllStudyCourseByStudentToken()
         {
             return Ok(await _studyCourseService.ListAllStudyCourseByStudentToken());
