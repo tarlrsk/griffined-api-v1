@@ -9,8 +9,8 @@ namespace griffined_api.Services.TeacherService
 {
     public class TeacherService : ITeacherService
     {
-        private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
-        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
+        private readonly string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -26,7 +26,7 @@ namespace griffined_api.Services.TeacherService
             var response = new ServiceResponse<GetTeacherDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             string password = "hog" + newTeacher.Phone;
-            FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
+            FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
 
             try
@@ -50,11 +50,11 @@ namespace griffined_api.Services.TeacherService
             teacher.FirebaseId = firebaseId;
             teacher.CreatedBy = id;
             teacher.LastUpdatedBy = id;
-            await addStaffFireStoreAsync(teacher);
+            await AddStaffFireStoreAsync(teacher);
             _context.Teachers.Add(teacher);
 
             await _context.SaveChangesAsync();
-            await addStaffFireStoreAsync(teacher);
+            await AddStaffFireStoreAsync(teacher);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(teacher);
@@ -68,10 +68,7 @@ namespace griffined_api.Services.TeacherService
 
             var dbTeacher = await _context.Teachers
                 .Include(t => t.WorkTimes)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (dbTeacher is null)
-                throw new NotFoundException($"Teacher with ID {id} not found.");
+                .FirstOrDefaultAsync(t => t.Id == id) ?? throw new NotFoundException($"Teacher with ID {id} not found.");
 
             _context.Teachers.Remove(dbTeacher);
             _context.WorkTimes.RemoveRange(dbTeacher.WorkTimes);
@@ -90,7 +87,7 @@ namespace griffined_api.Services.TeacherService
             var dbTeachers = await _context.Teachers
                 .Include(t => t.WorkTimes)
                 .ToListAsync();
-            
+
             var data = dbTeachers.Select(s =>
             {
                 var teacherDto = _mapper.Map<GetTeacherDto>(s);
@@ -110,10 +107,7 @@ namespace griffined_api.Services.TeacherService
 
             var dbTeacher = await _context.Teachers
                 .Include(t => t.WorkTimes)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (dbTeacher is null)
-                throw new NotFoundException($"Teacher with ID {id} not found.");
+                .FirstOrDefaultAsync(t => t.Id == id) ?? throw new NotFoundException($"Teacher with ID {id} not found.");
 
             var data = _mapper.Map<GetTeacherDto>(dbTeacher);
             data.TeacherId = dbTeacher.Id;
@@ -131,10 +125,7 @@ namespace griffined_api.Services.TeacherService
 
             var dbTeacher = await _context.Teachers
                 .Include(t => t.WorkTimes)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (dbTeacher is null)
-                throw new NotFoundException($"Teacher with ID {id} not found.");
+                .FirstOrDefaultAsync(t => t.Id == id) ?? throw new NotFoundException($"Teacher with ID {id} not found.");
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(dbTeacher);
@@ -149,10 +140,7 @@ namespace griffined_api.Services.TeacherService
 
             var teacher = await _context.Teachers
                 .Include(t => t.WorkTimes)
-                .FirstOrDefaultAsync(t => t.Id == updatedTeacher.Id);
-
-            if (teacher is null)
-                throw new NotFoundException($"Teacher with ID {updatedTeacher.Id} not found.");
+                .FirstOrDefaultAsync(t => t.Id == updatedTeacher.Id) ?? throw new NotFoundException($"Teacher with ID {updatedTeacher.Id} not found.");
 
             _mapper.Map(updatedTeacher, teacher);
 
@@ -182,7 +170,7 @@ namespace griffined_api.Services.TeacherService
                 Email = updatedTeacher.Email
             });
 
-            await addStaffFireStoreAsync(teacher);
+            await AddStaffFireStoreAsync(teacher);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = _mapper.Map<GetTeacherDto>(teacher);
@@ -190,11 +178,11 @@ namespace griffined_api.Services.TeacherService
             return response;
         }
 
-        private async Task addStaffFireStoreAsync(Teacher staff)
+        private async Task AddStaffFireStoreAsync(Teacher staff)
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
             DocumentReference docRef = db.Collection("users").Document(staff.FirebaseId);
-            Dictionary<string, object> staffDoc = new Dictionary<string, object>()
+            Dictionary<string, object> staffDoc = new()
                 {
                     { "displayName", staff.FullName },
                     { "email", staff.Email },
@@ -210,9 +198,7 @@ namespace griffined_api.Services.TeacherService
         {
             var response = new ServiceResponse<GetTeacherDto>();
 
-            var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.Id == id);
-            if (staff is null)
-                throw new NotFoundException($"Teacher with ID '{id}' not found.");
+            var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException($"Teacher with ID '{id}' not found.");
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
@@ -233,9 +219,7 @@ namespace griffined_api.Services.TeacherService
         {
             var response = new ServiceResponse<GetTeacherDto>();
 
-            var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.Id == id);
-            if (staff is null)
-                throw new NotFoundException($"Teacher with ID '{id}' not found.");
+            var staff = await _context.Teachers.FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException($"Teacher with ID '{id}' not found.");
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {

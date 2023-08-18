@@ -10,17 +10,10 @@ namespace griffined_api.Services.CourseService
 {
     public class CourseService : ICourseService
     {
-        private readonly IMapper _mapper;
         private readonly DataContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IFirebaseService _firebaseService;
-
-        public CourseService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
+        public CourseService(DataContext context)
         {
-            _httpContextAccessor = httpContextAccessor;
             _context = context;
-            _mapper = mapper;
-            _firebaseService = firebaseService;
         }
 
         public async Task<ServiceResponse<List<CourseResponseDto>>> ListAllCourseSubjectLevel()

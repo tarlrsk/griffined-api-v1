@@ -12,17 +12,13 @@ namespace griffined_api.Services.StudentReportService
 {
     public class StudentReportService : IStudentReportService
     {
-        private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
-        private string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
-        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
+        private readonly string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly StorageClient _storageClient;
         private readonly IFirebaseService _firebaseService;
-        public StudentReportService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService, StorageClient storageClient)
+        public StudentReportService(IMapper mapper, DataContext context, IFirebaseService firebaseService, StorageClient storageClient)
         {
-            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _context = context;
             _firebaseService = firebaseService;
@@ -35,10 +31,7 @@ namespace griffined_api.Services.StudentReportService
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
-
-            if (dbMember == null)
-                throw new NotFoundException("No student found.");
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId) ?? throw new NotFoundException("No student found.");
 
             int teacherId = _firebaseService.GetAzureIdWithToken();
 
@@ -49,12 +42,13 @@ namespace griffined_api.Services.StudentReportService
 
             if (fileToUpload != null)
             {
-                var studentReport = new StudentReport();
-
-                studentReport.StudySubjectMemberId = dbMember.Id;
-                studentReport.TeacherId = teacherId;
-                studentReport.DateUpdated = DateTime.Now;
-                studentReport.Progression = progression;
+                var studentReport = new StudentReport
+                {
+                    StudySubjectMemberId = dbMember.Id,
+                    TeacherId = teacherId,
+                    DateUpdated = DateTime.Now,
+                    Progression = progression
+                };
 
                 var reportRequestDto = new AddStudentReportRequestDto
                 {
@@ -99,10 +93,7 @@ namespace griffined_api.Services.StudentReportService
                                     .Include(m => m.StudySubject)
                                         .ThenInclude(ss => ss.Subject)
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubject.StudyCourseId == studyCourseId);
-
-            if (dbMember == null)
-                throw new NotFoundException("No student found.");
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubject.StudyCourseId == studyCourseId) ?? throw new NotFoundException("No student found.");
 
             var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
             var hundredPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);

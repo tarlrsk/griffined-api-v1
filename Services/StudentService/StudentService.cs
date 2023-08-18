@@ -13,9 +13,9 @@ namespace griffined_api.Services.StudentService
 {
     public class StudentService : IStudentService
     {
-        private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
-        private string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
-        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
+        private readonly string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private readonly string? FIREBASE_BUCKET = Environment.GetEnvironmentVariable("FIREBASE_BUCKET");
+        private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -37,7 +37,7 @@ namespace griffined_api.Services.StudentService
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             string password = newStudent.Nickname.ToLower() + newStudent.DOB.ToDateTime().ToString("dd/MM/yyyy");
 
-            FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
+            FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
             try
             {
@@ -112,7 +112,7 @@ namespace griffined_api.Services.StudentService
                 data.ProfilePicture = pictureResponseDto;
             }
 
-            if (filesToUpload != null && filesToUpload.Count() > 0)
+            if (filesToUpload != null && filesToUpload.Count > 0)
             {
                 _student.AdditionalFiles = new List<StudentAdditionalFile>();
 
@@ -166,31 +166,23 @@ namespace griffined_api.Services.StudentService
         {
             var response = new ServiceResponse<List<StudentResponseDto>>();
 
-            var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
-            if (dbStudent is null)
-                throw new NotFoundException($"Student with ID '{id}' not found.");
+            var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == id) ?? throw new NotFoundException($"Student with ID '{id}' not found.");
 
             _context.Students.Remove(dbStudent);
 
             if (dbStudent.Parent != null)
             {
-                var dbParent = await _context.Parents.FirstOrDefaultAsync(p => p.StudentId == id);
-                if (dbParent is null)
-                    throw new NotFoundException("Parent not found.");
+                var dbParent = await _context.Parents.FirstOrDefaultAsync(p => p.StudentId == id) ?? throw new NotFoundException("Parent not found.");
                 _context.Parents.Remove(dbParent);
             }
 
             if (dbStudent.Address != null)
             {
-                var dbAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.StudentId == id);
-                if (dbAddress is null)
-                    throw new NotFoundException("Address not found.");
+                var dbAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.StudentId == id) ?? throw new NotFoundException("Address not found.");
                 _context.Addresses.Remove(dbAddress);
             }
 
-            var dbAdditionalFiles = await _context.StudentAdditionalFiles.Where(f => f.StudentId == id).ToListAsync();
-            if (dbAdditionalFiles is null)
-                throw new NotFoundException($"No additional files found.");
+            var dbAdditionalFiles = await _context.StudentAdditionalFiles.Where(f => f.StudentId == id).ToListAsync() ?? throw new NotFoundException($"No additional files found.");
             _context.StudentAdditionalFiles.RemoveRange(dbAdditionalFiles);
 
             await _context.SaveChangesAsync();
@@ -208,10 +200,7 @@ namespace griffined_api.Services.StudentService
             var dbStudents = await _context.Students
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
-                .ToListAsync();
-
-            if (dbStudents is null)
-                throw new NotFoundException("No students found.");
+                .ToListAsync() ?? throw new NotFoundException("No students found.");
 
             var data = dbStudents.Select(s =>
             {
@@ -236,10 +225,7 @@ namespace griffined_api.Services.StudentService
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
                 .Include(s => s.AdditionalFiles)
-                .FirstOrDefaultAsync(s => s.StudentCode == studentCode);
-
-            if (dbStudent is null)
-                throw new NotFoundException($"Student with ID '{studentCode}' not found.");
+                .FirstOrDefaultAsync(s => s.StudentCode == studentCode) ?? throw new NotFoundException($"Student with ID '{studentCode}' not found.");
 
             var data = _mapper.Map<StudentResponseDto>(dbStudent);
 
@@ -302,10 +288,7 @@ namespace griffined_api.Services.StudentService
                 .Include(s => s.Parent)
                 .Include(s => s.Address)
                 .Include(s => s.AdditionalFiles)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            if (dbStudent is null)
-                throw new NotFoundException($"Student with ID '{id}' not found.");
+                .FirstOrDefaultAsync(s => s.Id == id) ?? throw new NotFoundException($"Student with ID '{id}' not found.");
 
             var data = _mapper.Map<StudentResponseDto>(dbStudent);
 
@@ -369,9 +352,7 @@ namespace griffined_api.Services.StudentService
                             .Include(s => s.Parent)
                             .Include(s => s.Address)
                             .Include(s => s.AdditionalFiles)
-                            .FirstOrDefaultAsync(s => s.StudentCode == updatedStudent.StudentCode);
-            if (student is null)
-                throw new NotFoundException($"Student with ID '{updatedStudent.StudentCode}' not found.");
+                            .FirstOrDefaultAsync(s => s.StudentCode == updatedStudent.StudentCode) ?? throw new NotFoundException($"Student with ID '{updatedStudent.StudentCode}' not found.");
 
             var data = _mapper.Map<StudentResponseDto>(student);
 
@@ -410,14 +391,16 @@ namespace griffined_api.Services.StudentService
                 var _parent = await _context.Parents.FirstOrDefaultAsync(p => p.Student != null && p.Student.StudentCode == updatedStudent.StudentCode);
                 if (_parent is null)
                 {
-                    var parent = new Parent();
-                    parent.FirstName = updatedStudent.Parent.FirstName;
-                    parent.LastName = updatedStudent.Parent.LastName;
-                    parent.Relationship = updatedStudent.Parent.Relationship;
-                    parent.Email = updatedStudent.Parent.Email;
-                    parent.Line = updatedStudent.Parent.Line;
-                    parent.Phone = updatedStudent.Parent.Phone;
-                    parent.Student = student;
+                    var parent = new Parent
+                    {
+                        FirstName = updatedStudent.Parent.FirstName,
+                        LastName = updatedStudent.Parent.LastName,
+                        Relationship = updatedStudent.Parent.Relationship,
+                        Email = updatedStudent.Parent.Email,
+                        Line = updatedStudent.Parent.Line,
+                        Phone = updatedStudent.Parent.Phone,
+                        Student = student
+                    };
                     await _context.AddAsync(parent);
                 }
                 else
@@ -439,13 +422,15 @@ namespace griffined_api.Services.StudentService
                 var _address = await _context.Addresses.FirstOrDefaultAsync(a => a.Student != null && a.Student.StudentCode == updatedStudent.StudentCode);
                 if (_address is null)
                 {
-                    var address = new Address();
-                    address.address = updatedStudent.Address.Address;
-                    address.Subdistrict = updatedStudent.Address.Subdistrict;
-                    address.District = updatedStudent.Address.District;
-                    address.Province = updatedStudent.Address.Province;
-                    address.Zipcode = updatedStudent.Address.Zipcode;
-                    address.Student = student;
+                    var address = new Address
+                    {
+                        address = updatedStudent.Address.Address,
+                        Subdistrict = updatedStudent.Address.Subdistrict,
+                        District = updatedStudent.Address.District,
+                        Province = updatedStudent.Address.Province,
+                        Zipcode = updatedStudent.Address.Zipcode,
+                        Student = student
+                    };
                     await _context.AddAsync(address);
                 }
                 else
@@ -596,10 +581,7 @@ namespace griffined_api.Services.StudentService
         public async Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
-
-            if (student is null)
-                throw new NotFoundException($"Student with ID '{id}' not found.");
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id) ?? throw new NotFoundException($"Student with ID '{id}' not found.");
 
             student.Status = StudentStatus.Inactive;
             await _context.SaveChangesAsync();
@@ -618,10 +600,7 @@ namespace griffined_api.Services.StudentService
         public async Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id)
         {
             var response = new ServiceResponse<StudentResponseDto>();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
-
-            if (student is null)
-                throw new NotFoundException($"Student with ID '{id}' not found.");
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id) ?? throw new NotFoundException($"Student with ID '{id}' not found.");
 
             student.Status = StudentStatus.Active;
             await _context.SaveChangesAsync();
@@ -637,14 +616,15 @@ namespace griffined_api.Services.StudentService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid,ChangeUserPasswordDto password)
+        public async Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password)
         {
             if (password.Password != password.VerifyPassword)
                 throw new BadRequestException("Both Password must be the same");
 
-            await _firebaseService.ChangePasswordWithUid(uid,password.Password);
+            await _firebaseService.ChangePasswordWithUid(uid, password.Password);
 
-            var response = new ServiceResponse<string>{
+            var response = new ServiceResponse<string>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
             };
             return response;
@@ -655,7 +635,7 @@ namespace griffined_api.Services.StudentService
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
             DocumentReference docRef = db.Collection("users").Document(student.FirebaseId);
-            Dictionary<string, object> studentDoc = new Dictionary<string, object>()
+            Dictionary<string, object> studentDoc = new()
                 {
                     { "displayName", student.FullName },
                     { "email", student.Email },
