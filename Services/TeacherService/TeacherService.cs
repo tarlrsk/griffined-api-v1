@@ -199,7 +199,7 @@ namespace griffined_api.Services.TeacherService
                     { "displayName", staff.FullName },
                     { "email", staff.Email },
                     { "id", staff.Id },
-                    { "role", "Teacher" },
+                    { "role", "teacher" },
                     { "uid", staff.FirebaseId}
 
                 };
