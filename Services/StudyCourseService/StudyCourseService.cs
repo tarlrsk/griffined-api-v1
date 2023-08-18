@@ -131,7 +131,7 @@ namespace griffined_api.Services.StudyCourseService
                         {
                             studentCount += 1;
                             student.Add(dbMember.StudentId);
-                            studyCourse.members.Add(new StudentNameResponseDto{
+                            studyCourse.Members.Add(new StudentNameResponseDto{
                                 StudentId = dbMember.Student.Id,
                                 StudentCode = dbMember.Student.StudentCode,
                                 FirstName = dbMember.Student.FirstName,
