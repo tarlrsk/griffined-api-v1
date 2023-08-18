@@ -9,8 +9,8 @@ namespace griffined_api.Services.StaffService
 {
     public class StaffService : IStaffService
     {
-        private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
-        private string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
+        private readonly string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -27,7 +27,7 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
             string password = "hog" + newStaff.Phone;
-            FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
+            FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
             try
             {
@@ -63,9 +63,7 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<List<StaffResponseDto>>();
 
-            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id);
-            if (dbStaff is null)
-                throw new NotFoundException($"Staff with ID '{id}' not found.");
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
 
             _context.Staff.Remove(dbStaff);
             await _context.SaveChangesAsync();
@@ -80,10 +78,7 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<StaffResponseDto>();
 
-            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id);
-
-            if (staff is null)
-                throw new NotFoundException($"Staff with ID '{id}' not found.");
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
@@ -102,10 +97,7 @@ namespace griffined_api.Services.StaffService
         public async Task<ServiceResponse<StaffResponseDto>> EnableStaff(int id)
         {
             var response = new ServiceResponse<StaffResponseDto>();
-            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id);
-
-            if (staff is null)
-                throw new NotFoundException($"Staff with ID '{id}' not found.");
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
@@ -146,10 +138,7 @@ namespace griffined_api.Services.StaffService
         {
             var response = new ServiceResponse<StaffResponseDto>();
 
-            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id);
-
-            if (dbStaff is null)
-                throw new NotFoundException($"Staff with ID '{id}' not found.");
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
 
             var staff = _mapper.Map<StaffResponseDto>(dbStaff);
             staff.StaffId = dbStaff.Id;
@@ -165,9 +154,7 @@ namespace griffined_api.Services.StaffService
             var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == updatedStaff.Id);
-            if (staff is null)
-                throw new NotFoundException($"Staff with ID '{updatedStaff.Id}' not found.");
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == updatedStaff.Id) ?? throw new NotFoundException($"Staff with ID '{updatedStaff.Id}' not found.");
 
             _mapper.Map(updatedStaff, staff);
 
@@ -201,7 +188,7 @@ namespace griffined_api.Services.StaffService
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
             DocumentReference docRef = db.Collection("users").Document(staff.FirebaseId);
-            Dictionary<string, object> staffDoc = new Dictionary<string, object>()
+            Dictionary<string, object> staffDoc = new()
                 {
                     { "displayName", staff.FullName },
                     { "email", staff.Email },
