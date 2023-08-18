@@ -1094,20 +1094,6 @@ namespace griffined_api.Services.RegistrationRequestService
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
 
-            foreach (var member in dbRequest.RegistrationRequestMembers)
-            {
-                if (member.Student.Status == StudentStatus.OnProcess)
-                    member.Student.Status = StudentStatus.Active;
-
-                foreach (var course in dbRequest.NewCourseRequests)
-                {
-                    if (member.Student.ExpiryDate < course.EndDate)
-                    {
-                        member.Student.ExpiryDate = course.EndDate;
-                    }
-                }
-            }
-
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
                 foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
@@ -1120,6 +1106,30 @@ namespace griffined_api.Services.RegistrationRequestService
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                            }
+                        }
+
+                        foreach (var dbCourse in dbRequest.NewCourseRequests)
+                        {
+                            if (dbCourse.StudyCourse != null)
+                            {
+                                foreach (var dbStudySubject in dbCourse.StudyCourse.StudySubjects)
+                                {
+                                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                                    {
+                                        foreach (var dbMember in dbRequest.RegistrationRequestMembers)
+                                        {
+                                            var attendance = new StudentAttendance
+                                            {
+                                                StudentId = dbMember.StudentId,
+                                                StudyClassId = dbStudyClass.Id,
+                                                Attendance = Attendance.None
+                                            };
+
+                                            _context.StudentAttendances.Add(attendance);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1142,6 +1152,20 @@ namespace griffined_api.Services.RegistrationRequestService
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
                             }
                         }
+                    }
+                }
+            }
+
+            foreach (var member in dbRequest.RegistrationRequestMembers)
+            {
+                if (member.Student.Status == StudentStatus.OnProcess)
+                    member.Student.Status = StudentStatus.Active;
+
+                foreach (var course in dbRequest.NewCourseRequests)
+                {
+                    if (member.Student.ExpiryDate < course.EndDate)
+                    {
+                        member.Student.ExpiryDate = course.EndDate;
                     }
                 }
             }
