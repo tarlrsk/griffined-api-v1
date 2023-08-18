@@ -42,10 +42,16 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
         }
 
-        [HttpGet("student/by-token"), Authorize(Roles= "student")]
+        [HttpGet("student/by-token"), Authorize(Roles = "student")]
         public async Task<ActionResult> ListAllStudyCourseByStudentToken()
         {
             return Ok(await _studyCourseService.ListAllStudyCourseByStudentToken());
+        }
+
+        [HttpGet("teacher/by-token"), Authorize(Roles = "teacher")]
+        public async Task<ActionResult> ListAllStudyCourseByTeacherToken()
+        {
+            return Ok(await _studyCourseService.ListAllStudyCourseByTeacherToken());
         }
     }
 }
