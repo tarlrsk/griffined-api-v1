@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using griffined_api.Dtos.StudyCourseDtos;
+using AutoMapper.Execution;
 
 namespace griffined_api.Services.StudyCourseService
 {
@@ -98,6 +99,7 @@ namespace griffined_api.Services.StudyCourseService
                                                 .ThenInclude(c => c.Teacher)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.StudySubjectMember)
+                                                .ThenInclude(s => s.Student)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.Subject)
                                         .Include(c => c.Course)
@@ -125,10 +127,18 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
-                        if (!(student.Exists(s => s == dbMember.StudentId)))
+                        if (!student.Exists(s => s == dbMember.StudentId))
                         {
                             studentCount += 1;
                             student.Add(dbMember.StudentId);
+                            studyCourse.Members.Add(new StudentNameResponseDto{
+                                StudentId = dbMember.Student.Id,
+                                StudentCode = dbMember.Student.StudentCode,
+                                FirstName = dbMember.Student.FirstName,
+                                LastName = dbMember.Student.LastName,
+                                FullName = dbMember.Student.FullName,
+                                Nickname = dbMember.Student.Nickname,
+                            });
                         }
                     }
                     studyCourse.StudySubjects.Add(new StudySubjectResponseDto()
