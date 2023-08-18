@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using griffined_api.Dtos.StudyCourseDtos;
+using AutoMapper.Execution;
 
 namespace griffined_api.Services.StudyCourseService
 {
@@ -98,6 +99,7 @@ namespace griffined_api.Services.StudyCourseService
                                                 .ThenInclude(c => c.Teacher)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.StudySubjectMember)
+                                                .ThenInclude(s => s.Student)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.Subject)
                                         .Include(c => c.Course)
@@ -125,10 +127,18 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
-                        if (!(student.Exists(s => s == dbMember.StudentId)))
+                        if (!student.Exists(s => s == dbMember.StudentId))
                         {
                             studentCount += 1;
                             student.Add(dbMember.StudentId);
+                            studyCourse.Members.Add(new StudentNameResponseDto{
+                                StudentId = dbMember.Student.Id,
+                                StudentCode = dbMember.Student.StudentCode,
+                                FirstName = dbMember.Student.FirstName,
+                                LastName = dbMember.Student.LastName,
+                                FullName = dbMember.Student.FullName,
+                                Nickname = dbMember.Student.Nickname,
+                            });
                         }
                     }
                     studyCourse.StudySubjects.Add(new StudySubjectResponseDto()
@@ -325,7 +335,7 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<List<EnrolledStudyCourseResponseDto>>> ListAllStudyCourseByStudentToken()
+        public async Task<ServiceResponse<List<StudyCourseMobileResponseDto>>> ListAllStudyCourseByStudentToken()
         {
             var studentId = _firebaseService.GetAzureIdWithToken();
             var dbStudyCourses = await _context.StudySubjectMember
@@ -346,10 +356,10 @@ namespace griffined_api.Services.StudyCourseService
                                 })
                                 .ToListAsync();
             
-            var responseData = new List<EnrolledStudyCourseResponseDto>();
+            var responseData = new List<StudyCourseMobileResponseDto>();
             foreach(var dbStudyCourse in dbStudyCourses)
             {
-                var studyCourse = new EnrolledStudyCourseResponseDto{
+                var studyCourse = new StudyCourseMobileResponseDto{
                     Section = dbStudyCourse.StudyCourse.Section,
                     StudyCourseId = dbStudyCourse.StudyCourse.Id,
                     Course = dbStudyCourse.StudyCourse.Course.course,
@@ -368,14 +378,62 @@ namespace griffined_api.Services.StudyCourseService
                 responseData.Add(studyCourse);
             }
 
-            var response = new ServiceResponse<List<EnrolledStudyCourseResponseDto>>()
+            var response = new ServiceResponse<List<StudyCourseMobileResponseDto>>()
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = responseData,
             };
+            return response;
+        }
+        
+        public async Task<ServiceResponse<List<StudyCourseMobileResponseDto>>> ListAllStudyCourseByTeacherToken()
+        {
+            var teacherId = _firebaseService.GetAzureIdWithToken();
+            var dbStudyCourses = await _context.StudyClasses
+                                .Include(c => c.StudySubject)
+                                    .ThenInclude(s => s.StudyCourse)
+                                        .ThenInclude(s => s.Course)
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.StudyCourse)
+                                        .ThenInclude(s => s.Level)
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Where(s => s.TeacherId == teacherId)
+                                .GroupBy(m => m.StudySubject.StudyCourse)
+                                .Select(group => new
+                                {
+                                    StudyCourse = group.Key,
+                                    StudySubjects = group.Select(m => m.StudySubject)
+                                })
+                                .ToListAsync();
 
+            var responseData = new List<StudyCourseMobileResponseDto>();
+            foreach(var dbStudyCourse in dbStudyCourses)
+            {
+                var studyCourse = new StudyCourseMobileResponseDto{
+                    Section = dbStudyCourse.StudyCourse.Section,
+                    StudyCourseId = dbStudyCourse.StudyCourse.Id,
+                    Course = dbStudyCourse.StudyCourse.Course.course,
+                    Level = dbStudyCourse.StudyCourse.Level?.level,
+                    LevelId = dbStudyCourse.StudyCourse.Level?.Id,
+                    StudyCourseType = dbStudyCourse.StudyCourse.StudyCourseType,
+                };
+                foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    var studySubject = new StudySubjectResponseDto{
+                        StudySubjectId = dbStudySubject.Id,
+                        Subject = dbStudySubject.Subject.subject,
+                    };
+                    studyCourse.StudySubjects.Add(studySubject);
+                }
+                responseData.Add(studyCourse);
+            }
 
-            
+            var response = new ServiceResponse<List<StudyCourseMobileResponseDto>>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = responseData,
+            };
             return response;
         }
     }
