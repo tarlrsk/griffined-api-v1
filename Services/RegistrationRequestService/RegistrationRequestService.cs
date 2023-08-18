@@ -18,16 +18,9 @@ namespace griffined_api.Services.RegistrationRequestService
     public class RegistrationRequestService : IRegistrationRequestService
     {
         private readonly DataContext _context;
-        private readonly IMapper _mapper;
         private readonly IFirebaseService _firebaseService;
-        public RegistrationRequestService
-        (
-            IMapper mapper,
-            DataContext context,
-            IFirebaseService firebaseService
-        )
+        public RegistrationRequestService(DataContext context, IFirebaseService firebaseService)
         {
-            _mapper = mapper;
             _context = context;
             _firebaseService = firebaseService;
         }
@@ -43,24 +36,21 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             foreach (var memberId in newRequestedCourses.MemberIds)
             {
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
-
-                if (dbStudent == null)
-                {
-                    throw new NotFoundException($"Student with ID {memberId} not found.");
-                }
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId) ?? throw new NotFoundException($"Student with ID {memberId} not found.");
 
                 if (dbStudent.Status == StudentStatus.Inactive)
                 {
                     dbStudent.Status = StudentStatus.OnProcess;
                 }
 
-                var member = new RegistrationRequestMember();
-                member.Student = dbStudent;
+                var member = new RegistrationRequestMember
+                {
+                    Student = dbStudent
+                };
                 request.RegistrationRequestMembers.Add(member);
             }
 
-            if (newRequestedCourses.Type == StudyCourseType.Private && newRequestedCourses.MemberIds.Count() == 1)
+            if (newRequestedCourses.Type == StudyCourseType.Private && newRequestedCourses.MemberIds.Count == 1)
             {
                 var student = request.RegistrationRequestMembers.ElementAt(0).Student;
                 request.Section = student.Nickname + "/" + student.FirstName;
@@ -72,10 +62,12 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var newPreferredDay in newRequestedCourses.PreferredDays)
             {
-                var requestedPreferredDay = new NewCoursePreferredDayRequest();
-                requestedPreferredDay.Day = newPreferredDay.Day;
-                requestedPreferredDay.FromTime = newPreferredDay.FromTime.ToTimeSpan();
-                requestedPreferredDay.ToTime = newPreferredDay.ToTime.ToTimeSpan();
+                var requestedPreferredDay = new NewCoursePreferredDayRequest
+                {
+                    Day = newPreferredDay.Day,
+                    FromTime = newPreferredDay.FromTime.ToTimeSpan(),
+                    ToTime = newPreferredDay.ToTime.ToTimeSpan()
+                };
                 request.NewCoursePreferredDayRequests.Add(requestedPreferredDay);
             }
 
@@ -99,23 +91,29 @@ namespace griffined_api.Services.RegistrationRequestService
                 var course = existedCourses.FirstOrDefault(c => c.course == newRequestedCourse.Course);
                 if (course == null)
                 {
-                    var newCourse = new Course();
-                    newCourse.course = newRequestedCourse.Course;
+                    var newCourse = new Course
+                    {
+                        course = newRequestedCourse.Course
+                    };
 
                     if (newRequestedCourse.Subjects == null)
                         throw new BadRequestException("The subjects field is required.");
 
                     foreach (var subject in newRequestedCourse.Subjects)
                     {
-                        var newSubject = new Subject();
-                        newSubject.subject = subject.Subject;
+                        var newSubject = new Subject
+                        {
+                            subject = subject.Subject
+                        };
                         newCourse.Subjects.Add(newSubject);
                     }
 
                     if (newRequestedCourse.Level != null)
                     {
-                        var newLevel = new Level();
-                        newLevel.level = newRequestedCourse.Level;
+                        var newLevel = new Level
+                        {
+                            level = newRequestedCourse.Level
+                        };
                         newCourse.Levels.Add(newLevel);
                     }
 
@@ -135,9 +133,11 @@ namespace griffined_api.Services.RegistrationRequestService
                     foreach (var requestedSubject in newRequestedCourse.Subjects)
                     {
                         var subject = existedSubjects.First(s => s.subject == requestedSubject.Subject);
-                        var newRequestedSubject = new NewCourseSubjectRequest();
-                        newRequestedSubject.Subject = subject;
-                        newRequestedSubject.Hour = requestedSubject.Hour;
+                        var newRequestedSubject = new NewCourseSubjectRequest
+                        {
+                            Subject = subject,
+                            Hour = requestedSubject.Hour
+                        };
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
                 }
@@ -151,9 +151,11 @@ namespace griffined_api.Services.RegistrationRequestService
                         var subject = course.Subjects.FirstOrDefault(s => s.subject == requestedSubject.Subject);
                         if (subject == null)
                         {
-                            var newSubject = new Subject();
-                            newSubject.subject = requestedSubject.Subject;
-                            newSubject.Course = course;
+                            var newSubject = new Subject
+                            {
+                                subject = requestedSubject.Subject,
+                                Course = course
+                            };
                             _context.Subjects.Add(newSubject);
                             await _context.SaveChangesAsync();
                             existedCourses = await _context.Courses
@@ -175,9 +177,11 @@ namespace griffined_api.Services.RegistrationRequestService
                     var level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
                     if (newRequestedCourse.Level != null && level != null)
                     {
-                        var newLevel = new Level();
-                        newLevel.level = newRequestedCourse.Level;
-                        newLevel.Course = course;
+                        var newLevel = new Level
+                        {
+                            level = newRequestedCourse.Level,
+                            Course = course
+                        };
                         _context.Levels.Add(newLevel);
                         await _context.SaveChangesAsync();
                         course = await _context.Courses
@@ -202,16 +206,15 @@ namespace griffined_api.Services.RegistrationRequestService
             request.Type = RegistrationRequestType.NewRequestedCourse;
             request.RegistrationStatus = RegistrationStatus.PendingEA;
 
-            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
-            if (staff == null)
-            {
-                throw new NotFoundException($"Staff with ID {byECId} is not found.");
-            }
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId) ?? throw new NotFoundException($"Staff with ID {byECId} is not found.");
+
             foreach (var comment in newRequestedCourses.Comments)
             {
-                var newComment = new RegistrationRequestComment();
-                newComment.Staff = staff;
-                newComment.comment = comment;
+                var newComment = new RegistrationRequestComment
+                {
+                    Staff = staff,
+                    comment = comment
+                };
                 request.RegistrationRequestComments.Add(newComment);
             }
             _context.RegistrationRequests.Add(request);
@@ -235,12 +238,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var memberId in newRequest.MemberIds)
             {
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId);
-
-                if (dbStudent == null)
-                {
-                    throw new NotFoundException($"Student with ID {memberId} not found.");
-                }
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == memberId) ?? throw new NotFoundException($"Student with ID {memberId} not found.");
 
                 if (dbStudent.Status == StudentStatus.Inactive)
                 {
@@ -248,8 +246,10 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
 
                 dbStudents.Add(dbStudent);
-                var member = new RegistrationRequestMember();
-                member.Student = dbStudent;
+                var member = new RegistrationRequestMember
+                {
+                    Student = dbStudent
+                };
                 request.RegistrationRequestMembers.Add(member);
             }
 
@@ -257,11 +257,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var dbStudyCourse = await _context.StudyCourses
                                                 .Include(s => s.StudySubjects)
-                                                .FirstOrDefaultAsync(s => s.Id == studyCourse.StudyCourseId);
-                if (dbStudyCourse == null)
-                {
-                    throw new NotFoundException($"Study Course with ID {studyCourse.StudyCourseId} not found");
-                }
+                                                .FirstOrDefaultAsync(s => s.Id == studyCourse.StudyCourseId) ?? throw new NotFoundException($"Study Course with ID {studyCourse.StudyCourseId} not found");
 
                 var newStudentAddingRequest = new StudentAddingRequest
                 {
@@ -271,11 +267,8 @@ namespace griffined_api.Services.RegistrationRequestService
 
                 foreach (var studySubjectId in studyCourse.StudySubjectIds)
                 {
-                    var dbStudySubject = dbStudyCourse.StudySubjects.FirstOrDefault(s => s.Id == studySubjectId);
-                    if (dbStudySubject == null)
-                    {
-                        throw new NotFoundException($"Study Subject with ID {studySubjectId} not found");
-                    }
+                    var dbStudySubject = dbStudyCourse.StudySubjects.FirstOrDefault(s => s.Id == studySubjectId) ?? throw new NotFoundException($"Study Subject with ID {studySubjectId} not found");
+
                     newStudentAddingRequest.StudentAddingSubjectRequests.Add(new StudentAddingSubjectRequest()
                     {
                         StudySubject = dbStudySubject
@@ -294,16 +287,15 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
             int byECId = _firebaseService.GetAzureIdWithToken();
-            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId);
-            if (staff == null)
-            {
-                throw new NotFoundException($"Staff with ID {byECId} is not found.");
-            }
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == byECId) ?? throw new NotFoundException($"Staff with ID {byECId} is not found.");
+
             foreach (var comment in newRequest.Comments)
             {
-                var newComment = new RegistrationRequestComment();
-                newComment.Staff = staff;
-                newComment.comment = comment;
+                var newComment = new RegistrationRequestComment
+                {
+                    Staff = staff,
+                    comment = comment
+                };
                 request.RegistrationRequestComments.Add(newComment);
             }
 
@@ -396,30 +388,38 @@ namespace griffined_api.Services.RegistrationRequestService
 
                 if (ec != null)
                 {
-                    var staff = new StaffNameOnlyResponseDto();
-                    staff.Nickname = ec.Nickname;
-                    staff.FullName = ec.FullName;
+                    var staff = new StaffNameOnlyResponseDto
+                    {
+                        Nickname = ec.Nickname,
+                        FullName = ec.FullName
+                    };
                     requestDto.ByEC = staff;
                 }
                 if (ea != null)
                 {
-                    var staff = new StaffNameOnlyResponseDto();
-                    staff.Nickname = ea.Nickname;
-                    staff.FullName = ea.FullName;
+                    var staff = new StaffNameOnlyResponseDto
+                    {
+                        Nickname = ea.Nickname,
+                        FullName = ea.FullName
+                    };
                     requestDto.ByEA = staff;
                 }
                 if (oa != null)
                 {
-                    var staff = new StaffNameOnlyResponseDto();
-                    staff.Nickname = oa.Nickname;
-                    staff.FullName = oa.FullName;
+                    var staff = new StaffNameOnlyResponseDto
+                    {
+                        Nickname = oa.Nickname,
+                        FullName = oa.FullName
+                    };
                     requestDto.ByEA = staff;
                 }
                 if (cancelledBy != null)
                 {
-                    var staff = new StaffNameOnlyResponseDto();
-                    staff.Nickname = cancelledBy.Nickname;
-                    staff.FullName = cancelledBy.FullName;
+                    var staff = new StaffNameOnlyResponseDto
+                    {
+                        Nickname = cancelledBy.Nickname,
+                        FullName = cancelledBy.FullName
+                    };
                     requestDto.ByEA = staff;
                 }
 
@@ -446,10 +446,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.RegistrationRequestComments)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
-                                                && r.RegistrationStatus == RegistrationStatus.PendingEA);
-
-            if (dbRequest == null)
-                throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
+                                                && r.RegistrationStatus == RegistrationStatus.PendingEA) ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto
             {
@@ -513,9 +510,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
-                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if (staff == null)
-                    throw new InternalServerException("Something went wrong on staff comment");
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId) ?? throw new InternalServerException("Something went wrong on staff comment");
 
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
@@ -641,9 +636,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
-                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if (staff == null)
-                    throw new InternalServerException("Something went wrong on staff comment");
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId) ?? throw new InternalServerException("Something went wrong on staff comment");
 
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
@@ -830,9 +823,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
-                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if (staff == null)
-                    throw new InternalServerException("Something went wrong on staff comment");
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId) ?? throw new InternalServerException("Something went wrong on staff comment");
 
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
@@ -856,9 +847,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .Include(r => r.RegistrationRequestPaymentFiles)
                                     .FirstOrDefaultAsync(
                                     r => r.Id == requestId
-                                    && r.RegistrationStatus == RegistrationStatus.PendingEC);
-            if (dbRequest == null)
-                throw new NotFoundException($"Pending EC request with ID {requestId} is not found.");
+                                    && r.RegistrationStatus == RegistrationStatus.PendingEC) ?? throw new NotFoundException($"Pending EC request with ID {requestId} is not found.");
 
             var removeFiles = dbRequest.RegistrationRequestPaymentFiles
                                         .Where(f => paymentRequest.FilesToDelete
@@ -888,8 +877,7 @@ namespace griffined_api.Services.RegistrationRequestService
             await _context.SaveChangesAsync();
 
 
-            var response = new ServiceResponse<String>();
-            response.StatusCode = (int)HttpStatusCode.OK; ;
+            var response = new ServiceResponse<String> { StatusCode = (int)HttpStatusCode.OK };
             return response;
         }
 
@@ -1050,9 +1038,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
-                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if (staff == null)
-                    throw new InternalServerException("Something went wrong on staff comment");
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId) ?? throw new InternalServerException("Something went wrong on staff comment");
 
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
@@ -1062,9 +1048,11 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Comments.Add(comment);
             }
 
-            var response = new ServiceResponse<RegistrationRequestPendingOAResponseDto>();
-            response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = requestDetail;
+            var response = new ServiceResponse<RegistrationRequestPendingOAResponseDto>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = requestDetail
+            };
             return response;
         }
 
@@ -1470,9 +1458,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
-                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if (staff == null)
-                    throw new InternalServerException("Something went wrong on staff comment");
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId) ?? throw new InternalServerException("Something went wrong on staff comment");
 
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
@@ -1695,9 +1681,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var dbComment in dbRequest.RegistrationRequestComments)
             {
                 var comment = new CommentResponseDto();
-                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId);
-                if (staff == null)
-                    throw new InternalServerException("Something went wrong on staff comment");
+                var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbComment.StaffId) ?? throw new InternalServerException("Something went wrong on staff comment");
 
                 comment.StaffId = staff.Id;
                 comment.Role = staff.Role;
@@ -1761,7 +1745,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
 
         // Private Service
-        private List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
+        private static List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
         {
             var rawSchedules = new List<ScheduleResponseDto>();
             foreach (var dbRequestedCourse in requests)
@@ -1799,7 +1783,7 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
-        private List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
+        private static List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
         {
             var rawSchedules = new List<ScheduleResponseDto>();
             foreach (var dbStudentAddingRequest in requests)

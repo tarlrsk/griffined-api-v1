@@ -12,13 +12,9 @@ namespace griffined_api.Services.StudyCourseService
     public class StudyCourseService : IStudyCourseService
     {
         private readonly DataContext _context;
-        private readonly IMapper _mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseService _firebaseService;
-        public StudyCourseService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
+        public StudyCourseService(DataContext context, IFirebaseService firebaseService)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _mapper = mapper;
             _context = context;
             _firebaseService = firebaseService;
         }
@@ -30,22 +26,24 @@ namespace griffined_api.Services.StudyCourseService
                             .Include(c => c.Subjects.Where(s => newRequestedSchedule.SubjectIds.Contains(s.Id)))
                             .Include(c => c.Levels.Where(l => l.Id == newRequestedSchedule.LevelId))
                             .FirstOrDefaultAsync(c => c.Id == newRequestedSchedule.CourseId);
+
             if (dbCourse == null || dbCourse.Levels == null)
             {
                 throw new NotFoundException($"Course or Level is not found");
             }
 
-            var studyCourse = new StudyCourse();
-
-            studyCourse.Course = dbCourse;
-            studyCourse.Level = dbCourse.Levels.First();
-            studyCourse.Section = newRequestedSchedule.Section;
-            studyCourse.TotalHour = newRequestedSchedule.TotalHours;
-            studyCourse.StartDate = DateTime.Parse(newRequestedSchedule.StartDate);
-            studyCourse.EndDate = DateTime.Parse(newRequestedSchedule.EndDate);
-            studyCourse.StudyCourseType = StudyCourseType.Group;
-            studyCourse.Method = newRequestedSchedule.Method;
-            studyCourse.Status = CourseStatus.NotStarted;
+            var studyCourse = new StudyCourse
+            {
+                Course = dbCourse,
+                Level = dbCourse.Levels.First(),
+                Section = newRequestedSchedule.Section,
+                TotalHour = newRequestedSchedule.TotalHours,
+                StartDate = DateTime.Parse(newRequestedSchedule.StartDate),
+                EndDate = DateTime.Parse(newRequestedSchedule.EndDate),
+                StudyCourseType = StudyCourseType.Group,
+                Method = newRequestedSchedule.Method,
+                Status = CourseStatus.NotStarted
+            };
 
             var teachers = await _context.Teachers.ToListAsync();
 
@@ -57,9 +55,7 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     if (newSchedule.SubjectId == newStudySubject.Id)
                     {
-                        var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId);
-                        if (teacher == null)
-                            throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
+                        var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
 
                         var studyClass = new StudyClass()
                         {
@@ -109,17 +105,19 @@ namespace griffined_api.Services.StudyCourseService
             var studyCourses = new List<StudyCourseResponseDto>();
             foreach (var dbStudyCourse in dbStudyCourses)
             {
-                var studyCourse = new StudyCourseResponseDto();
-                studyCourse.StudyCourseId = dbStudyCourse.Id;
-                studyCourse.Section = dbStudyCourse.Section;
-                studyCourse.Course = dbStudyCourse.Course.course;
-                studyCourse.Level = dbStudyCourse.Level?.level;
-                studyCourse.TotalHour = dbStudyCourse.TotalHour;
-                studyCourse.StartDate = dbStudyCourse.StartDate.ToString("dd-MMMM-yyyy");
-                studyCourse.EndDate = dbStudyCourse.EndDate.ToString("dd-MMMM-yyyy");
-                studyCourse.Method = dbStudyCourse.Method;
-                studyCourse.StudyCourseType = dbStudyCourse.StudyCourseType;
-                studyCourse.CourseStatus = dbStudyCourse.Status;
+                var studyCourse = new StudyCourseResponseDto
+                {
+                    StudyCourseId = dbStudyCourse.Id,
+                    Section = dbStudyCourse.Section,
+                    Course = dbStudyCourse.Course.course,
+                    Level = dbStudyCourse.Level?.level,
+                    TotalHour = dbStudyCourse.TotalHour,
+                    StartDate = dbStudyCourse.StartDate.ToString("dd-MMMM-yyyy"),
+                    EndDate = dbStudyCourse.EndDate.ToString("dd-MMMM-yyyy"),
+                    Method = dbStudyCourse.Method,
+                    StudyCourseType = dbStudyCourse.StudyCourseType,
+                    CourseStatus = dbStudyCourse.Status
+                };
 
                 var studentCount = 0;
                 var student = new List<int>();
@@ -131,7 +129,8 @@ namespace griffined_api.Services.StudyCourseService
                         {
                             studentCount += 1;
                             student.Add(dbMember.StudentId);
-                            studyCourse.Members.Add(new StudentNameResponseDto{
+                            studyCourse.Members.Add(new StudentNameResponseDto
+                            {
                                 StudentId = dbMember.Student.Id,
                                 StudentCode = dbMember.Student.StudentCode,
                                 FirstName = dbMember.Student.FirstName,
@@ -188,10 +187,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .ThenInclude(c => c.Level)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
-
-            if (dbRequest == null)
-                throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA) ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             var dbTeachers = await _context.Teachers.ToListAsync();
 
@@ -229,9 +225,7 @@ namespace griffined_api.Services.StudyCourseService
                     var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.SubjectId && c.CourseId == dbNewRequestedCourse.CourseId);
                     foreach (var requestedStudyClass in requestedStudyClasses)
                     {
-                        var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId);
-                        if (dbTeacher == null)
-                            throw new NotFoundException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
+                        var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId) ?? throw new NotFoundException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
 
                         var studyClass = new StudyClass()
                         {
@@ -258,14 +252,14 @@ namespace griffined_api.Services.StudyCourseService
             dbRequest.HasSchedule = true;
             await _context.SaveChangesAsync();
 
-            var response = new ServiceResponse<String>();
-            response.StatusCode = (int)HttpStatusCode.OK; ;
+            var response = new ServiceResponse<String> { StatusCode = (int)HttpStatusCode.OK };
+            ;
             return response;
         }
 
         public async Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId)
         {
-            if (requestDto.ClassToDelete.Count() != 0)
+            if (requestDto.ClassToDelete.Count != 0)
             {
                 var dbStudyClasses = await _context.StudyClasses.Where(s => requestDto.ClassToDelete.Contains(s.Id)).ToListAsync();
                 foreach (var dbStudyClass in dbStudyClasses)
@@ -284,11 +278,9 @@ namespace griffined_api.Services.StudyCourseService
                                     .ThenInclude(c => c!.Course)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
-                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA);
-            if (dbRequest == null)
-                throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
+                            .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA) ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
-            if (requestDto.ClassToAdd.Count() != 0)
+            if (requestDto.ClassToAdd.Count != 0)
             {
                 var dbTeachers = await _context.Teachers.ToListAsync();
 
@@ -355,11 +347,12 @@ namespace griffined_api.Services.StudyCourseService
                                     StudySubjects = group.Select(m => m.StudySubject)
                                 })
                                 .ToListAsync();
-            
+
             var responseData = new List<StudyCourseMobileResponseDto>();
-            foreach(var dbStudyCourse in dbStudyCourses)
+            foreach (var dbStudyCourse in dbStudyCourses)
             {
-                var studyCourse = new StudyCourseMobileResponseDto{
+                var studyCourse = new StudyCourseMobileResponseDto
+                {
                     Section = dbStudyCourse.StudyCourse.Section,
                     StudyCourseId = dbStudyCourse.StudyCourse.Id,
                     Course = dbStudyCourse.StudyCourse.Course.course,
@@ -367,9 +360,10 @@ namespace griffined_api.Services.StudyCourseService
                     LevelId = dbStudyCourse.StudyCourse.Level?.Id,
                     StudyCourseType = dbStudyCourse.StudyCourse.StudyCourseType,
                 };
-                foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
                 {
-                    var studySubject = new StudySubjectResponseDto{
+                    var studySubject = new StudySubjectResponseDto
+                    {
                         StudySubjectId = dbStudySubject.Id,
                         Subject = dbStudySubject.Subject.subject,
                     };
@@ -385,7 +379,7 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
-        
+
         public async Task<ServiceResponse<List<StudyCourseMobileResponseDto>>> ListAllStudyCourseByTeacherToken()
         {
             var teacherId = _firebaseService.GetAzureIdWithToken();
@@ -408,9 +402,10 @@ namespace griffined_api.Services.StudyCourseService
                                 .ToListAsync();
 
             var responseData = new List<StudyCourseMobileResponseDto>();
-            foreach(var dbStudyCourse in dbStudyCourses)
+            foreach (var dbStudyCourse in dbStudyCourses)
             {
-                var studyCourse = new StudyCourseMobileResponseDto{
+                var studyCourse = new StudyCourseMobileResponseDto
+                {
                     Section = dbStudyCourse.StudyCourse.Section,
                     StudyCourseId = dbStudyCourse.StudyCourse.Id,
                     Course = dbStudyCourse.StudyCourse.Course.course,
@@ -418,9 +413,10 @@ namespace griffined_api.Services.StudyCourseService
                     LevelId = dbStudyCourse.StudyCourse.Level?.Id,
                     StudyCourseType = dbStudyCourse.StudyCourse.StudyCourseType,
                 };
-                foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
                 {
-                    var studySubject = new StudySubjectResponseDto{
+                    var studySubject = new StudySubjectResponseDto
+                    {
                         StudySubjectId = dbStudySubject.Id,
                         Subject = dbStudySubject.Subject.subject,
                     };
