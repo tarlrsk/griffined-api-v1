@@ -933,7 +933,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             .Include(r => r.RegistrationRequestComments)
                             .FirstAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA
                             && r.Type == RegistrationRequestType.NewRequestedCourse);
-                
+
                 requestDetail.StudyCourseType = dbRequest.NewCourseRequests.ElementAt(0).StudyCourseType;
 
                 foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
@@ -1077,10 +1077,20 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Attendances)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Attendances)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
 
@@ -1097,6 +1107,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
                 }
             }
+
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
                 foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
@@ -1115,8 +1126,6 @@ namespace griffined_api.Services.RegistrationRequestService
 
                     if (dbNewCourseRequest.StudyCourse == null)
                         throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
-
-
                 }
             }
             else
