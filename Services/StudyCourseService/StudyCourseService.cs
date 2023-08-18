@@ -373,9 +373,57 @@ namespace griffined_api.Services.StudyCourseService
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = responseData,
             };
+            return response;
+        }
+        
+        public async Task<ServiceResponse<List<EnrolledStudyCourseResponseDto>>> ListAllStudyCourseByTeacherToken()
+        {
+            var teacherId = _firebaseService.GetAzureIdWithToken();
+            var dbStudyCourses = await _context.StudyClasses
+                                .Include(c => c.StudySubject)
+                                    .ThenInclude(s => s.StudyCourse)
+                                        .ThenInclude(s => s.Course)
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.StudyCourse)
+                                        .ThenInclude(s => s.Level)
+                                .Include(m => m.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Where(s => s.TeacherId == teacherId)
+                                .GroupBy(m => m.StudySubject.StudyCourse)
+                                .Select(group => new
+                                {
+                                    StudyCourse = group.Key,
+                                    StudySubjects = group.Select(m => m.StudySubject)
+                                })
+                                .ToListAsync();
 
+            var responseData = new List<EnrolledStudyCourseResponseDto>();
+            foreach(var dbStudyCourse in dbStudyCourses)
+            {
+                var studyCourse = new EnrolledStudyCourseResponseDto{
+                    Section = dbStudyCourse.StudyCourse.Section,
+                    StudyCourseId = dbStudyCourse.StudyCourse.Id,
+                    Course = dbStudyCourse.StudyCourse.Course.course,
+                    Level = dbStudyCourse.StudyCourse.Level?.level,
+                    LevelId = dbStudyCourse.StudyCourse.Level?.Id,
+                    StudyCourseType = dbStudyCourse.StudyCourse.StudyCourseType,
+                };
+                foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    var studySubject = new StudySubjectResponseDto{
+                        StudySubjectId = dbStudySubject.Id,
+                        Subject = dbStudySubject.Subject.subject,
+                    };
+                    studyCourse.StudySubjects.Add(studySubject);
+                }
+                responseData.Add(studyCourse);
+            }
 
-            
+            var response = new ServiceResponse<List<EnrolledStudyCourseResponseDto>>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = responseData,
+            };
             return response;
         }
     }
