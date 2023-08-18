@@ -18,6 +18,7 @@ global using griffined_api.Exceptions;
 global using griffined_api.Middlewares;
 global using griffined_api.Models;
 global using griffined_api.integrations.Firebase;
+global using griffined_api.Services.AttendanceService;
 global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.CourseService;
 global using griffined_api.Services.StaffService;
@@ -60,6 +61,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddLogging();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
