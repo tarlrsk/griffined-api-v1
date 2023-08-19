@@ -1095,28 +1095,19 @@ namespace griffined_api.Services.RegistrationRequestService
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
                             }
-                        }
 
-                        foreach (var dbCourse in dbRequest.NewCourseRequests)
-                        {
-                            if (dbCourse.StudyCourse != null)
+                            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                             {
-                                foreach (var dbStudySubject in dbCourse.StudyCourse.StudySubjects)
+                                foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                                 {
-                                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                                    var attendance = new StudentAttendance
                                     {
-                                        foreach (var dbMember in dbRequest.RegistrationRequestMembers)
-                                        {
-                                            var attendance = new StudentAttendance
-                                            {
-                                                StudentId = dbMember.StudentId,
-                                                StudyClassId = dbStudyClass.Id,
-                                                Attendance = Attendance.None
-                                            };
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyClass = dbStudyClass,
+                                        Attendance = Attendance.None
+                                    };
 
-                                            _context.StudentAttendances.Add(attendance);
-                                        }
-                                    }
+                                    _context.StudentAttendances.Add(attendance);
                                 }
                             }
                         }
@@ -1138,6 +1129,21 @@ namespace griffined_api.Services.RegistrationRequestService
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember.Where(s => studentIdList.Contains(s.StudentId)))
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                            }
+
+                            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                            {
+                                foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember.Where(s => studentIdList.Contains(s.StudentId)))
+                                {
+                                    var attendance = new StudentAttendance
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyClass = dbStudyClass,
+                                        Attendance = Attendance.None
+                                    };
+
+                                    _context.StudentAttendances.Add(attendance);
+                                }
                             }
                         }
                     }
