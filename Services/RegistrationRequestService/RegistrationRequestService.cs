@@ -380,6 +380,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.ScheduleError = registrationRequest.ScheduleError;
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
                 requestDto.HasSchedule = registrationRequest.HasSchedule;
+                requestDto.Section = registrationRequest.Section;
 
                 var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var ea = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
