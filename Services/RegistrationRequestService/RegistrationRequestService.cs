@@ -391,6 +391,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var staff = new StaffNameOnlyResponseDto
                     {
+                        StaffId = ec.Id,
                         Nickname = ec.Nickname,
                         FullName = ec.FullName
                     };
@@ -400,6 +401,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var staff = new StaffNameOnlyResponseDto
                     {
+                        StaffId = ea.Id,
                         Nickname = ea.Nickname,
                         FullName = ea.FullName
                     };
@@ -409,6 +411,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var staff = new StaffNameOnlyResponseDto
                     {
+                        StaffId = oa.Id,
                         Nickname = oa.Nickname,
                         FullName = oa.FullName
                     };
@@ -418,6 +421,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var staff = new StaffNameOnlyResponseDto
                     {
+                        StaffId = cancelledBy.Id,
                         Nickname = cancelledBy.Nickname,
                         FullName = cancelledBy.FullName
                     };
@@ -1447,6 +1451,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = ec.Id,
                     Nickname = ec.Nickname,
                     FullName = ec.FullName
                 };
@@ -1456,6 +1461,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = ea.Id,
                     Nickname = ea.Nickname,
                     FullName = ea.FullName
                 };
@@ -1465,6 +1471,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = oa.Id,
                     Nickname = oa.Nickname,
                     FullName = oa.FullName
                 };
@@ -1474,6 +1481,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = cancelledBy.Id,
                     Nickname = cancelledBy.Nickname,
                     FullName = cancelledBy.FullName
                 };
@@ -1670,6 +1678,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = ec.Id,
                     Nickname = ec.Nickname,
                     FullName = ec.FullName
                 };
@@ -1679,6 +1688,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = ea.Id,
                     Nickname = ea.Nickname,
                     FullName = ea.FullName
                 };
@@ -1688,6 +1698,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = oa.Id,
                     Nickname = oa.Nickname,
                     FullName = oa.FullName
                 };
@@ -1697,6 +1708,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var staff = new StaffNameOnlyResponseDto
                 {
+                    StaffId = cancelledBy.Id,
                     Nickname = cancelledBy.Nickname,
                     FullName = cancelledBy.FullName
                 };
