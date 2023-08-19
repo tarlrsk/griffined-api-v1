@@ -10,6 +10,7 @@ namespace griffined_api.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Attendance
     {
+        None,
         Present,
         Late,
         Absent

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230819153848_StudentAttendance_Nullable_Fields")]
+    partial class StudentAttendanceNullableFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -819,7 +822,9 @@ namespace griffinedapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[StudentId] IS NOT NULL");
 
                     b.HasIndex("StudyClassId");
 
@@ -1495,8 +1500,8 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.StudentAttendance", b =>
                 {
                     b.HasOne("griffined_api.Models.Student", "Student")
-                        .WithMany("Attendances")
-                        .HasForeignKey("StudentId");
+                        .WithOne("Attendance")
+                        .HasForeignKey("griffined_api.Models.StudentAttendance", "StudentId");
 
                     b.HasOne("griffined_api.Models.StudyClass", "StudyClass")
                         .WithMany("Attendances")
@@ -1760,7 +1765,7 @@ namespace griffinedapi.Migrations
 
                     b.Navigation("Address");
 
-                    b.Navigation("Attendances");
+                    b.Navigation("Attendance");
 
                     b.Navigation("CancellationRequests");
 

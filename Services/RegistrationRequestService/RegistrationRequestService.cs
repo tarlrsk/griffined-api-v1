@@ -1070,26 +1070,23 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Attendances)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudySubjectMember)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Attendances)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
 
-            foreach (var member in dbRequest.RegistrationRequestMembers)
-            {
-                if (member.Student.Status == StudentStatus.OnProcess)
-                    member.Student.Status = StudentStatus.Active;
-
-                foreach (var course in dbRequest.NewCourseRequests)
-                {
-                    if (member.Student.ExpiryDate < course.EndDate)
-                    {
-                        member.Student.ExpiryDate = course.EndDate;
-                    }
-                }
-            }
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
                 foreach (var dbNewCourseRequest in dbRequest.NewCourseRequests)
@@ -1103,13 +1100,26 @@ namespace griffined_api.Services.RegistrationRequestService
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
                             }
+
+                            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                            {
+                                foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
+                                {
+                                    var attendance = new StudentAttendance
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyClass = dbStudyClass,
+                                        Attendance = Attendance.None
+                                    };
+
+                                    _context.StudentAttendances.Add(attendance);
+                                }
+                            }
                         }
                     }
 
                     if (dbNewCourseRequest.StudyCourse == null)
                         throw new InternalServerException("Something went wrong with NewCourseRequest and StudyCourse");
-
-
                 }
             }
             else
@@ -1125,7 +1135,36 @@ namespace griffined_api.Services.RegistrationRequestService
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
                             }
+
+                            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                            {
+                                foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember.Where(s => studentIdList.Contains(s.StudentId)))
+                                {
+                                    var attendance = new StudentAttendance
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyClass = dbStudyClass,
+                                        Attendance = Attendance.None
+                                    };
+
+                                    _context.StudentAttendances.Add(attendance);
+                                }
+                            }
                         }
+                    }
+                }
+            }
+
+            foreach (var member in dbRequest.RegistrationRequestMembers)
+            {
+                if (member.Student.Status == StudentStatus.OnProcess)
+                    member.Student.Status = StudentStatus.Active;
+
+                foreach (var course in dbRequest.NewCourseRequests)
+                {
+                    if (member.Student.ExpiryDate < course.EndDate)
+                    {
+                        member.Student.ExpiryDate = course.EndDate;
                     }
                 }
             }
