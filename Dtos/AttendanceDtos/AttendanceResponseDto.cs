@@ -1,8 +1,8 @@
+using griffined_api.Dtos.SubjectDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using griffined_api.Dtos.SubjectDtos;
 
 namespace griffined_api.Dtos.AttendanceDtos
 {
@@ -19,7 +19,7 @@ namespace griffined_api.Dtos.AttendanceDtos
         public StudyCourseType StudyCourseType { get; set; }
 
         public SubjectResponseDto CurrentSubject { get; set; } = new SubjectResponseDto();
-        public List<SubjectResponseDto> AllSubject { get; set; } = new List<SubjectResponseDto>();
+        public List<SubjectResponseDto> AllSubjects { get; set; } = new List<SubjectResponseDto>();
 
         public string Section { get; set; } = string.Empty;
 
