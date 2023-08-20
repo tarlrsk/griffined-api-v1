@@ -1,11 +1,11 @@
-using Extensions.DateTimeExtensions;
+using AutoMapper.Execution;
+using griffined_api.Dtos.StudyCourseDtos;
+using griffined_api.Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using griffined_api.Dtos.StudyCourseDtos;
-using AutoMapper.Execution;
 
 namespace griffined_api.Services.StudyCourseService
 {

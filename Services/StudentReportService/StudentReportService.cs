@@ -150,7 +150,7 @@ namespace griffined_api.Services.StudentReportService
             var data = new StudentReportStudentResponseDto
             {
                 StudyCourseId = studyCourseId,
-                course = dbMember.StudySubject.StudyCourse.Course.course,
+                Course = dbMember.StudySubject.StudyCourse.Course.course,
                 StudentCode = studentCode,
                 Report = reportDtoList.ToList()
             };

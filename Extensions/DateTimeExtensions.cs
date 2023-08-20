@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace Extensions.DateTimeExtensions
+namespace griffined_api.Extensions.DateTimeExtensions
 {
     public static class DateTimeExtensions
     {
