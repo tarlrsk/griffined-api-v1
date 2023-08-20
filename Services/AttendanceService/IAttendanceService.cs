@@ -7,6 +7,6 @@ namespace griffined_api.Services.AttendanceService
 {
     public interface IAttendanceService
     {
-        Task<ServiceResponse<string>> UpdateStudentAttendance(int studyClassId, UpdateAttendanceRequestDto updateAttendanceRequest);
+        Task<ServiceResponse<string>> UpdateStudentAttendance(int studyClassId, List<UpdateAttendanceRequestDto> updateAttendanceRequests);
     }
 }

@@ -10,6 +10,6 @@ namespace griffined_api.Dtos.AttendanceDtos
         [Required]
         public int StudentId { get; set; }
         [Required]
-        public Attendance attendance { get; set; }
+        public Attendance Attendance { get; set; }
     }
 }
