@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using Google.Rpc;
+using griffined_api.Dtos.AttendanceDtos;
+using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace griffined_api.Services.AttendanceService
 {
@@ -16,7 +20,7 @@ namespace griffined_api.Services.AttendanceService
             _mapper = mapper;
         }
 
-        public Task<ServiceResponse<string>> UpdateStudentAttendance()
+        public async Task<ServiceResponse<string>> UpdateStudentAttendance(int studyClassId, UpdateAttendanceRequestDto updateAttendanceRequest)
         {
             throw new NotImplementedException();
         }
