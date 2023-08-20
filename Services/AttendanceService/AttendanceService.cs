@@ -36,6 +36,13 @@ namespace griffined_api.Services.AttendanceService
                 dbAttendance.Attendance = updateAttendanceRequest.Attendance;
             }
 
+            bool allAttendancesSet = dbClass.Attendances.All(a => a.Attendance != Attendance.None);
+
+            if (allAttendancesSet)
+            {
+                dbClass.Status = ClassStatus.Check;
+            }
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
