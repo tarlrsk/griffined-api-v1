@@ -16,7 +16,7 @@ namespace griffined_api.Controllers
             _attendanceService = attendanceService;
         }
 
-        [HttpGet("{studyClassId}")]
+        [HttpGet("{studyClassId}"), Authorize(Roles = "teacher")]
         public async Task<ActionResult> GetClassAttendance(int studyClassId)
         {
             var response = await _attendanceService.GetClassAttendance(studyClassId);
