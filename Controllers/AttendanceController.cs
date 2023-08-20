@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace griffined_api.Controllers
@@ -13,6 +14,15 @@ namespace griffined_api.Controllers
         public AttendanceController(IAttendanceService attendanceService)
         {
             _attendanceService = attendanceService;
+        }
+
+        [HttpGet("{studyClassId}")]
+        public async Task<ActionResult> GetClassAttendance(int studyClassId)
+        {
+            var response = await _attendanceService.GetClassAttendance(studyClassId);
+            if (response == null)
+                return NotFound(response);
+            return Ok(response);
         }
 
         [HttpPut("{studyClassId}"), Authorize(Roles = "teacher, master")]

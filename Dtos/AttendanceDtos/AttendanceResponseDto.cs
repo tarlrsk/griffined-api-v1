@@ -10,9 +10,9 @@ namespace griffined_api.Dtos.AttendanceDtos
     {
         public int StudyClassId { get; set; }
         public int ClassNo { get; set; }
-        public DateTime Date { get; set; }
-        public TimeSpan FromTime { get; set; }
-        public TimeSpan ToTime { get; set; }
+        public string Date { get; set; } = string.Empty;
+        public string FromTime { get; set; } = string.Empty;
+        public string ToTime { get; set; } = string.Empty;
 
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
