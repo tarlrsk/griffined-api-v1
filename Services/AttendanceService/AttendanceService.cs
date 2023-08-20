@@ -1,4 +1,3 @@
-using griffined_api.Dtos.SubjectDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
@@ -39,34 +38,8 @@ namespace griffined_api.Services.AttendanceService
                 Date = dbClass.Schedule.Date.ToDateString(),
                 FromTime = dbClass.Schedule.FromTime.ToTimeSpanString(),
                 ToTime = dbClass.Schedule.ToTime.ToTimeSpanString(),
-                CourseId = dbClass.StudySubject.StudyCourse.Id,
-                Course = dbClass.StudySubject.StudyCourse.Course.course,
-                CurrentSubject = new SubjectResponseDto
-                {
-                    SubjectId = dbClass.StudySubject.Id,
-                    Subject = dbClass.StudySubject.Subject.subject
-                },
-                AllSubject = dbClass.StudySubject.StudyCourse.StudySubjects.Select(subject => new SubjectResponseDto
-                {
-                    SubjectId = subject.Subject.Id,
-                    Subject = subject.Subject.subject
-                }).ToList(),
-                TeacherId = dbClass.Teacher.Id,
-                TeacherFirstName = dbClass.Teacher.FirstName,
-                TeacherLastName = dbClass.Teacher.LastName,
-                TeacherNickname = dbClass.Teacher.Nickname,
-                Members = dbClass.Attendances.Where(student => student.Student != null).Select(student => new StudentAttendanceResponseDto
-                {
-                    StudentId = student.Student!.Id,
-                    StudentFirstName = student.Student.FirstName,
-                    StudentLastName = student.Student.LastName,
-                    StudentNickname = student.Student.Nickname,
-                    Attendance = student.Attendance
-                }).ToList()
             };
 
-            response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = data;
             return response;
         }
 

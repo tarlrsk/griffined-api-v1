@@ -1,4 +1,4 @@
-using griffined_api.Extensions.DateTimeExtensions;
+using Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
