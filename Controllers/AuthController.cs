@@ -13,7 +13,7 @@ namespace griffined_api.Controllers
 
     public class AuthController : ControllerBase
     {
-        FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(Environment.GetEnvironmentVariable("FIREBASE_API_KEY")));
+        readonly FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(Environment.GetEnvironmentVariable("FIREBASE_API_KEY")));
 
 
         [HttpPost("login")]
@@ -22,8 +22,10 @@ namespace griffined_api.Controllers
             try
             {
                 FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.SignInWithEmailAndPasswordAsync(request.Email, request.Password);
-                var response = new TokenResponseDto();
-                response.AccessToken = firebaseAuthLink.FirebaseToken;
+                var response = new TokenResponseDto
+                {
+                    AccessToken = firebaseAuthLink.FirebaseToken
+                };
                 return Ok(response);
 
             }
