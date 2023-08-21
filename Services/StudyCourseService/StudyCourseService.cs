@@ -433,5 +433,21 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
+
+        public async Task<ServiceResponse<string>> UpdateStudyClassRoom(int studyClassId, string room)
+        {
+            var dbClass = await _context.StudyClasses.FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"Class with ID {studyClassId} not found.");
+
+            dbClass.Room = room;
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+
+            return response;
+        }
     }
 }
