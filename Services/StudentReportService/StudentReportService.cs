@@ -281,10 +281,7 @@ namespace griffined_api.Services.StudentReportService
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId);
-
-            if (dbMember == null)
-                throw new NotFoundException("No student found.");
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId) ?? throw new NotFoundException("No student found.");
 
             if (dbMember.StudentReports != null)
             {
@@ -323,12 +320,14 @@ namespace griffined_api.Services.StudentReportService
 
                             dbMember.StudentReports.Add(reportEntity);
                             existingReport.DateUpdated = DateTime.Now;
+                            existingReport.TeacherId = _firebaseService.GetAzureIdWithToken();
                         }
                         else
                         {
                             existingReport.FileName = reportEntity.FileName;
                             existingReport.ObjectName = reportEntity.ObjectName;
                             existingReport.DateUpdated = DateTime.Now;
+                            existingReport.TeacherId = _firebaseService.GetAzureIdWithToken();
                         }
                     }
                     else
@@ -337,6 +336,8 @@ namespace griffined_api.Services.StudentReportService
                     }
                 }
             }
+
+
 
             await _context.SaveChangesAsync();
 
