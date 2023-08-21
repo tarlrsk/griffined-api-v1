@@ -1780,6 +1780,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
+                            Room = "",
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
@@ -1818,6 +1819,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
+                            Room = "",
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
