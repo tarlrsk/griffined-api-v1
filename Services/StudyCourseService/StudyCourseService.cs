@@ -500,6 +500,7 @@ namespace griffined_api.Services.StudyCourseService
                         CourseSubject = dbStudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudyCourse.Level?.level ?? ""),
+                        ClassStatus = dbStudyClass.Status,
                         TeacherId = dbStudyClass.Teacher.Id,
                         TeacherFirstName = dbStudyClass.Teacher.FirstName,
                         TeacherLastName = dbStudyClass.Teacher.LastName,
