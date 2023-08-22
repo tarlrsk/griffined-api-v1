@@ -16,8 +16,9 @@ namespace griffined_api.Models
 
         public int ClassNumber { get; set; }
 
+        public string? Room { get; set; }
         public virtual ClassStatus Status { get; set; }
-        public bool isMakeup { get; set; } = false;
+        public bool IsMakeup { get; set; } = false;
 
         [ForeignKey(nameof(ScheduleId))]
         public virtual Schedule Schedule { get; set; } = new Schedule();

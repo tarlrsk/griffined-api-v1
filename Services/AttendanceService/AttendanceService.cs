@@ -36,6 +36,7 @@ namespace griffined_api.Services.AttendanceService
             {
                 StudyClassId = dbClass.Id,
                 ClassNo = dbClass.ClassNumber,
+                Room = dbClass.Room,
                 Date = dbClass.Schedule.Date.ToDateString(),
                 FromTime = dbClass.Schedule.FromTime.ToTimeSpanString(),
                 ToTime = dbClass.Schedule.ToTime.ToTimeSpanString(),
