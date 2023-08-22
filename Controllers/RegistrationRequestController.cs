@@ -34,9 +34,7 @@ namespace griffined_api.Controllers
         [HttpPost("student-adding-backup"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> AddStudentAddingRequest2([FromForm] string newStudentAdding, [Required] List<IFormFile> filesToUpload)
         {
-            var newStudentAddingDto = JsonConvert.DeserializeObject<StudentAddingRequestDto>(newStudentAdding);
-            if (newStudentAddingDto == null)
-                throw new InternalServerException("Cannot Map Object");
+            var newStudentAddingDto = JsonConvert.DeserializeObject<StudentAddingRequestDto>(newStudentAdding) ?? throw new InternalServerException("Cannot Map Object");
             var response = await _registrationRequestService.AddStudentAddingRequest(newStudentAddingDto, filesToUpload);
             return Ok(response);
         }

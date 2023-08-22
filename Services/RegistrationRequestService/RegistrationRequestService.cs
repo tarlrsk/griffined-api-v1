@@ -1,4 +1,3 @@
-using Extensions.DateTimeExtensions;
 using Google.Api;
 using Google.Cloud.Storage.V1;
 using Google.Rpc;
@@ -6,6 +5,7 @@ using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Enums;
+using griffined_api.Extensions.DateTimeExtensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System;
 using System.Collections.Generic;
@@ -1780,6 +1780,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
+                            Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
@@ -1818,6 +1819,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
+                            Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),

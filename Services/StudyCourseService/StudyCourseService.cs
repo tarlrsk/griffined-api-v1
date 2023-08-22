@@ -1,11 +1,11 @@
-using Extensions.DateTimeExtensions;
+using AutoMapper.Execution;
+using griffined_api.Dtos.StudyCourseDtos;
+using griffined_api.Extensions.DateTimeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using griffined_api.Dtos.StudyCourseDtos;
-using AutoMapper.Execution;
 
 namespace griffined_api.Services.StudyCourseService
 {
@@ -59,7 +59,7 @@ namespace griffined_api.Services.StudyCourseService
 
                         var studyClass = new StudyClass()
                         {
-                            isMakeup = false,
+                            IsMakeup = false,
                             ClassNumber = classNumber,
                             Teacher = teacher,
                             Schedule = new Schedule()
@@ -149,6 +149,7 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
@@ -229,7 +230,7 @@ namespace griffined_api.Services.StudyCourseService
 
                         var studyClass = new StudyClass()
                         {
-                            isMakeup = false,
+                            IsMakeup = false,
                             ClassNumber = requestedStudyClass.ClassNo,
                             Teacher = dbTeacher,
                             Schedule = new Schedule()
@@ -515,6 +516,22 @@ namespace griffined_api.Services.StudyCourseService
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
             };
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> UpdateStudyClassRoom(int studyClassId, string room)
+        {
+            var dbClass = await _context.StudyClasses.FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"Class with ID {studyClassId} not found.");
+
+            dbClass.Room = room;
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+
             return response;
         }
     }
