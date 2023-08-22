@@ -112,6 +112,7 @@ namespace griffined_api.Services.StudentReportService
                 FiftyPercentReport = fiftyPercentReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = fiftyPercentReport.Teacher.Id,
                     Progression = Progression.FiftyPercent,
                     File = new FilesResponseDto
                     {
@@ -124,6 +125,7 @@ namespace griffined_api.Services.StudentReportService
                 HundredPercentReport = hundredPercentReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = hundredPercentReport.Teacher.Id,
                     Progression = Progression.HundredPercent,
                     File = new FilesResponseDto
                     {
@@ -136,6 +138,7 @@ namespace griffined_api.Services.StudentReportService
                 SpecialReport = specialReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = specialReport.Teacher.Id,
                     Progression = Progression.Special,
                     File = new FilesResponseDto
                     {

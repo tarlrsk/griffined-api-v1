@@ -451,20 +451,21 @@ namespace griffined_api.Services.StudyCourseService
                                 ?? throw new NotFoundException($"Study Course with ID {studyCourseId} is not found.");
 
             var studentCount = 0;
-                var student = new List<int>();
-                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+            var student = new List<int>();
+            foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+            {
+                foreach (var dbMember in dbStudySubject.StudySubjectMember)
                 {
-                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                    if (!student.Exists(s => s == dbMember.StudentId))
                     {
-                        if (!student.Exists(s => s == dbMember.StudentId))
-                        {
-                            studentCount += 1;
-                            student.Add(dbMember.StudentId);
-                        }
+                        studentCount += 1;
+                        student.Add(dbMember.StudentId);
                     }
                 }
-            
-            var data = new StudyCourseDetailMobileResponseDto(){
+            }
+
+            var data = new StudyCourseDetailMobileResponseDto()
+            {
                 StudyCourseId = dbStudyCourse.Id,
                 StudyCourseType = dbStudyCourse.StudyCourseType,
                 Section = dbStudyCourse.Section,
@@ -479,13 +480,14 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             var schedules = new List<ScheduleResponseDto>();
-            foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+            foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
             {
-                data.StudySubjects.Add(new StudySubjectResponseDto{
+                data.StudySubjects.Add(new StudySubjectResponseDto
+                {
                     StudySubjectId = dbStudySubject.Id,
                     Subject = dbStudySubject.Subject.subject,
                 });
-                foreach(var dbStudyClass in dbStudySubject.StudyClasses)
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
                     schedules.Add(new ScheduleResponseDto
                     {
@@ -512,7 +514,7 @@ namespace griffined_api.Services.StudyCourseService
             }
 
             data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
-            
+
             var response = new ServiceResponse<StudyCourseDetailMobileResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -544,7 +546,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.Subject)
                                 .Where(sc => sc.StudySubjects.Any(ss => ss.StudySubjectMember.Any(sm => sm.Student.StudentCode == studentCode)))
-                                .ToListAsync() ?? throw new NotFoundException($"No student with ID {studentCode} found.");
+                                .ToListAsync() ?? throw new NotFoundException($"No courses containinng student with code {studentCode} found.");
 
             var dbMember = await _context.StudySubjectMember
                                 .Include(sm => sm.Student)
@@ -566,6 +568,7 @@ namespace griffined_api.Services.StudyCourseService
                 FiftyPercentReport = fiftyPercentReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = fiftyPercentReport.Teacher.Id,
                     Progression = Progression.FiftyPercent,
                     File = new FilesResponseDto
                     {
@@ -578,6 +581,7 @@ namespace griffined_api.Services.StudyCourseService
                 HundredPercentReport = hundredPercentReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = hundredPercentReport.Teacher.Id,
                     Progression = Progression.HundredPercent,
                     File = new FilesResponseDto
                     {
@@ -590,6 +594,7 @@ namespace griffined_api.Services.StudyCourseService
                 SpecialReport = specialReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = specialReport.Teacher.Id,
                     Progression = Progression.Special,
                     File = new FilesResponseDto
                     {
