@@ -434,6 +434,91 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
+        public async Task<ServiceResponse<StudyCourseDetailMobileResponseDto>> StudyCourseDetailForTeacher(int studyCourseId)
+        {
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(c => c.Course)
+                                .Include(c => c.Level)
+                                .Include(c => c.StudySubjects)
+                                    .ThenInclude(c => c.Subject)
+                                .Include(c => c.StudySubjects)
+                                    .ThenInclude(c => c.StudyClasses)
+                                        .ThenInclude(c => c.Schedule)
+                                .Include(c => c.StudySubjects)
+                                    .ThenInclude(c => c.StudyClasses)
+                                        .ThenInclude(c => c.Teacher)
+                                .FirstOrDefaultAsync(c => c.Id == studyCourseId)
+                                ?? throw new NotFoundException($"Study Course with ID {studyCourseId} is not found.");
+
+            var studentCount = 0;
+                var student = new List<int>();
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                    {
+                        if (!student.Exists(s => s == dbMember.StudentId))
+                        {
+                            studentCount += 1;
+                            student.Add(dbMember.StudentId);
+                        }
+                    }
+                }
+            
+            var data = new StudyCourseDetailMobileResponseDto(){
+                StudyCourseId = dbStudyCourse.Id,
+                StudyCourseType = dbStudyCourse.StudyCourseType,
+                Section = dbStudyCourse.Section,
+                Course = dbStudyCourse.Course.course,
+                Level = dbStudyCourse.Level?.level,
+                StudentCount = studentCount,
+                TotalHour = dbStudyCourse.TotalHour,
+                StartDate = dbStudyCourse.StartDate.ToDateString(),
+                EndDate = dbStudyCourse.EndDate.ToDateString(),
+                Method = dbStudyCourse.Method,
+                CourseStatus = dbStudyCourse.Status,
+            };
+
+            var schedules = new List<ScheduleResponseDto>();
+            foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+            {
+                data.StudySubjects.Add(new StudySubjectResponseDto{
+                    StudySubjectId = dbStudySubject.Id,
+                    Subject = dbStudySubject.Subject.subject,
+                });
+                foreach(var dbStudyClass in dbStudySubject.StudyClasses)
+                {
+                    schedules.Add(new ScheduleResponseDto
+                    {
+                        StudyClassId = dbStudyClass.Id,
+                        ClassNo = dbStudyClass.ClassNumber,
+                        Date = dbStudyClass.Schedule.Date.ToDateString(),
+                        FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                        ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                        CourseId = dbStudyCourse.Course.Id,
+                        CourseName = dbStudyCourse.Course.course,
+                        SubjectId = dbStudySubject.Subject.Id,
+                        SubjectName = dbStudySubject.Subject.subject,
+                        CourseSubject = dbStudyCourse.Course.course + " "
+                                            + dbStudySubject.Subject.subject
+                                            + " " + (dbStudyCourse.Level?.level ?? ""),
+                        TeacherId = dbStudyClass.Teacher.Id,
+                        TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                        TeacherLastName = dbStudyClass.Teacher.LastName,
+                        TeacherNickname = dbStudyClass.Teacher.Nickname,
+                        // TODO WorkType
+                    });
+                }
+            }
+
+            data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
+            
+            var response = new ServiceResponse<StudyCourseDetailMobileResponseDto>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+            return response;
+        }
 
         public async Task<ServiceResponse<string>> UpdateStudyClassRoom(int studyClassId, string room)
         {
