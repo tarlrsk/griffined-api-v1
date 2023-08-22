@@ -9,7 +9,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
     {
         public int StudyClassId { get; set; }
         public int ClassNo { get; set; }
-        public string Room { get; set; } = string.Empty;
+        public string? Room { get; set; }
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
         public string ToTime { get; set; } = string.Empty;

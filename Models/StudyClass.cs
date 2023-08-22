@@ -16,7 +16,7 @@ namespace griffined_api.Models
 
         public int ClassNumber { get; set; }
 
-        public string Room { get; set; } = string.Empty;
+        public string? Room { get; set; }
         public virtual ClassStatus Status { get; set; }
         public bool IsMakeup { get; set; } = false;
 
