@@ -42,7 +42,7 @@ namespace griffined_api.Services.StudyCourseService
                 EndDate = DateTime.Parse(newRequestedSchedule.EndDate),
                 StudyCourseType = StudyCourseType.Group,
                 Method = newRequestedSchedule.Method,
-                Status = CourseStatus.NotStarted
+                Status = StudyCourseStatus.NotStarted
             };
 
             var teachers = await _context.Teachers.ToListAsync();
@@ -203,7 +203,7 @@ namespace griffined_api.Services.StudyCourseService
                     EndDate = dbNewRequestedCourse.EndDate,
                     StudyCourseType = dbNewRequestedCourse.StudyCourseType,
                     Method = dbNewRequestedCourse.Method,
-                    Status = CourseStatus.Pending,
+                    Status = StudyCourseStatus.Pending,
                     NewCourseRequest = dbNewRequestedCourse,
                 };
                 foreach (var dbNewRequestedSubject in dbNewRequestedCourse.NewCourseSubjectRequests)

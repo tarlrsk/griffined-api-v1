@@ -21,7 +21,7 @@ namespace griffined_api.Models
 
         public virtual StudyCourseType StudyCourseType { get; set; }
         public virtual Method Method { get; set; }
-        public virtual CourseStatus Status { get; set; }
+        public virtual StudyCourseStatus Status { get; set; }
 
         [ForeignKey(nameof(CourseId))]
         public virtual Course Course { get; set; } = new Course();
