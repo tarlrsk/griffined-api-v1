@@ -9,10 +9,12 @@ namespace griffined_api.Dtos.StudyCourseDtos
     public class StudyCourseByStudentIdResponseDto
     {
         public int StudentId { get; set; }
-        public string StudentCode { get; set; } = string.Empty;
+        public string StudentFirstName { get; set; } = string.Empty;
+        public string StudentLastName { get; set; } = string.Empty;
+        public string StudentNickname { get; set; } = string.Empty;
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
         public StudyCourseStatus Status { get; set; }
-        public List<StudySubjectReportResponseDto> Reports = new List<StudySubjectReportResponseDto>();
+        public List<StudySubjectReportResponseDto> Reports = new();
     }
 }

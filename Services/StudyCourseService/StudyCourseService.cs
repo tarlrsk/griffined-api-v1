@@ -1,4 +1,5 @@
 using AutoMapper.Execution;
+using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 using System;
@@ -433,9 +434,51 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(int studentId)
+        public async Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(int studentId)
         {
-            throw new NotImplementedException();
+            var dbCourses = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.Student)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.StudentReports)
+                                .Where(sc => sc.StudySubjects.Any(ss => ss.StudySubjectMember.Any(sm => sm.StudentId == studentId)))
+                                .ToListAsync() ?? throw new NotFoundException($"No student with ID {studentId} found.");
+
+            var data = dbCourses.Select(course => new StudyCourseByStudentIdResponseDto
+            {
+                StudentId = studentId,
+                StudentFirstName = course.StudySubjects
+                                    .SelectMany(ss => ss.StudySubjectMember)
+                                    .Where(sm => sm.StudentId == studentId)
+                                    .Select(sm => sm.Student.FirstName)
+                                    .FirstOrDefault()!,
+                StudentLastName = course.StudySubjects
+                                    .SelectMany(ss => ss.StudySubjectMember)
+                                    .Where(sm => sm.StudentId == studentId)
+                                    .Select(sm => sm.Student.LastName)
+                                    .FirstOrDefault()!,
+                StudentNickname = course.StudySubjects
+                                    .SelectMany(ss => ss.StudySubjectMember)
+                                    .Where(sm => sm.StudentId == studentId)
+                                    .Select(sm => sm.Student.Nickname)
+                                    .FirstOrDefault()!,
+                CourseId = course.Id,
+                Course = course.Course.course,
+                Status = course.Status
+            }).ToList();
+
+            var response = new ServiceResponse<List<StudyCourseByStudentIdResponseDto>>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data
+            };
+
+            return response;
         }
     }
 }
