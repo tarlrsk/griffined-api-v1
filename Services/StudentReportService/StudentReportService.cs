@@ -95,6 +95,7 @@ namespace griffined_api.Services.StudentReportService
                                     .Include(m => m.StudySubject)
                                         .ThenInclude(ss => ss.Subject)
                                     .Include(m => m.StudentReports)
+                                        .ThenInclude(sr => sr.Teacher)
                                     .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubject.StudyCourseId == studyCourseId) ?? throw new NotFoundException("No student found.");
 
             var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
