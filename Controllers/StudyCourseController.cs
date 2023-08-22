@@ -55,9 +55,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpGet("{studentId}")]
-        public async Task<ActionResult> ListAllStudyCoursesByStudentId(int studentId)
+        public async Task<ActionResult> ListAllStudyCoursesByStudentId(string studentCode)
         {
-            return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentId));
+            return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentCode));
         }
     }
 }
