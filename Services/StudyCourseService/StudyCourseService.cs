@@ -432,5 +432,10 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
+
+        public Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(int studentId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
