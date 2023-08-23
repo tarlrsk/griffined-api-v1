@@ -9,21 +9,24 @@ using Firebase.Auth;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/auth")]
 
     public class AuthController : ControllerBase
     {
-        FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(Environment.GetEnvironmentVariable("FIREBASE_API_KEY")));
+        readonly FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(Environment.GetEnvironmentVariable("FIREBASE_API_KEY")));
 
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDto request)
+        public async Task<ActionResult> Login(UserDto request)
         {
             try
             {
-                FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.SignInWithEmailAndPasswordAsync(request.email, request.password);
-
-                return Ok(firebaseAuthLink.FirebaseToken);
+                FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.SignInWithEmailAndPasswordAsync(request.Email, request.Password);
+                var response = new TokenResponseDto
+                {
+                    AccessToken = firebaseAuthLink.FirebaseToken
+                };
+                return Ok(response);
 
             }
             catch (FirebaseAuthException ex)
@@ -32,11 +35,11 @@ namespace griffined_api.Controllers
             }
         }
 
-        [HttpPost("ResetPassword"), Authorize(Roles = "oa, ea, ep")]
-        public async Task<ActionResult<String>> ResetPassword(string email)
+        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ec, master")]
+        public async Task<ActionResult> ResetPassword(string email)
         {
             await firebaseAuthProvider.SendPasswordResetEmailAsync(email);
-            return Ok("Sucess");
+            return Ok("Success");
         }
 
 

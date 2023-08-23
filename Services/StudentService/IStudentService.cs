@@ -7,17 +7,14 @@ namespace griffined_api.Services.StudentService
 {
     public interface IStudentService
     {
-        Task<ServiceResponse<List<GetStudentDto>>> GetStudent();
-        Task<ServiceResponse<GetStudentDto>> GetStudentById(int id);
-        Task<ServiceResponse<GetStudentDto>> GetStudentByMe();
-        Task<ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>> GetStudentWithCoursesRegistered();
-        Task<ServiceResponse<List<GetStudentCourseWithClassesDto>>> GetStudentCourseWithClassesByStudentId(int studentId);
-        Task<ServiceResponse<List<GetStudentCourseWithClassesDto>>> GetStudentCourseWithClassesByMe();
-        Task<ServiceResponse<GetStudentDto>> AddStudent(AddStudentDto newStudent);
-        Task<ServiceResponse<GetStudentDto>> UpdateStudent(UpdateStudentDto updatedStudent);
-        Task<ServiceResponse<List<GetStudentDto>>> DeleteStudent(int id);
-        Task<ServiceResponse<GetStudentDto>> DisableStudent(int id);
-        Task<ServiceResponse<GetStudentDto>> EnableStudent(int id);
-        
+        Task<ServiceResponse<List<StudentResponseDto>>> GetStudent();
+        Task<ServiceResponse<StudentResponseDto>> GetStudentByStudentId(string studentCode);
+        Task<ServiceResponse<StudentResponseDto>> GetStudentByToken();
+        Task<ServiceResponse<StudentResponseDto>> AddStudent(AddStudentRequestDto newStudent, IFormFile? newProfilePicture, List<IFormFile>? filesToUpload);
+        Task<ServiceResponse<StudentResponseDto>> UpdateStudent(UpdateStudentRequestDto updatedStudent, IFormFile? updatedProfilePicture, List<IFormFile>? filesToUpload);
+        Task<ServiceResponse<List<StudentResponseDto>>> DeleteStudent(int id);
+        Task<ServiceResponse<StudentResponseDto>> DisableStudent(int id);
+        Task<ServiceResponse<StudentResponseDto>> EnableStudent(int id);
+        Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password);
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/student")]
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
@@ -17,69 +17,46 @@ namespace griffined_api.Controllers
             _studentService = studentService;
         }
 
-        [HttpGet("Get"), Authorize(Roles = "ep, ea, oa")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudent()
+        [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> GetStudent()
         {
             return Ok(await _studentService.GetStudent());
         }
 
-        [HttpGet("Get/{id}"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentById(int id)
+        [HttpGet("{studentId}"), Authorize(Roles = "ec, ea, oa, teacher, master")]
+        public async Task<ActionResult> GetStudentByStudentId(string studentId)
         {
-            var response = await _studentService.GetStudentById(id);
+            var response = await _studentService.GetStudentByStudentId(studentId);
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);
         }
-        [HttpGet("Get/Me"), Authorize(Roles = "student")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> GetStudentByMe()
+        [HttpGet("by-token"), Authorize(Roles = "student, master")]
+        public async Task<ActionResult> GetStudentByToken()
         {
-            var response = await _studentService.GetStudentByMe();
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-
-        [HttpGet("CourseCount/Get"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentWithCourseRegisteredCountDto>>>> GetStudentWithCourseRegistered()
-        {
-            return Ok(await _studentService.GetStudentWithCoursesRegistered());
-        }
-
-        [HttpGet("Course/Get/{studentId}"), Authorize(Roles = "ep, ea, oa, teacher")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentCourseWithClassesDto>>>> GetStudentCourseWithClassesByStudentId(int studentId)
-        {
-            var response = await _studentService.GetStudentCourseWithClassesByStudentId(studentId);
-            if (response.Data is null)
-                return NotFound(response);
-            return Ok(response);
-        }
-        [HttpGet("Course/Get/Me"), Authorize(Roles = "student")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentCourseWithClassesDto>>>> GetStudentCourseWithClassesByMe()
-        {
-            var response = await _studentService.GetStudentCourseWithClassesByMe();
+            var response = await _studentService.GetStudentByToken();
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);
         }
 
-        [HttpPost("Post"), Authorize(Roles = "ep")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> AddStudent(AddStudentDto newStudent)
+        [HttpPost, Authorize(Roles = "ec, master")]
+        public async Task<ActionResult> AddStudent([FromForm] AddStudentRequestDto newStudent, IFormFile? newProfilePicture, List<IFormFile>? filesToUpload)
         {
-            return Ok(await _studentService.AddStudent(newStudent));
+            return Ok(await _studentService.AddStudent(newStudent, newProfilePicture, filesToUpload));
         }
 
-        [HttpPut("Put"), Authorize(Roles = "ep, ea, oa")]
-        public async Task<ActionResult<ServiceResponse<List<GetStudentDto>>>> UpdateStudent(UpdateStudentDto updatedStudent)
+        [HttpPut, Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> UpdateStudent([FromForm] UpdateStudentRequestDto updatedStudent, IFormFile? updatedProfilePicture, List<IFormFile>? filesToUpload)
         {
-            var response = await _studentService.UpdateStudent(updatedStudent);
+            var response = await _studentService.UpdateStudent(updatedStudent, updatedProfilePicture, filesToUpload);
             if (response.Data is null)
                 return NotFound(response);
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}"), Authorize(Roles = "ep, ea, oa")]
-        public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DeleteStudent(int id)
+        [HttpDelete("{id}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> DeleteStudent(int id)
         {
             var response = await _studentService.DeleteStudent(id);
             if (response.Data is null)
@@ -88,8 +65,8 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpGet("Enable/{id}"), Authorize(Roles = "ep, ea, oa")]
-        public async Task<ActionResult<ServiceResponse<GetStudentDto>>> EnableStudent(int id)
+        [HttpPut("activate/{id}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> EnableStudent(int id)
         {
             var response = await _studentService.EnableStudent(id);
             if (response.Success != true)
@@ -98,13 +75,19 @@ namespace griffined_api.Controllers
         }
 
 
-        [HttpDelete("Disable/{id}"), Authorize(Roles = "ep, ea, oa")]
-        public async Task<ActionResult<ServiceResponse<GetStudentDto>>> DisableStudent(int id)
+        [HttpPut("deactivate/{id}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> DisableStudent(int id)
         {
             var response = await _studentService.DisableStudent(id);
             if (response.Success != true)
                 return NotFound(response);
             return Ok(response);
+        }
+
+        [HttpPut("change-password/{uid}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> ChangePasswordWithFirebaseUid(string uid, ChangeUserPasswordDto password)
+        {
+            return Ok(await _studentService.ChangePasswordWithFirebaseId(uid, password));
         }
     }
 }

@@ -1,0 +1,62 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using griffined_api.Dtos.RegistrationRequestDto;
+using griffined_api.Dtos.StudyCourseDtos;
+
+namespace griffined_api.Controllers
+{
+    [ApiController]
+    [Route("api/v1/study-course")]
+
+    public class StudyCourseController : ControllerBase
+    {
+        private readonly IStudyCourseService _studyCourseService;
+        public StudyCourseController(IStudyCourseService studyCourseService)
+        {
+            _studyCourseService = studyCourseService;
+
+        }
+        [HttpPost("group"), Authorize(Roles = "ec, master")]
+        public async Task<ActionResult> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
+        {
+            return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
+        }
+
+        [HttpGet(), Authorize(Roles = "ec, oa, master")]
+        public async Task<ActionResult> GetAllStudyCourse()
+        {
+            return Ok(await _studyCourseService.GetAllStudyCourse());
+        }
+
+        [HttpPost("new/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
+        {
+            return Ok(await _studyCourseService.AddNewStudyClass(newStudyClasses, requestId));
+        } 
+
+        [HttpPut("new/{requestId}"), Authorize(Roles= "ea, master")]
+        public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
+        {
+            return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
+        }
+
+        [HttpGet("student/by-token"), Authorize(Roles = "student")]
+        public async Task<ActionResult> ListAllStudyCourseByStudentToken()
+        {
+            return Ok(await _studyCourseService.ListAllStudyCourseByStudentToken());
+        }
+
+        [HttpGet("teacher/by-token"), Authorize(Roles = "teacher")]
+        public async Task<ActionResult> ListAllStudyCourseByTeacherToken()
+        {
+            return Ok(await _studyCourseService.ListAllStudyCourseByTeacherToken());
+        }
+
+        [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "master, teacher")]
+        public async Task<ActionResult> GetStudyCourseDetailForTeacher(int studyCourseId){
+            return Ok(await _studyCourseService.StudyCourseDetailForTeacher(studyCourseId));
+        }
+    }
+}

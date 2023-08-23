@@ -1,14 +1,16 @@
+using Firebase.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using Firebase.Auth;
 
 namespace griffined_api.Services.StaffService
 {
     public class StaffService : IStaffService
     {
-        private string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private readonly string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
+        private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -20,201 +22,181 @@ namespace griffined_api.Services.StaffService
 
         }
 
-        public async Task<ServiceResponse<GetStaffDto>> AddStaff(AddStaffDto newStaff)
+        public async Task<ServiceResponse<StaffResponseDto>> AddStaff(AddStaffRequestDto newStaff)
         {
-            var response = new ServiceResponse<GetStaffDto>();
+            var response = new ServiceResponse<StaffResponseDto>();
+            int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
+            string password = "hog" + newStaff.Phone;
+            FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
+            FirebaseAuthLink firebaseAuthLink;
+            try
+            {
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.Email, password);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("EMAIL_EXISTS"))
+                    throw new ConflictException("Email Exists");
+                else if (ex.Message.Contains("INVALID_EMAIL"))
+                    throw new ConflictException("Invalid Email Format");
+                else
+                    throw new InternalServerException("Something went wrong.");
+            }
+
+            var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
+            string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
+
+            var staff = _mapper.Map<Staff>(newStaff);
+            staff.FirebaseId = firebaseId;
+            staff.CreatedBy = id;
+            staff.LastUpdatedBy = id;
+            _context.Staff.Add(staff);
+
+            await _context.SaveChangesAsync();
+            await AddStaffFireStoreAsync(staff);
+
+            response.Data = _mapper.Map<StaffResponseDto>(staff);
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<StaffResponseDto>>> DeleteStaff(int id)
+        {
+            var response = new ServiceResponse<List<StaffResponseDto>>();
+
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
+
+            _context.Staff.Remove(dbStaff);
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = _context.Staff.Select(e => _mapper.Map<StaffResponseDto>(e)).ToList();
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<StaffResponseDto>> DisableStaff(int id)
+        {
+            var response = new ServiceResponse<StaffResponseDto>();
+
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
+
+            await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+            {
+                Uid = staff.FirebaseId,
+                Disabled = true
+            });
+
+            staff.IsActive = false;
+
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+
+            return response;
+        }
+        public async Task<ServiceResponse<StaffResponseDto>> EnableStaff(int id)
+        {
+            var response = new ServiceResponse<StaffResponseDto>();
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
+
+            await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+            {
+                Uid = staff.FirebaseId,
+                Disabled = false
+            });
+
+            staff.IsActive = true;
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<StaffResponseDto>>> GetStaff()
+        {
+            var dbStaff = await _context.Staff.ToListAsync();
+
+            var data = dbStaff.Select(s =>
+            {
+                var staffDto = _mapper.Map<StaffResponseDto>(s);
+                staffDto.StaffId = s.Id;
+                return staffDto;
+            }).ToList();
+
+
+            var response = new ServiceResponse<List<StaffResponseDto>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<StaffResponseDto>> GetStaffById(int id)
+        {
+            var response = new ServiceResponse<StaffResponseDto>();
+
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(e => e.Id == id) ?? throw new NotFoundException($"Staff with ID '{id}' not found.");
+
+            var staff = _mapper.Map<StaffResponseDto>(dbStaff);
+            staff.StaffId = dbStaff.Id;
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = staff;
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<StaffResponseDto>> UpdateStaff(UpdateStaffRequestDto updatedStaff)
+        {
+            var response = new ServiceResponse<StaffResponseDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            try
+            var staff = await _context.Staff.FirstOrDefaultAsync(o => o.Id == updatedStaff.Id) ?? throw new NotFoundException($"Staff with ID '{updatedStaff.Id}' not found.");
+
+            _mapper.Map(updatedStaff, staff);
+
+            staff.FirstName = updatedStaff.FirstName;
+            staff.LastName = updatedStaff.LastName;
+            staff.Nickname = updatedStaff.Nickname;
+            staff.Phone = updatedStaff.Phone;
+            staff.Line = updatedStaff.Line;
+            staff.Email = updatedStaff.Email;
+            staff.LastUpdatedBy = id;
+
+            await _context.SaveChangesAsync();
+
+            await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
-                string password = "hog" + newStaff.phone;
-                FirebaseAuthProvider firebaseAuthProvider = new FirebaseAuthProvider(new FirebaseConfig(API_KEY));
-                FirebaseAuthLink firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.email, password);
+                Uid = staff.FirebaseId,
+                Email = updatedStaff.Email
+            });
 
-                var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
-                string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
+            await AddStaffFireStoreAsync(staff);
 
-                var staff = _mapper.Map<Staff>(newStaff);
-                staff.firebaseId = firebaseId;
-                staff.CreatedBy = id;
-                staff.LastUpdatedBy = id;
-                _context.Staffs.Add(staff);
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = _mapper.Map<StaffResponseDto>(staff);
 
-                await _context.SaveChangesAsync();
-                await addStaffFireStoreAsync(staff);
-
-                response.Data = _mapper.Map<GetStaffDto>(staff);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetStaffDto>>> DeleteStaff(int id)
+
+
+        private async Task AddStaffFireStoreAsync(Staff staff)
         {
-            var response = new ServiceResponse<List<GetStaffDto>>();
-            try
-            {
-                var dbStaff = await _context.Staffs.FirstAsync(e => e.id == id);
-                if (dbStaff is null)
-                    throw new Exception($"Staff with ID '{id}' not found.");
-
-                _context.Staffs.Remove(dbStaff);
-                await _context.SaveChangesAsync();
-
-                response.Data = _context.Staffs.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<ServiceResponse<GetStaffDto>> DisableStaff(int id)
-        {
-            var response = new ServiceResponse<GetStaffDto>();
-            try
-            {
-                var staff = await _context.Staffs.FirstOrDefaultAsync(o => o.id == id);
-                if (staff is null)
-                    throw new Exception($"Staff with ID '{id}' not found.");
-
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+            FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
+            DocumentReference docRef = db.Collection("users").Document(staff.FirebaseId);
+            Dictionary<string, object> staffDoc = new()
                 {
-                    Uid = staff.firebaseId,
-                    Disabled = true
-                });
-
-
-                staff.isActive = false;
-
-                await _context.SaveChangesAsync();
-
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-        public async Task<ServiceResponse<GetStaffDto>> EnableStaff(int id)
-        {
-            var response = new ServiceResponse<GetStaffDto>();
-            try
-            {
-                var staff = await _context.Staffs.FirstOrDefaultAsync(o => o.id == id);
-                if (staff is null)
-                    throw new Exception($"Staff with ID '{id}' not found.");
-
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
-                {
-                    Uid = staff.firebaseId,
-                    Disabled = false
-                });
-
-
-                staff.isActive = true;
-                await _context.SaveChangesAsync();
-
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<ServiceResponse<List<GetStaffDto>>> GetStaff()
-        {
-            var response = new ServiceResponse<List<GetStaffDto>>();
-            var dbStaffs = await _context.Staffs.ToListAsync();
-            response.Data = dbStaffs.Select(e => _mapper.Map<GetStaffDto>(e)).ToList();
-            return response;
-        }
-
-        public async Task<ServiceResponse<GetStaffDto>> GetStaffById(int id)
-        {
-            var response = new ServiceResponse<GetStaffDto>();
-            try
-            {
-                var dbStaff = await _context.Staffs.FirstOrDefaultAsync(e => e.id == id);
-                if (dbStaff is null)
-                    throw new Exception($"Staff with ID '{id}' not found.");
-                response.Data = _mapper.Map<GetStaffDto>(dbStaff);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<ServiceResponse<GetStaffDto>> UpdateStaff(UpdateStaffDto updatedStaff)
-        {
-            var response = new ServiceResponse<GetStaffDto>();
-            int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
-
-            try
-            {
-                var staff = await _context.Staffs.FirstOrDefaultAsync(o => o.id == updatedStaff.id);
-                if (staff is null)
-                    throw new Exception($"Staff with ID '{updatedStaff.id}' not found.");
-
-                _mapper.Map(updatedStaff, staff);
-
-                staff.fName = updatedStaff.fName;
-                staff.lName = updatedStaff.lName;
-                staff.nickname = updatedStaff.nickname;
-                staff.phone = updatedStaff.phone;
-                staff.line = updatedStaff.line;
-                staff.email = updatedStaff.email;
-                staff.LastUpdatedBy = id;
-
-                await _context.SaveChangesAsync();
-
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
-                {
-                    Uid = staff.firebaseId,
-                    Email = updatedStaff.email
-                });
-
-                await addStaffFireStoreAsync(staff);
-
-                response.Data = _mapper.Map<GetStaffDto>(staff);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-
-
-        private async Task addStaffFireStoreAsync(Staff staff)
-        {
-            FirestoreDb db = FirestoreDb.Create("myproject-f44ec");
-            DocumentReference docRef = db.Collection("users").Document(staff.firebaseId);
-            Dictionary<string, object> staffDoc = new Dictionary<string, object>()
-                {
-                    { "displayName", staff.fullName },
-                    { "email", staff.email },
-                    { "id", staff.id },
-                    { "role", staff.role },
-                    { "uid", staff.firebaseId}
-
+                    { "displayName", staff.FullName },
+                    { "email", staff.Email },
+                    { "id", staff.Id },
+                    { "role", staff.Role },
+                    { "uid", staff.FirebaseId}
                 };
             await docRef.SetAsync(staffDoc);
         }
-
     }
 }

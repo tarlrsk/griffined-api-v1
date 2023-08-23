@@ -1,41 +1,33 @@
 global using AutoMapper;
 global using griffined_api.Data;
 global using griffined_api.Dtos.AddressDtos;
+global using griffined_api.Dtos.AttendanceDtos;
 global using griffined_api.Dtos.AvailableScheduleDtos;
-global using griffined_api.Dtos.EADtos;
-global using griffined_api.Dtos.EPDtos;
-global using griffined_api.Dtos.ExamDateDtos;
-global using griffined_api.Dtos.OADtos;
+global using griffined_api.Dtos.CourseDtos;
+global using griffined_api.Dtos.General;
 global using griffined_api.Dtos.ParentDtos;
-global using griffined_api.Dtos.PaymentDtos;
 global using griffined_api.Dtos.PreferredDayDtos;
-global using griffined_api.Dtos.PrivateClassDtos;
-global using griffined_api.Dtos.PrivateCourseDtos;
-global using griffined_api.Dtos.PrivateRegistrationRequestDtos;
-global using griffined_api.Dtos.PrivateRegReqInformationDtos;
-global using griffined_api.Dtos.PrivateRegReqWithInfoDtos;
-global using griffined_api.Dtos.ScheduleDtos;
+global using griffined_api.Dtos.ProfilePictureDto;
 global using griffined_api.Dtos.StaffDtos;
 global using griffined_api.Dtos.StudentDtos;
 global using griffined_api.Dtos.StudentAddtionalFilesDtos;
-global using griffined_api.Dtos.StudentPrivateClassDtos;
 global using griffined_api.Dtos.TeacherDtos;
-global using griffined_api.Dtos.TeacherLeavingRequestDtos;
-global using griffined_api.Dtos.TeacherPrivateClassDtos;
 global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
+global using griffined_api.Enums;
+global using griffined_api.Exceptions;
+global using griffined_api.Middlewares;
 global using griffined_api.Models;
-global using griffined_api.Services.AuthenticationService;
+global using griffined_api.integrations.Firebase;
+global using griffined_api.Services.AttendanceService;
 global using griffined_api.Services.CheckAvailableService;
-global using griffined_api.Services.EAService;
-global using griffined_api.Services.EPService;
-global using griffined_api.Services.OAService;
-global using griffined_api.Services.PaymentService;
-global using griffined_api.Services.PrivateRegistrationRequestService;
-global using griffined_api.Services.ScheduleService;
+global using griffined_api.Services.CourseService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
 global using griffined_api.Services.TeacherService;
+global using griffined_api.Services.RegistrationRequestService;
+global using griffined_api.Services.StudyCourseService;
+global using griffined_api.integrations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
@@ -53,29 +45,34 @@ global using Google.Cloud.Firestore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using FirebaseAdmin;
 using FirebaseAdminAuthentication.DependencyInjection.Extensions;
+using griffined_api.Services.StudentReportService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+DotNetEnv.Env.Load();
 
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(Environment.GetEnvironmentVariable("REMOTE_DB")));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddLogging();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
-builder.Services.AddScoped<IEAService, EAService>();
-builder.Services.AddScoped<IEPService, EPService>();
-builder.Services.AddScoped<IOAService, OAService>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IPrivateRegistrationRequestService, PrivateRegistrationRequestService>();
-builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IFirebaseService, FirebaseService>();
+builder.Services.AddScoped<IRegistrationRequestService, RegistrationRequestService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IStudentReportService, StudentReportService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IStudyCourseService, StudyCourseService>();
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -90,10 +87,18 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddSingleton(FirebaseApp.Create());
+builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))
+}));
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
+
+builder.Services.AddSingleton<UrlSigner>(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
+
+var storageClient = StorageClient.Create();
+builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {
@@ -119,6 +124,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

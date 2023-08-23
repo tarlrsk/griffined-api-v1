@@ -9,19 +9,19 @@ namespace griffined_api.Dtos.TeacherDtos
     public class AddTeacherDto
     {
         [Required]
-        public string fName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
         [Required]
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
         [Required]
-        public string nickname { get; set; } = string.Empty;
+        public string Nickname { get; set; } = string.Empty;
         [Required]
-        public string phone { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
         [Required]
-        public string email { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         [Required]
-        public string line { get; set; } = string.Empty;
-        public List<AddWorkTimeDto> workTimes { get; set; } = new List<AddWorkTimeDto>();
+        public string Line { get; set; } = string.Empty;
+        public List<WorkTimeRequestDto> WorkTimes { get; set; } = new List<WorkTimeRequestDto>();
         public bool isActive { get; set; } = true;
     }
 }

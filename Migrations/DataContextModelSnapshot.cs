@@ -8,7 +8,7 @@ using griffined_api.Data;
 
 #nullable disable
 
-namespace houseofgriffinapi.Migrations
+namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
     partial class DataContextModelSnapshot : ModelSnapshot
@@ -22,1243 +22,1827 @@ namespace houseofgriffinapi.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PrivateRegistrationRequestStudent", b =>
-                {
-                    b.Property<int>("privateRegistrationRequestsid")
-                        .HasColumnType("int");
-
-                    b.Property<int>("studentsid")
-                        .HasColumnType("int");
-
-                    b.HasKey("privateRegistrationRequestsid", "studentsid");
-
-                    b.HasIndex("studentsid");
-
-                    b.ToTable("StudentRequests", (string)null);
-                });
-
             modelBuilder.Entity("griffined_api.Models.Address", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("address")
-                        .IsRequired()
+                    b.Property<string>("District")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("district")
-                        .IsRequired()
+                    b.Property<string>("Province")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("province")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("studentId")
+                    b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("subdistrict")
+                    b.Property<string>("Subdistrict")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Zipcode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[StudentId] IS NOT NULL");
+
+                    b.ToTable("Address", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Appointment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppointmentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AppointmentType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("zipcode")
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("studentId")
-                        .IsUnique();
+                    b.ToTable("Appointment", (string)null);
+                });
 
-                    b.ToTable("Addresses");
+            modelBuilder.Entity("griffined_api.Models.AppointmentMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("AppointmentMember", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.CancellationRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RequestedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyClassId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("StudyClassId");
+
+                    b.HasIndex("StudyCourseId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("CancellationRequest", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Course", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("course")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("Course", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Level", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
                     b.Property<string>("level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("subject")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.HasKey("id");
+                    b.HasIndex("CourseId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Level", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.EA", b =>
+            modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("email")
+                    b.Property<string>("Day")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("fName")
+                    b.Property<TimeSpan>("FromTime")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("RegistrationRequestId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("firebaseId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<TimeSpan>("ToTime")
+                        .HasColumnType("time");
 
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
+                    b.HasKey("Id");
 
-                    b.Property<string>("lName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("RegistrationRequestId");
 
-                    b.Property<string>("line")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("EAs");
+                    b.ToTable("NewCoursePreferredDayRequest", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.EP", b =>
+            modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("email")
+                    b.Property<int?>("CourseId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("fName")
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LevelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RegistrationRequestId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("firebaseId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
+                    b.Property<int?>("StudyCourseId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("lName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("StudyCourseType")
+                        .HasColumnType("int");
 
-                    b.Property<string>("line")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("TotalHours")
+                        .HasColumnType("int");
 
-                    b.Property<string>("nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("CourseId");
 
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("LevelId");
 
-                    b.HasKey("id");
+                    b.HasIndex("RegistrationRequestId");
 
-                    b.ToTable("EPs");
+                    b.HasIndex("StudyCourseId")
+                        .IsUnique()
+                        .HasFilter("[StudyCourseId] IS NOT NULL");
+
+                    b.ToTable("NewCourseRequest", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.ExamDate", b =>
+            modelBuilder.Entity("griffined_api.Models.NewCourseSubjectRequest", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("examDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("privateCourseId")
+                    b.Property<int>("Hour")
                         .HasColumnType("int");
 
-                    b.Property<int?>("studentId")
+                    b.Property<int?>("NewCourseRequestId")
+                        .IsRequired()
                         .HasColumnType("int");
 
-                    b.HasKey("id");
-
-                    b.HasIndex("privateCourseId");
-
-                    b.HasIndex("studentId");
-
-                    b.ToTable("ExamDate");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.OA", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int?>("SubjectId")
+                        .IsRequired()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    b.HasKey("Id");
 
-                    b.Property<string>("email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("NewCourseRequestId");
 
-                    b.Property<string>("fName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("SubjectId");
 
-                    b.Property<string>("firebaseId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("lName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("line")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("OAs");
+                    b.ToTable("NewCourseSubjectRequest", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Parent", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("email")
-                        .IsRequired()
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("fName")
-                        .IsRequired()
+                    b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("lName")
-                        .IsRequired()
+                    b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("line")
-                        .IsRequired()
+                    b.Property<string>("Line")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("phone")
-                        .IsRequired()
+                    b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("relationship")
-                        .IsRequired()
+                    b.Property<string>("Relationship")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("studentId")
+                    b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("studentId")
-                        .IsUnique();
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[StudentId] IS NOT NULL");
 
-                    b.ToTable("Parents");
+                    b.ToTable("Parent", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.Payment", b =>
+            modelBuilder.Entity("griffined_api.Models.ProfilePicture", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("groupRegReqId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("paymentType")
+                    b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("privateRegReqId")
+                    b.Property<string>("ObjectName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("privateRegReqId");
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[StudentId] IS NOT NULL");
 
-                    b.ToTable("Payments");
+                    b.ToTable("ProfilePicture", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PaymentFile", b =>
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequest", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("file")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("paymentId")
+                    b.Property<int?>("ApprovedByStaffId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
-
-                    b.HasIndex("paymentId");
-
-                    b.ToTable("PaymentFiles");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PreferredDay", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int?>("CancelledBy")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("day")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fromTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("privateReqInfoId")
+                    b.Property<int?>("CreatedByStaffId")
                         .HasColumnType("int");
 
-                    b.Property<string>("toTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("privateReqInfoId");
-
-                    b.ToTable("PreferredDays");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PrivateClass", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LastUpdatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fromTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("method")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("privateCourseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("room")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("studentCancellationRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("toTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("privateCourseId");
-
-                    b.ToTable("PrivateClasses");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PrivateCourse", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LastUpdatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("course")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fromDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("hourPerClass")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("level")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("method")
-                        .HasColumnType("int");
-
-                    b.Property<int>("reqId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("requestid")
-                        .HasColumnType("int");
-
-                    b.Property<string>("section")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("subject")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("toDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("totalHour")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("requestid");
-
-                    b.ToTable("PrivateCourses");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PrivateRegistrationRequest", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EARemark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EAStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EPRemark1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EPRemark2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("LastUpdatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("OARemark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Staffid")
-                        .HasColumnType("int");
-
-                    b.Property<string>("courseType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("dateCreated")
+                    b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("paymentStatus")
+                    b.Property<bool>("HasSchedule")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NewCourseDetailError")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("PaymentByStaffId")
                         .HasColumnType("int");
 
-                    b.Property<string>("section")
+                    b.Property<bool>("PaymentError")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("PaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PaymentType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RegistrationStatus")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ScheduleError")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ScheduledByStaffId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Section")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("status")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<int?>("takenByEAId")
-                        .HasColumnType("int");
+                    b.HasKey("Id");
 
-                    b.Property<int?>("takenByEPId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("takenByOAId")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("Staffid");
-
-                    b.HasIndex(new[] { "status", "EAStatus", "paymentStatus" }, "Index_statuses");
-
-                    b.ToTable("PrivateRegistrationRequests");
+                    b.ToTable("RegistrationRequest", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PrivateRegistrationRequestInfo", b =>
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequestComment", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("course")
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("RegistrationRequestId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fromDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("hourPerClass")
                         .HasColumnType("int");
 
-                    b.Property<string>("level")
+                    b.Property<int?>("StaffId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("comment")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("method")
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistrationRequestId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("RegistrationRequestComment", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequestMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("requestId")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("RegistrationRequestId")
+                        .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<string>("subject")
+                    b.Property<int?>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistrationRequestId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("RegistrationRequestMember", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequestPaymentFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("toDate")
+                    b.Property<string>("ObjectName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("totalHour")
+                    b.Property<int?>("RegistrationRequestId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("requestId");
+                    b.HasIndex("RegistrationRequestId");
 
-                    b.ToTable("PrivateRegistrationRequestInfos");
+                    b.ToTable("RegistrationRequestPaymentFile", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Schedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("FromTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("ToTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.ToTable("Schedule", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Staff", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirebaseId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("LastUpdatedBy")
                         .HasColumnType("int");
 
-                    b.Property<string>("email")
+                    b.Property<string>("Line")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("fName")
+                    b.Property<string>("Nickname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("firebaseId")
+                    b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("isActive")
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Staff", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StaffNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("StaffId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("hasRead")
                         .HasColumnType("bit");
 
-                    b.Property<string>("lName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("line")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("StaffId");
 
-                    b.Property<string>("nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("StudyCourseId");
 
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Staffs");
+                    b.ToTable("StaffNotification", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Student", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CountryOfSchool")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("DOB")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirebaseId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HealthInformation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HogInformation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("LastUpdatedBy")
                         .HasColumnType("int");
 
-                    b.Property<string>("countryOfSchool")
+                    b.Property<string>("LevelOfStudy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("dateCreated")
+                    b.Property<string>("Line")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nickname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Program")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("School")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetScore")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetUniversity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Student", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAddingRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("RegistrationRequestId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudyCourseType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistrationRequestId");
+
+                    b.HasIndex("StudyCourseId");
+
+                    b.ToTable("StudentAddingRequest", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAddingSubjectRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("StudentAddingRequestId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudySubjectId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentAddingRequestId");
+
+                    b.HasIndex("StudySubjectId");
+
+                    b.ToTable("StudentAddingSubjectRequest", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAdditionalFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ObjectName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("StudentAdditionalFile", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAttendance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Attendance")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyClassId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("StudyClassId");
+
+                    b.ToTable("StudentAttendance", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("dob")
+                    b.Property<int?>("StudentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fName")
+                    b.Property<int?>("StudyCourseId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("firebaseId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
-                    b.Property<string>("healthInfo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("hogInfo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("isActive")
+                    b.Property<bool>("hasRead")
                         .HasColumnType("bit");
 
-                    b.Property<string>("lName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("levelOfStudy")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("StudentId");
 
-                    b.Property<string>("line")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("StudyCourseId");
 
-                    b.Property<string>("nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("profilePicture")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("program")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("school")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("targetScore")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("targetUni")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Students");
+                    b.ToTable("StudentNotification", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.StudentAdditionalFiles", b =>
+            modelBuilder.Entity("griffined_api.Models.StudentReport", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("file")
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUploaded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("studentId")
+                    b.Property<string>("ObjectName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Progression")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.Property<int?>("StudySubjectMemberId")
+                        .IsRequired()
+                        .HasColumnType("int");
 
-                    b.HasIndex("studentId");
+                    b.Property<int?>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("int");
 
-                    b.ToTable("StudentAdditionalFiles");
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudySubjectMemberId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("StudentReport", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.StudentClassCancellationRequest", b =>
+            modelBuilder.Entity("griffined_api.Models.StudyClass", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("OARemark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("privateClassId")
+                    b.Property<int>("ClassNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("studentId")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsMakeup")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("studentRemark")
+                    b.Property<string>("Room")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.Property<int?>("ScheduleId")
+                        .IsRequired()
+                        .HasColumnType("int");
 
-                    b.HasIndex("privateClassId")
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudySubjectId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId")
                         .IsUnique();
 
-                    b.HasIndex("studentId");
+                    b.HasIndex("StudySubjectId");
 
-                    b.ToTable("StudentClassCancellationRequest");
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("StudyClass", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyCourse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LevelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Section")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudyCourseType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalHour")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("LevelId");
+
+                    b.ToTable("StudyCourse", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyCourseHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StaffId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("StudyCourseId");
+
+                    b.ToTable("StudyCourseHistory", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SubjectId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudyCourseId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("StudySubject", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubjectMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudySubjectId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("StudySubjectId");
+
+                    b.ToTable("StudySubjectMember", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Subject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Subject", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Teacher", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirebaseId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("LastUpdatedBy")
                         .HasColumnType("int");
 
-                    b.Property<string>("email")
+                    b.Property<string>("Line")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("fName")
+                    b.Property<string>("Nickname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("firebaseId")
+                    b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("isActive")
+                    b.HasKey("Id");
+
+                    b.ToTable("Teacher", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.TeacherNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("StudyCourseId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("hasRead")
                         .HasColumnType("bit");
 
-                    b.Property<string>("lName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("line")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("AppointmentId");
 
-                    b.Property<string>("nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("StudyCourseId");
 
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("TeacherId");
 
-                    b.HasKey("id");
-
-                    b.ToTable("Teachers");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.TeacherLeavingRequest", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("EARemark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OARemark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fromDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fromTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("teacherId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("teacherRemark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("toDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("toTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("teacherId");
-
-                    b.ToTable("TeacherLeavingRequests");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.TeacherPrivateClass", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int>("privateClassId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("teacherId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("workType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("privateClassId")
-                        .IsUnique();
-
-                    b.HasIndex("teacherId");
-
-                    b.HasIndex(new[] { "status" }, "Index_status");
-
-                    b.ToTable("TeacherPrivateClasses");
+                    b.ToTable("TeacherNotification", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.WorkTime", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("day")
+                    b.Property<string>("Day")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("fromTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<TimeSpan>("FromTime")
+                        .HasColumnType("time");
 
-                    b.Property<int>("teacherId")
+                    b.Property<int?>("TeacherId")
                         .HasColumnType("int");
 
-                    b.Property<string>("toTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<TimeSpan>("ToTime")
+                        .HasColumnType("time");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("teacherId");
+                    b.HasIndex("TeacherId");
 
-                    b.ToTable("WorkTimes");
-                });
-
-            modelBuilder.Entity("griffined_api.StudentPrivateClass", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int>("attendance")
-                        .HasColumnType("int");
-
-                    b.Property<int>("classId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("privateClassid")
-                        .HasColumnType("int");
-
-                    b.Property<int>("studentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("privateClassid");
-
-                    b.HasIndex("studentId");
-
-                    b.HasIndex(new[] { "attendance" }, "Index_attendance");
-
-                    b.ToTable("StudentPrivateClasses");
-                });
-
-            modelBuilder.Entity("PrivateRegistrationRequestStudent", b =>
-                {
-                    b.HasOne("griffined_api.Models.PrivateRegistrationRequest", null)
-                        .WithMany()
-                        .HasForeignKey("privateRegistrationRequestsid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("griffined_api.Models.Student", null)
-                        .WithMany()
-                        .HasForeignKey("studentsid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.ToTable("WorkTime", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Address", b =>
                 {
-                    b.HasOne("griffined_api.Models.Student", "student")
-                        .WithOne("address")
-                        .HasForeignKey("griffined_api.Models.Address", "studentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithOne("Address")
+                        .HasForeignKey("griffined_api.Models.Address", "StudentId");
 
-                    b.Navigation("student");
+                    b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.ExamDate", b =>
+            modelBuilder.Entity("griffined_api.Models.AppointmentMember", b =>
                 {
-                    b.HasOne("griffined_api.Models.PrivateCourse", "privateCourse")
-                        .WithMany("examDates")
-                        .HasForeignKey("privateCourseId");
+                    b.HasOne("griffined_api.Models.Appointment", "Appointment")
+                        .WithMany("AppointmentMembers")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.HasOne("griffined_api.Models.Student", "student")
-                        .WithMany("examDates")
-                        .HasForeignKey("studentId");
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("AppointmentMembers")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("privateCourse");
+                    b.Navigation("Appointment");
 
-                    b.Navigation("student");
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.CancellationRequest", b =>
+                {
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithMany("CancellationRequests")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudyClass", "StudyClass")
+                        .WithMany("CancellationRequests")
+                        .HasForeignKey("StudyClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("CancellationRequests")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("CancellationRequests")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("StudyClass");
+
+                    b.Navigation("StudyCourse");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Level", b =>
+                {
+                    b.HasOne("griffined_api.Models.Course", "Course")
+                        .WithMany("Levels")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>
+                {
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("NewCoursePreferredDayRequests")
+                        .HasForeignKey("RegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RegistrationRequest");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
+                {
+                    b.HasOne("griffined_api.Models.Course", "Course")
+                        .WithMany("NewCourseRequests")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Level", "Level")
+                        .WithMany("NewCourseRequests")
+                        .HasForeignKey("LevelId");
+
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("NewCourseRequests")
+                        .HasForeignKey("RegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithOne("NewCourseRequest")
+                        .HasForeignKey("griffined_api.Models.NewCourseRequest", "StudyCourseId");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Level");
+
+                    b.Navigation("RegistrationRequest");
+
+                    b.Navigation("StudyCourse");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.NewCourseSubjectRequest", b =>
+                {
+                    b.HasOne("griffined_api.Models.NewCourseRequest", "NewCourseRequest")
+                        .WithMany("NewCourseSubjectRequests")
+                        .HasForeignKey("NewCourseRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Subject", "Subject")
+                        .WithMany("NewCourseSubjectRequests")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NewCourseRequest");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Parent", b =>
                 {
-                    b.HasOne("griffined_api.Models.Student", "student")
-                        .WithOne("parent")
-                        .HasForeignKey("griffined_api.Models.Parent", "studentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithOne("Parent")
+                        .HasForeignKey("griffined_api.Models.Parent", "StudentId");
 
-                    b.Navigation("student");
+                    b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.Payment", b =>
+            modelBuilder.Entity("griffined_api.Models.ProfilePicture", b =>
                 {
-                    b.HasOne("griffined_api.Models.PrivateRegistrationRequest", "privateRegReq")
-                        .WithMany()
-                        .HasForeignKey("privateRegReqId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithOne("ProfilePicture")
+                        .HasForeignKey("griffined_api.Models.ProfilePicture", "StudentId");
 
-                    b.Navigation("privateRegReq");
+                    b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PaymentFile", b =>
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequestComment", b =>
                 {
-                    b.HasOne("griffined_api.Models.Payment", "payment")
-                        .WithMany("payment")
-                        .HasForeignKey("paymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("RegistrationRequestComments")
+                        .HasForeignKey("RegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("payment");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PreferredDay", b =>
-                {
-                    b.HasOne("griffined_api.Models.PrivateRegistrationRequestInfo", "privateReqInfo")
-                        .WithMany("preferredDays")
-                        .HasForeignKey("privateReqInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.Staff", "Staff")
+                        .WithMany("RegistrationRequestComments")
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("privateReqInfo");
+                    b.Navigation("RegistrationRequest");
+
+                    b.Navigation("Staff");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PrivateClass", b =>
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequestMember", b =>
                 {
-                    b.HasOne("griffined_api.Models.PrivateCourse", "privateCourse")
-                        .WithMany("privateClasses")
-                        .HasForeignKey("privateCourseId");
-
-                    b.Navigation("privateCourse");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PrivateCourse", b =>
-                {
-                    b.HasOne("griffined_api.Models.PrivateRegistrationRequest", "request")
-                        .WithMany()
-                        .HasForeignKey("requestid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("RegistrationRequestMembers")
+                        .HasForeignKey("RegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("request");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PrivateRegistrationRequest", b =>
-                {
-                    b.HasOne("griffined_api.Models.Staff", null)
-                        .WithMany("privateRegistrationRequests")
-                        .HasForeignKey("Staffid");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.PrivateRegistrationRequestInfo", b =>
-                {
-                    b.HasOne("griffined_api.Models.PrivateRegistrationRequest", "privateRegistrationRequest")
-                        .WithMany("privateRegistrationRequestInfos")
-                        .HasForeignKey("requestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithMany("RegistrationRequestMembers")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("privateRegistrationRequest");
+                    b.Navigation("RegistrationRequest");
+
+                    b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.StudentAdditionalFiles", b =>
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequestPaymentFile", b =>
                 {
-                    b.HasOne("griffined_api.Models.Student", "student")
-                        .WithMany("additionalFiles")
-                        .HasForeignKey("studentId");
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("RegistrationRequestPaymentFiles")
+                        .HasForeignKey("RegistrationRequestId");
 
-                    b.Navigation("student");
+                    b.Navigation("RegistrationRequest");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.StudentClassCancellationRequest", b =>
+            modelBuilder.Entity("griffined_api.Models.Schedule", b =>
                 {
-                    b.HasOne("griffined_api.Models.PrivateClass", "privateClass")
-                        .WithOne("studentClassCancellationRequest")
-                        .HasForeignKey("griffined_api.Models.StudentClassCancellationRequest", "privateClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("griffined_api.Models.Appointment", "Appointment")
+                        .WithMany("Schedules")
+                        .HasForeignKey("AppointmentId");
 
-                    b.HasOne("griffined_api.Models.Student", "student")
-                        .WithMany("classCancellationRequests")
-                        .HasForeignKey("studentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("privateClass");
-
-                    b.Navigation("student");
+                    b.Navigation("Appointment");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.TeacherLeavingRequest", b =>
+            modelBuilder.Entity("griffined_api.Models.StaffNotification", b =>
                 {
-                    b.HasOne("griffined_api.Models.Teacher", "teacher")
-                        .WithMany("leavingRequests")
-                        .HasForeignKey("teacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.Staff", "Staff")
+                        .WithMany("StaffNotifications")
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("teacher");
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("StaffNotifications")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Staff");
+
+                    b.Navigation("StudyCourse");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.TeacherPrivateClass", b =>
+            modelBuilder.Entity("griffined_api.Models.StudentAddingRequest", b =>
                 {
-                    b.HasOne("griffined_api.Models.PrivateClass", "privateClass")
-                        .WithOne("teacherPrivateClass")
-                        .HasForeignKey("griffined_api.Models.TeacherPrivateClass", "privateClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
+                        .WithMany("StudentAddingRequest")
+                        .HasForeignKey("RegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("griffined_api.Models.Teacher", "teacher")
-                        .WithMany("privateClasses")
-                        .HasForeignKey("teacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("StudentAddingRequests")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("privateClass");
+                    b.Navigation("RegistrationRequest");
 
-                    b.Navigation("teacher");
+                    b.Navigation("StudyCourse");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAddingSubjectRequest", b =>
+                {
+                    b.HasOne("griffined_api.Models.StudentAddingRequest", "StudentAddingRequest")
+                        .WithMany("StudentAddingSubjectRequests")
+                        .HasForeignKey("StudentAddingRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudySubject", "StudySubject")
+                        .WithMany("StudentAddingSubjectRequests")
+                        .HasForeignKey("StudySubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StudentAddingRequest");
+
+                    b.Navigation("StudySubject");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAdditionalFile", b =>
+                {
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithMany("AdditionalFiles")
+                        .HasForeignKey("StudentId");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAttendance", b =>
+                {
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithMany("Attendances")
+                        .HasForeignKey("StudentId");
+
+                    b.HasOne("griffined_api.Models.StudyClass", "StudyClass")
+                        .WithMany("Attendances")
+                        .HasForeignKey("StudyClassId");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("StudyClass");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentNotification", b =>
+                {
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithMany("StudentNotifications")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("StudentNotifications")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("StudyCourse");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentReport", b =>
+                {
+                    b.HasOne("griffined_api.Models.StudySubjectMember", "StudySubjectMember")
+                        .WithMany("StudentReports")
+                        .HasForeignKey("StudySubjectMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("StudentReports")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StudySubjectMember");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyClass", b =>
+                {
+                    b.HasOne("griffined_api.Models.Schedule", "Schedule")
+                        .WithOne("StudyClass")
+                        .HasForeignKey("griffined_api.Models.StudyClass", "ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudySubject", "StudySubject")
+                        .WithMany("StudyClasses")
+                        .HasForeignKey("StudySubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("StudyClasses")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("StudySubject");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyCourse", b =>
+                {
+                    b.HasOne("griffined_api.Models.Course", "Course")
+                        .WithMany("StudyCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Level", "Level")
+                        .WithMany("StudyCourses")
+                        .HasForeignKey("LevelId");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Level");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyCourseHistory", b =>
+                {
+                    b.HasOne("griffined_api.Models.Staff", "ByStaff")
+                        .WithMany("StudyCourseHistories")
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("StudyCourseHistories")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ByStaff");
+
+                    b.Navigation("StudyCourse");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubject", b =>
+                {
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("StudySubjects")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Subject", "Subject")
+                        .WithMany("StudySubjects")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StudyCourse");
+
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubjectMember", b =>
+                {
+                    b.HasOne("griffined_api.Models.Student", "Student")
+                        .WithMany("StudySubjectMember")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudySubject", "StudySubject")
+                        .WithMany("StudySubjectMember")
+                        .HasForeignKey("StudySubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("StudySubject");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Subject", b =>
+                {
+                    b.HasOne("griffined_api.Models.Course", "Course")
+                        .WithMany("Subjects")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.TeacherNotification", b =>
+                {
+                    b.HasOne("griffined_api.Models.Appointment", "Appointment")
+                        .WithMany("TeacherNotifications")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("TeacherNotifications")
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("TeacherNotifications")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("StudyCourse");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("griffined_api.Models.WorkTime", b =>
                 {
-                    b.HasOne("griffined_api.Models.Teacher", "teacher")
-                        .WithMany("workTimes")
-                        .HasForeignKey("teacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("WorkTimes")
+                        .HasForeignKey("TeacherId");
 
-                    b.Navigation("teacher");
+                    b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("griffined_api.StudentPrivateClass", b =>
+            modelBuilder.Entity("griffined_api.Models.Appointment", b =>
                 {
-                    b.HasOne("griffined_api.Models.PrivateClass", "privateClass")
-                        .WithMany("studentPrivateClasses")
-                        .HasForeignKey("privateClassid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("AppointmentMembers");
 
-                    b.HasOne("griffined_api.Models.Student", "student")
-                        .WithMany("privateClasses")
-                        .HasForeignKey("studentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Schedules");
 
-                    b.Navigation("privateClass");
-
-                    b.Navigation("student");
+                    b.Navigation("TeacherNotifications");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.Payment", b =>
+            modelBuilder.Entity("griffined_api.Models.Course", b =>
                 {
-                    b.Navigation("payment");
+                    b.Navigation("Levels");
+
+                    b.Navigation("NewCourseRequests");
+
+                    b.Navigation("StudyCourses");
+
+                    b.Navigation("Subjects");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PrivateClass", b =>
+            modelBuilder.Entity("griffined_api.Models.Level", b =>
                 {
-                    b.Navigation("studentClassCancellationRequest");
+                    b.Navigation("NewCourseRequests");
 
-                    b.Navigation("studentPrivateClasses");
-
-                    b.Navigation("teacherPrivateClass");
+                    b.Navigation("StudyCourses");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PrivateCourse", b =>
+            modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
                 {
-                    b.Navigation("examDates");
-
-                    b.Navigation("privateClasses");
+                    b.Navigation("NewCourseSubjectRequests");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PrivateRegistrationRequest", b =>
+            modelBuilder.Entity("griffined_api.Models.RegistrationRequest", b =>
                 {
-                    b.Navigation("privateRegistrationRequestInfos");
+                    b.Navigation("NewCoursePreferredDayRequests");
+
+                    b.Navigation("NewCourseRequests");
+
+                    b.Navigation("RegistrationRequestComments");
+
+                    b.Navigation("RegistrationRequestMembers");
+
+                    b.Navigation("RegistrationRequestPaymentFiles");
+
+                    b.Navigation("StudentAddingRequest");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.PrivateRegistrationRequestInfo", b =>
+            modelBuilder.Entity("griffined_api.Models.Schedule", b =>
                 {
-                    b.Navigation("preferredDays");
+                    b.Navigation("StudyClass");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Staff", b =>
                 {
-                    b.Navigation("privateRegistrationRequests");
+                    b.Navigation("RegistrationRequestComments");
+
+                    b.Navigation("StaffNotifications");
+
+                    b.Navigation("StudyCourseHistories");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Student", b =>
                 {
-                    b.Navigation("additionalFiles");
+                    b.Navigation("AdditionalFiles");
 
-                    b.Navigation("address");
+                    b.Navigation("Address");
 
-                    b.Navigation("classCancellationRequests");
+                    b.Navigation("Attendances");
 
-                    b.Navigation("examDates");
+                    b.Navigation("CancellationRequests");
 
-                    b.Navigation("parent");
+                    b.Navigation("Parent");
 
-                    b.Navigation("privateClasses");
+                    b.Navigation("ProfilePicture");
+
+                    b.Navigation("RegistrationRequestMembers");
+
+                    b.Navigation("StudentNotifications");
+
+                    b.Navigation("StudySubjectMember");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudentAddingRequest", b =>
+                {
+                    b.Navigation("StudentAddingSubjectRequests");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyClass", b =>
+                {
+                    b.Navigation("Attendances");
+
+                    b.Navigation("CancellationRequests");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudyCourse", b =>
+                {
+                    b.Navigation("CancellationRequests");
+
+                    b.Navigation("NewCourseRequest");
+
+                    b.Navigation("StaffNotifications");
+
+                    b.Navigation("StudentAddingRequests");
+
+                    b.Navigation("StudentNotifications");
+
+                    b.Navigation("StudyCourseHistories");
+
+                    b.Navigation("StudySubjects");
+
+                    b.Navigation("TeacherNotifications");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubject", b =>
+                {
+                    b.Navigation("StudentAddingSubjectRequests");
+
+                    b.Navigation("StudyClasses");
+
+                    b.Navigation("StudySubjectMember");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubjectMember", b =>
+                {
+                    b.Navigation("StudentReports");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.Subject", b =>
+                {
+                    b.Navigation("NewCourseSubjectRequests");
+
+                    b.Navigation("StudySubjects");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Teacher", b =>
                 {
-                    b.Navigation("leavingRequests");
+                    b.Navigation("AppointmentMembers");
 
-                    b.Navigation("privateClasses");
+                    b.Navigation("CancellationRequests");
 
-                    b.Navigation("workTimes");
+                    b.Navigation("StudentReports");
+
+                    b.Navigation("StudyClasses");
+
+                    b.Navigation("TeacherNotifications");
+
+                    b.Navigation("WorkTimes");
                 });
 #pragma warning restore 612, 618
         }

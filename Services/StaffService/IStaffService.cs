@@ -7,12 +7,12 @@ namespace griffined_api.Services.StaffService
 {
     public interface IStaffService
     {
-        Task<ServiceResponse<List<GetStaffDto>>> GetStaff();
-        Task<ServiceResponse<GetStaffDto>> GetStaffById(int id);
-        Task<ServiceResponse<GetStaffDto>> AddStaff(AddStaffDto newStaff);
-        Task<ServiceResponse<GetStaffDto>> UpdateStaff(UpdateStaffDto updatedStaff);
-        Task<ServiceResponse<List<GetStaffDto>>> DeleteStaff(int id);
-        Task<ServiceResponse<GetStaffDto>> DisableStaff(int id);
-        Task<ServiceResponse<GetStaffDto>> EnableStaff(int id);
+        Task<ServiceResponse<List<StaffResponseDto>>> GetStaff();
+        Task<ServiceResponse<StaffResponseDto>> GetStaffById(int id);
+        Task<ServiceResponse<StaffResponseDto>> AddStaff(AddStaffRequestDto newStaff);
+        Task<ServiceResponse<StaffResponseDto>> UpdateStaff(UpdateStaffRequestDto updatedStaff);
+        Task<ServiceResponse<List<StaffResponseDto>>> DeleteStaff(int id);
+        Task<ServiceResponse<StaffResponseDto>> DisableStaff(int id);
+        Task<ServiceResponse<StaffResponseDto>> EnableStaff(int id);
     }
 }

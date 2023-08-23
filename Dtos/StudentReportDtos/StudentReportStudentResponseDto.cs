@@ -1,0 +1,17 @@
+using griffined_api.Dtos.StudyCourseDtos;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace griffined_api.Dtos.StudentReportDtos
+{
+    public class StudentReportStudentResponseDto
+    {
+        public int StudyCourseId { get; set; }
+        public string Course { get; set; } = string.Empty;
+        public string StudentCode { get; set; } = string.Empty;
+        public List<StudySubjectReportResponseDto> Report { get; set; } = new List<StudySubjectReportResponseDto>();
+
+    }
+}

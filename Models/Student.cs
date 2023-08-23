@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,56 +9,55 @@ namespace griffined_api.Models
 {
     public class Student
     {
-        [Required]
-        public int id { get; set; }
-        [Required]
-        public string firebaseId { get; set; } = string.Empty;
-        [Required]
-        public string title { get; set; } = string.Empty;
-        [Required]
-        public string fName { get; set; } = string.Empty;
-        [Required]
-        public string lName { get; set; } = string.Empty;
-        public string fullName { get { return fName + " " + lName; } }
-        [Required]
-        public string nickname { get; set; } = string.Empty;
-        public string? profilePicture { get; set; }
-        private DateTime _dob;
-        [Required]
-        public string dob { get { return _dob.ToString("dd-MMMM-yyyy HH:mm:ss"); } set { _dob = DateTime.Parse(value); } }
-        public int age
+        public int Id { get; set; }
+
+        public string StudentCode { get; set; } = string.Empty;
+        public string FirebaseId { get; set; } = string.Empty;
+
+        public string Title { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string FullName { get { return FirstName + " " + LastName; } }
+        public string Nickname { get; set; } = string.Empty;
+        public DateTime DOB { get; set; }
+        public int Age
         {
             get
             {
                 int _age = 0;
-                _age = DateTime.Now.Subtract(_dob).Days;
+                _age = DateTime.Now.Subtract(DOB).Days;
                 _age /= 365;
                 return _age;
             }
         }
-        [Required]
-        public string phone { get; set; } = string.Empty;
-        public string? line { get; set; }
-        public string? email { get; set; }
-        public string? school { get; set; }
-        public string? countryOfSchool { get; set; }
-        public string? levelOfStudy { get; set; }
-        public string? program { get; set; }
-        public string? targetUni { get; set; }
-        public string? targetScore { get; set; }
-        public string? hogInfo { get; set; }
-        public string? healthInfo { get; set; }
-        public bool isActive { get; set; } = true;
+        public string Phone { get; set; } = string.Empty;
+        public string Line { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? School { get; set; }
+        public string? CountryOfSchool { get; set; }
+        public string? LevelOfStudy { get; set; }
+        public string? Program { get; set; }
+        public string? TargetUniversity { get; set; }
+        public string? TargetScore { get; set; }
+        public string? HogInformation { get; set; }
+        public string? HealthInformation { get; set; }
+
+        public StudentStatus Status { get; set; } = StudentStatus.Inactive;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
-        public DateTime dateCreated { get; set; } = DateTime.Now;
-        public Parent? parent { get; set; }
-        public Address? address { get; set; }
-        public ICollection<StudentAdditionalFiles>? additionalFiles { get; set; }
-        public ICollection<PrivateRegistrationRequest>? privateRegistrationRequests { get; set; }
-        public ICollection<StudentPrivateClass> privateClasses { get; set; } = new List<StudentPrivateClass>();
-        public ICollection<ExamDate>? examDates { get; set; }
-        public ICollection<StudentClassCancellationRequest>? classCancellationRequests { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public DateTime ExpiryDate { get; set; } = new DateTime(2030, 12, 31);
+
+        public virtual ProfilePicture? ProfilePicture { get; set; }
+        public virtual Parent? Parent { get; set; }
+        public virtual Address? Address { get; set; }
+
+        public virtual ICollection<StudentAttendance>? Attendances { get; set; }
+        public virtual ICollection<StudentAdditionalFile>? AdditionalFiles { get; set; }
+        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
+        public virtual ICollection<StudySubjectMember> StudySubjectMember { get; set; } = new List<StudySubjectMember>();
+        public virtual ICollection<CancellationRequest>? CancellationRequests { get; set; }
+        public virtual ICollection<StudentNotification>? StudentNotifications { get; set; }
 
     }
 }
