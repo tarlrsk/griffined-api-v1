@@ -53,23 +53,29 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.ListAllStudyCourseByTeacherToken());
         }
-        
-        [HttpGet("student/{studyCourseId}"), Authorize(Roles = "master, student")]
+
+        [HttpGet("student/{studyCourseId}"), Authorize(Roles = "student, master")]
         public async Task<ActionResult> GetStudyCourseDetailForStudentMobile(int studyCourseId)
         {
             return Ok(await _studyCourseService.StudyCourseDetailForStudent(studyCourseId));
         }
 
-        [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "master, teacher")]
+        [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "teacher, master")]
         public async Task<ActionResult> GetStudyCourseDetailForTeacher(int studyCourseId)
         {
             return Ok(await _studyCourseService.StudyCourseDetailForTeacher(studyCourseId));
         }
 
-        [HttpGet("{studentCode}")]
+        [HttpGet("all-courses/student/{studentCode}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> ListAllStudyCoursesByStudentId(string studentCode)
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentCode));
+        }
+
+        [HttpGet("all-courses/teacher/{teacherId}"), Authorize(Roles = "ea, oa, master")]
+        public async Task<ActionResult> ListAllStudyCoursesByTeacherId(int teacherId)
+        {
+            return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByTeacherId(teacherId));
         }
     }
 }
