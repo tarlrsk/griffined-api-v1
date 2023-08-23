@@ -10,6 +10,7 @@ namespace griffined_api.Dtos.AttendanceDtos
     {
         public int StudyClassId { get; set; }
         public int ClassNo { get; set; }
+        public string Section { get; set; } = string.Empty;
         public string? Room { get; set; }
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
@@ -21,8 +22,6 @@ namespace griffined_api.Dtos.AttendanceDtos
 
         public SubjectResponseDto CurrentSubject { get; set; } = new SubjectResponseDto();
         public List<SubjectResponseDto> AllSubjects { get; set; } = new List<SubjectResponseDto>();
-
-        public string Section { get; set; } = string.Empty;
 
         public int TeacherId { get; set; }
         public string TeacherFirstName { get; set; } = string.Empty;
