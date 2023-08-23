@@ -60,7 +60,7 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.StudyCourseDetailForTeacher(studyCourseId));
         }
 
-        [HttpGet("{studentId}")]
+        [HttpGet("{studentCode}")]
         public async Task<ActionResult> ListAllStudyCoursesByStudentId(string studentCode)
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentCode));

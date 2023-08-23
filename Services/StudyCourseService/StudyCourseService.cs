@@ -451,20 +451,21 @@ namespace griffined_api.Services.StudyCourseService
                                 ?? throw new NotFoundException($"Study Course with ID {studyCourseId} is not found.");
 
             var studentCount = 0;
-                var student = new List<int>();
-                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+            var student = new List<int>();
+            foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+            {
+                foreach (var dbMember in dbStudySubject.StudySubjectMember)
                 {
-                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                    if (!student.Exists(s => s == dbMember.StudentId))
                     {
-                        if (!student.Exists(s => s == dbMember.StudentId))
-                        {
-                            studentCount += 1;
-                            student.Add(dbMember.StudentId);
-                        }
+                        studentCount += 1;
+                        student.Add(dbMember.StudentId);
                     }
                 }
-            
-            var data = new StudyCourseDetailMobileResponseDto(){
+            }
+
+            var data = new StudyCourseDetailMobileResponseDto()
+            {
                 StudyCourseId = dbStudyCourse.Id,
                 StudyCourseType = dbStudyCourse.StudyCourseType,
                 Section = dbStudyCourse.Section,
@@ -479,13 +480,14 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             var schedules = new List<ScheduleResponseDto>();
-            foreach(var dbStudySubject in dbStudyCourse.StudySubjects)
+            foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
             {
-                data.StudySubjects.Add(new StudySubjectResponseDto{
+                data.StudySubjects.Add(new StudySubjectResponseDto
+                {
                     StudySubjectId = dbStudySubject.Id,
                     Subject = dbStudySubject.Subject.subject,
                 });
-                foreach(var dbStudyClass in dbStudySubject.StudyClasses)
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
                     schedules.Add(new ScheduleResponseDto
                     {
@@ -512,7 +514,7 @@ namespace griffined_api.Services.StudyCourseService
             }
 
             data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
-            
+
             var response = new ServiceResponse<StudyCourseDetailMobileResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -543,73 +545,117 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(sc => sc.Course)
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.Student)
+                                .Include(sm => sm.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.StudentReports)
+                                            .ThenInclude(sr => sr.Teacher)
                                 .Where(sc => sc.StudySubjects.Any(ss => ss.StudySubjectMember.Any(sm => sm.Student.StudentCode == studentCode)))
-                                .ToListAsync() ?? throw new NotFoundException($"No student with ID {studentCode} found.");
+                                .ToListAsync() ?? throw new NotFoundException($"No courses containing student with code {studentCode} found.");
 
-            var dbMember = await _context.StudySubjectMember
-                                .Include(sm => sm.Student)
-                                .Include(sm => sm.StudentReports)
-                                .FirstOrDefaultAsync(sm => sm.Student.StudentCode == studentCode) ?? throw new NotFoundException($"No student with ID {studentCode} found.");
+            var fiftyPercentReport = dbCourses.SelectMany(sc => sc.StudySubjects)
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .SelectMany(sm => sm.StudentReports)
+                            .FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
 
-            var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
-            var hundredPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
-            var specialReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.Special);
+            var hundredPercentReport = dbCourses.SelectMany(sc => sc.StudySubjects)
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .SelectMany(sm => sm.StudentReports)
+                            .FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
 
-            var reportDto = dbMember.StudentReports.Select(async report =>
-            new StudySubjectReportResponseDto
-            {
-                StudySubject = new StudySubjectResponseDto
-                {
-                    StudySubjectId = dbMember.StudySubject.Id,
-                    Subject = dbMember.StudySubject.Subject.subject
-                },
-                FiftyPercentReport = fiftyPercentReport != null
-                ? new ReportFileResponseDto
-                {
-                    Progression = Progression.FiftyPercent,
-                    File = new FilesResponseDto
-                    {
-                        FileName = fiftyPercentReport.FileName,
-                        ContentType = await _firebaseService.GetContentTypeByObjectName(fiftyPercentReport.ObjectName),
-                        URL = await _firebaseService.GetUrlByObjectName(fiftyPercentReport.ObjectName)
-                    }
-                }
-                : null,
-                HundredPercentReport = hundredPercentReport != null
-                ? new ReportFileResponseDto
-                {
-                    Progression = Progression.HundredPercent,
-                    File = new FilesResponseDto
-                    {
-                        FileName = hundredPercentReport.FileName,
-                        ContentType = await _firebaseService.GetContentTypeByObjectName(hundredPercentReport.ObjectName),
-                        URL = await _firebaseService.GetUrlByObjectName(hundredPercentReport.ObjectName)
-                    }
-                }
-                : null,
-                SpecialReport = specialReport != null
-                ? new ReportFileResponseDto
-                {
-                    Progression = Progression.Special,
-                    File = new FilesResponseDto
-                    {
-                        FileName = specialReport.FileName,
-                        ContentType = await _firebaseService.GetContentTypeByObjectName(specialReport.ObjectName),
-                        URL = await _firebaseService.GetUrlByObjectName(specialReport.ObjectName)
-                    }
-                }
-                : null
-            }).ToList();
+            var specialReport = dbCourses.SelectMany(sc => sc.StudySubjects)
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .SelectMany(sm => sm.StudentReports)
+                            .FirstOrDefault(sr => sr.Progression == Progression.Special);
+
+            var reportDto = dbCourses
+                            .SelectMany(sc => sc.StudySubjects)
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.StudentReports)
+                            .FirstOrDefault()!
+                            .Select(async report => new StudySubjectReportResponseDto
+                            {
+                                StudySubject = new StudySubjectResponseDto
+                                {
+                                    StudySubjectId = report.StudySubjectMember.StudySubject.Id,
+                                    Subject = report.StudySubjectMember.StudySubject.Subject.subject
+                                },
+                                FiftyPercentReport = fiftyPercentReport != null
+                                ? new ReportFileResponseDto
+                                {
+                                    UploadedBy = report.Teacher.Id,
+                                    Progression = Progression.FiftyPercent,
+                                    File = new FilesResponseDto
+                                    {
+                                        FileName = fiftyPercentReport.FileName,
+                                        ContentType = await _firebaseService.GetContentTypeByObjectName(fiftyPercentReport.ObjectName),
+                                        URL = await _firebaseService.GetUrlByObjectName(fiftyPercentReport.ObjectName)
+                                    }
+                                }
+                                : null,
+                                HundredPercentReport = hundredPercentReport != null
+                                ? new ReportFileResponseDto
+                                {
+                                    UploadedBy = report.Teacher.Id,
+                                    Progression = Progression.HundredPercent,
+                                    File = new FilesResponseDto
+                                    {
+                                        FileName = hundredPercentReport.FileName,
+                                        ContentType = await _firebaseService.GetContentTypeByObjectName(hundredPercentReport.ObjectName),
+                                        URL = await _firebaseService.GetUrlByObjectName(hundredPercentReport.ObjectName)
+                                    }
+                                }
+                                : null,
+                                SpecialReport = specialReport != null
+                                ? new ReportFileResponseDto
+                                {
+                                    UploadedBy = report.Teacher.Id,
+                                    Progression = Progression.Special,
+                                    File = new FilesResponseDto
+                                    {
+                                        FileName = specialReport.FileName,
+                                        ContentType = await _firebaseService.GetContentTypeByObjectName(specialReport.ObjectName),
+                                        URL = await _firebaseService.GetUrlByObjectName(specialReport.ObjectName)
+                                    }
+                                }
+                                : null
+                            }).ToList();
 
             var reportDtoList = await Task.WhenAll(reportDto);
 
             var data = dbCourses.Select(course => new StudyCourseByStudentIdResponseDto
             {
-                StudentId = dbMember.Student.Id,
-                StudentCode = studentCode,
-                StudentFirstName = dbMember.Student.FirstName,
-                StudentLastName = dbMember.Student.LastName,
-                StudentNickname = dbMember.Student.Nickname,
+                StudentId = course.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.Id)
+                            .FirstOrDefault()!,
+                StudentCode = course.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.StudentCode)
+                            .FirstOrDefault()!,
+                StudentFirstName = course.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.FirstName)
+                            .FirstOrDefault()!,
+                StudentLastName = course.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.LastName)
+                            .FirstOrDefault()!,
+                StudentNickname = course.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.Nickname)
+                            .FirstOrDefault()!,
                 CourseId = course.Id,
                 Course = course.Course.course,
                 Status = course.Status,
