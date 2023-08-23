@@ -53,6 +53,12 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.ListAllStudyCourseByTeacherToken());
         }
+        
+        [HttpGet("student/{studyCourseId}"), Authorize(Roles = "master, student")]
+        public async Task<ActionResult> GetStudyCourseDetailForStudentMobile(int studyCourseId)
+        {
+            return Ok(await _studyCourseService.StudyCourseDetailForStudent(studyCourseId));
+        }
 
         [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "master, teacher")]
         public async Task<ActionResult> GetStudyCourseDetailForTeacher(int studyCourseId){
