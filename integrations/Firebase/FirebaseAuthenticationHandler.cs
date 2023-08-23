@@ -86,7 +86,7 @@ namespace griffined_api.integrations.Firebase
             }
             else
             {
-                var oa = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Office Admin");
+                var oa = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "oa");
                 if (oa != null)
                 {
                     azure_id = oa.Id.ToString();
@@ -94,7 +94,7 @@ namespace griffined_api.integrations.Firebase
                 }
                 else
                 {
-                    var ea = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Education Admin");
+                    var ea = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "ea");
                     if (ea != null)
                     {
                         azure_id = ea.Id.ToString();
@@ -102,7 +102,7 @@ namespace griffined_api.integrations.Firebase
                     }
                     else
                     {
-                        var ec = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "Education Counsellor");
+                        var ec = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "ec");
                         if (ec != null)
                         {
                             azure_id = ec.Id.ToString();

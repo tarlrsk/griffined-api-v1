@@ -2,6 +2,7 @@ using AutoMapper.Execution;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -511,6 +512,112 @@ namespace griffined_api.Services.StudyCourseService
                         // TODO WorkType
                     });
                 }
+            }
+
+            data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
+
+            var response = new ServiceResponse<StudyCourseDetailMobileResponseDto>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<StudyCourseDetailMobileResponseDto>> StudyCourseDetailForStudent(int studyCourseId)
+        {
+            var studentId = _firebaseService.GetAzureIdWithToken();
+            var dbStudySubjects = await _context.StudySubjectMember
+                                .Where(m => m.StudentId == studentId)
+                                .Include(s => s.StudySubject.Subject)
+                                .Select(m => m.StudySubject)
+                                .ToListAsync();
+
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(c => c.Course)
+                                .Include(c => c.Level)
+                                .FirstOrDefaultAsync(c => c.Id == studyCourseId)
+                                ?? throw new NotFoundException($"Study Course with ID {studyCourseId} is not found.");
+
+            var dbStudyClasses = await _context.StudyClasses
+                                .Include(c => c.Schedule)
+                                .Include(c => c.Attendances)
+                                    .ThenInclude(a => a.Student)
+                                .Include(c => c.Teacher)
+                                .Where(c => dbStudySubjects.Contains(c.StudySubject))
+                                .Select(c => new
+                                {
+                                    StudyClass = c,
+                                    c.StudySubject,
+                                    c.Schedule,
+                                    Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
+                                })
+                                .ToListAsync();
+
+            if (dbStudyClasses.Count == 0)
+                throw new NotFoundException($"Class is not found");
+
+            var studentCount = 0;
+            var student = new List<int>();
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                {
+                    if (!student.Exists(s => s == dbMember.StudentId))
+                    {
+                        studentCount += 1;
+                        student.Add(dbMember.StudentId);
+                    }
+                }
+            }
+
+            var data = new StudyCourseDetailMobileResponseDto()
+            {
+                StudyCourseId = dbStudyCourse.Id,
+                StudyCourseType = dbStudyCourse.StudyCourseType,
+                Section = dbStudyCourse.Section,
+                Course = dbStudyCourse.Course.course,
+                Level = dbStudyCourse.Level?.level,
+                StudentCount = studentCount,
+                TotalHour = dbStudyCourse.TotalHour,
+                StartDate = dbStudyCourse.StartDate.ToDateString(),
+                EndDate = dbStudyCourse.EndDate.ToDateString(),
+                Method = dbStudyCourse.Method,
+                CourseStatus = dbStudyCourse.Status,
+            };
+
+            var schedules = new List<ScheduleResponseDto>();
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                data.StudySubjects.Add(new StudySubjectResponseDto
+                {
+                    StudySubjectId = dbStudySubject.Id,
+                    Subject = dbStudySubject.Subject.subject,
+                });
+            }
+
+            foreach (var dbStudyClass in dbStudyClasses)
+            {
+                schedules.Add(new ScheduleResponseDto
+                {
+                    StudyClassId = dbStudyClass.StudyClass.Id,
+                    ClassNo = dbStudyClass.StudyClass.ClassNumber,
+                    Date = dbStudyClass.StudyClass.Schedule.Date.ToDateString(),
+                    FromTime = dbStudyClass.StudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    ToTime = dbStudyClass.StudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    CourseId = dbStudyCourse.Course.Id,
+                    CourseName = dbStudyCourse.Course.course,
+                    SubjectId = dbStudyClass.StudySubject.Subject.Id,
+                    SubjectName = dbStudyClass.StudySubject.Subject.subject,
+                    CourseSubject = dbStudyCourse.Course.course + " "
+                                        + dbStudyClass.StudySubject.Subject.subject
+                                        + " " + (dbStudyCourse.Level?.level ?? ""),
+                    TeacherId = dbStudyClass.StudyClass.Teacher.Id,
+                    TeacherFirstName = dbStudyClass.StudyClass.Teacher.FirstName,
+                    TeacherLastName = dbStudyClass.StudyClass.Teacher.LastName,
+                    TeacherNickname = dbStudyClass.StudyClass.Teacher.Nickname,
+                    // TODO WorkType
+                });
             }
 
             data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
