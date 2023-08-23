@@ -1093,7 +1093,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     if (dbNewCourseRequest.StudyCourse != null)
                     {
-                        dbNewCourseRequest.StudyCourse.Status = CourseStatus.NotStarted;
+                        dbNewCourseRequest.StudyCourse.Status = StudyCourseStatus.NotStarted;
                         foreach (var dbStudySubject in dbNewCourseRequest.StudyCourse.StudySubjects)
                         {
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
@@ -1221,7 +1221,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     if (dbNewCourseRequest.StudyCourse != null)
                     {
-                        dbNewCourseRequest.StudyCourse.Status = CourseStatus.Cancelled;
+                        dbNewCourseRequest.StudyCourse.Status = StudyCourseStatus.Cancelled;
                         foreach (var dbStudySubject in dbNewCourseRequest.StudyCourse.StudySubjects)
                         {
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)

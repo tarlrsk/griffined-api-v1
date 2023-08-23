@@ -95,6 +95,7 @@ namespace griffined_api.Services.StudentReportService
                                     .Include(m => m.StudySubject)
                                         .ThenInclude(ss => ss.Subject)
                                     .Include(m => m.StudentReports)
+                                        .ThenInclude(sr => sr.Teacher)
                                     .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubject.StudyCourseId == studyCourseId) ?? throw new NotFoundException("No student found.");
 
             var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
@@ -112,6 +113,7 @@ namespace griffined_api.Services.StudentReportService
                 FiftyPercentReport = fiftyPercentReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = fiftyPercentReport.Teacher.Id,
                     Progression = Progression.FiftyPercent,
                     File = new FilesResponseDto
                     {
@@ -124,6 +126,7 @@ namespace griffined_api.Services.StudentReportService
                 HundredPercentReport = hundredPercentReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = hundredPercentReport.Teacher.Id,
                     Progression = Progression.HundredPercent,
                     File = new FilesResponseDto
                     {
@@ -136,6 +139,7 @@ namespace griffined_api.Services.StudentReportService
                 SpecialReport = specialReport != null
                 ? new ReportFileResponseDto
                 {
+                    UploadedBy = specialReport.Teacher.Id,
                     Progression = Progression.Special,
                     File = new FilesResponseDto
                     {

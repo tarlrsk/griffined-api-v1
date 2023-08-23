@@ -34,9 +34,9 @@ namespace griffined_api.Controllers
         public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
             return Ok(await _studyCourseService.AddNewStudyClass(newStudyClasses, requestId));
-        } 
+        }
 
-        [HttpPut("new/{requestId}"), Authorize(Roles= "ea, master")]
+        [HttpPut("new/{requestId}"), Authorize(Roles = "ea, master")]
         public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
         {
             return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
@@ -61,8 +61,15 @@ namespace griffined_api.Controllers
         }
 
         [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "master, teacher")]
-        public async Task<ActionResult> GetStudyCourseDetailForTeacher(int studyCourseId){
+        public async Task<ActionResult> GetStudyCourseDetailForTeacher(int studyCourseId)
+        {
             return Ok(await _studyCourseService.StudyCourseDetailForTeacher(studyCourseId));
+        }
+
+        [HttpGet("{studentCode}")]
+        public async Task<ActionResult> ListAllStudyCoursesByStudentId(string studentCode)
+        {
+            return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentCode));
         }
     }
 }

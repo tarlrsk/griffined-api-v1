@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Enums
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum CourseStatus
+    public enum StudyCourseStatus
     {
         Ongoing,
         Finished,

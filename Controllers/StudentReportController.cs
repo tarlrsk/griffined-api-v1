@@ -1,9 +1,9 @@
+using griffined_api.Services.StudentReportService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Rpc;
-using griffined_api.Services.StudentReportService;
 
 namespace griffined_api.Controllers
 {
