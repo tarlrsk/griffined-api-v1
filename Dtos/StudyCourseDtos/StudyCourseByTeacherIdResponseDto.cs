@@ -21,6 +21,6 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string StartDate { get; set; } = string.Empty;
         public string EndDate { get; set; } = string.Empty;
         public Method Method { get; set; }
-        public List<StudySubjectMemberWithReportsResponseDto> StudySubjects { get; set; } = new();
+        public List<StudySubjectWithMembersResponseDto> StudySubjects { get; set; } = new();
     }
 }

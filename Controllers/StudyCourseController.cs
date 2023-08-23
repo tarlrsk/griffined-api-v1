@@ -66,13 +66,13 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.StudyCourseDetailForTeacher(studyCourseId));
         }
 
-        [HttpGet("{studentCode}"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet("all-courses/student/{studentCode}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> ListAllStudyCoursesByStudentId(string studentCode)
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentCode));
         }
 
-        [HttpGet("{teacherId}"), Authorize(Roles = "ea, oa, master")]
+        [HttpGet("all-courses/teacher/{teacherId}"), Authorize(Roles = "ea, oa, master")]
         public async Task<ActionResult> ListAllStudyCoursesByTeacherId(int teacherId)
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByTeacherId(teacherId));
