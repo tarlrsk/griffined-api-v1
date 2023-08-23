@@ -548,13 +548,13 @@ namespace griffined_api.Services.StudyCourseService
                                 .Select(c => new
                                 {
                                     StudyClass = c,
-                                    c.StudySubject,
-                                    c.Schedule,
+                                    StudySubject = c.StudySubject,
+                                    Schedule = c.Schedule,
                                     Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
                                 })
                                 .ToListAsync();
-
-            if (dbStudyClasses.Count == 0)
+            
+            if (dbStudyClasses.Count() == 0)
                 throw new NotFoundException($"Class is not found");
 
             var studentCount = 0;
