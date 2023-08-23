@@ -553,7 +553,7 @@ namespace griffined_api.Services.StudyCourseService
                                     Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
                                 })
                                 .ToListAsync();
-            
+
             if (dbStudyClasses.Count() == 0)
                 throw new NotFoundException($"Class is not found");
 
@@ -766,6 +766,11 @@ namespace griffined_api.Services.StudyCourseService
             }
 
             return response;
+        }
+
+        public Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
