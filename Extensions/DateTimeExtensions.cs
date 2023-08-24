@@ -26,9 +26,7 @@ namespace griffined_api.Extensions.DateTimeExtensions
         // Extension method to covert String to DateTime. This method throws an argument exception when the date format or date string is invalid.
         public static DateTime ToDateTime(this string dateString)
         {
-            DateTime result;
-
-            if (DateTime.TryParse(dateString, out result))
+            if (DateTime.TryParse(dateString, out DateTime result))
             {
                 return result;
             }
@@ -41,9 +39,7 @@ namespace griffined_api.Extensions.DateTimeExtensions
         // Extension method to convert String to TimeSpan. This method throws an argument exception when the time format or time string is invalid.
         public static TimeSpan ToTimeSpan(this string timeString)
         {
-            TimeSpan result;
-
-            if (TimeSpan.TryParse(timeString, out result))
+            if (TimeSpan.TryParse(timeString, out TimeSpan result))
             {
                 return result;
             }

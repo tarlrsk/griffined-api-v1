@@ -1,4 +1,5 @@
 using AutoMapper.Execution;
+using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -43,7 +44,7 @@ namespace griffined_api.Services.StudyCourseService
                 EndDate = DateTime.Parse(newRequestedSchedule.EndDate),
                 StudyCourseType = StudyCourseType.Group,
                 Method = newRequestedSchedule.Method,
-                Status = CourseStatus.NotStarted
+                Status = StudyCourseStatus.NotStarted
             };
 
             var teachers = await _context.Teachers.ToListAsync();
@@ -205,7 +206,7 @@ namespace griffined_api.Services.StudyCourseService
                     EndDate = dbNewRequestedCourse.EndDate,
                     StudyCourseType = dbNewRequestedCourse.StudyCourseType,
                     Method = dbNewRequestedCourse.Method,
-                    Status = CourseStatus.Pending,
+                    Status = StudyCourseStatus.Pending,
                     NewCourseRequest = dbNewRequestedCourse,
                 };
                 foreach (var dbNewRequestedSubject in dbNewRequestedCourse.NewCourseSubjectRequests)
@@ -548,8 +549,8 @@ namespace griffined_api.Services.StudyCourseService
                                 .Select(c => new
                                 {
                                     StudyClass = c,
-                                    StudySubject = c.StudySubject,
-                                    Schedule = c.Schedule,
+                                    c.StudySubject,
+                                    c.Schedule,
                                     Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
                                 })
                                 .ToListAsync();
@@ -644,6 +645,260 @@ namespace griffined_api.Services.StudyCourseService
                 StatusCode = (int)HttpStatusCode.OK,
             };
 
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(string studentCode)
+        {
+            var response = new ServiceResponse<List<StudyCourseByStudentIdResponseDto>>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = new List<StudyCourseByStudentIdResponseDto>()
+            };
+
+            var dbStudyCourses = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.Student)
+                                .Include(sm => sm.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.StudentReports)
+                                            .ThenInclude(sr => sr.Teacher)
+                                .Where(sc => sc.StudySubjects.Any(ss => ss.StudySubjectMember.Any(sm => sm.Student.StudentCode == studentCode)))
+                                .ToListAsync() ?? throw new NotFoundException($"No courses containing student with code {studentCode} found.");
+
+            foreach (var dbStudyCourse in dbStudyCourses)
+            {
+                var studyCourseDto = new StudyCourseByStudentIdResponseDto
+                {
+                    StudentId = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.Id)
+                            .FirstOrDefault()!,
+                    StudentCode = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.StudentCode)
+                            .FirstOrDefault()!,
+                    StudentFirstName = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.FirstName)
+                            .FirstOrDefault()!,
+                    StudentLastName = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.LastName)
+                            .FirstOrDefault()!,
+                    StudentNickname = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sm => sm.Student.StudentCode == studentCode)
+                            .Select(sm => sm.Student.Nickname)
+                            .FirstOrDefault()!,
+                    StudyCourseId = dbStudyCourse.Id,
+                    Course = dbStudyCourse.Course.course,
+                    Status = dbStudyCourse.Status,
+                    Reports = new List<StudySubjectReportResponseDto>()
+                };
+
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    var studentReport = dbStudySubject.StudySubjectMember
+                                .FirstOrDefault(sm => sm.Student.StudentCode == studentCode)?
+                                .StudentReports?
+                                .FirstOrDefault();
+
+                    var reportDto = new StudySubjectReportResponseDto
+                    {
+                        StudySubject = new StudySubjectResponseDto
+                        {
+                            StudySubjectId = dbStudySubject.Id,
+                            Subject = dbStudySubject.Subject.subject
+                        },
+                        FiftyPercentReport = studentReport?.Progression == Progression.FiftyPercent
+                            ? new ReportFileResponseDto
+                            {
+                                UploadedBy = studentReport.Teacher.Id,
+                                Progression = studentReport.Progression,
+                                File = new FilesResponseDto
+                                {
+                                    FileName = studentReport.FileName,
+                                    ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
+                                    URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
+                                }
+                            }
+                            : null,
+                        HundredPercentReport = studentReport?.Progression == Progression.HundredPercent
+                            ? new ReportFileResponseDto
+                            {
+                                UploadedBy = studentReport.Teacher.Id,
+                                Progression = studentReport.Progression,
+                                File = new FilesResponseDto
+                                {
+                                    FileName = studentReport.FileName,
+                                    ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
+                                    URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
+                                }
+                            }
+                            : null,
+                        SpecialReport = studentReport?.Progression == Progression.Special
+                            ? new ReportFileResponseDto
+                            {
+                                UploadedBy = studentReport.Teacher.Id,
+                                Progression = studentReport.Progression,
+                                File = new FilesResponseDto
+                                {
+                                    FileName = studentReport.FileName,
+                                    ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
+                                    URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
+                                }
+                            }
+                            : null
+                    };
+
+                    studyCourseDto.Reports.Add(reportDto);
+                }
+
+                response.Data.Add(studyCourseDto);
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId)
+        {
+            var response = new ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = new List<StudyCourseByTeacherIdResponseDto>()
+            };
+
+            var dbStudyCourses = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.Teacher)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.Student)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.StudentReports)
+                                .Where(sc => sc.StudySubjects.Any(ss => ss.StudyClasses.Any(sm => sm.Teacher.Id == teacherId)))
+                                .ToListAsync() ?? throw new NotFoundException("No courses containing teacher with ID {teacherId} found.");
+
+
+            foreach (var dbStudyCourse in dbStudyCourses)
+            {
+                var studentCount = 0;
+                var student = new List<int>();
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                    {
+                        if (!student.Exists(s => s == dbMember.StudentId))
+                        {
+                            studentCount += 1;
+                            student.Add(dbMember.StudentId);
+                        }
+                    }
+                }
+
+                var studyCourseDto = new StudyCourseByTeacherIdResponseDto
+                {
+                    TeacherId = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.Id,
+                    TeacherFirstName = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.FirstName,
+                    TeacherLastName = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.LastName,
+                    TeacherNickname = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.Nickname,
+
+                    StudyCourseId = dbStudyCourse.Id,
+                    Course = dbStudyCourse.Course.course,
+                    Level = dbStudyCourse.Level!.level,
+                    Section = dbStudyCourse.Section,
+                    StudentCount = studentCount,
+                    TotalHour = dbStudyCourse.TotalHour,
+                    StartDate = dbStudyCourse.StartDate.ToDateString(),
+                    EndDate = dbStudyCourse.EndDate.ToDateString(),
+                    Method = dbStudyCourse.Method
+                };
+
+                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+                {
+                    var studySubjectDto = new StudySubjectWithMembersResponseDto
+                    {
+                        StudySubjectId = dbStudySubject.Id,
+                        Subject = dbStudySubject.Subject.subject
+                    };
+
+                    foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
+                    {
+                        var studentReport = dbStudySubject.StudySubjectMember
+                                            .FirstOrDefault(sm => sm.Student.StudentCode == dbStudySubjectMember.Student.StudentCode)?
+                                            .StudentReports?
+                                            .FirstOrDefault();
+
+                        var reportDto = new StudySubjectMemberWithReportsResponseDto
+                        {
+                            StudentId = dbStudySubjectMember.Student.Id,
+                            StudentCode = dbStudySubjectMember.Student.StudentCode,
+                            StudentFirstName = dbStudySubjectMember.Student.FirstName,
+                            StudentLastName = dbStudySubjectMember.Student.LastName,
+                            StudentNickname = dbStudySubjectMember.Student.Nickname,
+                            FiftyPercentReport = studentReport?.Progression == Progression.FiftyPercent
+                                ? new ReportFileResponseDto
+                                {
+                                    UploadedBy = studentReport.Teacher.Id,
+                                    Progression = studentReport.Progression,
+                                    File = new FilesResponseDto
+                                    {
+                                        FileName = studentReport.FileName,
+                                        ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
+                                        URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
+                                    }
+                                }
+                                : null,
+                            HundredPercentReport = studentReport?.Progression == Progression.HundredPercent
+                                ? new ReportFileResponseDto
+                                {
+                                    UploadedBy = studentReport.Teacher.Id,
+                                    Progression = studentReport.Progression,
+                                    File = new FilesResponseDto
+                                    {
+                                        FileName = studentReport.FileName,
+                                        ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
+                                        URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
+                                    }
+                                }
+                                : null,
+                            SpecialReport = studentReport?.Progression == Progression.Special
+                                ? new ReportFileResponseDto
+                                {
+                                    UploadedBy = studentReport.Teacher.Id,
+                                    Progression = studentReport.Progression,
+                                    File = new FilesResponseDto
+                                    {
+                                        FileName = studentReport.FileName,
+                                        ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
+                                        URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
+                                    }
+                                }
+                                : null
+                        };
+
+                        studySubjectDto.Members.Add(reportDto);
+                    }
+
+                    studyCourseDto.StudySubjects.Add(studySubjectDto);
+                }
+
+                response.Data.Add(studyCourseDto);
+            }
             return response;
         }
     }
