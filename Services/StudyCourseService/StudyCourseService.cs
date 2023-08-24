@@ -901,5 +901,64 @@ namespace griffined_api.Services.StudyCourseService
             }
             return response;
         }
+
+        public async Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId)
+        {
+            var response = new ServiceResponse<StaffCoursesDetailResponseDto>();
+
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.Level)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.Schedule)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.Teacher)
+                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("Course not found.");
+
+            var data = new StaffCoursesDetailResponseDto
+            {
+                StudyCourseId = dbStudyCourse.Id,
+                Course = dbStudyCourse.Course.course,
+                Subjects = dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
+                {
+                    StudySubjectId = dbStudySubject.Id,
+                    Subject = dbStudySubject.Subject.subject
+                }).ToList(),
+                Level = new Dtos.LevelDtos.LevelResponseDto
+                {
+                    LevelId = dbStudyCourse.Level!.Id,
+                    Level = dbStudyCourse.Level.level
+                },
+                Section = dbStudyCourse.Section,
+                Method = dbStudyCourse.Method,
+                StartDate = dbStudyCourse.StartDate.ToDateString(),
+                EndDate = dbStudyCourse.EndDate.ToDateString(),
+                TotalHour = dbStudyCourse.TotalHour,
+                Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
+                {
+                    StudyCourseId = dbStudyCourse.Id,
+                    CourseId = dbStudyCourse.Course.Id,
+                    Course = dbStudyCourse.Course.course,
+                    SubjectId = dbStudySubject.Id,
+                    Subject = dbStudySubject.Subject.subject,
+                    CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                    StudyClassId = dbStudyClass.Id,
+                    ClassNo = dbStudyClass.ClassNumber,
+                    Date = dbStudyClass.Schedule.Date.ToDateString(),
+                    FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    TeacherNickname = dbStudyClass.Teacher.Nickname
+                    // TODO TeacherWorkType
+                })).ToList()
+            };
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
     }
 }
