@@ -15,6 +15,7 @@ namespace griffined_api.Dtos.AttendanceDtos
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
         public string ToTime { get; set; } = string.Empty;
+        public ClassStatus ClassStatus { get; set; }
 
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;

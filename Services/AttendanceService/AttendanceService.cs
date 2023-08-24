@@ -48,6 +48,7 @@ namespace griffined_api.Services.AttendanceService
                 Date = dbClass.Schedule.Date.ToDateString(),
                 FromTime = dbClass.Schedule.FromTime.ToTimeSpanString(),
                 ToTime = dbClass.Schedule.ToTime.ToTimeSpanString(),
+                ClassStatus = dbClass.Status,
 
                 CourseId = dbClass.StudySubject.StudyCourse.Id,
                 Course = dbClass.StudySubject.StudyCourse.Course.course,
