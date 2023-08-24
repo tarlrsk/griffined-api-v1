@@ -940,10 +940,12 @@ namespace griffined_api.Services.StudyCourseService
                 TotalHour = dbStudyCourse.TotalHour,
                 Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
                 {
+                    StudyCourseId = dbStudyCourse.Id,
                     CourseId = dbStudyCourse.Course.Id,
                     Course = dbStudyCourse.Course.course,
                     SubjectId = dbStudySubject.Id,
                     Subject = dbStudySubject.Subject.subject,
+                    CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                     StudyClassId = dbStudyClass.Id,
                     ClassNo = dbStudyClass.ClassNumber,
                     Date = dbStudyClass.Schedule.Date.ToDateString(),
