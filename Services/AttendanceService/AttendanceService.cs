@@ -44,6 +44,8 @@ namespace griffined_api.Services.AttendanceService
 
                 CourseId = dbClass.StudySubject.StudyCourse.Id,
                 Course = dbClass.StudySubject.StudyCourse.Course.course,
+                CourseStatus = dbClass.StudySubject.StudyCourse.Status,
+                StudyCourseType = dbClass.StudySubject.StudyCourse.StudyCourseType,
 
                 CurrentSubject = new SubjectResponseDto
                 {

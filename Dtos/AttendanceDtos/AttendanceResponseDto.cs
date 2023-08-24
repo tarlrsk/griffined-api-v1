@@ -18,6 +18,7 @@ namespace griffined_api.Dtos.AttendanceDtos
 
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
+        public StudyCourseStatus CourseStatus { get; set; }
         public StudyCourseType StudyCourseType { get; set; }
 
         public SubjectResponseDto CurrentSubject { get; set; } = new SubjectResponseDto();
