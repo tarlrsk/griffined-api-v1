@@ -960,5 +960,10 @@ namespace griffined_api.Services.StudyCourseService
             response.Data = data;
             return response;
         }
+
+        public Task<ServiceResponse<StudySubjectMemberResponseDto>> GetStudyCourseMember(int studyCourseId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,8 +1,8 @@
+using griffined_api.Dtos.StudyCourseDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using griffined_api.Dtos.StudyCourseDtos;
 
 namespace griffined_api.Services.StudyCourseService
 {
@@ -20,5 +20,6 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(string studentCode);
         Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId);
         Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId);
+        Task<ServiceResponse<StudySubjectMemberResponseDto>> GetStudyCourseMember(int studyCourseId);
     }
 }
