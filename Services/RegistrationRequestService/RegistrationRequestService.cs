@@ -1798,9 +1798,9 @@ namespace griffined_api.Services.RegistrationRequestService
                                             + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
                                             + " " + (dbRequestedCourse.Level?.level ?? ""),
                             CourseId = dbRequestedCourse.Course.Id,
-                            CourseName = dbRequestedCourse.Course.course,
+                            Course = dbRequestedCourse.Course.course,
                             SubjectId = dbStudySubject.Subject.Id,
-                            SubjectName = dbStudySubject.Subject.subject,
+                            Subject = dbStudySubject.Subject.subject,
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
@@ -1837,9 +1837,9 @@ namespace griffined_api.Services.RegistrationRequestService
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
                             CourseId = dbStudentAddingRequest.StudyCourse.Course.Id,
-                            CourseName = dbStudentAddingRequest.StudyCourse.Course.course,
+                            Course = dbStudentAddingRequest.StudyCourse.Course.course,
                             SubjectId = dbStudySubject.Subject.Id,
-                            SubjectName = dbStudySubject.Subject.subject,
+                            Subject = dbStudySubject.Subject.subject,
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
