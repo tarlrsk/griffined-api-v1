@@ -19,5 +19,6 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<string>> UpdateStudyClassRoom(int studyClassId, string room);
         Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(string studentCode);
         Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId);
+        Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId);
     }
 }
