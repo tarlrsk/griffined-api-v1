@@ -1,4 +1,4 @@
-using griffined_api.Dtos.SubjectDtos;
+using griffined_api.Dtos.StudyCourseDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +15,15 @@ namespace griffined_api.Dtos.AttendanceDtos
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
         public string ToTime { get; set; } = string.Empty;
+        public ClassStatus ClassStatus { get; set; }
 
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
         public StudyCourseStatus CourseStatus { get; set; }
         public StudyCourseType StudyCourseType { get; set; }
 
-        public SubjectResponseDto CurrentSubject { get; set; } = new SubjectResponseDto();
-        public List<SubjectResponseDto> AllSubjects { get; set; } = new List<SubjectResponseDto>();
+        public string Subject { get; set; } = string.Empty;
+        public List<StudySubjectResponseDto> AllSubjects { get; set; } = new List<StudySubjectResponseDto>();
 
         public int TeacherId { get; set; }
         public string TeacherFirstName { get; set; } = string.Empty;
