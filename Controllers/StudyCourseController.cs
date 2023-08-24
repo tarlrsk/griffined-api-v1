@@ -77,5 +77,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByTeacherId(teacherId));
         }
+
+        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ep, ea, oa, master")]
+        public async Task<ActionResult> GetCourseDetail(int studyCourseId)
+        {
+            return Ok(await _studyCourseService.GetCourseDetail(studyCourseId));
+        }
     }
 }

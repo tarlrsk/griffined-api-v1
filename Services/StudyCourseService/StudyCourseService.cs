@@ -899,5 +899,26 @@ namespace griffined_api.Services.StudyCourseService
             }
             return response;
         }
+
+        public async Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId)
+        {
+            var response = new ServiceResponse<StaffCoursesDetailResponseDto>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = new StaffCoursesDetailResponseDto()
+            };
+
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.Level)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.Teacher)
+                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId);
+
+            return response;
+        }
     }
 }
