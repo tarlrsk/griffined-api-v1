@@ -961,9 +961,62 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public Task<ServiceResponse<StudySubjectMemberResponseDto>> GetStudyCourseMember(int studyCourseId)
+        public async Task<ServiceResponse<StudySubjectMemberResponseDto>> GetStudyCourseMember(int studyCourseId)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<StudySubjectMemberResponseDto>();
+
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.Student)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.Teacher)
+                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("No course found.");
+
+            var data = new StudySubjectMemberResponseDto
+            {
+                Students = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudySubjectMember)
+                            .Where(sc => sc.Student != null)
+                            .Select(sm => new StudentStudySubjectMemberResponseDto
+                            {
+                                StudentId = sm.Student.Id,
+                                StudentFirstName = sm.Student.FirstName,
+                                StudentLastName = sm.Student.LastName,
+                                StudentNickname = sm.Student.Nickname,
+                                Phone = sm.Student.Phone,
+                                // TODO JoinedDate
+                                Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
+                                {
+                                    StudySubjectId = subject.Id,
+                                    Subject = subject.Subject.subject
+                                }).ToList()
+                            }).ToList(),
+                Teachers = dbStudyCourse.StudySubjects
+                            .SelectMany(ss => ss.StudyClasses)
+                            .Where(sc => sc.Teacher != null)
+                            .Select(sc => new TeacherStudySubjectMemberResponseDto
+                            {
+                                TeacherId = sc.Teacher.Id,
+                                TeacherFirstName = sc.Teacher.FirstName,
+                                TeacherLastName = sc.Teacher.LastName,
+                                TeacherNickname = sc.Teacher.Nickname,
+                                Phone = sc.Teacher.Phone,
+                                // TODO JoinedDate
+                                Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
+                                {
+                                    StudySubjectId = subject.Id,
+                                    Subject = subject.Subject.subject
+                                }).ToList()
+                            }).ToList()
+            };
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
         }
     }
 }
