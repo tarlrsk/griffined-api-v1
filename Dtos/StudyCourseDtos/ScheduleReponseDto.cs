@@ -8,9 +8,9 @@ namespace griffined_api.Dtos.StudyCourseDtos
     public class ScheduleResponseDto
     {
         public int CourseId { get; set; }
-        public string CourseName { get; set; } = string.Empty;
+        public string Course { get; set; } = string.Empty;
         public int SubjectId { get; set; }
-        public string SubjectName { get; set; } = string.Empty;
+        public string Subject { get; set; } = string.Empty;
         public string CourseSubject { get; set; } = string.Empty;
         public int StudyClassId { get; set; }
         public int ClassNo { get; set; }
