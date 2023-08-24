@@ -14,9 +14,9 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string FromTime { get; set; } = string.Empty;
         public string ToTime { get; set; } = string.Empty;
         public int CourseId { get; set; }
-        public string CourseName { get; set; } = string.Empty;
+        public string Course { get; set; } = string.Empty;
         public int SubjectId { get; set; }
-        public string SubjectName { get; set; } = string.Empty;
+        public string Subject { get; set; } = string.Empty;
         public string CourseSubject { get; set; } = string.Empty;
         public ClassStatus ClassStatus { get; set; }
         public int TeacherId { get; set; }

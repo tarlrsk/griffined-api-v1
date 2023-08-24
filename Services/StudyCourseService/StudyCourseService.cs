@@ -157,9 +157,9 @@ namespace griffined_api.Services.StudyCourseService
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                             CourseId = dbStudyCourse.Course.Id,
-                            CourseName = dbStudyCourse.Course.course,
+                            Course = dbStudyCourse.Course.course,
                             SubjectId = dbStudySubject.Subject.Id,
-                            SubjectName = dbStudySubject.Subject.subject,
+                            Subject = dbStudySubject.Subject.subject,
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
@@ -498,9 +498,9 @@ namespace griffined_api.Services.StudyCourseService
                         FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                         ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                         CourseId = dbStudyCourse.Course.Id,
-                        CourseName = dbStudyCourse.Course.course,
+                        Course = dbStudyCourse.Course.course,
                         SubjectId = dbStudySubject.Subject.Id,
-                        SubjectName = dbStudySubject.Subject.subject,
+                        Subject = dbStudySubject.Subject.subject,
                         CourseSubject = dbStudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudyCourse.Level?.level ?? ""),
@@ -606,9 +606,9 @@ namespace griffined_api.Services.StudyCourseService
                     FromTime = dbStudyClass.StudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbStudyClass.StudyClass.Schedule.ToTime.ToTimeSpanString(),
                     CourseId = dbStudyCourse.Course.Id,
-                    CourseName = dbStudyCourse.Course.course,
+                    Course = dbStudyCourse.Course.course,
                     SubjectId = dbStudyClass.StudySubject.Subject.Id,
-                    SubjectName = dbStudyClass.StudySubject.Subject.subject,
+                    Subject = dbStudyClass.StudySubject.Subject.subject,
                     CourseSubject = dbStudyCourse.Course.course + " "
                                         + dbStudyClass.StudySubject.Subject.subject
                                         + " " + (dbStudyCourse.Level?.level ?? ""),
