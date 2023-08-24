@@ -1,5 +1,7 @@
+using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Dtos.SubjectDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +34,11 @@ namespace griffined_api.Services.AttendanceService
                                     .ThenInclude(a => a.Student)
                                 .FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"No class with ID {studyClassId} found.");
 
+            var dbCourse = await _context.StudyCourses
+                                .Include(c => c.StudySubjects)
+                                    .ThenInclude(ss => ss.Subject)
+                                .FirstOrDefaultAsync(c => c.Id == dbClass.StudySubject.StudyCourse.Id) ?? throw new NotFoundException($"No course found.");
+
             var data = new AttendanceResponseDto
             {
                 StudyClassId = dbClass.Id,
@@ -41,22 +48,14 @@ namespace griffined_api.Services.AttendanceService
                 Date = dbClass.Schedule.Date.ToDateString(),
                 FromTime = dbClass.Schedule.FromTime.ToTimeSpanString(),
                 ToTime = dbClass.Schedule.ToTime.ToTimeSpanString(),
+                ClassStatus = dbClass.Status,
 
                 CourseId = dbClass.StudySubject.StudyCourse.Id,
                 Course = dbClass.StudySubject.StudyCourse.Course.course,
                 CourseStatus = dbClass.StudySubject.StudyCourse.Status,
                 StudyCourseType = dbClass.StudySubject.StudyCourse.StudyCourseType,
 
-                CurrentSubject = new SubjectResponseDto
-                {
-                    SubjectId = dbClass.StudySubject.Id,
-                    Subject = dbClass.StudySubject.Subject.subject
-                },
-                AllSubjects = dbClass.StudySubject.StudyCourse.StudySubjects.Select(subject => new SubjectResponseDto
-                {
-                    SubjectId = subject.Subject.Id,
-                    Subject = subject.Subject.subject
-                }).ToList(),
+                Subject = dbClass.StudySubject.Subject.subject,
 
                 TeacherId = dbClass.Teacher.Id,
                 TeacherFirstName = dbClass.Teacher.FirstName,
@@ -72,6 +71,17 @@ namespace griffined_api.Services.AttendanceService
                     Attendance = student.Attendance
                 }).ToList()
             };
+
+            foreach (var dbStudySubject in dbCourse.StudySubjects)
+            {
+                var allSubjectsDto = new StudySubjectResponseDto
+                {
+                    StudySubjectId = dbStudySubject.Subject.Id,
+                    Subject = dbStudySubject.Subject.subject
+                };
+
+                data.AllSubjects.Add(allSubjectsDto);
+            }
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
