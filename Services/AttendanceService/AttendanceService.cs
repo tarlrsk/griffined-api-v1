@@ -109,7 +109,7 @@ namespace griffined_api.Services.AttendanceService
 
             if (allAttendancesSet)
             {
-                dbClass.Status = ClassStatus.Check;
+                dbClass.Status = ClassStatus.Checked;
             }
 
             await _context.SaveChangesAsync();
