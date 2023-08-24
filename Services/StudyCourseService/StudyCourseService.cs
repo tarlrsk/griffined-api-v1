@@ -496,6 +496,7 @@ namespace griffined_api.Services.StudyCourseService
                         Date = dbStudyClass.Schedule.Date.ToDateString(),
                         FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                         ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                        StudyCourseId = dbStudyCourse.Id,
                         CourseId = dbStudyCourse.Course.Id,
                         CourseName = dbStudyCourse.Course.course,
                         SubjectId = dbStudySubject.Subject.Id,
@@ -552,7 +553,7 @@ namespace griffined_api.Services.StudyCourseService
                                     Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
                                 })
                                 .ToListAsync();
-            
+
             if (dbStudyClasses.Count() == 0)
                 throw new NotFoundException($"Class is not found");
 
@@ -604,6 +605,7 @@ namespace griffined_api.Services.StudyCourseService
                     Date = dbStudyClass.StudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbStudyClass.StudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbStudyClass.StudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    StudyCourseId = dbStudyCourse.Id,
                     CourseId = dbStudyCourse.Course.Id,
                     CourseName = dbStudyCourse.Course.course,
                     SubjectId = dbStudyClass.StudySubject.Subject.Id,

@@ -13,6 +13,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
         public string ToTime { get; set; } = string.Empty;
+        public int StudyCourseId { get; set; }
         public int CourseId { get; set; }
         public string CourseName { get; set; } = string.Empty;
         public int SubjectId { get; set; }
