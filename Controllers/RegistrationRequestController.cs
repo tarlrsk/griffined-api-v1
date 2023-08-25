@@ -68,7 +68,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, master")]
+        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, oa, master")]
         public async Task<ActionResult> GetPendingECDetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingECDetail(requestId);
