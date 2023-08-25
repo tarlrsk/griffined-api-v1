@@ -1099,6 +1099,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                                dbStudySubjectMember.CourseJoinedDate = DateTime.Now;
                             }
 
                             foreach (var dbStudyClass in dbStudySubject.StudyClasses)
@@ -1442,9 +1443,10 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDetail.Schedules = StudentAddingRequestMapScheduleDto(dbRequest.StudentAddingRequest);
             }
 
-            foreach(var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
+            foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
             {
-                requestDetail.PreferredDays.Add(new PreferredDayResponseDto{
+                requestDetail.PreferredDays.Add(new PreferredDayResponseDto
+                {
                     Day = dbPreferredDay.Day,
                     FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
                     ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),

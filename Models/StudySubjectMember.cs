@@ -13,6 +13,7 @@ namespace griffined_api.Models
         public int StudentId { get; set; }
         public int? StudySubjectId { get; set; }
         public StudySubjectMemberStatus Status { get; set; }
+        public DateTime CourseJoinedDate { get; set; }
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student Student { get; set; } = new Student();
