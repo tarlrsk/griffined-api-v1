@@ -555,7 +555,7 @@ namespace griffined_api.Services.StudyCourseService
                                 })
                                 .ToListAsync();
 
-            if (dbStudyClasses.Count() == 0)
+            if (dbStudyClasses.Count == 0)
                 throw new NotFoundException($"Class is not found");
 
             var studentCount = 0;
