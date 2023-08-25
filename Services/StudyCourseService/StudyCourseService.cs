@@ -988,7 +988,7 @@ namespace griffined_api.Services.StudyCourseService
                                 StudentLastName = sm.Student.LastName,
                                 StudentNickname = sm.Student.Nickname,
                                 Phone = sm.Student.Phone,
-                                // TODO JoinedDate
+                                CourseJoinedDate = sm.CourseJoinedDate.ToDateTimeString(),
                                 Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = subject.Id,
