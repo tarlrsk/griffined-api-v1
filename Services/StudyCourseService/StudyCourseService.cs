@@ -435,7 +435,7 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
-        public async Task<ServiceResponse<StudyCourseDetailMobileResponseDto>> StudyCourseDetailForTeacher(int studyCourseId)
+        public async Task<ServiceResponse<StudyCourseMobileTeacherDetailResponseDto>> StudyCourseDetailForTeacher(int studyCourseId)
         {
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(c => c.Course)
@@ -465,7 +465,7 @@ namespace griffined_api.Services.StudyCourseService
                 }
             }
 
-            var data = new StudyCourseDetailMobileResponseDto()
+            var data = new StudyCourseMobileTeacherDetailResponseDto()
             {
                 StudyCourseId = dbStudyCourse.Id,
                 StudyCourseType = dbStudyCourse.StudyCourseType,
@@ -517,7 +517,7 @@ namespace griffined_api.Services.StudyCourseService
 
             data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
 
-            var response = new ServiceResponse<StudyCourseDetailMobileResponseDto>
+            var response = new ServiceResponse<StudyCourseMobileTeacherDetailResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
@@ -525,13 +525,15 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<StudyCourseDetailMobileResponseDto>> StudyCourseDetailForStudent(int studyCourseId)
+        public async Task<ServiceResponse<StudyCourseMobileStudentDetailResponseDto>> StudyCourseDetailForStudent(int studyCourseId)
         {
             var studentId = _firebaseService.GetAzureIdWithToken();
             var dbStudySubjects = await _context.StudySubjectMember
                                 .Where(m => m.StudentId == studentId)
                                 .Include(s => s.StudySubject.Subject)
+                                .Where(s => s.StudySubject.StudyCourseId == studyCourseId)
                                 .Select(m => m.StudySubject)
+                                .Distinct()
                                 .ToListAsync();
 
             var dbStudyCourse = await _context.StudyCourses
@@ -558,28 +560,13 @@ namespace griffined_api.Services.StudyCourseService
             if (dbStudyClasses.Count() == 0)
                 throw new NotFoundException($"Class is not found");
 
-            var studentCount = 0;
-            var student = new List<int>();
-            foreach (var dbStudySubject in dbStudySubjects)
-            {
-                foreach (var dbMember in dbStudySubject.StudySubjectMember)
-                {
-                    if (!student.Exists(s => s == dbMember.StudentId))
-                    {
-                        studentCount += 1;
-                        student.Add(dbMember.StudentId);
-                    }
-                }
-            }
-
-            var data = new StudyCourseDetailMobileResponseDto()
+            var data = new StudyCourseMobileStudentDetailResponseDto()
             {
                 StudyCourseId = dbStudyCourse.Id,
                 StudyCourseType = dbStudyCourse.StudyCourseType,
                 Section = dbStudyCourse.Section,
                 Course = dbStudyCourse.Course.course,
                 Level = dbStudyCourse.Level?.level,
-                StudentCount = studentCount,
                 TotalHour = dbStudyCourse.TotalHour,
                 StartDate = dbStudyCourse.StartDate.ToDateString(),
                 EndDate = dbStudyCourse.EndDate.ToDateString(),
@@ -587,7 +574,7 @@ namespace griffined_api.Services.StudyCourseService
                 CourseStatus = dbStudyCourse.Status,
             };
 
-            var schedules = new List<ScheduleResponseDto>();
+            var schedules = new List<ScheduleStudentMobileResponseDto>();
             foreach (var dbStudySubject in dbStudySubjects)
             {
                 data.StudySubjects.Add(new StudySubjectResponseDto
@@ -599,7 +586,9 @@ namespace griffined_api.Services.StudyCourseService
 
             foreach (var dbStudyClass in dbStudyClasses)
             {
-                schedules.Add(new ScheduleResponseDto
+                if(dbStudyClass.Attendance == null)
+                    throw new InternalServerException("Something went wrong with Student Attendance");
+                schedules.Add(new ScheduleStudentMobileResponseDto
                 {
                     StudyClassId = dbStudyClass.StudyClass.Id,
                     ClassNo = dbStudyClass.StudyClass.ClassNumber,
@@ -618,13 +607,14 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherFirstName = dbStudyClass.StudyClass.Teacher.FirstName,
                     TeacherLastName = dbStudyClass.StudyClass.Teacher.LastName,
                     TeacherNickname = dbStudyClass.StudyClass.Teacher.Nickname,
+                    Attendance = dbStudyClass.Attendance.Attendance,
                     // TODO WorkType
                 });
             }
 
             data.Schedules = schedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
 
-            var response = new ServiceResponse<StudyCourseDetailMobileResponseDto>
+            var response = new ServiceResponse<StudyCourseMobileStudentDetailResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
