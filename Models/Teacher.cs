@@ -29,5 +29,6 @@ namespace griffined_api.Models
         public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
         public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
         public virtual ICollection<CancellationRequest> CancellationRequests { get; set; } = new List<CancellationRequest>();
+        public virtual ICollection<StudySubjectTeacher> StudySubjectTeachers { get; set; } = new List<StudySubjectTeacher>();
     }
 }
