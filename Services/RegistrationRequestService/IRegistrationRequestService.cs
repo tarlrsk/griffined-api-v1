@@ -23,5 +23,6 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<string>> UpdatePayment(int requestId, UpdatePaymentRequestDto updatePayment);
         Task<ServiceResponse<CompletedCancellationResponseDto>> GetCompletedRequest(int requestId);
         Task<ServiceResponse<CompletedCancellationResponseDto>> GetCancellationRequest(int requestId);
+        Task<ServiceResponse<string>> EaTakenRequest(int requestId);
     }
 }

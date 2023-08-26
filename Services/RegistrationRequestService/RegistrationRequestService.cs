@@ -347,6 +347,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         StudentId = student.Student.Id,
                         StudentCode = student.Student.StudentCode,
+                        FirstName = student.Student.FirstName,
+                        LastName = student.Student.LastName,
                         FullName = student.Student.FullName,
                         Nickname = student.Student.Nickname
                     };
@@ -468,6 +470,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -621,6 +625,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -795,6 +801,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1021,6 +1029,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1099,6 +1109,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                                dbStudySubjectMember.CourseJoinedDate = DateTime.Now;
                             }
 
                             foreach (var dbStudyClass in dbStudySubject.StudyClasses)
@@ -1188,7 +1199,6 @@ namespace griffined_api.Services.RegistrationRequestService
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
             dbRequest.PaymentError = true;
-            dbRequest.PaymentStatus = PaymentStatus.Incomplete;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
@@ -1458,6 +1468,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1698,6 +1710,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1813,6 +1827,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                             + " " + (dbRequestedCourse.Level?.level ?? ""),
                             CourseId = dbRequestedCourse.Course.Id,
                             Course = dbRequestedCourse.Course.course,
+                            StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
                             TeacherId = dbStudyClass.Teacher.Id,
@@ -1852,6 +1867,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                             + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
                             CourseId = dbStudentAddingRequest.StudyCourse.Course.Id,
                             Course = dbStudentAddingRequest.StudyCourse.Course.course,
+                            StudySubjectId = dbStudySubject.Subject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
                             TeacherId = dbStudyClass.Teacher.Id,
@@ -1865,6 +1881,21 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
             return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
+        }
+
+        public async Task<ServiceResponse<string>> EaTakenRequest(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
+
+            dbRequest.TakenByEAId = _firebaseService.GetAzureIdWithToken();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
+            return response;
         }
     }
 
