@@ -586,7 +586,7 @@ namespace griffined_api.Services.StudyCourseService
 
             foreach (var dbStudyClass in dbStudyClasses)
             {
-                if(dbStudyClass.Attendance == null)
+                if (dbStudyClass.Attendance == null)
                     throw new InternalServerException("Something went wrong with Student Attendance");
                 schedules.Add(new ScheduleStudentMobileResponseDto
                 {
@@ -995,7 +995,7 @@ namespace griffined_api.Services.StudyCourseService
                                 TeacherLastName = sc.Teacher.LastName,
                                 TeacherNickname = sc.Teacher.Nickname,
                                 Phone = sc.Teacher.Phone,
-                                // TODO JoinedDate
+                                // TODO TeacherJoinedDate
                                 Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = subject.Id,
