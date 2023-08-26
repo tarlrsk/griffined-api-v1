@@ -145,6 +145,7 @@ namespace griffined_api.Services.StudyCourseService
                     studyCourse.StudySubjects.Add(new StudySubjectResponseDto()
                     {
                         StudySubjectId = dbStudySubject.Id,
+                        SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
                     });
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
@@ -154,6 +155,7 @@ namespace griffined_api.Services.StudyCourseService
                             StudyCourseId = dbStudyCourse.Id,
                             CourseId = dbStudyCourse.Course.Id,
                             Course = dbStudyCourse.Course.course,
+                            StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
@@ -371,6 +373,7 @@ namespace griffined_api.Services.StudyCourseService
                     var studySubject = new StudySubjectResponseDto
                     {
                         StudySubjectId = dbStudySubject.Id,
+                        SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
                     };
                     studyCourse.StudySubjects.Add(studySubject);
@@ -424,6 +427,7 @@ namespace griffined_api.Services.StudyCourseService
                     var studySubject = new StudySubjectResponseDto
                     {
                         StudySubjectId = dbStudySubject.Id,
+                        SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
                     };
                     studyCourse.StudySubjects.Add(studySubject);
@@ -489,6 +493,7 @@ namespace griffined_api.Services.StudyCourseService
                 data.StudySubjects.Add(new StudySubjectResponseDto
                 {
                     StudySubjectId = dbStudySubject.Id,
+                    SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
                 });
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
@@ -503,6 +508,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudyCourseId = dbStudyCourse.Id,
                         CourseId = dbStudyCourse.Course.Id,
                         Course = dbStudyCourse.Course.course,
+                        StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
                         CourseSubject = dbStudyCourse.Course.course + " "
@@ -583,6 +589,7 @@ namespace griffined_api.Services.StudyCourseService
                 data.StudySubjects.Add(new StudySubjectResponseDto
                 {
                     StudySubjectId = dbStudySubject.Id,
+                    SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
                 });
             }
@@ -710,6 +717,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubject = new StudySubjectResponseDto
                         {
                             StudySubjectId = dbStudySubject.Id,
+                            SubjectId = dbStudySubject.Id,
                             Subject = dbStudySubject.Subject.subject
                         },
                         FiftyPercentReport = studentReport?.Progression == Progression.FiftyPercent
@@ -826,6 +834,7 @@ namespace griffined_api.Services.StudyCourseService
                     var studySubjectDto = new StudySubjectWithMembersResponseDto
                     {
                         StudySubjectId = dbStudySubject.Id,
+                        SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject
                     };
 
@@ -919,6 +928,7 @@ namespace griffined_api.Services.StudyCourseService
                 Subjects = dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
                 {
                     StudySubjectId = dbStudySubject.Id,
+                    SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject
                 }).ToList(),
                 Level = new Dtos.LevelDtos.LevelResponseDto
@@ -936,7 +946,8 @@ namespace griffined_api.Services.StudyCourseService
                     StudyCourseId = dbStudyCourse.Id,
                     CourseId = dbStudyCourse.Course.Id,
                     Course = dbStudyCourse.Course.course,
-                    SubjectId = dbStudySubject.Id,
+                    StudySubjectId = dbStudySubject.Id,
+                    SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
                     CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                     StudyClassId = dbStudyClass.Id,
@@ -985,6 +996,7 @@ namespace griffined_api.Services.StudyCourseService
                                 Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = subject.Id,
+                                    SubjectId = subject.Subject.Id,
                                     Subject = subject.Subject.subject
                                 }).ToList()
                             }).ToList(),
@@ -1002,6 +1014,7 @@ namespace griffined_api.Services.StudyCourseService
                                 Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = subject.Id,
+                                    SubjectId = subject.Subject.Id,
                                     Subject = subject.Subject.subject
                                 }).ToList()
                             }).ToList()
