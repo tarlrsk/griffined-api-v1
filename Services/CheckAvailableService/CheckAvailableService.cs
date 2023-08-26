@@ -16,6 +16,12 @@ namespace griffined_api.Services.CheckAvailableService
             _context = context;
         }
 
+        public async Task<ServiceResponse<List<AvailableScheduleResponseDto>>> GetAvailableSchedule(NewScheduleRequestDto newScheduleRequest)
+        {
+            newScheduleRequest.LocalSchedule.Select(s => s.Date);
+            throw new NotImplementedException();
+        }
+
         // public async Task<ServiceResponse<List<GetAvailableTeacherDto>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId)
         // {
         //     var response = new ServiceResponse<List<GetAvailableTeacherDto>>();
