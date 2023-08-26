@@ -1880,6 +1880,21 @@ namespace griffined_api.Services.RegistrationRequestService
             }
             return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
+
+        public async Task<ServiceResponse<string>> EaTakenRequest(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                            .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
+
+            dbRequest.TakenByEAId = _firebaseService.GetAzureIdWithToken();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
+            return response;
+        }
     }
 
 
