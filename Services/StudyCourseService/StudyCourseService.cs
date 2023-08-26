@@ -151,15 +151,18 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
-                            Room = null,
-                            Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                            StudyCourseId = dbStudyCourse.Id,
                             CourseId = dbStudyCourse.Course.Id,
                             Course = dbStudyCourse.Course.course,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
+                            CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                            StudyClassId = dbStudyClass.Id,
+                            ClassNo = dbStudyClass.ClassNumber,
+                            Room = null,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                             TeacherId = dbStudyClass.Teacher.Id,
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
@@ -586,7 +589,7 @@ namespace griffined_api.Services.StudyCourseService
 
             foreach (var dbStudyClass in dbStudyClasses)
             {
-                if(dbStudyClass.Attendance == null)
+                if (dbStudyClass.Attendance == null)
                     throw new InternalServerException("Something went wrong with Student Attendance");
                 schedules.Add(new ScheduleStudentMobileResponseDto
                 {
