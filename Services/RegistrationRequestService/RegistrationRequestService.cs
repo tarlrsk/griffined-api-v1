@@ -347,6 +347,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         StudentId = student.Student.Id,
                         StudentCode = student.Student.StudentCode,
+                        FirstName = student.Student.FirstName,
+                        LastName = student.Student.LastName,
                         FullName = student.Student.FullName,
                         Nickname = student.Student.Nickname
                     };
@@ -468,6 +470,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -621,6 +625,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -795,6 +801,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1021,6 +1029,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1458,6 +1468,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
@@ -1698,6 +1710,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudentId = dbMember.Student.Id,
                     StudentCode = dbMember.Student.StudentCode,
+                    FirstName = dbMember.Student.FirstName,
+                    LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
                     Nickname = dbMember.Student.Nickname,
                 };
