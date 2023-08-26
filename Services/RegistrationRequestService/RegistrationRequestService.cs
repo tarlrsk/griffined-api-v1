@@ -1384,12 +1384,22 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
                     requestDetail.Courses.Add(requestedCourse);
                 }
+
+                foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
+                {
+                    requestDetail.PreferredDays.Add(new PreferredDayResponseDto
+                    {
+                        Day = dbPreferredDay.Day,
+                        FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
+                        ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),
+                    });
+                }
+
                 requestDetail.Schedules = NewCourseRequestMapScheduleDto(dbRequest.NewCourseRequests);
             }
             else
             {
                 dbRequest = await _context.RegistrationRequests
-                            .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.Course)
@@ -1441,16 +1451,6 @@ namespace griffined_api.Services.RegistrationRequestService
                     requestDetail.Courses.Add(requestedCourse);
                 }
                 requestDetail.Schedules = StudentAddingRequestMapScheduleDto(dbRequest.StudentAddingRequest);
-            }
-
-            foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
-            {
-                requestDetail.PreferredDays.Add(new PreferredDayResponseDto
-                {
-                    Day = dbPreferredDay.Day,
-                    FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
-                    ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),
-                });
             }
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
@@ -1570,6 +1570,7 @@ namespace griffined_api.Services.RegistrationRequestService
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
                 dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.NewCoursePreferredDayRequests)
                             .Include(r => r.NewCourseRequests)
                                 .ThenInclude(c => c.NewCourseSubjectRequests)
                                     .ThenInclude(s => s.Subject)
@@ -1622,7 +1623,19 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
                     requestDetail.Courses.Add(requestedCourse);
                 }
-                requestDetail.Schedules = NewCourseRequestMapScheduleDto(dbRequest.NewCourseRequests);
+
+                foreach (var dbPreferredDay in dbRequest.NewCoursePreferredDayRequests)
+                {
+                    requestDetail.PreferredDays.Add(new PreferredDayResponseDto
+                    {
+                        Day = dbPreferredDay.Day,
+                        FromTime = dbPreferredDay.FromTime.ToTimeSpanString(),
+                        ToTime = dbPreferredDay.ToTime.ToTimeSpanString(),
+                    });
+                }
+
+                if (requestDetail.HasSchedule != false)
+                    requestDetail.Schedules = NewCourseRequestMapScheduleDto(dbRequest.NewCourseRequests);
             }
             else
             {
