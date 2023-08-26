@@ -15,6 +15,7 @@ namespace griffined_api.Models
         public int? ScheduledByStaffId { get; set; }
         public int? ApprovedByStaffId { get; set; }
         public int? CancelledBy { get; set; }
+        public int? TakenByEAId { get; set; }
 
         public string Section { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;

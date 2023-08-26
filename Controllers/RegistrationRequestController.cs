@@ -127,5 +127,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _registrationRequestService.GetCancellationRequest(requestId));
         }
+
+        [HttpPut, Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaTakenRequest(int requestId)
+        {
+            return Ok(await _registrationRequestService.EaTakenRequest(requestId));
+        }
     }
 }
