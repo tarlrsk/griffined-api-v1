@@ -560,7 +560,7 @@ namespace griffined_api.Services.StudyCourseService
                                 })
                                 .ToListAsync();
 
-            if (dbStudyClasses.Count() == 0)
+            if (dbStudyClasses.Count == 0)
                 throw new NotFoundException($"Class is not found");
 
             var data = new StudyCourseMobileStudentDetailResponseDto()
@@ -981,7 +981,7 @@ namespace griffined_api.Services.StudyCourseService
                                 StudentLastName = sm.Student.LastName,
                                 StudentNickname = sm.Student.Nickname,
                                 Phone = sm.Student.Phone,
-                                // TODO JoinedDate
+                                CourseJoinedDate = sm.CourseJoinedDate.ToDateTimeString(),
                                 Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = subject.Id,
@@ -998,7 +998,7 @@ namespace griffined_api.Services.StudyCourseService
                                 TeacherLastName = sc.Teacher.LastName,
                                 TeacherNickname = sc.Teacher.Nickname,
                                 Phone = sc.Teacher.Phone,
-                                // TODO JoinedDate
+                                // TODO TeacherJoinedDate
                                 Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = subject.Id,

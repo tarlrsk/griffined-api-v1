@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230825071346_StudentCourseJoinedDate")]
+    partial class StudentCourseJoinedDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1084,32 +1087,6 @@ namespace griffinedapi.Migrations
                     b.ToTable("StudySubjectMember", (string)null);
                 });
 
-            modelBuilder.Entity("griffined_api.Models.StudySubjectTeacher", b =>
-                {
-                    b.Property<int>("StudySubjectTeacherId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudySubjectTeacherId"));
-
-                    b.Property<DateTime>("CourseJoinedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("StudySubjectMemberId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeacherId")
-                        .HasColumnType("int");
-
-                    b.HasKey("StudySubjectTeacherId");
-
-                    b.HasIndex("StudySubjectMemberId");
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("StudySubjectTeacher", (string)null);
-                });
-
             modelBuilder.Entity("griffined_api.Models.Subject", b =>
                 {
                     b.Property<int>("Id")
@@ -1680,25 +1657,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("StudySubject");
                 });
 
-            modelBuilder.Entity("griffined_api.Models.StudySubjectTeacher", b =>
-                {
-                    b.HasOne("griffined_api.Models.StudySubjectMember", "StudySubjectMember")
-                        .WithMany("StudySubjectTeachers")
-                        .HasForeignKey("StudySubjectMemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
-                        .WithMany("StudySubjectTeachers")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("StudySubjectMember");
-
-                    b.Navigation("Teacher");
-                });
-
             modelBuilder.Entity("griffined_api.Models.Subject", b =>
                 {
                     b.HasOne("griffined_api.Models.Course", "Course")
@@ -1871,8 +1829,6 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.StudySubjectMember", b =>
                 {
                     b.Navigation("StudentReports");
-
-                    b.Navigation("StudySubjectTeachers");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Subject", b =>
@@ -1891,8 +1847,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("StudentReports");
 
                     b.Navigation("StudyClasses");
-
-                    b.Navigation("StudySubjectTeachers");
 
                     b.Navigation("TeacherNotifications");
 

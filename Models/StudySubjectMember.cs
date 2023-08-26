@@ -12,7 +12,9 @@ namespace griffined_api.Models
         public int Id { get; set; }
         public int StudentId { get; set; }
         public int? StudySubjectId { get; set; }
+
         public StudySubjectMemberStatus Status { get; set; }
+        public DateTime CourseJoinedDate { get; set; }
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student Student { get; set; } = new Student();
@@ -20,6 +22,7 @@ namespace griffined_api.Models
         [ForeignKey(nameof(StudySubjectId))]
         public virtual StudySubject StudySubject { get; set; } = new StudySubject();
 
+        public virtual ICollection<StudySubjectTeacher> StudySubjectTeachers { get; set; } = new List<StudySubjectTeacher>();
         public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
     }
 }

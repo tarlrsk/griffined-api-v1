@@ -1099,6 +1099,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                             {
                                 dbStudySubjectMember.Status = StudySubjectMemberStatus.Success;
+                                dbStudySubjectMember.CourseJoinedDate = DateTime.Now;
                             }
 
                             foreach (var dbStudyClass in dbStudySubject.StudyClasses)
