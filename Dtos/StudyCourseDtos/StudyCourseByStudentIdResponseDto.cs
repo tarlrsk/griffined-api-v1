@@ -15,6 +15,8 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string StudentNickname { get; set; } = string.Empty;
         public int StudyCourseId { get; set; }
         public string Course { get; set; } = string.Empty;
+        public string Level { get; set; } = string.Empty;
+        public string Section { get; set; } = string.Empty;
         public StudyCourseStatus Status { get; set; }
         public List<StudySubjectReportResponseDto> Reports { get; set; } = new();
     }
