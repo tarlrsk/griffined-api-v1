@@ -658,6 +658,7 @@ namespace griffined_api.Services.StudyCourseService
 
             var dbStudyCourses = await _context.StudyCourses
                                 .Include(sc => sc.Course)
+                                .Include(sc => sc.Level)
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.Subject)
                                 .Include(sc => sc.StudySubjects)
@@ -701,6 +702,8 @@ namespace griffined_api.Services.StudyCourseService
                             .FirstOrDefault()!,
                     StudyCourseId = dbStudyCourse.Id,
                     Course = dbStudyCourse.Course.course,
+                    Level = dbStudyCourse.Level!.level,
+                    Section = dbStudyCourse.Section,
                     Status = dbStudyCourse.Status,
                     Reports = new List<StudySubjectReportResponseDto>()
                 };
