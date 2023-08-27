@@ -37,7 +37,10 @@ namespace griffined_api.Services.StudentReportService
 
             var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
 
-            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression) ?? throw new BadRequestException("Report already existed");
+            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
+
+            if (existingReport != null)
+                throw new BadRequestException("Report already existed");
 
             if (fileToUpload != null)
             {
@@ -329,6 +332,7 @@ namespace griffined_api.Services.StudentReportService
 
                     reportEntity.FileName = fileName;
                     reportEntity.ObjectName = objectName;
+                    reportEntity.Progression = detailRequestDto.Progression;
                     reportEntity.DateUpdated = DateTime.Now;
                     reportEntity.Teacher = dbTeacher;
                 }

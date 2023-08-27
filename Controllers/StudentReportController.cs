@@ -37,14 +37,14 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "teacher, master")]
-        public async Task<ActionResult> AddStudentReport([FromForm] StudentReportDetailRequestDto detailRequestDto, IFormFile? fileToUpload)
+        public async Task<ActionResult> AddStudentReport([FromForm] StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
             var response = await _studentReportService.AddStudentReport(detailRequestDto, fileToUpload);
             return Ok(response);
         }
 
         [HttpPut, Authorize(Roles = "teacher, master")]
-        public async Task<ActionResult> UpdateStudentReport([FromForm] StudentReportDetailRequestDto detailRequestDto, IFormFile? fileToUpload)
+        public async Task<ActionResult> UpdateStudentReport([FromForm] StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
             var response = await _studentReportService.UpdateStudentReport(detailRequestDto, fileToUpload);
             return Ok(response);
