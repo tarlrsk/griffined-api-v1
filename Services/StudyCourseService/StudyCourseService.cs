@@ -1043,6 +1043,7 @@ namespace griffined_api.Services.StudyCourseService
             var member = new StudySubjectMember()
             {
                 Student = student,
+                CourseJoinedDate = DateTime.Now,
                 Status = StudySubjectMemberStatus.Success
             };
 
