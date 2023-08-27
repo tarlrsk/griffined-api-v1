@@ -346,8 +346,6 @@ namespace griffined_api.Services.StudentReportService
                 }
             }
 
-
-
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
