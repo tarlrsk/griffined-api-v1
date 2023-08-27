@@ -1028,9 +1028,19 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public Task<ServiceResponse<string>> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
+        public async Task<ServiceResponse<string>> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<string>();
+
+            var dbStudySubject = await _context.StudySubjects
+                                .Include(ss => ss.StudyCourse)
+                                .Include(ss => ss.StudySubjectMember)
+                                .FirstOrDefaultAsync(ss => ss.StudyCourse.Id == studyCourseId && ss.Id == studySubjectId);
+
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == studentCode);
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            return response;
         }
     }
 }
