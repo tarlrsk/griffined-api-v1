@@ -1035,9 +1035,18 @@ namespace griffined_api.Services.StudyCourseService
             var dbStudySubject = await _context.StudySubjects
                                 .Include(ss => ss.StudyCourse)
                                 .Include(ss => ss.StudySubjectMember)
-                                .FirstOrDefaultAsync(ss => ss.StudyCourse.Id == studyCourseId && ss.Id == studySubjectId);
+                                .FirstOrDefaultAsync(ss => ss.StudyCourse.Id == studyCourseId && ss.Id == studySubjectId)
+                                ?? throw new NotFoundException("No Subjects Found.");
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == studentCode);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == studentCode) ?? throw new NotFoundException("No Student Found.");
+
+            var member = new StudySubjectMember()
+            {
+                Student = student,
+                Status = StudySubjectMemberStatus.Success
+            };
+
+            dbStudySubject.StudySubjectMember.Add(member);
 
             response.StatusCode = (int)HttpStatusCode.OK;
             return response;
