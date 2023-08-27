@@ -78,19 +78,19 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByTeacherId(teacherId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ep, ea, oa, master")]
+        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetCourseDetail(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetCourseDetail(studyCourseId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}/members")]
+        [HttpGet("course-detail/{studyCourseId}/members"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetStudyCourseMember(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetStudyCourseMember(studyCourseId));
         }
 
-        [HttpPost("add/{studyCourseId}/{studySubjectId}/{studentCode}")]
+        [HttpPost("add/{studyCourseId}/{studySubjectId}/{studentCode}"), Authorize(Roles = "ea, master")]
         public async Task<ActionResult> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
         {
             return Ok(await _studyCourseService.EaAddStudent(studyCourseId, studySubjectId, studentCode));

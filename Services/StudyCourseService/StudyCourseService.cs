@@ -1048,6 +1048,8 @@ namespace griffined_api.Services.StudyCourseService
 
             dbStudySubject.StudySubjectMember.Add(member);
 
+            await _context.SaveChangesAsync();
+
             response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
