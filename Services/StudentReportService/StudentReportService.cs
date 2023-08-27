@@ -25,7 +25,7 @@ namespace griffined_api.Services.StudentReportService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile? fileToUpload)
+        public async Task<ServiceResponse<string>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
             var response = new ServiceResponse<string>();
 
@@ -37,10 +37,7 @@ namespace griffined_api.Services.StudentReportService
 
             var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
 
-            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
-
-            if (existingReport != null)
-                throw new BadRequestException("Report already existed");
+            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression) ?? throw new BadRequestException("Report already existed");
 
             if (fileToUpload != null)
             {
@@ -59,7 +56,7 @@ namespace griffined_api.Services.StudentReportService
 
                 var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
                 var fileName = fileToUpload.FileName;
-                var objectName = $"students/{detailRequestDto.StudentCode}/study subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
+                var objectName = $"students/{detailRequestDto.StudentCode}/study-subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
 
                 studentReport.FileName = fileName;
                 studentReport.ObjectName = objectName;
@@ -75,6 +72,10 @@ namespace griffined_api.Services.StudentReportService
                 }
 
                 dbMember.StudentReports.Add(studentReport);
+            }
+            else
+            {
+                throw new BadRequestException("No file to upload");
             }
 
             await _context.SaveChangesAsync();
@@ -281,7 +282,7 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile? fileToUpload)
+        public async Task<ServiceResponse<string>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
             var response = new ServiceResponse<string>();
 
@@ -292,57 +293,54 @@ namespace griffined_api.Services.StudentReportService
             var teacherId = _firebaseService.GetAzureIdWithToken();
             var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No teacher found.");
 
-            if (dbMember.StudentReports != null)
+            if (fileToUpload != null)
             {
-                if (fileToUpload != null)
+                var reportRequestDto = new AddStudentReportRequestDto
                 {
-                    var reportRequestDto = new AddStudentReportRequestDto
+                    ReportData = fileToUpload
+                };
+
+                var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
+                var fileName = fileToUpload.FileName;
+                var objectName = $"students/{detailRequestDto.StudentCode}/study-subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
+
+                using (var stream = reportRequestDto.ReportData.OpenReadStream())
+                {
+                    var storageObject = await _storageClient.UploadObjectAsync(
+                        FIREBASE_BUCKET,
+                        objectName,
+                        fileToUpload.ContentType,
+                        stream
+                    );
+
+                    reportEntity.FileName = fileName;
+                    reportEntity.ObjectName = objectName;
+                    reportEntity.DateUpdated = DateTime.Now;
+                    reportEntity.Teacher = dbTeacher;
+                }
+
+                var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
+
+                if (existingReport != null)
+                {
+                    if (fileToUpload.FileName != existingReport.FileName)
                     {
-                        ReportData = fileToUpload
-                    };
+                        await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
+                        _context.StudentReports.Remove(existingReport);
 
-                    var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
-                    var fileName = fileToUpload.FileName;
-                    var objectName = $"students/{detailRequestDto.StudentCode}/study subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
-
-                    using (var stream = reportRequestDto.ReportData.OpenReadStream())
-                    {
-                        var storageObject = await _storageClient.UploadObjectAsync(
-                            FIREBASE_BUCKET,
-                            objectName,
-                            fileToUpload.ContentType,
-                            stream
-                        );
-
-                        reportEntity.FileName = fileName;
-                        reportEntity.ObjectName = objectName;
-                    }
-
-                    var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
-
-                    if (existingReport != null)
-                    {
-                        if (fileToUpload.FileName != existingReport.FileName)
-                        {
-                            await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
-                            _context.StudentReports.Remove(existingReport);
-
-                            dbMember.StudentReports.Add(reportEntity);
-                            existingReport.DateUpdated = DateTime.Now;
-                            existingReport.Teacher = dbTeacher;
-                        }
-                        else
-                        {
-                            existingReport.FileName = reportEntity.FileName;
-                            existingReport.ObjectName = reportEntity.ObjectName;
-                            existingReport.DateUpdated = DateTime.Now;
-                            existingReport.Teacher = dbTeacher;
-                        }
+                        dbMember.StudentReports.Add(reportEntity);
                     }
                     else
                     {
-                        dbMember.StudentReports.Add(reportEntity);
+                        existingReport.FileName = reportEntity.FileName;
+                        existingReport.ObjectName = reportEntity.ObjectName;
+                        existingReport.DateUpdated = DateTime.Now;
+                        existingReport.Teacher = dbTeacher;
                     }
+                }
+                else
+                {
+                    dbMember.StudentReports.Add(reportEntity);
                 }
             }
 
