@@ -102,12 +102,18 @@ namespace griffined_api.Services.StudentReportService
             var hundredPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
             var specialReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.Special);
 
-            var reportDto = dbMember.StudentReports.Select(async report =>
+            var distinctReports = dbMember.StudentReports
+                                    .GroupBy(report => report.StudySubjectMember.StudySubject)
+                                    .Select(group => group.First())
+                                    .ToList();
+
+            var reportDto = distinctReports.Select(async report =>
             new StudySubjectReportResponseDto
             {
                 StudySubject = new Dtos.StudyCourseDtos.StudySubjectResponseDto
                 {
                     StudySubjectId = dbMember.StudySubject.Id,
+                    SubjectId = dbMember.StudySubject.Subject.Id,
                     Subject = dbMember.StudySubject.Subject.subject
                 },
                 FiftyPercentReport = fiftyPercentReport != null
