@@ -1027,5 +1027,10 @@ namespace griffined_api.Services.StudyCourseService
             response.Data = data;
             return response;
         }
+
+        public Task<ServiceResponse<string>> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

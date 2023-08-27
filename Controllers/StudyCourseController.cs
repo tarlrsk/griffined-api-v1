@@ -89,5 +89,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.GetStudyCourseMember(studyCourseId));
         }
+
+        [HttpPost()]
+        public async Task<ActionResult> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
+        {
+            return Ok(await _studyCourseService.EaAddStudent(studyCourseId, studySubjectId, studentCode));
+        }
     }
 }
