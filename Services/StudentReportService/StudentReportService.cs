@@ -357,6 +357,10 @@ namespace griffined_api.Services.StudentReportService
                     dbMember.StudentReports.Add(reportEntity);
                 }
             }
+            else
+            {
+                throw new BadRequestException("No file to upload.");
+            }
 
             await _context.SaveChangesAsync();
 
