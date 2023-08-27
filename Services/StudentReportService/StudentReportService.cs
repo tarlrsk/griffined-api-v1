@@ -25,19 +25,19 @@ namespace griffined_api.Services.StudentReportService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentReport(int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
+        public async Task<ServiceResponse<string>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile? fileToUpload)
         {
             var response = new ServiceResponse<string>();
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId) ?? throw new NotFoundException("No student found.");
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == detailRequestDto.StudentCode && m.StudySubjectId == detailRequestDto.StudySubjectId) ?? throw new NotFoundException("No student found.");
 
             int teacherId = _firebaseService.GetAzureIdWithToken();
 
             var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
 
-            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == progression);
+            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
 
             if (existingReport != null)
                 throw new BadRequestException("Report already existed");
@@ -49,7 +49,7 @@ namespace griffined_api.Services.StudentReportService
                     StudySubjectMemberId = dbMember.Id,
                     Teacher = dbTeacher,
                     DateUpdated = DateTime.Now,
-                    Progression = progression
+                    Progression = detailRequestDto.Progression
                 };
 
                 var reportRequestDto = new AddStudentReportRequestDto
@@ -59,7 +59,7 @@ namespace griffined_api.Services.StudentReportService
 
                 var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
                 var fileName = fileToUpload.FileName;
-                var objectName = $"students/{studentCode}/study subjects/{studySubjectId}/{progression}/{fileName}";
+                var objectName = $"students/{detailRequestDto.StudentCode}/study subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
 
                 studentReport.FileName = fileName;
                 studentReport.ObjectName = objectName;
@@ -287,13 +287,13 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> UpdateStudentReport(int studySubjectId, string studentCode, Progression progression, IFormFile? fileToUpload)
+        public async Task<ServiceResponse<string>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile? fileToUpload)
         {
             var response = new ServiceResponse<string>();
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == studentCode && m.StudySubjectId == studySubjectId) ?? throw new NotFoundException("No student found.");
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == detailRequestDto.StudentCode && m.StudySubjectId == detailRequestDto.StudySubjectId) ?? throw new NotFoundException("No student found.");
 
             var teacherId = _firebaseService.GetAzureIdWithToken();
             var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No teacher found.");
@@ -309,7 +309,7 @@ namespace griffined_api.Services.StudentReportService
 
                     var reportEntity = _mapper.Map<StudentReport>(reportRequestDto);
                     var fileName = fileToUpload.FileName;
-                    var objectName = $"students/{studentCode}/study subjects/{studySubjectId}/{progression}/{fileName}";
+                    var objectName = $"students/{detailRequestDto.StudentCode}/study subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
 
                     using (var stream = reportRequestDto.ReportData.OpenReadStream())
                     {
@@ -324,7 +324,7 @@ namespace griffined_api.Services.StudentReportService
                         reportEntity.ObjectName = objectName;
                     }
 
-                    var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == progression);
+                    var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
 
                     if (existingReport != null)
                     {
@@ -351,8 +351,6 @@ namespace griffined_api.Services.StudentReportService
                     }
                 }
             }
-
-
 
             await _context.SaveChangesAsync();
 
