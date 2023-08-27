@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Google.Api;
+using griffined_api.Dtos.StudyCourseDtos;
+using griffined_api.Extensions.DateTimeExtensions;
 
 namespace griffined_api.Services.CheckAvailableService
 {
@@ -16,10 +20,116 @@ namespace griffined_api.Services.CheckAvailableService
             _context = context;
         }
 
-        public async Task<ServiceResponse<List<AvailableScheduleResponseDto>>> GetAvailableSchedule(NewScheduleRequestDto newScheduleRequest)
+        public async Task<ServiceResponse<CheckScheduleResultResponseDto>> GetAvailableSchedule(RequestedScheduleRequestDto requestedSchedule)
         {
-            newScheduleRequest.LocalSchedule.Select(s => s.Date);
-            throw new NotImplementedException();
+            var listRequestedDate = requestedSchedule.Dates.Select(s => s.ToDateTime()).ToList();
+
+            var dbStudyClasses = await _context.StudyClasses
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.StudyCourse)
+                                    .ThenInclude(c => c.Level) 
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.Subject)
+                            .Include(c => c.Teacher)
+                            .Include(c => c.Schedule)
+                            .Where(c => 
+                            !requestedSchedule.CurrentStudySubjectId.Contains(c.StudySubject.Id) 
+                            && listRequestedDate.Contains(c.Schedule.Date)
+                            && c.TeacherId == requestedSchedule.TeacherId
+                            && c.Status == ClassStatus.None
+                            && c.Status == ClassStatus.PendingCancellation)
+                            .ToListAsync();
+            
+            var requestedStudySubject = await _context.StudySubjects
+                                .Include(s => s.Subject)
+                                .Include(s => s.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                                .Include(s => s.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                                .FirstOrDefaultAsync(s => s.Id == requestedSchedule.RequestedStudySubjectId) 
+                                ?? throw new NotFoundException($"StudySubject with ID {requestedSchedule.RequestedStudySubjectId}is not found.");
+
+            var requestedTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == requestedSchedule.TeacherId)
+                                ?? throw new NotFoundException($"Teacher with ID {requestedSchedule.TeacherId} is not found.");
+
+            var conflictSchedule = new List<ScheduleResponseDto>();
+            var availableSchedule = new List<AvailableScheduleResponseDto>();
+
+            var data = new CheckScheduleResultResponseDto();
+
+            foreach(var requestDate in requestedSchedule.Dates)
+            {
+                foreach(var dbStudyClass in dbStudyClasses.Where(s => s.Schedule.Date == requestDate.ToDateTime()))
+                {
+                    if (requestedSchedule.FromTime.ToTimeSpan().TotalMilliseconds < dbStudyClass.Schedule.ToTime.TotalMilliseconds 
+                        && dbStudyClass.Schedule.FromTime.TotalMilliseconds  < requestedSchedule.ToTime.ToTimeSpan().TotalMilliseconds)
+                    {
+                        conflictSchedule.Add(new ScheduleResponseDto
+                        {
+                            StudyCourseId = dbStudyClass.StudySubject.StudyCourse.Id,
+                            CourseId = dbStudyClass.StudySubject.StudyCourse.Course.Id,
+                            Course = dbStudyClass.StudySubject.StudyCourse.Course.course,
+                            StudySubjectId = dbStudyClass.StudySubject.Id,
+                            SubjectId = dbStudyClass.StudySubject.Subject.Id,
+                            Subject = dbStudyClass.StudySubject.Subject.subject,
+                            CourseSubject = dbStudyClass.StudySubject.StudyCourse.Course.course + " "
+                                            + dbStudyClass.StudySubject.Subject.subject
+                                            + " " + (dbStudyClass.StudySubject.StudyCourse.Level?.level ?? ""),
+                            StudyClassId = dbStudyClass.Id,
+                            ClassNo = dbStudyClass.ClassNumber,
+                            Room = dbStudyClass.Room,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            ClassStatus = dbStudyClass.Status,
+                            TeacherId = dbStudyClass.Teacher.Id,
+                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                            TeacherLastName = dbStudyClass.Teacher.LastName,
+                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            // TODO Teacher WorkType
+                        });
+                    }
+                }
+                if(conflictSchedule.IsNullOrEmpty())
+                {
+                    availableSchedule.Add(new AvailableScheduleResponseDto{
+                        StudyCourseId = requestedStudySubject.StudyCourse.Id,
+                        CourseId = requestedStudySubject.StudyCourse.Course.Id,
+                        Course = requestedStudySubject.StudyCourse.Course.course,
+                        StudySubjectId = requestedStudySubject.Id,
+                        SubjectId = requestedStudySubject.Subject.Id,
+                        Subject = requestedStudySubject.Subject.subject,
+                        CourseSubject = requestedStudySubject.StudyCourse.Course.course + " "
+                                            + requestedStudySubject.Subject.subject
+                                            + " " + (requestedStudySubject.StudyCourse.Level?.level ?? ""),
+                        Date = requestDate.ToDateTime().ToDateString(),
+                        FromTime = requestedSchedule.FromTime,
+                        ToTime = requestedSchedule.ToTime,
+                        TeacherId = requestedTeacher.Id,
+                        TeacherFirstName = requestedTeacher.FirstName,
+                        TeacherLastName = requestedTeacher.LastName,
+                        TeacherNickname = requestedTeacher.Nickname,
+                        // TODO Teacher WorkType
+                    });
+                }else{
+                    data.IsConflict = true;
+                }
+            }
+
+            if(data.IsConflict)
+                data.ConflictSchedule = conflictSchedule;
+            else
+                data.AvailableSchedule = availableSchedule;
+
+            var response = new ServiceResponse<CheckScheduleResultResponseDto>{
+                Data = data,
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+
+            return response;
         }
 
         // public async Task<ServiceResponse<List<GetAvailableTeacherDto>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId)
