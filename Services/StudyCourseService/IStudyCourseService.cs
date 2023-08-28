@@ -21,6 +21,6 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId);
         Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId);
         Task<ServiceResponse<StudySubjectMemberResponseDto>> GetStudyCourseMember(int studyCourseId);
-        Task<ServiceResponse<string>> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode);
+        Task<ServiceResponse<string>> EaAddStudent(EaStudentManagementRequestDto requestDto);
     }
 }

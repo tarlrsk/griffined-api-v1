@@ -90,10 +90,10 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.GetStudyCourseMember(studyCourseId));
         }
 
-        [HttpPost("add/{studyCourseId}/{studySubjectId}/{studentCode}"), Authorize(Roles = "ea, master")]
-        public async Task<ActionResult> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
+        [HttpPost("add/student"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaAddStudent(EaStudentManagementRequestDto requestDto)
         {
-            return Ok(await _studyCourseService.EaAddStudent(studyCourseId, studySubjectId, studentCode));
+            return Ok(await _studyCourseService.EaAddStudent(requestDto));
         }
     }
 }

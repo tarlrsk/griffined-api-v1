@@ -1028,37 +1028,43 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> EaAddStudent(int studyCourseId, int studySubjectId, string studentCode)
+        public async Task<ServiceResponse<string>> EaAddStudent(EaStudentManagementRequestDto requestDto)
         {
             var response = new ServiceResponse<string>();
 
-            var dbStudySubject = await _context.StudySubjects
+            var dbStudySubjects = await _context.StudySubjects
                                 .Include(ss => ss.StudyCourse)
                                 .Include(ss => ss.StudySubjectMember)
-                                .FirstOrDefaultAsync(ss => ss.StudyCourse.Id == studyCourseId && ss.Id == studySubjectId)
+                                .Where(ss => requestDto.StudySubjectIds.Contains(ss.Id) && ss.StudyCourse.Id == requestDto.StudyCourseId)
+                                .ToListAsync()
                                 ?? throw new NotFoundException("No Subjects Found.");
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == studentCode) ?? throw new NotFoundException("No Student Found.");
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == requestDto.StudentCode) ?? throw new NotFoundException("No Student Found.");
 
-            var member = new StudySubjectMember()
+            foreach (var dbStudySubject in dbStudySubjects)
             {
-                Student = student,
-                CourseJoinedDate = DateTime.Now,
-                Status = StudySubjectMemberStatus.Success
-            };
+                var existingMember = await _context.StudySubjectMember.FirstOrDefaultAsync(sm => sm.Student.Id == student.Id) ?? throw new BadRequestException("The student is already in the subject");
 
-            dbStudySubject.StudySubjectMember.Add(member);
-
-            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
-            {
-                var studentAttendance = new StudentAttendance
+                var member = new StudySubjectMember
                 {
-                    StudyClass = dbStudyClass,
                     Student = student,
-                    Attendance = Attendance.None
+                    CourseJoinedDate = DateTime.Now,
+                    Status = StudySubjectMemberStatus.Success
                 };
 
-                dbStudyClass.Attendances.Add(studentAttendance);
+                dbStudySubject.StudySubjectMember.Add(member);
+
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                {
+                    var studentAttendance = new StudentAttendance
+                    {
+                        StudyClass = dbStudyClass,
+                        Student = student,
+                        Attendance = Attendance.None
+                    };
+
+                    dbStudyClass.Attendances.Add(studentAttendance);
+                }
             }
 
             await _context.SaveChangesAsync();
