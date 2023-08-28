@@ -24,7 +24,7 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
         }
 
-        [HttpGet(), Authorize(Roles = "ec, oa, master")]
+        [HttpGet(), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetAllStudyCourse()
         {
             return Ok(await _studyCourseService.GetAllStudyCourse());
