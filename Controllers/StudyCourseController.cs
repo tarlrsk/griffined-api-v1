@@ -24,7 +24,7 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
         }
 
-        [HttpGet(), Authorize(Roles = "ec, oa, master")]
+        [HttpGet(), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetAllStudyCourse()
         {
             return Ok(await _studyCourseService.GetAllStudyCourse());
@@ -78,16 +78,22 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByTeacherId(teacherId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ep, ea, oa, master")]
+        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetCourseDetail(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetCourseDetail(studyCourseId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}/members")]
+        [HttpGet("course-detail/{studyCourseId}/members"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetStudyCourseMember(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetStudyCourseMember(studyCourseId));
+        }
+
+        [HttpPost("add/student"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaAddStudent(EaStudentManagementRequestDto requestDto)
+        {
+            return Ok(await _studyCourseService.EaAddStudent(requestDto));
         }
     }
 }

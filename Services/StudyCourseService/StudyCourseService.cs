@@ -658,6 +658,7 @@ namespace griffined_api.Services.StudyCourseService
 
             var dbStudyCourses = await _context.StudyCourses
                                 .Include(sc => sc.Course)
+                                .Include(sc => sc.Level)
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.Subject)
                                 .Include(sc => sc.StudySubjects)
@@ -701,6 +702,8 @@ namespace griffined_api.Services.StudyCourseService
                             .FirstOrDefault()!,
                     StudyCourseId = dbStudyCourse.Id,
                     Course = dbStudyCourse.Course.course,
+                    Level = dbStudyCourse.Level!.level,
+                    Section = dbStudyCourse.Section,
                     Status = dbStudyCourse.Status,
                     Reports = new List<StudySubjectReportResponseDto>()
                 };
@@ -985,43 +988,91 @@ namespace griffined_api.Services.StudyCourseService
                 Students = dbStudyCourse.StudySubjects
                             .SelectMany(ss => ss.StudySubjectMember)
                             .Where(sc => sc.Student != null)
-                            .Select(sm => new StudentStudySubjectMemberResponseDto
+                            .GroupBy(sm => sm.Student.Id)
+                            .Select(group => new StudentStudySubjectMemberResponseDto
                             {
-                                StudentId = sm.Student.Id,
-                                StudentFirstName = sm.Student.FirstName,
-                                StudentLastName = sm.Student.LastName,
-                                StudentNickname = sm.Student.Nickname,
-                                Phone = sm.Student.Phone,
-                                CourseJoinedDate = sm.CourseJoinedDate.ToDateTimeString(),
-                                Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
+                                StudentId = group.First().Student.Id,
+                                StudentFirstName = group.First().Student.FirstName,
+                                StudentLastName = group.First().Student.LastName,
+                                StudentNickname = group.First().Student.Nickname,
+                                Phone = group.First().Student.Phone, // Corrected phone retrieval
+                                CourseJoinedDate = group.First().CourseJoinedDate.ToDateTimeString(),
+                                Subjects = group.Select(member => new StudySubjectResponseDto
                                 {
-                                    StudySubjectId = subject.Id,
-                                    SubjectId = subject.Subject.Id,
-                                    Subject = subject.Subject.subject
+                                    StudySubjectId = member.StudySubject.Id,
+                                    SubjectId = member.StudySubject.Subject.Id,
+                                    Subject = member.StudySubject.Subject.subject
                                 }).ToList()
                             }).ToList(),
+
                 Teachers = dbStudyCourse.StudySubjects
                             .SelectMany(ss => ss.StudyClasses)
                             .Where(sc => sc.Teacher != null)
-                            .Select(sc => new TeacherStudySubjectMemberResponseDto
+                            .GroupBy(sc => sc.Teacher)
+                            .Select(group => new TeacherStudySubjectMemberResponseDto
                             {
-                                TeacherId = sc.Teacher.Id,
-                                TeacherFirstName = sc.Teacher.FirstName,
-                                TeacherLastName = sc.Teacher.LastName,
-                                TeacherNickname = sc.Teacher.Nickname,
-                                Phone = sc.Teacher.Phone,
-                                // TODO TeacherJoinedDate
-                                Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
+                                TeacherId = group.Key.Id,
+                                TeacherFirstName = group.Key.FirstName,
+                                TeacherLastName = group.Key.LastName,
+                                TeacherNickname = group.Key.Nickname,
+                                Phone = group.Key.Phone,
+                                CourseJoinedDate = group.First().Schedule.Date.ToDateTimeString(),
+                                Subjects = group.Select(cls => new StudySubjectResponseDto
                                 {
-                                    StudySubjectId = subject.Id,
-                                    SubjectId = subject.Subject.Id,
-                                    Subject = subject.Subject.subject
+                                    StudySubjectId = cls.StudySubject.Id,
+                                    SubjectId = cls.StudySubject.Subject.Id,
+                                    Subject = cls.StudySubject.Subject.subject
                                 }).ToList()
                             }).ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> EaAddStudent(EaStudentManagementRequestDto requestDto)
+        {
+            var response = new ServiceResponse<string>();
+
+            var dbStudySubjects = await _context.StudySubjects
+                                .Include(ss => ss.StudyCourse)
+                                .Include(ss => ss.StudySubjectMember)
+                                .Where(ss => requestDto.StudySubjectIds.Contains(ss.Id) && ss.StudyCourse.Id == requestDto.StudyCourseId)
+                                .ToListAsync()
+                                ?? throw new NotFoundException("No Subjects Found.");
+
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == requestDto.StudentCode) ?? throw new NotFoundException("No Student Found.");
+
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                var existingMember = await _context.StudySubjectMember.FirstOrDefaultAsync(sm => sm.Student.Id == student.Id) ?? throw new BadRequestException("The student is already in the subject");
+
+                var member = new StudySubjectMember
+                {
+                    Student = student,
+                    CourseJoinedDate = DateTime.Now,
+                    Status = StudySubjectMemberStatus.Success
+                };
+
+                dbStudySubject.StudySubjectMember.Add(member);
+
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                {
+                    var studentAttendance = new StudentAttendance
+                    {
+                        StudyClass = dbStudyClass,
+                        Student = student,
+                        Attendance = Attendance.None
+                    };
+
+                    dbStudyClass.Attendances.Add(studentAttendance);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
     }
