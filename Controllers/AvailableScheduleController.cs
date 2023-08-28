@@ -19,6 +19,12 @@ namespace griffined_api.Controllers
 
         }
 
+        [HttpPost("schedule"), Authorize(Roles = "master, ea")]
+        public async Task<ActionResult> GetAvailableSchedule(RequestedScheduleRequestDto requestedSchedule)
+        {
+            return Ok(await _checkAvailable.GetAvailableSchedule(requestedSchedule));
+        }
+
         // [HttpGet("time")]
         // public async Task<ActionResult<ServiceResponse<List<GetAvailableTimeDto>>>> GetAvailableTime([FromQuery] int[] listOfStudentId, string date, int hour, int classId)
         // {
