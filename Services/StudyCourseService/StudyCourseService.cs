@@ -988,37 +988,40 @@ namespace griffined_api.Services.StudyCourseService
                 Students = dbStudyCourse.StudySubjects
                             .SelectMany(ss => ss.StudySubjectMember)
                             .Where(sc => sc.Student != null)
-                            .Select(sm => new StudentStudySubjectMemberResponseDto
+                            .GroupBy(sm => sm.Student.Id)
+                            .Select(group => new StudentStudySubjectMemberResponseDto
                             {
-                                StudentId = sm.Student.Id,
-                                StudentFirstName = sm.Student.FirstName,
-                                StudentLastName = sm.Student.LastName,
-                                StudentNickname = sm.Student.Nickname,
-                                Phone = sm.Student.Phone,
-                                CourseJoinedDate = sm.CourseJoinedDate.ToDateTimeString(),
-                                Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
+                                StudentId = group.First().Student.Id,
+                                StudentFirstName = group.First().Student.FirstName,
+                                StudentLastName = group.First().Student.LastName,
+                                StudentNickname = group.First().Student.Nickname,
+                                Phone = group.First().Student.Phone, // Corrected phone retrieval
+                                CourseJoinedDate = group.First().CourseJoinedDate.ToDateTimeString(),
+                                Subjects = group.Select(member => new StudySubjectResponseDto
                                 {
-                                    StudySubjectId = subject.Id,
-                                    SubjectId = subject.Subject.Id,
-                                    Subject = subject.Subject.subject
+                                    StudySubjectId = member.StudySubject.Id,
+                                    SubjectId = member.StudySubject.Subject.Id,
+                                    Subject = member.StudySubject.Subject.subject
                                 }).ToList()
                             }).ToList(),
+
                 Teachers = dbStudyCourse.StudySubjects
                             .SelectMany(ss => ss.StudyClasses)
                             .Where(sc => sc.Teacher != null)
-                            .Select(sc => new TeacherStudySubjectMemberResponseDto
+                            .GroupBy(sc => sc.Teacher)
+                            .Select(group => new TeacherStudySubjectMemberResponseDto
                             {
-                                TeacherId = sc.Teacher.Id,
-                                TeacherFirstName = sc.Teacher.FirstName,
-                                TeacherLastName = sc.Teacher.LastName,
-                                TeacherNickname = sc.Teacher.Nickname,
-                                Phone = sc.Teacher.Phone,
-                                // TODO TeacherJoinedDate
-                                Subjects = dbStudyCourse.StudySubjects.Select(subject => new StudySubjectResponseDto
+                                TeacherId = group.Key.Id,
+                                TeacherFirstName = group.Key.FirstName,
+                                TeacherLastName = group.Key.LastName,
+                                TeacherNickname = group.Key.Nickname,
+                                Phone = group.Key.Phone,
+                                CourseJoinedDate = group.First().Schedule.Date.ToDateTimeString(),
+                                Subjects = group.Select(cls => new StudySubjectResponseDto
                                 {
-                                    StudySubjectId = subject.Id,
-                                    SubjectId = subject.Subject.Id,
-                                    Subject = subject.Subject.subject
+                                    StudySubjectId = cls.StudySubject.Id,
+                                    SubjectId = cls.StudySubject.Subject.Id,
+                                    Subject = cls.StudySubject.Subject.subject
                                 }).ToList()
                             }).ToList()
             };
