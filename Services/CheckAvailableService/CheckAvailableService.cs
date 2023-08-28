@@ -55,10 +55,6 @@ namespace griffined_api.Services.CheckAvailableService
                             || c.Status == ClassStatus.PendingCancellation))
                             .ToListAsync();
 
-            var count = dbStudyClasses.Count();
-
-            Console.WriteLine("dbStudyClasses ======== " + count);
-
             var requestedStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == requestedSchedule.RequestedStudySubjectId)
                                 ?? throw new NotFoundException($"StudySubject with ID {requestedSchedule.RequestedStudySubjectId}is not found.");
 
