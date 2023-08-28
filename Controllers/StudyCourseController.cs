@@ -95,5 +95,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.EaAddStudent(requestDto));
         }
+
+        [HttpPut("remove/student"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaRemoveStudent(EaStudentManagementRequestDto requestDto)
+        {
+            return Ok(await _studyCourseService.EaRemoveStudent(requestDto));
+        }
     }
 }
