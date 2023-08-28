@@ -18,10 +18,10 @@ namespace griffined_api.Controllers
             _studentReportService = studentReportService;
         }
 
-        [HttpGet("student"), Authorize(Roles = "teacher, master")]
-        public async Task<ActionResult> StudentGetStudentReport(int studyCourseId, string studentCode)
+        [HttpGet("student"), Authorize(Roles = "student, master")]
+        public async Task<ActionResult> StudentGetStudentReport(int studyCourseId)
         {
-            var response = await _studentReportService.StudentGetStudentReport(studyCourseId, studentCode);
+            var response = await _studentReportService.StudentGetStudentReport(studyCourseId);
             if (response == null)
                 return NotFound(response);
             return Ok(response);
