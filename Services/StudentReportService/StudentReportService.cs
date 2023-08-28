@@ -81,9 +81,13 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<StudentReportStudentResponseDto>> StudentGetStudentReport(int studyCourseId, string studentCode)
+        public async Task<ServiceResponse<StudentReportStudentResponseDto>> StudentGetStudentReport(int studyCourseId)
         {
             var response = new ServiceResponse<StudentReportStudentResponseDto>();
+
+            var studentId = _firebaseService.GetAzureIdWithToken();
+
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == studentId) ?? throw new NotFoundException("No Student Found.");
 
             var dbStudySubjects = await _context.StudySubjects
                                     .Include(ss => ss.StudyCourse)
@@ -94,14 +98,14 @@ namespace griffined_api.Services.StudentReportService
                                     .Include(ss => ss.StudySubjectMember)
                                         .ThenInclude(sm => sm.StudentReports)
                                             .ThenInclude(sr => sr.Teacher)
-                                    .Where(ss => ss.StudyCourse.Id == studyCourseId && ss.StudySubjectMember.Any(sm => sm.Student.StudentCode == studentCode))
+                                    .Where(ss => ss.StudyCourse.Id == studyCourseId && ss.StudySubjectMember.Any(sm => sm.Student.Id == studentId))
                                     .ToListAsync() ?? throw new NotFoundException("No Study Subject found.");
 
             var reportDtoList = new List<StudySubjectReportResponseDto>();
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
-                var dbMember = dbStudySubject.StudySubjectMember.FirstOrDefault(sm => sm.Student.StudentCode == studentCode) ?? throw new NotFoundException("No Student Found.");
+                var dbMember = dbStudySubject.StudySubjectMember.FirstOrDefault(sm => sm.Student.Id == studentId) ?? throw new NotFoundException("No Student Found.");
 
                 var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
                 var hundredPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
@@ -168,7 +172,7 @@ namespace griffined_api.Services.StudentReportService
             {
                 StudyCourseId = studyCourseId,
                 Course = dbStudySubjects.FirstOrDefault()!.StudyCourse.Course.course,
-                StudentCode = studentCode,
+                StudentCode = student.StudentCode,
                 Report = reportDtoList
             };
 
