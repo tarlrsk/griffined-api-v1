@@ -3,6 +3,7 @@ using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -226,6 +227,7 @@ namespace griffined_api.Services.StudyCourseService
                         var member = new StudySubjectMember()
                         {
                             Student = student.Student,
+                            CourseJoinedDate = DateTime.Now,
                             Status = StudySubjectMemberStatus.Pending,
                         };
                         studySubject.StudySubjectMember.Add(member);
@@ -1038,6 +1040,8 @@ namespace griffined_api.Services.StudyCourseService
             var dbStudySubjects = await _context.StudySubjects
                                 .Include(ss => ss.StudyCourse)
                                 .Include(ss => ss.StudySubjectMember)
+                                .Include(ss => ss.StudyClasses)
+                                    .ThenInclude(sc => sc.Attendances)
                                 .Where(ss => requestDto.StudySubjectIds.Contains(ss.Id) && ss.StudyCourse.Id == requestDto.StudyCourseId)
                                 .ToListAsync()
                                 ?? throw new NotFoundException("No Subjects Found.");
@@ -1046,7 +1050,10 @@ namespace griffined_api.Services.StudyCourseService
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
-                var existingMember = await _context.StudySubjectMember.FirstOrDefaultAsync(sm => sm.Student.Id == student.Id) ?? throw new BadRequestException("The student is already in the subject");
+                var existingMember = await _context.StudySubjectMember.FirstOrDefaultAsync(sm => sm.Student.Id == student.Id && sm.StudySubject.Id == dbStudySubject.Id);
+
+                if (existingMember != null)
+                    throw new BadRequestException("The student is already in the subject");
 
                 var member = new StudySubjectMember
                 {
@@ -1068,6 +1075,44 @@ namespace griffined_api.Services.StudyCourseService
 
                     dbStudyClass.Attendances.Add(studentAttendance);
                 }
+            }
+
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> EaRemoveStudent(EaStudentManagementRequestDto requestDto)
+        {
+            var response = new ServiceResponse<string>();
+
+            var dbStudySubjects = await _context.StudySubjects
+                                    .Include(ss => ss.StudyCourse)
+                                    .Include(ss => ss.StudySubjectMember)
+                                    .Include(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.Attendances)
+                                            .ThenInclude(a => a.Student)
+                                    .Where(ss => requestDto.StudySubjectIds.Contains(ss.Id) && ss.StudyCourse.Id == requestDto.StudyCourseId)
+                                    .ToListAsync()
+                                    ?? throw new NotFoundException("No Subjects Found.");
+
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                var studentToRemove = dbStudySubject.StudySubjectMember
+                                        .FirstOrDefault(sm => sm.Student.StudentCode == requestDto.StudentCode)
+                                        ?? throw new NotFoundException("No Student Found");
+
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                {
+                    var attendanceToRemove = dbStudyClass.Attendances
+                                            .FirstOrDefault(a => a.Student!.StudentCode == requestDto.StudentCode)
+                                            ?? throw new NotFoundException($"No Attendance with Student {requestDto.StudentCode} Found.");
+
+                    _context.StudentAttendances.Remove(attendanceToRemove);
+                }
+
+                _context.StudySubjectMember.Remove(studentToRemove);
             }
 
             await _context.SaveChangesAsync();
