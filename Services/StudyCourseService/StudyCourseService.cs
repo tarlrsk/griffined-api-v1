@@ -1049,6 +1049,18 @@ namespace griffined_api.Services.StudyCourseService
 
             dbStudySubject.StudySubjectMember.Add(member);
 
+            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+            {
+                var studentAttendance = new StudentAttendance
+                {
+                    StudyClass = dbStudyClass,
+                    Student = student,
+                    Attendance = Attendance.None
+                };
+
+                dbStudyClass.Attendances.Add(studentAttendance);
+            }
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
