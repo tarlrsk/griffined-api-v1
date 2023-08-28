@@ -1016,7 +1016,7 @@ namespace griffined_api.Services.StudyCourseService
                                 TeacherLastName = group.Key.LastName,
                                 TeacherNickname = group.Key.Nickname,
                                 Phone = group.Key.Phone,
-                                // TODO TeacherJoinedDate
+                                CourseJoinedDate = group.First().Schedule.Date.ToDateTimeString(),
                                 Subjects = group.Select(cls => new StudySubjectResponseDto
                                 {
                                     StudySubjectId = cls.StudySubject.Id,
