@@ -10,6 +10,8 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
     public class RequestedScheduleRequestDto
     {
         [Required]
+        public List<int> StudentIds { get; set; } = new List<int>();
+        [Required]
         public List<int> CurrentStudySubjectId { get; set; } = new List<int>();
         [Required]
         public List<string> Dates { get; set; } = new List<string>();
@@ -22,6 +24,6 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         [Required]
         public int RequestedStudyCourseId { get; set; }
         public int? RequestedStudySubjectId { get; set; }
-        public List<LocalScheduleResponseDto> LocalSchedule { get; set; } = new List<LocalScheduleResponseDto>();
+        public List<LocalScheduleRequestDto> LocalSchedule { get; set; } = new List<LocalScheduleRequestDto>();
     }
 }

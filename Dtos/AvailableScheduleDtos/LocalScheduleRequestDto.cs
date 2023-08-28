@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
-    public class LocalScheduleResponseDto
+    public class LocalScheduleRequestDto
     {
         [Required]
         public string Date { get; set; } = string.Empty;
@@ -16,7 +16,7 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         [Required]
         public string ToTime { get; set; } = string.Empty;
         [Required]
-        public int SubjectId { get; set; }
+        public int StudySubjectId { get; set; }
         [Required]
         public int TeacherId { get; set; }
     }
