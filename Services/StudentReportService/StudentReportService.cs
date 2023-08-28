@@ -185,6 +185,18 @@ namespace griffined_api.Services.StudentReportService
         {
             var response = new ServiceResponse<StudentReportTeacherResponseDto>();
 
+            var dbStudySubjects = await _context.StudySubjects
+                                    .Include(ss => ss.StudyCourse)
+                                        .ThenInclude(sc => sc.Course)
+                                    .Include(ss => ss.Subject)
+                                    .Include(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.Student)
+                                    .Include(ss => ss.StudySubjectMember)
+                                        .ThenInclude(sm => sm.StudentReports)
+                                            .ThenInclude(sr => sr.Teacher)
+                                    .Where(ss => ss.StudyCourse.Id == studyCourseId)
+                                    .ToListAsync() ?? throw new NotFoundException("No Study Subject found.");
+
             var dbMembers = await _context.StudySubjectMember
                         .Include(m => m.StudySubject)
                             .ThenInclude(ss => ss.StudyCourse)
