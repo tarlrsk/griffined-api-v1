@@ -105,13 +105,13 @@ namespace griffined_api.Services.StudentReportService
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
-                var dbMember = dbStudySubject.StudySubjectMember.FirstOrDefault(sm => sm.Student.Id == studentId) ?? throw new NotFoundException("No Student Found.");
+                var dbStudySubjectMember = dbStudySubject.StudySubjectMember.FirstOrDefault(sm => sm.Student.Id == studentId) ?? throw new NotFoundException("No Student Found.");
 
-                var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
-                var hundredPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
-                var specialReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.Special);
+                var fiftyPercentReport = dbStudySubjectMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
+                var hundredPercentReport = dbStudySubjectMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
+                var specialReport = dbStudySubjectMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.Special);
 
-                var distinctReports = dbMember.StudentReports
+                var distinctReports = dbStudySubjectMember.StudentReports
                                     .GroupBy(report => report.StudySubjectMember.StudySubject)
                                     .Select(group => group.First())
                                     .ToList();
