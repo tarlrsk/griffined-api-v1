@@ -70,18 +70,22 @@ namespace griffined_api.Services.StudentReportService
                     fileToUpload.ContentType,
                     stream
                 );
+
+                reportEntity.ObjectName = objectName;
             }
+
+            string url = await _firebaseService.GetUrlByObjectName(reportEntity.ObjectName);
 
             dbMember.StudentReports.Add(studentReport);
 
+            await _context.SaveChangesAsync();
+
             var data = new FilesResponseDto
             {
-                FileName = reportEntity.FileName,
-                ContentType = await _firebaseService.GetContentTypeByObjectName(reportEntity.ObjectName),
-                URL = await _firebaseService.GetUrlByObjectName(reportEntity.ObjectName)
+                FileName = fileToUpload.FileName,
+                ContentType = fileToUpload.ContentType,
+                URL = url
             };
-
-            await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
