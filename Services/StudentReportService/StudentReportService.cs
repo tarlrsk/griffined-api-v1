@@ -185,47 +185,59 @@ namespace griffined_api.Services.StudentReportService
         {
             var response = new ServiceResponse<StudentReportTeacherResponseDto>();
 
-            var dbStudySubjects = await _context.StudySubjects
-                                    .Include(ss => ss.StudyCourse)
-                                        .ThenInclude(sc => sc.Course)
-                                    .Include(ss => ss.Subject)
-                                    .Include(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.Student)
-                                    .Include(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.StudentReports)
-                                            .ThenInclude(sr => sr.Teacher)
-                                    .Where(ss => ss.StudyCourse.Id == studyCourseId)
-                                    .ToListAsync() ?? throw new NotFoundException("No Study Subject found.");
-
             var data = new StudentReportTeacherResponseDto
             {
-                StudyCourseId = studyCourseId,
-                Course = dbStudySubjects.First().StudyCourse.Course.course
+                StudyCourseId = studyCourseId
             };
 
-            foreach (var dbStudySubject in dbStudySubjects)
+            var dbStudySubjectMembers = await _context.StudySubjectMember
+                                        .Include(sm => sm.StudySubject)
+                                            .ThenInclude(ss => ss.Subject)
+                                        .Include(sm => sm.StudySubject)
+                                            .ThenInclude(ss => ss.StudyCourse)
+                                                .ThenInclude(sc => sc.Course)
+                                        .Include(sm => sm.Student)
+                                        .Include(sm => sm.StudentReports)
+                                            .ThenInclude(sp => sp.Teacher)
+                                        .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
+                                        .ToListAsync() ?? throw new NotFoundException("No Members Found.");
+
+            dbStudySubjectMembers = dbStudySubjectMembers
+                                    .GroupBy(sm => sm.Student.Id)
+                                    .Select(group => group.First())
+                                    .ToList();
+
+            foreach (var dbStudySubjectMember in dbStudySubjectMembers)
             {
-                var dbMembers = dbStudySubject.StudySubjectMember.ToList();
-                dbMembers = dbMembers
-                            .GroupBy(sm => sm.Student.Id)
-                            .Select(group => group.First())
-                            .ToList();
-
-                foreach (var dbMember in dbMembers)
+                var studentDto = new StudentReportWithStudentResponseDto
                 {
-                    var studentDto = new StudentReportWithStudentResponseDto
-                    {
-                        StudentId = dbMember.Student.Id,
-                        StudentCode = dbMember.Student.StudentCode,
-                        FirstName = dbMember.Student.FirstName,
-                        LastName = dbMember.Student.LastName,
-                        Nickname = dbMember.Student.Nickname,
-                        Subjects = new List<StudySubjectReportResponseDto>()
-                    };
+                    StudentId = dbStudySubjectMember.Student.Id,
+                    StudentCode = dbStudySubjectMember.Student.StudentCode,
+                    FirstName = dbStudySubjectMember.Student.FirstName,
+                    LastName = dbStudySubjectMember.Student.LastName,
+                    Nickname = dbStudySubjectMember.Student.Nickname,
+                    Subjects = new List<StudySubjectReportResponseDto>()
+                };
 
-                    var fiftyPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
-                    var hundredPercentReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
-                    var specialReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.Special);
+                var dbStudySubjects = await _context.StudySubjects
+                                        .Include(ss => ss.StudyCourse)
+                                            .ThenInclude(sc => sc.Course)
+                                        .Include(ss => ss.Subject)
+                                        .Include(ss => ss.StudySubjectMember)
+                                            .ThenInclude(sm => sm.Student)
+                                        .Include(ss => ss.StudySubjectMember)
+                                            .ThenInclude(sm => sm.StudentReports)
+                                                .ThenInclude(sr => sr.Teacher)
+                                        .Where(ss => ss.StudyCourse.Id == studyCourseId && ss.StudySubjectMember.Any(sm => sm.Student.Id == dbStudySubjectMember.Student.Id))
+                                        .ToListAsync() ?? throw new NotFoundException("No Study Subject found.");
+
+                foreach (var dbStudySubject in dbStudySubjects)
+                {
+                    var dbMemberReport = dbStudySubject.StudySubjectMember.FirstOrDefault(sm => sm.Student.Id == dbStudySubjectMember.Student.Id) ?? throw new NotFoundException("No Student Found.");
+
+                    var fiftyPercentReport = dbMemberReport.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.FiftyPercent);
+                    var hundredPercentReport = dbMemberReport.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.HundredPercent);
+                    var specialReport = dbMemberReport.StudentReports.FirstOrDefault(sr => sr.Progression == Progression.Special);
 
                     var reportDto = new StudySubjectReportResponseDto
                     {
@@ -277,9 +289,12 @@ namespace griffined_api.Services.StudentReportService
                     };
 
                     studentDto.Subjects.Add(reportDto);
-                    data.Students.Add(studentDto);
                 }
+
+                data.Students.Add(studentDto);
             }
+
+            data.Course = dbStudySubjectMembers.First().StudySubject.StudyCourse.Course.course;
 
             response.Data = data;
             response.StatusCode = (int)HttpStatusCode.OK;
