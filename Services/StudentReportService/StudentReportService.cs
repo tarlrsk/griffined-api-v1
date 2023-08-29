@@ -25,9 +25,9 @@ namespace griffined_api.Services.StudentReportService
             _storageClient = storageClient;
         }
 
-        public async Task<ServiceResponse<string>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
+        public async Task<ServiceResponse<FilesResponseDto>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
-            var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<FilesResponseDto>();
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
@@ -74,10 +74,17 @@ namespace griffined_api.Services.StudentReportService
 
             dbMember.StudentReports.Add(studentReport);
 
+            var data = new FilesResponseDto
+            {
+                FileName = reportEntity.FileName,
+                ContentType = await _firebaseService.GetContentTypeByObjectName(reportEntity.ObjectName),
+                URL = await _firebaseService.GetUrlByObjectName(reportEntity.ObjectName)
+            };
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = "successful";
+            response.Data = data;
             return response;
         }
 
@@ -335,9 +342,9 @@ namespace griffined_api.Services.StudentReportService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
+        public async Task<ServiceResponse<FilesResponseDto>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
-            var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<FilesResponseDto>();
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
@@ -397,8 +404,15 @@ namespace griffined_api.Services.StudentReportService
 
             await _context.SaveChangesAsync();
 
+            var data = new FilesResponseDto
+            {
+                FileName = reportEntity.FileName,
+                ContentType = await _firebaseService.GetContentTypeByObjectName(reportEntity.ObjectName),
+                URL = await _firebaseService.GetUrlByObjectName(reportEntity.ObjectName)
+            };
+
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = "success";
+            response.Data = data;
             return response;
         }
     }

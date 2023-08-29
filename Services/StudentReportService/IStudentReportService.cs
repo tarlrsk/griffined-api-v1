@@ -10,7 +10,7 @@ namespace griffined_api.Services.StudentReportService
     {
         Task<ServiceResponse<StudentReportResponseDto>> StudentGetStudentReport(int studyCourseId);
         Task<ServiceResponse<StudentReportResponseDto>> TeacherGetStudentReport(int studyCourseId);
-        Task<ServiceResponse<String>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload);
-        Task<ServiceResponse<String>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload);
+        Task<ServiceResponse<FilesResponseDto>> AddStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload);
+        Task<ServiceResponse<FilesResponseDto>> UpdateStudentReport(StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload);
     }
 }
