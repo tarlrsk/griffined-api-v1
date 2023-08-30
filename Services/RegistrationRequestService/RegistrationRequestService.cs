@@ -467,7 +467,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
                                                 && r.RegistrationStatus == RegistrationStatus.PendingEA) ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
-            var ea = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId) ?? throw new NotFoundException("EA not found.");
+            var ea = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId);
 
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto
             {
@@ -478,12 +478,18 @@ namespace griffined_api.Services.RegistrationRequestService
                 StudyCourseType = dbRequest.NewCourseRequests.ElementAt(0).StudyCourseType,
             };
 
-            var takenByEADetail = new StaffNameOnlyResponseDto
+            var takenByEADetail = new StaffNameOnlyResponseDto();
+
+            if (ea != null)
             {
-                StaffId = ea.Id,
-                FullName = ea.FullName,
-                Nickname = ea.Nickname
-            };
+                takenByEADetail.StaffId = ea.Id;
+                takenByEADetail.FullName = ea.FullName;
+                takenByEADetail.Nickname = ea.Nickname;
+            }
+            else
+            {
+                takenByEADetail = null;
+            }
 
             requestDetail.TakenByEA = takenByEADetail;
 
@@ -604,7 +610,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         && r.Type == RegistrationRequestType.NewRequestedCourse)
                         ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
-            var ea = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId) ?? throw new NotFoundException("EA not found.");
+            var ea = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId);
 
             var requestDetail = new RegistrationRequestPendingEADetail2ResponseDto
             {
@@ -615,12 +621,18 @@ namespace griffined_api.Services.RegistrationRequestService
                 StudyCourseType = dbRequest.NewCourseRequests.ElementAt(0).StudyCourseType,
             };
 
-            var takenByEADetail = new StaffNameOnlyResponseDto
+            var takenByEADetail = new StaffNameOnlyResponseDto();
+
+            if (ea != null)
             {
-                StaffId = ea.Id,
-                FullName = ea.FullName,
-                Nickname = ea.Nickname
-            };
+                takenByEADetail.StaffId = ea.Id;
+                takenByEADetail.FullName = ea.FullName;
+                takenByEADetail.Nickname = ea.Nickname;
+            }
+            else
+            {
+                takenByEADetail = null;
+            }
 
             requestDetail.TakenByEA = takenByEADetail;
 

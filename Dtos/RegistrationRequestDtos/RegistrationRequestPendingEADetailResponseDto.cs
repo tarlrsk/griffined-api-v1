@@ -13,7 +13,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public RegistrationRequestType RegistrationRequestType { get; set; }
         public StudyCourseType StudyCourseType { get; set; }
         public List<StudentNameResponseDto> Members { get; set; } = new List<StudentNameResponseDto>();
-        public StaffNameOnlyResponseDto TakenByEA { get; set; } = new();
+        public StaffNameOnlyResponseDto? TakenByEA { get; set; } = new();
         public List<PreferredDayResponseDto> PreferredDays { get; set; } = new List<PreferredDayResponseDto>();
         public List<RequestedCourseResponseDto> Courses { get; set; } = new List<RequestedCourseResponseDto>();
         public RegistrationStatus RegistrationStatus { get; set; }
