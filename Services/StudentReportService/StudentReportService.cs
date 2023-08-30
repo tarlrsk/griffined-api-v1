@@ -376,6 +376,8 @@ namespace griffined_api.Services.StudentReportService
 
             if (existingReport != null)
             {
+                await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
+
                 using (var stream = reportRequestDto.ReportData.OpenReadStream())
                 {
                     var storageObject = await _storageClient.UploadObjectAsync(
@@ -386,7 +388,6 @@ namespace griffined_api.Services.StudentReportService
                     );
                 }
 
-                await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
                 existingReport.FileName = reportEntity.FileName;
                 existingReport.ObjectName = reportEntity.ObjectName;
                 existingReport.DateUpdated = DateTime.Now;
