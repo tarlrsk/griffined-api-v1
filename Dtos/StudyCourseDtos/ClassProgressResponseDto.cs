@@ -10,9 +10,6 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public int StudyCourseId { get; set; }
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
-        public int StudySubjectId { get; set; }
-        public int SubjectId { get; set; }
-        public string Subject { get; set; } = string.Empty;
         public string Progress { get; set; } = string.Empty;
     }
 }

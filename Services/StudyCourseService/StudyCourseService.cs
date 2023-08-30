@@ -1121,46 +1121,51 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<ClassProgressResponseDto>> GetSubjectProgress(int studyCourseId, int studySubjectId)
+        public async Task<ServiceResponse<ClassProgressResponseDto>> GetCourseProgress(int studyCourseId)
         {
             var response = new ServiceResponse<ClassProgressResponseDto>();
 
-            var dbStudySubject = await _context.StudySubjects
+            var data = new ClassProgressResponseDto();
+
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId)
+                                ?? throw new NotFoundException("No Course Found.");
+
+            var dbStudySubjects = await _context.StudySubjects
                                 .Include(ss => ss.StudyCourse)
                                     .ThenInclude(sc => sc.Course)
                                 .Include(ss => ss.Subject)
                                 .Include(ss => ss.StudyClasses)
-                                .FirstOrDefaultAsync(ss => ss.Id == studySubjectId)
+                                .Where(ss => ss.StudyCourse.Id == studyCourseId)
+                                .ToListAsync()
                                 ?? throw new NotFoundException("No Subject Found.");
 
             int completedClass = 0;
             int incompleteClass = 0;
 
-            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+            foreach (var dbStudySubject in dbStudySubjects)
             {
-                if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    completedClass += 1;
-                }
-                else if (dbStudyClass.Status == ClassStatus.None)
-                {
-                    incompleteClass += 1;
+                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    {
+                        completedClass += 1;
+                    }
+                    else if (dbStudyClass.Status == ClassStatus.None)
+                    {
+                        incompleteClass += 1;
+                    }
                 }
             }
 
             double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
             double progress = Math.Round(progressRatio * 100);
 
-            var data = new ClassProgressResponseDto
-            {
-                StudyCourseId = studyCourseId,
-                CourseId = dbStudySubject.StudyCourse.Course.Id,
-                Course = dbStudySubject.StudyCourse.Course.course,
-                StudySubjectId = studySubjectId,
-                SubjectId = dbStudySubject.Subject.Id,
-                Subject = dbStudySubject.Subject.subject,
-                Progress = $"{progress}%"
-            };
+            data.StudyCourseId = dbStudyCourse.Id;
+            data.CourseId = dbStudyCourse.Course.Id;
+            data.Course = dbStudyCourse.Course.course;
+            data.Progress = $"{progress}%";
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
