@@ -1,4 +1,6 @@
 using AutoMapper.Execution;
+using Azure;
+using Google.Api;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -1172,5 +1174,75 @@ namespace griffined_api.Services.StudyCourseService
             response.Data = data;
             return response;
         }
+
+        public async Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest)
+        {
+            var dbRemoveStudyClasses = await _context.StudyClasses
+                                        .Include(c => c.Attendances)
+                                        .Where(c => updateRequest.RemoveStudyClassId.Contains(c.Id)).ToListAsync();
+
+            foreach (var dbRemoveStudyClass in dbRemoveStudyClasses)
+            {
+                foreach (var dbAttendance in dbRemoveStudyClass.Attendances)
+                {
+                    _context.StudentAttendances.Remove(dbAttendance);
+                }
+                dbRemoveStudyClass.Status = ClassStatus.Deleted;
+            }
+
+            var dbStudySubjects = await _context.StudySubjects
+                            .Include(s => s.Subject)
+                            .Include(s => s.StudyClasses)
+                            .Include(s => s.StudyCourse)
+                            .Include(s => s.StudySubjectMember)
+                                .ThenInclude(s => s.Student)
+                            .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
+                            .ToListAsync();
+
+            var dbTeacher = await _context.Teachers.ToListAsync();
+
+            foreach (var studySubjectId in updateRequest.StudySubjectIds)
+            {
+                foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == studySubjectId))
+                {
+                    var dbStudySubject = dbStudySubjects.FirstOrDefault(s => s.Id == studySubjectId)
+                                        ?? throw new NotFoundException($"StudySubject with ID {studySubjectId} is not found.");
+
+                    var classCount = dbStudySubject.StudyClasses.Count();
+                    var studyClass = new StudyClass
+                    {
+                        //TODO Class Count
+                        Teacher = dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
+                                ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found."),
+                        StudyCourse = dbStudySubject.StudyCourse,
+                        Schedule = new Schedule
+                        {
+                            Date = newSchedule.Date.ToDateTime(),
+                            FromTime = newSchedule.FromTime.ToTimeSpan(),
+                            ToTime = newSchedule.ToTime.ToTimeSpan(),
+                            Type = ScheduleType.Class,
+                        },
+                    };
+                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                    {
+                        studyClass.Attendances.Add(new StudentAttendance
+                        {
+                            Attendance = Attendance.None,
+                            Student = dbMember.Student,
+                        });
+                    }
+
+                    dbStudySubject.StudyClasses.Add(studyClass);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
     }
+
 }
