@@ -10,10 +10,14 @@ namespace griffined_api.Services.StudyCourseService
     public class UpdateScheduleRequestDto
     {
         [Required]
-        public List<int> StudySubjectIds { get; set; } = new List<int>();
+        public string Date { get; set; } = string.Empty;
         [Required]
-        public List<int> RemoveSchedule { get; set; } = new List<int>();
+        public string FromTime { get; set; } = string.Empty;
         [Required]
-        public List<ScheduleRequestDto> NewSchedule { get; set; } = new List<ScheduleRequestDto>();
+        public string ToTime { get; set; } = string.Empty;
+        [Required]
+        public int StudySubjectId { get; set; }
+        [Required]
+        public int TeacherId { get; set; }
     }
 }

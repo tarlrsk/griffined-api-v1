@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StudyCourseDtos
 {
-    public class ScheduleRequestDto
+    public class NewScheduleRequestDto
     {
         [Required]
         public string Date { get; set; } = string.Empty;
