@@ -467,6 +467,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.Type == RegistrationRequestType.NewRequestedCourse
                                                 && r.RegistrationStatus == RegistrationStatus.PendingEA) ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
+            var ea = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId) ?? throw new NotFoundException("EA not found.");
+
             var requestDetail = new RegistrationRequestPendingEADetailResponseDto
             {
                 RequestId = dbRequest.Id,
@@ -475,6 +477,15 @@ namespace griffined_api.Services.RegistrationRequestService
                 RegistrationStatus = dbRequest.RegistrationStatus,
                 StudyCourseType = dbRequest.NewCourseRequests.ElementAt(0).StudyCourseType,
             };
+
+            var takenByEADetail = new StaffNameOnlyResponseDto
+            {
+                StaffId = ea.Id,
+                FullName = ea.FullName,
+                Nickname = ea.Nickname
+            };
+
+            requestDetail.TakenByEA = takenByEADetail;
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
             {
@@ -593,6 +604,8 @@ namespace griffined_api.Services.RegistrationRequestService
                         && r.Type == RegistrationRequestType.NewRequestedCourse)
                         ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
+            var ea = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId) ?? throw new NotFoundException("EA not found.");
+
             var requestDetail = new RegistrationRequestPendingEADetail2ResponseDto
             {
                 RequestId = dbRequest.Id,
@@ -601,6 +614,15 @@ namespace griffined_api.Services.RegistrationRequestService
                 RegistrationStatus = dbRequest.RegistrationStatus,
                 StudyCourseType = dbRequest.NewCourseRequests.ElementAt(0).StudyCourseType,
             };
+
+            var takenByEADetail = new StaffNameOnlyResponseDto
+            {
+                StaffId = ea.Id,
+                FullName = ea.FullName,
+                Nickname = ea.Nickname
+            };
+
+            requestDetail.TakenByEA = takenByEADetail;
 
             foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
             {
