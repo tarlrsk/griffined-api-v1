@@ -504,29 +504,33 @@ namespace griffined_api.Services.StudyCourseService
                 });
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    schedules.Add(new ScheduleResponseDto
+                    if (dbStudyClass.Status != ClassStatus.Deleted)
                     {
-                        StudyClassId = dbStudyClass.Id,
-                        ClassNo = dbStudyClass.ClassNumber,
-                        Date = dbStudyClass.Schedule.Date.ToDateString(),
-                        FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                        ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                        StudyCourseId = dbStudyCourse.Id,
-                        CourseId = dbStudyCourse.Course.Id,
-                        Course = dbStudyCourse.Course.course,
-                        StudySubjectId = dbStudySubject.Id,
-                        SubjectId = dbStudySubject.Subject.Id,
-                        Subject = dbStudySubject.Subject.subject,
-                        CourseSubject = dbStudyCourse.Course.course + " "
+                        schedules.Add(new ScheduleResponseDto
+                        {
+                            StudyClassId = dbStudyClass.Id,
+                            ClassNo = dbStudyClass.ClassNumber,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            StudyCourseId = dbStudyCourse.Id,
+                            CourseId = dbStudyCourse.Course.Id,
+                            Course = dbStudyCourse.Course.course,
+                            StudySubjectId = dbStudySubject.Id,
+                            SubjectId = dbStudySubject.Subject.Id,
+                            Subject = dbStudySubject.Subject.subject,
+                            CourseSubject = dbStudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudyCourse.Level?.level ?? ""),
-                        ClassStatus = dbStudyClass.Status,
-                        TeacherId = dbStudyClass.Teacher.Id,
-                        TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                        TeacherLastName = dbStudyClass.Teacher.LastName,
-                        TeacherNickname = dbStudyClass.Teacher.Nickname,
-                        // TODO WorkType
-                    });
+                            ClassStatus = dbStudyClass.Status,
+                            TeacherId = dbStudyClass.Teacher.Id,
+                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                            TeacherLastName = dbStudyClass.Teacher.LastName,
+                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            // TODO WorkType
+                        });
+                    }
+
                 }
             }
 
@@ -562,7 +566,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Attendances)
                                     .ThenInclude(a => a.Student)
                                 .Include(c => c.Teacher)
-                                .Where(c => dbStudySubjects.Contains(c.StudySubject))
+                                .Where(c => dbStudySubjects.Contains(c.StudySubject) && c.Status != ClassStatus.Deleted)
                                 .Select(c => new
                                 {
                                     StudyClass = c,
