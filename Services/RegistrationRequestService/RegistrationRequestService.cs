@@ -408,7 +408,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         FullName = ea.FullName
                     };
                     requestDto.TakenByEA = staff;
-                    requestDto.ScheduledByEA = staff;
+                    requestDto.ScheduledBy = staff;
                 }
                 if (oa != null)
                 {

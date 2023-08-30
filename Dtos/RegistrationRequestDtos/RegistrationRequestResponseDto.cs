@@ -22,7 +22,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public bool HasSchedule { get; set; }
         public StaffNameOnlyResponseDto? ByEC { get; set; }
         public StaffNameOnlyResponseDto? TakenByEA { get; set; }
-        public StaffNameOnlyResponseDto? ScheduledByEA { get; set; }
+        public StaffNameOnlyResponseDto? ScheduledBy { get; set; }
         public StaffNameOnlyResponseDto? ByOA { get; set; }
         public StaffNameOnlyResponseDto? CancelledBy { get; set; }
     }
