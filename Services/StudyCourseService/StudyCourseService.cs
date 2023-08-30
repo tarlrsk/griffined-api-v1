@@ -67,6 +67,7 @@ namespace griffined_api.Services.StudyCourseService
                             IsMakeup = false,
                             ClassNumber = classNumber,
                             Teacher = teacher,
+                            StudyCourse = studyCourse,
                             Schedule = new Schedule()
                             {
                                 Date = newSchedule.Date.ToDateTime(),
@@ -314,6 +315,7 @@ namespace griffined_api.Services.StudyCourseService
                             {
                                 ClassNumber = newStudyClass.ClassNo,
                                 Teacher = dbTeachers.FirstOrDefault(t => t.Id == newStudyClass.TeacherId) ?? throw new Exception($"Cannot Find Teacher ID {newStudyClass.TeacherId}"),
+                                StudyCourse = dbNewCourseRequest.StudyCourse,
                                 Schedule = new Schedule
                                 {
                                     Date = newStudyClass.Date.ToDateTime(),
