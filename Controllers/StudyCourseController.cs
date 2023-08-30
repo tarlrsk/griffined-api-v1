@@ -101,5 +101,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.EaRemoveStudent(requestDto));
         }
+
+        [HttpGet("{studyCourseId}/{studySubjectId}/progress"), Authorize(Roles = "ec, ea, oa, teacher, master")]
+        public async Task<ActionResult> GetSubjectProgress(int studyCourseId, int studySubjectId)
+        {
+            return Ok(await _studyCourseService.GetSubjectProgress(studyCourseId, studySubjectId));
+        }
     }
 }

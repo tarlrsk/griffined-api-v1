@@ -1120,5 +1120,51 @@ namespace griffined_api.Services.StudyCourseService
             response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
+
+        public async Task<ServiceResponse<ClassProgressResponseDto>> GetSubjectProgress(int studyCourseId, int studySubjectId)
+        {
+            var response = new ServiceResponse<ClassProgressResponseDto>();
+
+            var dbStudySubject = await _context.StudySubjects
+                                .Include(ss => ss.StudyCourse)
+                                    .ThenInclude(sc => sc.Course)
+                                .Include(ss => ss.Subject)
+                                .Include(ss => ss.StudyClasses)
+                                .FirstOrDefaultAsync(ss => ss.Id == studySubjectId)
+                                ?? throw new NotFoundException("No Subject Found.");
+
+            int completedClass = 0;
+            int incompleteClass = 0;
+
+            foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+            {
+                if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                {
+                    completedClass += 1;
+                }
+                else if (dbStudyClass.Status == ClassStatus.None)
+                {
+                    incompleteClass += 1;
+                }
+            }
+
+            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+            double progress = Math.Round(progressRatio * 100);
+
+            var data = new ClassProgressResponseDto
+            {
+                StudyCourseId = studyCourseId,
+                CourseId = dbStudySubject.StudyCourse.Course.Id,
+                Course = dbStudySubject.StudyCourse.Course.course,
+                StudySubjectId = studySubjectId,
+                SubjectId = dbStudySubject.Subject.Id,
+                Subject = dbStudySubject.Subject.subject,
+                Progress = $"{progress}%"
+            };
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
     }
 }
