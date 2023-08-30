@@ -394,7 +394,7 @@ namespace griffined_api.Services.StudentReportService
             }
             else
             {
-                dbMember.StudentReports.Add(reportEntity);
+                throw new BadRequestException("No existing Report.");
             }
 
             await _context.SaveChangesAsync();
