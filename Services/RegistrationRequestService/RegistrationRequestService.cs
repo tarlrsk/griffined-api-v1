@@ -385,7 +385,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.Section = registrationRequest.Section;
 
                 var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
-                var ea = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var scheduledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var takenBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.TakenByEAId);
                 var oa = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
                 var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
@@ -399,15 +400,25 @@ namespace griffined_api.Services.RegistrationRequestService
                     };
                     requestDto.ByEC = staff;
                 }
-                if (ea != null)
+                if (takenBy != null)
                 {
                     var staff = new StaffNameOnlyResponseDto
                     {
-                        StaffId = ea.Id,
-                        Nickname = ea.Nickname,
-                        FullName = ea.FullName
+                        StaffId = takenBy.Id,
+                        Nickname = takenBy.Nickname,
+                        FullName = takenBy.FullName
                     };
+
                     requestDto.TakenByEA = staff;
+                }
+                if (scheduledBy != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto
+                    {
+                        StaffId = scheduledBy.Id,
+                        Nickname = scheduledBy.Nickname,
+                        FullName = scheduledBy.FullName
+                    };
                     requestDto.ScheduledBy = staff;
                 }
                 if (oa != null)
@@ -1889,7 +1900,11 @@ namespace griffined_api.Services.RegistrationRequestService
             var dbRequest = await _context.RegistrationRequests
                             .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
 
-            dbRequest.TakenByEAId = _firebaseService.GetAzureIdWithToken();
+            var staffId = _firebaseService.GetAzureIdWithToken();
+
+            dbRequest.TakenByEAId = staffId;
+
+            await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
             {
