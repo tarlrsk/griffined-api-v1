@@ -273,7 +273,7 @@ namespace griffined_api.Services.StudyCourseService
         {
             if (requestDto.ClassToDelete.Count != 0)
             {
-                var dbStudyClasses = await _context.StudyClasses.Where(s => requestDto.ClassToDelete.Contains(s.Id)).ToListAsync();
+                var dbStudyClasses = await _context.StudyClasses.Where(s => s.Id == 1).ToListAsync();
                 foreach (var dbStudyClass in dbStudyClasses)
                 {
                     dbStudyClass.Status = ClassStatus.Deleted;
