@@ -9,6 +9,7 @@ namespace griffined_api.Services.StudyCourseService
     public class StudentStudySubjectMemberResponseDto
     {
         public int StudentId { get; set; }
+        public string StudentCode { get; set; } = string.Empty;
         public string StudentFirstName { get; set; } = string.Empty;
         public string StudentLastName { get; set; } = string.Empty;
         public string StudentNickname { get; set; } = string.Empty;
