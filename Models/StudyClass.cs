@@ -11,6 +11,7 @@ namespace griffined_api.Models
     {
         public int Id { get; set; }
         public int? ScheduleId { get; set; }
+        public int? StudyCourseId { get; set; }
         public int? StudySubjectId { get; set; }
         public int? TeacherId { get; set; }
 
@@ -22,6 +23,9 @@ namespace griffined_api.Models
 
         [ForeignKey(nameof(ScheduleId))]
         public virtual Schedule Schedule { get; set; } = new Schedule();
+
+        [ForeignKey(nameof(StudyCourseId))]
+        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
 
         [ForeignKey(nameof(StudySubjectId))]
         public virtual StudySubject StudySubject { get; set; } = new StudySubject();

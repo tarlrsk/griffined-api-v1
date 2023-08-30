@@ -213,7 +213,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var newComment = new RegistrationRequestComment
                 {
                     Staff = staff,
-                    comment = comment
+                    Comment = comment
                 };
                 request.RegistrationRequestComments.Add(newComment);
             }
@@ -294,7 +294,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var newComment = new RegistrationRequestComment
                 {
                     Staff = staff,
-                    comment = comment
+                    Comment = comment
                 };
                 request.RegistrationRequestComments.Add(newComment);
             }
@@ -385,7 +385,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.Section = registrationRequest.Section;
 
                 var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
-                var ea = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var scheduledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
+                var takenBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.TakenByEAId);
                 var oa = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
                 var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
@@ -399,15 +400,26 @@ namespace griffined_api.Services.RegistrationRequestService
                     };
                     requestDto.ByEC = staff;
                 }
-                if (ea != null)
+                if (takenBy != null)
                 {
                     var staff = new StaffNameOnlyResponseDto
                     {
-                        StaffId = ea.Id,
-                        Nickname = ea.Nickname,
-                        FullName = ea.FullName
+                        StaffId = takenBy.Id,
+                        Nickname = takenBy.Nickname,
+                        FullName = takenBy.FullName
                     };
-                    requestDto.ByEA = staff;
+
+                    requestDto.TakenByEA = staff;
+                }
+                if (scheduledBy != null)
+                {
+                    var staff = new StaffNameOnlyResponseDto
+                    {
+                        StaffId = scheduledBy.Id,
+                        Nickname = scheduledBy.Nickname,
+                        FullName = scheduledBy.FullName
+                    };
+                    requestDto.ScheduledBy = staff;
                 }
                 if (oa != null)
                 {
@@ -417,7 +429,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         Nickname = oa.Nickname,
                         FullName = oa.FullName
                     };
-                    requestDto.ByEA = staff;
+                    requestDto.ByOA = staff;
                 }
                 if (cancelledBy != null)
                 {
@@ -427,13 +439,13 @@ namespace griffined_api.Services.RegistrationRequestService
                         Nickname = cancelledBy.Nickname,
                         FullName = cancelledBy.FullName
                     };
-                    requestDto.ByEA = staff;
+                    requestDto.CancelledBy = staff;
                 }
 
                 data.Add(requestDto);
 
             }
-            response.StatusCode = (int)HttpStatusCode.OK; ;
+            response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
             return response;
         }
@@ -525,7 +537,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToString("dd-MMMM-yyyy HH:mm:ss");
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -653,7 +665,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -842,7 +854,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1059,7 +1071,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1498,7 +1510,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1740,7 +1752,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1883,12 +1895,16 @@ namespace griffined_api.Services.RegistrationRequestService
             return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
 
-        public async Task<ServiceResponse<string>> EaTakenRequest(int requestId)
+        public async Task<ServiceResponse<string>> EaTakeRequest(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
                             .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
 
-            dbRequest.TakenByEAId = _firebaseService.GetAzureIdWithToken();
+            var staffId = _firebaseService.GetAzureIdWithToken();
+
+            dbRequest.TakenByEAId = staffId;
+
+            await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
             {
@@ -1897,7 +1913,78 @@ namespace griffined_api.Services.RegistrationRequestService
 
             return response;
         }
+
+        public async Task<ServiceResponse<string>> EaReleaseRequest(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
+
+            dbRequest.TakenByEAId = null;
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> AddComment(int requestId, CommentRequestDto comment)
+        {
+            var response = new ServiceResponse<string>();
+
+            var dbRequest = await _context.RegistrationRequests
+                            .FirstOrDefaultAsync(r => r.Id == requestId)
+                            ?? throw new NotFoundException("No Request Found.");
+
+            var staffId = _firebaseService.GetAzureIdWithToken();
+
+            var dbStaff = await _context.Staff
+                            .FirstOrDefaultAsync(s => s.Id == staffId)
+                            ?? throw new NotFoundException("No Staff Found.");
+
+            var newComment = new RegistrationRequestComment
+            {
+                Staff = dbStaff,
+                Comment = comment.Comment,
+                DateCreated = DateTime.Now
+            };
+
+            dbRequest.RegistrationRequestComments.Add(newComment);
+
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            return response;
+        }
+
+        public async Task<ServiceResponse<RegistrationRequestCommentResponseDto>> GetCommentsByRequestId(int requestId)
+        {
+            var response = new ServiceResponse<RegistrationRequestCommentResponseDto>();
+
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.RegistrationRequestComments)
+                            .FirstOrDefaultAsync(r => r.Id == requestId)
+                            ?? throw new NotFoundException("No Request Found.");
+
+            var data = new RegistrationRequestCommentResponseDto
+            {
+                RequestId = dbRequest.Id,
+                Comments = dbRequest.RegistrationRequestComments.Select(comment => new CommentResponseDto
+                {
+                    StaffId = comment.Staff.Id,
+                    Role = comment.Staff.Role,
+                    FullName = comment.Staff.FullName,
+                    CreatedAt = comment.DateCreated.ToDateTimeString(),
+                    Comment = comment.Comment
+                }).ToList()
+            };
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
     }
-
-
 }

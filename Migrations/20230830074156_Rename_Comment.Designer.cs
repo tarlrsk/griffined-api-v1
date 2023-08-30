@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230830074156_Rename_Comment")]
+    partial class RenameComment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -929,9 +932,6 @@ namespace griffinedapi.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int?>("StudyCourseId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("StudySubjectId")
                         .IsRequired()
                         .HasColumnType("int");
@@ -944,8 +944,6 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("ScheduleId")
                         .IsUnique();
-
-                    b.HasIndex("StudyCourseId");
 
                     b.HasIndex("StudySubjectId");
 
@@ -1595,10 +1593,6 @@ namespace griffinedapi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
-                        .WithMany("StudyClasses")
-                        .HasForeignKey("StudyCourseId");
-
                     b.HasOne("griffined_api.Models.StudySubject", "StudySubject")
                         .WithMany("StudyClasses")
                         .HasForeignKey("StudySubjectId")
@@ -1612,8 +1606,6 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.Navigation("Schedule");
-
-                    b.Navigation("StudyCourse");
 
                     b.Navigation("StudySubject");
 
@@ -1865,8 +1857,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("StudentAddingRequests");
 
                     b.Navigation("StudentNotifications");
-
-                    b.Navigation("StudyClasses");
 
                     b.Navigation("StudyCourseHistories");
 

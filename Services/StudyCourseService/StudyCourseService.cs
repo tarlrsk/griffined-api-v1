@@ -1048,7 +1048,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .ToListAsync()
                                 ?? throw new NotFoundException("No Subjects Found.");
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == requestDto.StudentCode) ?? throw new NotFoundException("No Student Found.");
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == requestDto.StudentId) ?? throw new NotFoundException("No Student Found.");
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
@@ -1102,14 +1102,14 @@ namespace griffined_api.Services.StudyCourseService
             foreach (var dbStudySubject in dbStudySubjects)
             {
                 var studentToRemove = dbStudySubject.StudySubjectMember
-                                        .FirstOrDefault(sm => sm.Student.StudentCode == requestDto.StudentCode)
+                                        .FirstOrDefault(sm => sm.Student.Id == requestDto.StudentId)
                                         ?? throw new NotFoundException("No Student Found");
 
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
                     var attendanceToRemove = dbStudyClass.Attendances
-                                            .FirstOrDefault(a => a.Student!.StudentCode == requestDto.StudentCode)
-                                            ?? throw new NotFoundException($"No Attendance with Student {requestDto.StudentCode} Found.");
+                                            .FirstOrDefault(a => a.Student!.Id == requestDto.StudentId)
+                                            ?? throw new NotFoundException($"No Attendance with Student {requestDto.StudentId} Found.");
 
                     _context.StudentAttendances.Remove(attendanceToRemove);
                 }
@@ -1122,7 +1122,38 @@ namespace griffined_api.Services.StudyCourseService
             response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
-        
+
+        public async Task<ServiceResponse<ClassProgressResponseDto>> GetCourseProgress(int studyCourseId)
+        {
+            var response = new ServiceResponse<ClassProgressResponseDto>();
+
+            var data = new ClassProgressResponseDto();
+
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(sc => sc.Course)
+                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId)
+                                ?? throw new NotFoundException("No Course Found.");
+
+            var dbStudySubjects = await _context.StudySubjects
+                                .Include(ss => ss.StudyCourse)
+                                    .ThenInclude(sc => sc.Course)
+                                .Include(ss => ss.Subject)
+                                .Include(ss => ss.StudyClasses)
+                                .Where(ss => ss.StudyCourse.Id == studyCourseId)
+                                .ToListAsync()
+                                ?? throw new NotFoundException("No Subject Found.");
+
+            int completedClass = 0;
+            int incompleteClass = 0;
+
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                {
+                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    {
+                        completedClass += 1;
+                        
         public async Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest)
         {
             var dbRemoveStudyClasses = await _context.StudyClasses
@@ -1135,6 +1166,26 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     _context.StudentAttendances.Remove(dbAttendance);
                 }
+                    else if (dbStudyClass.Status == ClassStatus.None)
+                    {
+                        incompleteClass += 1;
+                    }
+                }
+            }
+
+            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+            double progress = Math.Round(progressRatio * 100);
+
+            data.StudyCourseId = dbStudyCourse.Id;
+            data.CourseId = dbStudyCourse.Course.Id;
+            data.Course = dbStudyCourse.Course.course;
+            data.Progress = $"{progress}%";
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
+    }
                 dbRemoveStudyClass.Status = ClassStatus.Deleted;
             }
 

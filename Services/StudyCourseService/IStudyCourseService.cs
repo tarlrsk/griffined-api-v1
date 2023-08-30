@@ -24,5 +24,6 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<string>> EaAddStudent(EaStudentManagementRequestDto requestDto);
         Task<ServiceResponse<string>> EaRemoveStudent(EaStudentManagementRequestDto requestDto);
         Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest);
+        Task<ServiceResponse<ClassProgressResponseDto>> GetCourseProgress(int studyCourseId);
     }
 }
