@@ -1914,6 +1914,23 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
+        public async Task<ServiceResponse<string>> EaReleaseRequest(int requestId)
+        {
+            var dbRequest = await _context.RegistrationRequests
+                .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
+
+            dbRequest.TakenByEAId = null;
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
+            return response;
+        }
+
         public async Task<ServiceResponse<string>> AddComment(int requestId, CommentRequestDto comment)
         {
             var response = new ServiceResponse<string>();
