@@ -27,5 +27,6 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<string>> EaTakeRequest(int requestId);
         Task<ServiceResponse<string>> EaReleaseRequest(int requestId);
         Task<ServiceResponse<string>> AddComment(int requestId, CommentRequestDto comment);
+        Task<ServiceResponse<RegistrationRequestCommentResponseDto>> GetCommentsByRequestId(int requestId);
     }
 }

@@ -1959,5 +1959,32 @@ namespace griffined_api.Services.RegistrationRequestService
             response.StatusCode = (int)HttpStatusCode.OK;
             return response;
         }
+
+        public async Task<ServiceResponse<RegistrationRequestCommentResponseDto>> GetCommentsByRequestId(int requestId)
+        {
+            var response = new ServiceResponse<RegistrationRequestCommentResponseDto>();
+
+            var dbRequest = await _context.RegistrationRequests
+                            .Include(r => r.RegistrationRequestComments)
+                            .FirstOrDefaultAsync(r => r.Id == requestId)
+                            ?? throw new NotFoundException("No Request Found.");
+
+            var data = new RegistrationRequestCommentResponseDto
+            {
+                RequestId = dbRequest.Id,
+                Comments = dbRequest.RegistrationRequestComments.Select(comment => new CommentResponseDto
+                {
+                    StaffId = comment.Staff.Id,
+                    Role = comment.Staff.Role,
+                    FullName = comment.Staff.FullName,
+                    CreatedAt = comment.DateCreated.ToDateTimeString(),
+                    Comment = comment.Comment
+                }).ToList()
+            };
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
     }
 }
