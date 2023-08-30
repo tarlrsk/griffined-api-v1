@@ -1652,6 +1652,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         Section = dbRequestedCourse.StudyCourse?.Section,
                         CourseId = dbRequestedCourse.Course.Id,
                         Course = dbRequestedCourse.Course.course,
+                        StudyCourseId = dbRequestedCourse.StudyCourse?.Id,
                         LevelId = dbRequestedCourse.LevelId,
                         Level = dbRequestedCourse.Level?.level,
                         TotalHours = dbRequestedCourse.TotalHours,
@@ -1666,10 +1667,12 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             SubjectId = dbRequestSubject.Subject.Id,
                             Subject = dbRequestSubject.Subject.subject,
+                            StudySubjectId = dbRequestedCourse.StudyCourse?.StudySubjects.FirstOrDefault(s => s.SubjectId == dbRequestSubject.Subject.Id)?.Id,
                             Hour = dbRequestSubject.Hour,
                         };
                         requestedCourse.subjects.Add(requestSubject);
                     }
+                    
                     requestDetail.Courses.Add(requestedCourse);
                 }
 
@@ -1854,6 +1857,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            StudyCourseId = dbStudySubject.StudyCourse.Id,
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
@@ -1894,6 +1898,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            StudyCourseId = dbStudySubject.StudyCourse.Id,
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
