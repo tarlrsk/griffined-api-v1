@@ -326,20 +326,11 @@ namespace griffined_api.Services.StudentReportService
 
             if (existingReport != null)
             {
-                if (fileToUpload.FileName != existingReport.FileName)
-                {
                     await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
-                    _context.StudentReports.Remove(existingReport);
-
-                    dbMember.StudentReports.Add(reportEntity);
-                }
-                else
-                {
                     existingReport.FileName = reportEntity.FileName;
                     existingReport.ObjectName = reportEntity.ObjectName;
                     existingReport.DateUpdated = DateTime.Now;
                     existingReport.Teacher = dbTeacher;
-                }
             }
             else
             {
