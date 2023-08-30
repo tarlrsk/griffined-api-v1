@@ -1646,8 +1646,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         };
                         requestedCourse.subjects.Add(requestSubject);
                     }
-
-                    foreach(var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                    
                     requestDetail.Courses.Add(requestedCourse);
                 }
 
