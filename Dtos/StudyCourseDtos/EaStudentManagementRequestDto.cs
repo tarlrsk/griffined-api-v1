@@ -8,7 +8,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
     public class EaStudentManagementRequestDto
     {
         [Required]
-        public string StudentCode { get; set; } = string.Empty;
+        public int StudentId { get; set; }
 
         [Required]
         public int StudyCourseId { get; set; }
