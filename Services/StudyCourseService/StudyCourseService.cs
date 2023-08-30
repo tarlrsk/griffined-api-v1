@@ -1046,7 +1046,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .ToListAsync()
                                 ?? throw new NotFoundException("No Subjects Found.");
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentCode == requestDto.StudentCode) ?? throw new NotFoundException("No Student Found.");
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == requestDto.StudentId) ?? throw new NotFoundException("No Student Found.");
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
@@ -1100,14 +1100,14 @@ namespace griffined_api.Services.StudyCourseService
             foreach (var dbStudySubject in dbStudySubjects)
             {
                 var studentToRemove = dbStudySubject.StudySubjectMember
-                                        .FirstOrDefault(sm => sm.Student.StudentCode == requestDto.StudentCode)
+                                        .FirstOrDefault(sm => sm.Student.Id == requestDto.StudentId)
                                         ?? throw new NotFoundException("No Student Found");
 
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
                     var attendanceToRemove = dbStudyClass.Attendances
-                                            .FirstOrDefault(a => a.Student!.StudentCode == requestDto.StudentCode)
-                                            ?? throw new NotFoundException($"No Attendance with Student {requestDto.StudentCode} Found.");
+                                            .FirstOrDefault(a => a.Student!.Id == requestDto.StudentId)
+                                            ?? throw new NotFoundException($"No Attendance with Student {requestDto.StudentId} Found.");
 
                     _context.StudentAttendances.Remove(attendanceToRemove);
                 }
