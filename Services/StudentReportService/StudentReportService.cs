@@ -366,32 +366,31 @@ namespace griffined_api.Services.StudentReportService
             var fileName = fileToUpload.FileName;
             var objectName = $"students/{detailRequestDto.StudentCode}/study-subjects/{detailRequestDto.StudySubjectId}/{detailRequestDto.Progression}/{fileName}";
 
-            using (var stream = reportRequestDto.ReportData.OpenReadStream())
-            {
-                var storageObject = await _storageClient.UploadObjectAsync(
-                    FIREBASE_BUCKET,
-                    objectName,
-                    fileToUpload.ContentType,
-                    stream
-                );
+            reportEntity.FileName = fileName;
+            reportEntity.ObjectName = objectName;
+            reportEntity.Progression = detailRequestDto.Progression;
+            reportEntity.DateUpdated = DateTime.Now;
+            reportEntity.Teacher = dbTeacher;
 
-                reportEntity.FileName = fileName;
-                reportEntity.ObjectName = objectName;
-                reportEntity.Progression = detailRequestDto.Progression;
-                reportEntity.DateUpdated = DateTime.Now;
-                reportEntity.Teacher = dbTeacher;
-            }
-
-            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression 
-                                && sr.StudySubjectMember.StudySubject.Id == detailRequestDto.StudySubjectId);
+            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
 
             if (existingReport != null)
             {
-                    await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
-                    existingReport.FileName = reportEntity.FileName;
-                    existingReport.ObjectName = reportEntity.ObjectName;
-                    existingReport.DateUpdated = DateTime.Now;
-                    existingReport.Teacher = dbTeacher;
+                using (var stream = reportRequestDto.ReportData.OpenReadStream())
+                {
+                    var storageObject = await _storageClient.UploadObjectAsync(
+                        FIREBASE_BUCKET,
+                        objectName,
+                        fileToUpload.ContentType,
+                        stream
+                    );
+                }
+
+                await _firebaseService.DeleteStorageFileByObjectName(existingReport.ObjectName);
+                existingReport.FileName = reportEntity.FileName;
+                existingReport.ObjectName = reportEntity.ObjectName;
+                existingReport.DateUpdated = DateTime.Now;
+                existingReport.Teacher = dbTeacher;
             }
             else
             {
