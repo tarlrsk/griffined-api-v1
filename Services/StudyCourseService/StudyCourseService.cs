@@ -1,4 +1,6 @@
 using AutoMapper.Execution;
+using Azure;
+using Google.Api;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -1118,6 +1120,26 @@ namespace griffined_api.Services.StudyCourseService
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
+            return response;
+        }
+        
+        public async Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateScheduleRequestDto updateRequest)
+        {
+            var dbRemoveStudyClasses = await _context.StudyClasses.Where(c => updateRequest.RemoveSchedule.Contains(c.Id)).ToListAsync();
+
+            foreach(var dbRemoveStudyClass in dbRemoveStudyClasses)
+            {
+                dbRemoveStudyClass.Status = ClassStatus.Deleted;
+            }
+
+            foreach(var newClassRequest in updateRequest.NewSchedule)
+            {
+                
+            }
+
+            var response = new ServiceResponse<string>{
+                StatusCode = (int)HttpStatusCode.OK,
+            };
             return response;
         }
     }
