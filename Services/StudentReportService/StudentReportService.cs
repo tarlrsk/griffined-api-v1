@@ -382,7 +382,8 @@ namespace griffined_api.Services.StudentReportService
                 reportEntity.Teacher = dbTeacher;
             }
 
-            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
+            var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression 
+                                && sr.StudySubjectMember.StudySubject.Id == detailRequestDto.StudySubjectId);
 
             if (existingReport != null)
             {
@@ -394,7 +395,7 @@ namespace griffined_api.Services.StudentReportService
             }
             else
             {
-                throw new BadRequestException("No existing Report.");
+                throw new BadRequestException("No existing Report.")
             }
 
             await _context.SaveChangesAsync();
