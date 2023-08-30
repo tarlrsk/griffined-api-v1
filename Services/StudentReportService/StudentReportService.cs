@@ -395,7 +395,7 @@ namespace griffined_api.Services.StudentReportService
             }
             else
             {
-                throw new BadRequestException("No existing Report.")
+                throw new BadRequestException("No existing Report.");
             }
 
             await _context.SaveChangesAsync();
