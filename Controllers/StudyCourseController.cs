@@ -107,5 +107,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.GetCourseProgress(studyCourseId));
         }
+
+        [HttpPut("schedule"), Authorize(Roles = "ea,master")]
+        public async Task<ActionResult> UpdateScheduleWithoutRequest(UpdateStudyCourseRequestDto updateRequest)
+        {
+            return Ok(await _studyCourseService.UpdateScheduleWithoutCancelRequest(updateRequest));
+        }
     }
 }

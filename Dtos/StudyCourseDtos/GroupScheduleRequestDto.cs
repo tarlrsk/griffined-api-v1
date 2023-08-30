@@ -22,7 +22,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
         [Required]
         public int TotalHours { get; set; }
         public Method Method { get; set; }
-        public List<ScheduleRequestDto> Schedules { get; set; } = new List<ScheduleRequestDto>();
+        public List<NewScheduleRequestDto> Schedules { get; set; } = new List<NewScheduleRequestDto>();
 
     }
 }

@@ -12,7 +12,7 @@ namespace griffined_api.Services.StudyCourseService
         [Required]
         public List<int> StudySubjectIds { get; set; } = new List<int>();
         [Required]
-        public List<int> RemoveSchedule { get; set; } = new List<int>();
+        public List<int> RemoveStudyClassId { get; set; } = new List<int>();
         [Required]
         public List<UpdateScheduleRequestDto> NewSchedule { get; set; } = new List<UpdateScheduleRequestDto>();
     }
