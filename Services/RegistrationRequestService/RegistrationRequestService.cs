@@ -486,10 +486,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 takenByEADetail.FullName = ea.FullName;
                 takenByEADetail.Nickname = ea.Nickname;
             }
-            else
-            {
-                takenByEADetail = null;
-            }
 
             requestDetail.TakenByEA = takenByEADetail;
 
@@ -628,10 +624,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 takenByEADetail.StaffId = ea.Id;
                 takenByEADetail.FullName = ea.FullName;
                 takenByEADetail.Nickname = ea.Nickname;
-            }
-            else
-            {
-                takenByEADetail = null;
             }
 
             requestDetail.TakenByEA = takenByEADetail;
