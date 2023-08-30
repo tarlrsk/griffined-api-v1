@@ -485,9 +485,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 takenByEADetail.StaffId = ea.Id;
                 takenByEADetail.FullName = ea.FullName;
                 takenByEADetail.Nickname = ea.Nickname;
+                requestDetail.TakenByEA = takenByEADetail;
             }
-
-            requestDetail.TakenByEA = takenByEADetail;
 
             foreach (var dbMember in dbRequest.RegistrationRequestMembers)
             {
@@ -624,9 +623,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 takenByEADetail.StaffId = ea.Id;
                 takenByEADetail.FullName = ea.FullName;
                 takenByEADetail.Nickname = ea.Nickname;
+                requestDetail.TakenByEA = takenByEADetail;
             }
-
-            requestDetail.TakenByEA = takenByEADetail;
 
             foreach (var dbRequestedCourse in dbRequest.NewCourseRequests)
             {
@@ -1672,7 +1670,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         };
                         requestedCourse.subjects.Add(requestSubject);
                     }
-                    
+
                     requestDetail.Courses.Add(requestedCourse);
                 }
 
