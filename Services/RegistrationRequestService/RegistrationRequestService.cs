@@ -407,7 +407,8 @@ namespace griffined_api.Services.RegistrationRequestService
                         Nickname = ea.Nickname,
                         FullName = ea.FullName
                     };
-                    requestDto.ByEA = staff;
+                    requestDto.TakenByEA = staff;
+                    requestDto.ScheduledByEA = staff;
                 }
                 if (oa != null)
                 {
@@ -417,7 +418,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         Nickname = oa.Nickname,
                         FullName = oa.FullName
                     };
-                    requestDto.ByEA = staff;
+                    requestDto.ByOA = staff;
                 }
                 if (cancelledBy != null)
                 {
@@ -427,13 +428,13 @@ namespace griffined_api.Services.RegistrationRequestService
                         Nickname = cancelledBy.Nickname,
                         FullName = cancelledBy.FullName
                     };
-                    requestDto.ByEA = staff;
+                    requestDto.CancelledBy = staff;
                 }
 
                 data.Add(requestDto);
 
             }
-            response.StatusCode = (int)HttpStatusCode.OK; ;
+            response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
             return response;
         }
