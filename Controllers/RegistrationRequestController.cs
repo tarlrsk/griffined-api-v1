@@ -128,10 +128,10 @@ namespace griffined_api.Controllers
             return Ok(await _registrationRequestService.GetCancellationRequest(requestId));
         }
 
-        [HttpPut, Authorize(Roles = "ea, master")]
-        public async Task<ActionResult> EaTakenRequest(int requestId)
+        [HttpPut("take/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaTakeRequest(int requestId)
         {
-            return Ok(await _registrationRequestService.EaTakenRequest(requestId));
+            return Ok(await _registrationRequestService.EaTakeRequest(requestId));
         }
     }
 }
