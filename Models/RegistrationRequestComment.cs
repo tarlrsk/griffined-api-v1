@@ -13,7 +13,7 @@ namespace griffined_api.Models
         public int? RegistrationRequestId { get; set; }
         public int? StaffId { get; set; }
 
-        public string comment { get; set; } = String.Empty;
+        public string Comment { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [ForeignKey(nameof(RegistrationRequestId))]

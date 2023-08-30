@@ -133,5 +133,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _registrationRequestService.EaTakeRequest(requestId));
         }
+
+        [HttpPost("comment/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> AddComment(int requestId, CommentRequestDto comment)
+        {
+            return Ok(await _registrationRequestService.AddComment(requestId, comment));
+        }
     }
 }

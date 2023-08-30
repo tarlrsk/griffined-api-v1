@@ -1,8 +1,8 @@
+using griffined_api.Dtos.RegistrationRequestDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using griffined_api.Dtos.RegistrationRequestDto;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -24,5 +24,6 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<CompletedCancellationResponseDto>> GetCompletedRequest(int requestId);
         Task<ServiceResponse<CompletedCancellationResponseDto>> GetCancellationRequest(int requestId);
         Task<ServiceResponse<string>> EaTakeRequest(int requestId);
+        Task<ServiceResponse<string>> AddComment(int requestId, CommentRequestDto comment);
     }
 }
