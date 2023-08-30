@@ -213,7 +213,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var newComment = new RegistrationRequestComment
                 {
                     Staff = staff,
-                    comment = comment
+                    Comment = comment
                 };
                 request.RegistrationRequestComments.Add(newComment);
             }
@@ -294,7 +294,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var newComment = new RegistrationRequestComment
                 {
                     Staff = staff,
-                    comment = comment
+                    Comment = comment
                 };
                 request.RegistrationRequestComments.Add(newComment);
             }
@@ -526,7 +526,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToString("dd-MMMM-yyyy HH:mm:ss");
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -654,7 +654,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -843,7 +843,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1060,7 +1060,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1499,7 +1499,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1741,7 +1741,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 comment.Role = staff.Role;
                 comment.FullName = staff.FullName;
                 comment.CreatedAt = dbComment.DateCreated.ToDateTimeString();
-                comment.Comment = dbComment.comment;
+                comment.Comment = dbComment.Comment;
                 requestDetail.Comments.Add(comment);
             }
 
@@ -1898,7 +1898,34 @@ namespace griffined_api.Services.RegistrationRequestService
 
             return response;
         }
+
+        public async Task<ServiceResponse<string>> AddComment(int requestId, CommentRequestDto comment)
+        {
+            var response = new ServiceResponse<string>();
+
+            var dbRequest = await _context.RegistrationRequests
+                            .FirstOrDefaultAsync(r => r.Id == requestId)
+                            ?? throw new NotFoundException("No Request Found.");
+
+            var staffId = _firebaseService.GetAzureIdWithToken();
+
+            var dbStaff = await _context.Staff
+                            .FirstOrDefaultAsync(s => s.Id == staffId)
+                            ?? throw new NotFoundException("No Staff Found.");
+
+            var newComment = new RegistrationRequestComment
+            {
+                Staff = dbStaff,
+                Comment = comment.Comment,
+                DateCreated = DateTime.Now
+            };
+
+            dbRequest.RegistrationRequestComments.Add(newComment);
+
+            await _context.SaveChangesAsync();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            return response;
+        }
     }
-
-
 }
