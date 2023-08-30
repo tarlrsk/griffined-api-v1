@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using Newtonsoft.Json;
 
@@ -135,7 +136,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("comment/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
-        public async Task<ActionResult> AddComment(int requestId, string comment)
+        public async Task<ActionResult> AddComment(int requestId, CommentRequestDto comment)
         {
             return Ok(await _registrationRequestService.AddComment(requestId, comment));
         }
