@@ -135,7 +135,7 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("comment/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
-        public async Task<ActionResult> AddComment(int requestId, CommentRequestDto comment)
+        public async Task<ActionResult> AddComment(int requestId, string comment)
         {
             return Ok(await _registrationRequestService.AddComment(requestId, comment));
         }

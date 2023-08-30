@@ -1899,7 +1899,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> AddComment(int requestId, CommentRequestDto comment)
+        public async Task<ServiceResponse<string>> AddComment(int requestId, string comment)
         {
             var response = new ServiceResponse<string>();
 
@@ -1916,7 +1916,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var newComment = new RegistrationRequestComment
             {
                 Staff = dbStaff,
-                Comment = comment.Comment,
+                Comment = comment,
                 DateCreated = DateTime.Now
             };
 
