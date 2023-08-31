@@ -173,6 +173,7 @@ namespace griffined_api.Services.StudyCourseService
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            ClassStatus = dbStudyClass.Status,
                             // TODO Teacher Work Type
                         };
                         studyCourse.Schedules.Add(schedule);
@@ -969,7 +970,8 @@ namespace griffined_api.Services.StudyCourseService
                     Date = dbStudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                    TeacherNickname = dbStudyClass.Teacher.Nickname
+                    TeacherNickname = dbStudyClass.Teacher.Nickname,
+                    ClassStatus = dbStudyClass.Status,
                     // TODO TeacherWorkType
                 })).ToList()
             };
