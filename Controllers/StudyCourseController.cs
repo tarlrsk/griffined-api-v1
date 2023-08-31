@@ -18,7 +18,7 @@ namespace griffined_api.Controllers
             _studyCourseService = studyCourseService;
 
         }
-        [HttpPost("group"), Authorize(Roles = "ec, master")]
+        [HttpPost("group"), Authorize(Roles = "ea, master")]
         public async Task<ActionResult> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
         {
             return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
