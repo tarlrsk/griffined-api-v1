@@ -9,10 +9,10 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
 {
     public class AvailableScheduleResponseDto
     {
-        public int StudyCourseId { get; set; }
+        public int? StudyCourseId { get; set; }
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
-        public int StudySubjectId { get; set; }
+        public int? StudySubjectId { get; set; }
         public int SubjectId { get; set; }
         public string Subject { get; set; } = string.Empty;
         public int? LevelId { get; set; }
