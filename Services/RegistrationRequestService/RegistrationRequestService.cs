@@ -1999,6 +1999,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             var dbRequest = await _context.RegistrationRequests
                             .Include(r => r.RegistrationRequestComments)
+                                .ThenInclude(r => r.Staff)
                             .FirstOrDefaultAsync(r => r.Id == requestId)
                             ?? throw new NotFoundException("No Request Found.");
 
