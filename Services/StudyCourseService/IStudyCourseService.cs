@@ -1,8 +1,8 @@
+using griffined_api.Dtos.StudyCourseDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using griffined_api.Dtos.StudyCourseDtos;
 
 namespace griffined_api.Services.StudyCourseService
 {
@@ -14,8 +14,16 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId);
         Task<ServiceResponse<List<StudyCourseMobileResponseDto>>> ListAllStudyCourseByStudentToken();
         Task<ServiceResponse<List<StudyCourseMobileResponseDto>>> ListAllStudyCourseByTeacherToken();
-        Task<ServiceResponse<StudyCourseDetailMobileResponseDto>> StudyCourseDetailForTeacher(int studyCourseId);
-        Task<ServiceResponse<StudyCourseDetailMobileResponseDto>> StudyCourseDetailForStudent(int studyCourseId);
+        Task<ServiceResponse<StudyCourseMobileTeacherDetailResponseDto>> StudyCourseDetailForTeacher(int studyCourseId);
+        Task<ServiceResponse<StudyCourseMobileStudentDetailResponseDto>> StudyCourseDetailForStudent(int studyCourseId);
         Task<ServiceResponse<string>> UpdateStudyClassRoom(int studyClassId, string room);
+        Task<ServiceResponse<List<StudyCourseByStudentIdResponseDto>>> ListAllStudyCoursesWithReportsByStudentId(string studentCode);
+        Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId);
+        Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId);
+        Task<ServiceResponse<StudySubjectMemberResponseDto>> GetStudyCourseMember(int studyCourseId);
+        Task<ServiceResponse<string>> EaAddStudent(EaStudentManagementRequestDto requestDto);
+        Task<ServiceResponse<string>> EaRemoveStudent(EaStudentManagementRequestDto requestDto);
+        Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest);
+        Task<ServiceResponse<ClassProgressResponseDto>> GetCourseProgress(int studyCourseId);
     }
 }

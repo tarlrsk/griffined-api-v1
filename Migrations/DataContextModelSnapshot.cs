@@ -421,6 +421,9 @@ namespace griffinedapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TakenByEAId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -437,6 +440,10 @@ namespace griffinedapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
@@ -447,10 +454,6 @@ namespace griffinedapi.Migrations
                     b.Property<int?>("StaffId")
                         .IsRequired()
                         .HasColumnType("int");
-
-                    b.Property<string>("comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -926,6 +929,9 @@ namespace griffinedapi.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StudyCourseId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("StudySubjectId")
                         .IsRequired()
                         .HasColumnType("int");
@@ -938,6 +944,8 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("ScheduleId")
                         .IsUnique();
+
+                    b.HasIndex("StudyCourseId");
 
                     b.HasIndex("StudySubjectId");
 
@@ -988,6 +996,8 @@ namespace griffinedapi.Migrations
                     b.HasIndex("CourseId");
 
                     b.HasIndex("LevelId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("StudyCourse", (string)null);
                 });
@@ -1060,6 +1070,9 @@ namespace griffinedapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CourseJoinedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -1077,6 +1090,32 @@ namespace griffinedapi.Migrations
                     b.HasIndex("StudySubjectId");
 
                     b.ToTable("StudySubjectMember", (string)null);
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubjectTeacher", b =>
+                {
+                    b.Property<int>("StudySubjectTeacherId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudySubjectTeacherId"));
+
+                    b.Property<DateTime>("CourseJoinedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StudySubjectMemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StudySubjectTeacherId");
+
+                    b.HasIndex("StudySubjectMemberId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("StudySubjectTeacher", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.Subject", b =>
@@ -1556,6 +1595,10 @@ namespace griffinedapi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
+                        .WithMany("StudyClasses")
+                        .HasForeignKey("StudyCourseId");
+
                     b.HasOne("griffined_api.Models.StudySubject", "StudySubject")
                         .WithMany("StudyClasses")
                         .HasForeignKey("StudySubjectId")
@@ -1569,6 +1612,8 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.Navigation("Schedule");
+
+                    b.Navigation("StudyCourse");
 
                     b.Navigation("StudySubject");
 
@@ -1647,6 +1692,25 @@ namespace griffinedapi.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("StudySubject");
+                });
+
+            modelBuilder.Entity("griffined_api.Models.StudySubjectTeacher", b =>
+                {
+                    b.HasOne("griffined_api.Models.StudySubjectMember", "StudySubjectMember")
+                        .WithMany("StudySubjectTeachers")
+                        .HasForeignKey("StudySubjectMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("StudySubjectTeachers")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StudySubjectMember");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Subject", b =>
@@ -1802,6 +1866,8 @@ namespace griffinedapi.Migrations
 
                     b.Navigation("StudentNotifications");
 
+                    b.Navigation("StudyClasses");
+
                     b.Navigation("StudyCourseHistories");
 
                     b.Navigation("StudySubjects");
@@ -1821,6 +1887,8 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.StudySubjectMember", b =>
                 {
                     b.Navigation("StudentReports");
+
+                    b.Navigation("StudySubjectTeachers");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Subject", b =>
@@ -1839,6 +1907,8 @@ namespace griffinedapi.Migrations
                     b.Navigation("StudentReports");
 
                     b.Navigation("StudyClasses");
+
+                    b.Navigation("StudySubjectTeachers");
 
                     b.Navigation("TeacherNotifications");
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
 using Newtonsoft.Json;
 
@@ -68,7 +69,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, master")]
+        [HttpGet("pending-ec/{requestId}"), Authorize(Roles = "ea, ec, oa, master")]
         public async Task<ActionResult> GetPendingECDetail(int requestId)
         {
             var response = await _registrationRequestService.GetPendingECDetail(requestId);
@@ -126,6 +127,30 @@ namespace griffined_api.Controllers
         public async Task<ActionResult> GetCancellationRequest(int requestId)
         {
             return Ok(await _registrationRequestService.GetCancellationRequest(requestId));
+        }
+
+        [HttpPut("take/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaTakeRequest(int requestId)
+        {
+            return Ok(await _registrationRequestService.EaTakeRequest(requestId));
+        }
+
+        [HttpPut("release/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaReleaseRequest(int requestId)
+        {
+            return Ok(await _registrationRequestService.EaReleaseRequest(requestId));
+        }
+
+        [HttpPost("comment/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> AddComment(int requestId, CommentRequestDto comment)
+        {
+            return Ok(await _registrationRequestService.AddComment(requestId, comment));
+        }
+
+        [HttpGet("comment/{requestId}"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> GetCommentsByRequestId(int requestId)
+        {
+            return Ok(await _registrationRequestService.GetCommentsByRequestId(requestId));
         }
     }
 }

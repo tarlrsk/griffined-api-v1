@@ -11,7 +11,7 @@ namespace griffined_api.Enums
     public enum ClassStatus
     {
         None,
-        Check,
+        Checked,
         Unchecked,
         PendingCancellation,
         Cancelled,

@@ -9,7 +9,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
     {
         public int RequestId { get; set; }
         public List<StudentNameResponseDto> Members { get; set; } = new List<StudentNameResponseDto>();
-        public string Section { get; set; } = string.Empty;
+        public string Section { get; set; } = "Multiple";
         public List<StudyCourseType> StudyCourseType { get; set; } = new List<StudyCourseType>();
         public RegistrationRequestType Type { get; set; }
         public RegistrationStatus RegistrationStatus { get; set; }
@@ -21,7 +21,8 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public bool NewCourseDetailError { get; set; }
         public bool HasSchedule { get; set; }
         public StaffNameOnlyResponseDto? ByEC { get; set; }
-        public StaffNameOnlyResponseDto? ByEA { get; set; }
+        public StaffNameOnlyResponseDto? TakenByEA { get; set; }
+        public StaffNameOnlyResponseDto? ScheduledBy { get; set; }
         public StaffNameOnlyResponseDto? ByOA { get; set; }
         public StaffNameOnlyResponseDto? CancelledBy { get; set; }
     }
