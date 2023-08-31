@@ -22,7 +22,7 @@ namespace griffined_api.Services.CheckAvailableService
 
         public async Task<ServiceResponse<CheckScheduleResultResponseDto>> GetAvailableSchedule(RequestedScheduleRequestDto requestedSchedule)
         {
-            var listRequestedDate = requestedSchedule.Dates.Select(s => s.ToDateTime()).ToList();
+            var listRequestedDate = requestedSchedule.RequestedDates.Select(s => s.ToDateTime()).ToList();
 
             var dbAllStudySubjects = await _context.StudySubjects
                                     .Include(s => s.Subject)
@@ -55,8 +55,9 @@ namespace griffined_api.Services.CheckAvailableService
                             || c.Status == ClassStatus.PendingCancellation))
                             .ToListAsync();
 
-            var requestedStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == requestedSchedule.RequestedStudySubjectId)
-                                ?? throw new NotFoundException($"StudySubject with ID {requestedSchedule.RequestedStudySubjectId}is not found.");
+            var allCourse = await _context.Courses.Include(c => c.Subjects).Include(c => c.Levels).ToListAsync();
+
+            var requestedStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == requestedSchedule.RequestedStudySubjectId);
 
             var requestedTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == requestedSchedule.TeacherId)
                                 ?? throw new NotFoundException($"Teacher with ID {requestedSchedule.TeacherId} is not found.");
@@ -81,8 +82,8 @@ namespace griffined_api.Services.CheckAvailableService
                             StudySubjectId = dbStudyClass.StudySubject.Id,
                             SubjectId = dbStudyClass.StudySubject.Subject.Id,
                             Subject = dbStudyClass.StudySubject.Subject.subject,
-                            LevelId = requestedStudySubject.StudyCourse.Level?.Id,
-                            Level = requestedStudySubject.StudyCourse.Level?.level,
+                            LevelId = dbStudyClass.StudyCourse.Level?.Id,
+                            Level = dbStudyClass.StudyCourse.Level?.level,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
@@ -104,22 +105,26 @@ namespace griffined_api.Services.CheckAvailableService
                     if (requestedSchedule.FromTime.ToTimeSpan().TotalMilliseconds < localSchedule.ToTime.ToTimeSpan().TotalMilliseconds
                     && localSchedule.FromTime.ToTimeSpan().TotalMilliseconds < requestedSchedule.ToTime.ToTimeSpan().TotalMilliseconds)
                     {
-                        var dbStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == localSchedule.StudySubjectId)
-                                            ?? throw new NotFoundException("StudySubjectId in LocalSchedule is  not found");
+                        var dbStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == localSchedule.StudySubjectId);
 
                         var dbTeacher = dbAllTeachers.FirstOrDefault(t => t.Id == localSchedule.TeacherId)
                                         ?? throw new NotFoundException("TeacherId in LocalSchedule is not found");
 
+                        var conflictCourse = allCourse.FirstOrDefault(c => c.Id == localSchedule.CourseId) ?? throw new NotFoundException("Conflict Course ID is not found.");
+                        var conflictSubject = conflictCourse.Subjects.FirstOrDefault(c => c.Id == localSchedule.SubjectId) ?? throw new NotFoundException("Conflict Subject ID is not found.");
+                        var conflictLevel = conflictCourse.Levels.FirstOrDefault(c => c.Id == localSchedule.LevelId);
+
+
                         var conflict = new ConflictScheduleResponseDto
                         {
-                            StudyCourseId = dbStudySubject.StudyCourse.Id,
-                            CourseId = dbStudySubject.StudyCourse.Course.Id,
-                            Course = dbStudySubject.StudyCourse.Course.course,
-                            StudySubjectId = dbStudySubject.Id,
-                            SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
-                            LevelId = requestedStudySubject.StudyCourse.Level?.Id,
-                            Level = requestedStudySubject.StudyCourse.Level?.level,
+                            StudyCourseId = dbStudySubject?.StudyCourse.Id,
+                            CourseId = conflictCourse.Id,
+                            Course = conflictCourse.course,
+                            StudySubjectId = dbStudySubject?.Id,
+                            SubjectId = conflictSubject.Id,
+                            Subject = conflictSubject.subject,
+                            LevelId = conflictLevel?.Id,
+                            Level = conflictLevel?.level,
                             Date = localSchedule.Date.ToDateTime().ToDateString(),
                             FromTime = localSchedule.FromTime.ToTimeSpan().ToTimeSpanString(),
                             ToTime = localSchedule.ToTime.ToTimeSpan().ToTimeSpanString(),
@@ -134,19 +139,23 @@ namespace griffined_api.Services.CheckAvailableService
                             conflictSchedule.Add(conflict);
                     }
                 }
+                
+                var availableCourse = allCourse.FirstOrDefault(c => c.Id == requestedSchedule.RequestedCourseId)?? throw new NotFoundException("Course ID is not found");
+                var availableSubject = availableCourse.Subjects.FirstOrDefault(c => c.Id == requestedSchedule.RequestedSubjectId)?? throw new NotFoundException("Subject ID is not found");
+                var availableLevel = availableCourse.Levels.FirstOrDefault(c => c.Id == requestedSchedule.RequestedLevelId);
 
                 if (conflictSchedule.IsNullOrEmpty())
                 {
                     availableSchedule.Add(new AvailableScheduleResponseDto
                     {
-                        StudyCourseId = requestedStudySubject.StudyCourse.Id,
-                        CourseId = requestedStudySubject.StudyCourse.Course.Id,
-                        Course = requestedStudySubject.StudyCourse.Course.course,
-                        StudySubjectId = requestedStudySubject.Id,
-                        SubjectId = requestedStudySubject.Subject.Id,
-                        Subject = requestedStudySubject.Subject.subject,
-                        LevelId = requestedStudySubject.StudyCourse.Level?.Id,
-                        Level = requestedStudySubject.StudyCourse.Level?.level,
+                        StudyCourseId = requestedStudySubject?.StudyCourse.Id,
+                        CourseId = availableCourse.Id,
+                        Course = availableCourse.course,
+                        StudySubjectId = requestedStudySubject?.Id,
+                        SubjectId = availableSubject.Id,
+                        Subject = availableSubject.subject,
+                        LevelId = availableLevel?.Id,
+                        Level = availableLevel?.level,
                         Date = requestDate.ToDateString(),
                         FromTime = requestedSchedule.FromTime,
                         ToTime = requestedSchedule.ToTime,

@@ -15,8 +15,12 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         public string FromTime { get; set; } = string.Empty;
         [Required]
         public string ToTime { get; set; } = string.Empty;
+        public int? StudySubjectId { get; set; }
         [Required]
-        public int StudySubjectId { get; set; }
+        public int CourseId { get; set; }
+        [Required]
+        public int SubjectId { get; set; }
+        public int? LevelId { get; set; }
         [Required]
         public int TeacherId { get; set; }
     }
