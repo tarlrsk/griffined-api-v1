@@ -245,6 +245,7 @@ namespace griffined_api.Services.StudyCourseService
                             IsMakeup = false,
                             ClassNumber = requestedStudyClass.ClassNo,
                             Teacher = dbTeacher,
+                            StudyCourse = studyCourse,
                             Schedule = new Schedule()
                             {
                                 Date = requestedStudyClass.Date.ToDateTime(),
