@@ -939,6 +939,7 @@ namespace griffined_api.Services.StudyCourseService
             var data = new StaffCoursesDetailResponseDto
             {
                 StudyCourseId = dbStudyCourse.Id,
+                CourseId = dbStudyCourse.Course.Id,
                 Course = dbStudyCourse.Course.course,
                 Subjects = dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
                 {
