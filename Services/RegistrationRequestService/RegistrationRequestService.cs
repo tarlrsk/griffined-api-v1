@@ -1876,6 +1876,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            ClassStatus = dbStudyClass.Status,
                             //TODO Teacher Work Type
                         };
                         rawSchedules.Add(schedule);
@@ -1917,6 +1918,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            ClassStatus = dbStudyClass.Status,
                             //TODO Teacher Work Type
                         };
                         rawSchedules.Add(schedule);
