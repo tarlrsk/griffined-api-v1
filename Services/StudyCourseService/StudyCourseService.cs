@@ -1325,17 +1325,18 @@ namespace griffined_api.Services.StudyCourseService
                                 .ThenInclude(c => c.Level)
                             .Include(c => c.Teacher)
                             .Include(c => c.Schedule)
-                            .Where(c => 
-                            c.Schedule.Date == requestDate.ToDateTime() 
+                            .Where(c =>
+                            c.Schedule.Date == requestDate.ToDateTime()
                             && c.Status != ClassStatus.Cancelled
                             && c.Status != ClassStatus.Deleted
                             && c.TeacherId == teacherId)
                             .ToListAsync();
 
             var data = new List<TodayClassMobileResponse>();
-            foreach(var dbStudyClass in dbStudyClasses)
+            foreach (var dbStudyClass in dbStudyClasses)
             {
-                var studyClass = new TodayClassMobileResponse{
+                var studyClass = new TodayClassMobileResponse
+                {
                     StudyClassId = dbStudyClass.Id,
                     StudyCourseId = dbStudyClass.StudyCourse.Id,
                     CourseId = dbStudyClass.StudyCourse.Course.Id,
@@ -1358,7 +1359,8 @@ namespace griffined_api.Services.StudyCourseService
                 data.Add(studyClass);
             }
 
-            var response = new ServiceResponse<List<TodayClassMobileResponse>>{
+            var response = new ServiceResponse<List<TodayClassMobileResponse>>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
             };
