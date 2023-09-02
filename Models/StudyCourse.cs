@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    [Index("Status")]
+    [Index(nameof(Status))]
     public class StudyCourse
     {
         public int Id { get; set; }
