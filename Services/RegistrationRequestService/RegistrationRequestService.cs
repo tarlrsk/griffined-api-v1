@@ -2018,7 +2018,9 @@ namespace griffined_api.Services.RegistrationRequestService
                     FullName = comment.Staff.FullName,
                     CreatedAt = comment.DateCreated.ToDateTimeString(),
                     Comment = comment.Comment
-                }).ToList()
+                })
+                .OrderByDescending(c => c.CreatedAt.ToDateTime())
+                .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
