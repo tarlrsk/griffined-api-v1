@@ -13,7 +13,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         public string Course { get; set; } = string.Empty;
         public int? LevelId { get; set; }
         public string? Level { get; set; }
-        public int TotalHours { get; set; }
+        public double TotalHours { get; set; }
         public string StartDate { get; set; } = string.Empty;
         public string EndDate { get; set; } = string.Empty;
         public StudyCourseType StudyCourseType { get; set; }

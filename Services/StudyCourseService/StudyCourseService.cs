@@ -56,6 +56,7 @@ namespace griffined_api.Services.StudyCourseService
             {
                 var studySubject = new StudySubject();
                 var classNumber = 1;
+                double totalSubjectHour = 0;
                 foreach (var newSchedule in newRequestedSchedule.Schedules)
                 {
                     if (newSchedule.SubjectId == newStudySubject.Id)
@@ -78,9 +79,11 @@ namespace griffined_api.Services.StudyCourseService
                         };
                         classNumber = +1;
                         studySubject.StudyClasses.Add(studyClass);
+                        totalSubjectHour += studyClass.Schedule.FromTime.Subtract(studyClass.Schedule.ToTime).TotalHours;
                     }
                 }
                 studySubject.Subject = newStudySubject;
+                studySubject.Hour = totalSubjectHour;
                 studyCourse.StudySubjects.Add(studySubject);
             }
             _context.StudyCourses.Add(studyCourse);
