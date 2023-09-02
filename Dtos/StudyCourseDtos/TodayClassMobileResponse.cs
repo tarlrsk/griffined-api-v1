@@ -19,6 +19,7 @@ namespace griffined_api.Services.StudyCourseService
         public int? LevelId { get; set; }
         public string? Level { get; set; }
         public string Section { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
         public string ToTime { get; set; } = string.Empty;
         public string? Room { get; set; }
