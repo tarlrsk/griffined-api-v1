@@ -1114,7 +1114,7 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             string joinedSubject = string.Join(",", subjectList);
-            string historyDescription = $"Added Student {student.FirstName} {student.LastName[0]}. ({student.Nickname}) to {dbStudyCourse.Course.course} {joinedSubject} on {history.DateUpdated.ToDateString()}.";
+            string historyDescription = $"Added Student {student.FirstName} {student.LastName[0]}. ({student.Nickname}) to {dbStudyCourse.Course.course} {joinedSubject}.";
 
             history.Description = historyDescription;
 
@@ -1181,7 +1181,7 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             string joinedSubject = string.Join(",", subjectList);
-            string historyDescription = $"Removed Student {student.FirstName} {student.LastName[0]}. ({student.Nickname}) from {dbStudyCourse.Course.course} {joinedSubject} on {history.DateUpdated.ToDateString()}.";
+            string historyDescription = $"Removed Student {student.FirstName} {student.LastName[0]}. ({student.Nickname}) from {dbStudyCourse.Course.course} {joinedSubject}.";
 
             history.Description = historyDescription;
 
