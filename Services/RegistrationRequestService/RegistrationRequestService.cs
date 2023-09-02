@@ -718,7 +718,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 RequestId = dbRequest.Id,
                 Section = dbRequest.Section,
                 RegistrationRequestType = dbRequest.Type,
-                RegistrationStatus = dbRequest.RegistrationStatus
+                RegistrationStatus = dbRequest.RegistrationStatus,
+                PaymentType = dbRequest.PaymentType,
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
@@ -790,6 +791,9 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(c => c.Subject)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.Level)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
