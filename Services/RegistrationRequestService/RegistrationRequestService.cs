@@ -718,7 +718,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 RequestId = dbRequest.Id,
                 Section = dbRequest.Section,
                 RegistrationRequestType = dbRequest.Type,
-                RegistrationStatus = dbRequest.RegistrationStatus
+                RegistrationStatus = dbRequest.RegistrationStatus,
+                PaymentType = dbRequest.PaymentType,
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
