@@ -14,7 +14,7 @@ namespace griffined_api.Models
         public int? CourseId { get; set; }
         public int? LevelId { get; set; }
 
-        public int TotalHours { get; set; }
+        public double TotalHours { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 

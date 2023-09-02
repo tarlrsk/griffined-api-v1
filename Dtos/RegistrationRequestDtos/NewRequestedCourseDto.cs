@@ -13,7 +13,7 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         [Required]
         public Method Method { get; set; }
         [Required]
-        public int TotalHours { get; set; }
+        public double TotalHours { get; set; }
         [Required]
         public string StartDate { get; set; } = string.Empty;
         [Required]
