@@ -1313,7 +1313,7 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<List<TodayMobileResponse>>> GetMobileTodayClass(string requestDate)
+        public async Task<ServiceResponse<List<TodayClassMobileResponse>>> GetMobileTodayClass(string requestDate)
         {
             var teacherId = _firebaseService.GetAzureIdWithToken();
             var dbStudyClasses = await _context.StudyClasses
@@ -1332,10 +1332,10 @@ namespace griffined_api.Services.StudyCourseService
                             && c.TeacherId == teacherId)
                             .ToListAsync();
 
-            var data = new List<TodayMobileResponse>();
+            var data = new List<TodayClassMobileResponse>();
             foreach(var dbStudyClass in dbStudyClasses)
             {
-                var studyClass = new TodayMobileResponse{
+                var studyClass = new TodayClassMobileResponse{
                     StudyClassId = dbStudyClass.Id,
                     StudyCourseId = dbStudyClass.StudyCourse.Id,
                     CourseId = dbStudyClass.StudyCourse.Course.Id,
@@ -1358,7 +1358,7 @@ namespace griffined_api.Services.StudyCourseService
                 data.Add(studyClass);
             }
 
-            var response = new ServiceResponse<List<TodayMobileResponse>>{
+            var response = new ServiceResponse<List<TodayClassMobileResponse>>{
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
             };

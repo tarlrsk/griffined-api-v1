@@ -6,7 +6,7 @@ using griffined_api.Dtos.StudyCourseDtos;
 
 namespace griffined_api.Services.StudyCourseService
 {
-    public class TodayMobileResponse
+    public class TodayClassMobileResponse
     {
         public int StudyClassId { get; set; }
         public StudyCourseType StudyCourseType { get; set; }
