@@ -332,6 +332,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         .ThenInclude(m => m.Student)
                     .Include(r => r.NewCourseRequests)
                     .Include(r => r.StudentAddingRequest)
+                        .ThenInclude(s => s.StudyCourse)
                     .ToListAsync();
 
             var data = new List<RegistrationRequestResponseDto>();
@@ -362,14 +363,19 @@ namespace griffined_api.Services.RegistrationRequestService
                         if (!requestDto.StudyCourseType.Any(t => t == dbNewCourse.StudyCourseType))
                             requestDto.StudyCourseType.Add(dbNewCourse.StudyCourseType);
                     }
+                    requestDto.Section = registrationRequest.Section;
                 }
                 else
                 {
+                    var section = registrationRequest.StudentAddingRequest.ElementAt(0).StudyCourse.Section;
                     foreach (var dbStudentAdding in registrationRequest.StudentAddingRequest)
                     {
                         if (!requestDto.StudyCourseType.Any(t => t == dbStudentAdding.StudyCourseType))
                             requestDto.StudyCourseType.Add(dbStudentAdding.StudyCourseType);
+                        if(dbStudentAdding.StudyCourse.Section != section)
+                            section = "Multiple";
                     }
+                    requestDto.Section = section;
                 }
 
                 requestDto.RequestId = registrationRequest.Id;
@@ -382,7 +388,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.ScheduleError = registrationRequest.ScheduleError;
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
                 requestDto.HasSchedule = registrationRequest.HasSchedule;
-                requestDto.Section = "Multiple";
 
                 var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var scheduledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
