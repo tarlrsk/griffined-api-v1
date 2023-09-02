@@ -756,6 +756,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     var requestedCourse = new RequestedCourseResponseDto()
                     {
                         Section = dbRequestedCourse.StudyCourse?.Section,
+                        StudyCourseId = dbRequestedCourse.StudyCourse?.Id,
                         CourseId = dbRequestedCourse.Course.Id,
                         Course = dbRequestedCourse.Course.course,
                         LevelId = dbRequestedCourse.LevelId,
@@ -771,6 +772,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var requestSubject = new RequestedSubjectResponseDto()
                         {
+                            StudySubjectId = dbRequestSubject.Id,
                             SubjectId = dbRequestSubject.Subject.Id,
                             Subject = dbRequestSubject.Subject.subject,
                             Hour = dbRequestSubject.Hour,
@@ -816,6 +818,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var requestedCourse = new RequestedCourseResponseDto()
                     {
+                        StudyCourseId = dbStudentAddingRequest.StudyCourse.Id,
                         Section = dbStudentAddingRequest.StudyCourse?.Section,
                         CourseId = dbStudentAddingRequest.StudyCourse!.Course.Id,
                         Course = dbStudentAddingRequest.StudyCourse.Course.course,
@@ -831,6 +834,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var requestSubject = new RequestedSubjectResponseDto()
                         {
+                            StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
                             Hour = dbStudySubject.Hour,
