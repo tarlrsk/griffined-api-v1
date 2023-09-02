@@ -1315,22 +1315,48 @@ namespace griffined_api.Services.StudyCourseService
 
         public async Task<ServiceResponse<List<TodayClassMobileResponse>>> GetMobileTodayClass(string requestDate)
         {
-            var teacherId = _firebaseService.GetAzureIdWithToken();
-            var dbStudyClasses = await _context.StudyClasses
-                            .Include(c => c.StudySubject)
-                                .ThenInclude(s => s.Subject)
-                            .Include(c => c.StudyCourse)
-                                .ThenInclude(c => c.Course)
-                            .Include(c => c.StudyCourse)
-                                .ThenInclude(c => c.Level)
-                            .Include(c => c.Teacher)
-                            .Include(c => c.Schedule)
-                            .Where(c =>
-                            c.Schedule.Date == requestDate.ToDateTime()
-                            && c.Status != ClassStatus.Cancelled
-                            && c.Status != ClassStatus.Deleted
-                            && c.TeacherId == teacherId)
-                            .ToListAsync();
+            var userId = _firebaseService.GetAzureIdWithToken();
+            var role = _firebaseService.GetRoleWithToken();
+            List<StudyClass> dbStudyClasses = new();
+            if (role == "teacher")
+            {
+                dbStudyClasses = await _context.StudyClasses
+                                .Include(c => c.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                                .Include(c => c.Teacher)
+                                .Include(c => c.Schedule)
+                                .Where(c =>
+                                c.Schedule.Date == requestDate.ToDateTime()
+                                && c.Status != ClassStatus.Cancelled
+                                && c.Status != ClassStatus.Deleted
+                                && c.TeacherId == userId)
+                                .ToListAsync();
+            }
+            else if (role == "student")
+            {
+                dbStudyClasses = await _context.StudyClasses
+                                .Include(c => c.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                                .Include(c => c.Teacher)
+                                .Include(c => c.Schedule)
+                                .Where(c =>
+                                c.Schedule.Date == requestDate.ToDateTime()
+                                && c.Status != ClassStatus.Cancelled
+                                && c.Status != ClassStatus.Deleted
+                                && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId))
+                                .ToListAsync();
+            }else{
+                throw new InternalServerException("Something went wrong with User.");
+            }
+
 
             var data = new List<TodayClassMobileResponse>();
             foreach (var dbStudyClass in dbStudyClasses)
@@ -1347,6 +1373,7 @@ namespace griffined_api.Services.StudyCourseService
                     LevelId = dbStudyClass.StudyCourse.Level?.Id,
                     Level = dbStudyClass.StudyCourse.Level?.level,
                     Section = dbStudyClass.StudyCourse.Section,
+                    Date = dbStudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                     Room = dbStudyClass.Room,

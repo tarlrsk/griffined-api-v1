@@ -8,6 +8,7 @@ namespace griffined_api.integrations.Firebase
     public interface IFirebaseService
     {
         int GetAzureIdWithToken();
+        string GetRoleWithToken();
         Task ChangePasswordWithUid(string uid, string newPassword);
         Task<String> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file);
         Task DeleteStorageFileByObjectName(string objectName);
