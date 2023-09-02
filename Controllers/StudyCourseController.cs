@@ -113,5 +113,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.UpdateScheduleWithoutCancelRequest(updateRequest));
         }
+
+        [HttpGet("today/{date}"), Authorize(Roles= "teacher,student")]
+        public async Task<ActionResult> GetToday(string date)
+        {
+            return Ok(await _studyCourseService.GetMobileTodayClass(date));
+        }
     }
 }

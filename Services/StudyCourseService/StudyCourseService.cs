@@ -1312,6 +1312,60 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
+
+        public async Task<ServiceResponse<List<TodayClassMobileResponse>>> GetMobileTodayClass(string requestDate)
+        {
+            var teacherId = _firebaseService.GetAzureIdWithToken();
+            var dbStudyClasses = await _context.StudyClasses
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.Subject)
+                            .Include(c => c.StudyCourse)
+                                .ThenInclude(c => c.Course)
+                            .Include(c => c.StudyCourse)
+                                .ThenInclude(c => c.Level)
+                            .Include(c => c.Teacher)
+                            .Include(c => c.Schedule)
+                            .Where(c =>
+                            c.Schedule.Date == requestDate.ToDateTime()
+                            && c.Status != ClassStatus.Cancelled
+                            && c.Status != ClassStatus.Deleted
+                            && c.TeacherId == teacherId)
+                            .ToListAsync();
+
+            var data = new List<TodayClassMobileResponse>();
+            foreach (var dbStudyClass in dbStudyClasses)
+            {
+                var studyClass = new TodayClassMobileResponse
+                {
+                    StudyClassId = dbStudyClass.Id,
+                    StudyCourseId = dbStudyClass.StudyCourse.Id,
+                    CourseId = dbStudyClass.StudyCourse.Course.Id,
+                    Course = dbStudyClass.StudyCourse.Course.course,
+                    StudySubjectId = dbStudyClass.StudySubject.Id,
+                    SubjectId = dbStudyClass.StudySubject.Subject.Id,
+                    Subject = dbStudyClass.StudySubject.Subject.subject,
+                    LevelId = dbStudyClass.StudyCourse.Level?.Id,
+                    Level = dbStudyClass.StudyCourse.Level?.level,
+                    Section = dbStudyClass.StudyCourse.Section,
+                    FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    Room = dbStudyClass.Room,
+                    StudyCourseType = dbStudyClass.StudyCourse.StudyCourseType,
+                    TeacherId = dbStudyClass.Teacher.Id,
+                    TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                    TeacherLastName = dbStudyClass.Teacher.LastName,
+                    TeacherNickname = dbStudyClass.Teacher.Nickname,
+                };
+                data.Add(studyClass);
+            }
+
+            var response = new ServiceResponse<List<TodayClassMobileResponse>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+            return response;
+        }
     }
 
 }
