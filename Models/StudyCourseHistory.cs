@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
+    [Index(nameof(Type))]
     public class StudyCourseHistory
     {
         public int Id { get; set; }
@@ -15,11 +16,12 @@ namespace griffined_api.Models
 
         public string Description { get; set; } = string.Empty;
         public DateTime DateUpdated { get; set; }
+        public StudyCourseHistoryType Type { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
         public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
 
         [ForeignKey(nameof(StaffId))]
-        public virtual Staff ByStaff { get; set; } = new Staff();
+        public virtual Staff Staff { get; set; } = new Staff();
     }
 }
