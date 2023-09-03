@@ -1405,7 +1405,7 @@ namespace griffined_api.Services.StudyCourseService
 
             var data = dbStudyCourseHistories.Select(history => new StudyCourseHistoryResponseDto
             {
-                Date = history.UpdatedDate,
+                Date = history.UpdatedDate.ToDateTimeString(),
                 RecordType = history.Type,
                 Record = $"[{history.Staff.Role} {history.Staff.Nickname}/{history.Staff.FirstName}] {history.Description}"
             })
