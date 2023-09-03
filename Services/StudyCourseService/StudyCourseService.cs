@@ -977,7 +977,9 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherNickname = dbStudyClass.Teacher.Nickname,
                     ClassStatus = dbStudyClass.Status,
                     // TODO TeacherWorkType
-                })).ToList()
+                }))
+                .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
+                .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -1350,7 +1352,9 @@ namespace griffined_api.Services.StudyCourseService
                                 && c.Status != ClassStatus.Deleted
                                 && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId))
                                 .ToListAsync();
-            }else{
+            }
+            else
+            {
                 throw new InternalServerException("Something went wrong with User.");
             }
 
