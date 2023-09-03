@@ -1449,7 +1449,7 @@ namespace griffined_api.Services.StudyCourseService
                 RecordType = history.Type,
                 Record = $"[{history.Staff.Role} {history.Staff.Nickname}/{history.Staff.FirstName}] {history.Description}"
             })
-            .OrderByDescending(sch => sch.Date)
+            .OrderByDescending(sch => sch.Date.ToDateTime())
             .ToList();
 
             response.StatusCode = (int)HttpStatusCode.OK;
