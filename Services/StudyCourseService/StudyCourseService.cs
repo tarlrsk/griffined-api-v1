@@ -1447,7 +1447,7 @@ namespace griffined_api.Services.StudyCourseService
             {
                 Date = history.UpdatedDate.ToDateTimeString(),
                 RecordType = history.Type,
-                Record = $"[{history.Staff.Role} {history.Staff.Nickname}/{history.Staff.FirstName}] {history.Description}"
+                Record = $"[{history.Staff.Role.ToUpper()} {history.Staff.Nickname}/{history.Staff.FirstName}] {history.Description}"
             })
             .OrderByDescending(sch => sch.Date.ToDateTime())
             .ToList();
