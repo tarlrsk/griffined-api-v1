@@ -1246,7 +1246,14 @@ namespace griffined_api.Services.StudyCourseService
 
         public async Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest)
         {
+            var staffId = _firebaseService.GetAzureIdWithToken();
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == staffId) ?? throw new NotFoundException("No Staff Found");
+
             var dbRemoveStudyClasses = await _context.StudyClasses
+                                        .Include(c => c.StudySubject)
+                                            .ThenInclude(ss => ss.Subject)
+                                        .Include(c => c.Schedule)
+                                        .Include(c => c.Teacher)
                                         .Include(c => c.Attendances)
                                         .Where(c => updateRequest.RemoveStudyClassId.Contains(c.Id)).ToListAsync();
 
@@ -1257,6 +1264,16 @@ namespace griffined_api.Services.StudyCourseService
                     _context.StudentAttendances.Remove(dbAttendance);
                 }
                 dbRemoveStudyClass.Status = ClassStatus.Deleted;
+
+                var removeHistory = new StudyCourseHistory
+                {
+                    StudyCourse = dbRemoveStudyClasses.First().StudyCourse,
+                    Staff = staff,
+                    DateUpdated = DateTime.Now,
+                    Type = StudyCourseHistoryType.Schedule
+                };
+
+                string removedStudyClassHistory = $"Removed {dbRemoveStudyClass.StudyCourse} {dbRemoveStudyClass.StudySubject} on {dbRemoveStudyClass.Schedule.Date.ToDateString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}";
             }
 
             var dbStudySubjects = await _context.StudySubjects
@@ -1353,7 +1370,9 @@ namespace griffined_api.Services.StudyCourseService
                                 && c.Status != ClassStatus.Deleted
                                 && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId))
                                 .ToListAsync();
-            }else{
+            }
+            else
+            {
                 throw new InternalServerException("Something went wrong with User.");
             }
 
