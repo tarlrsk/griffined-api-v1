@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
-    [Index("Status")]
+    [Index(nameof(Status))]
     public class StudyCourse
     {
         public int Id { get; set; }
@@ -16,7 +16,7 @@ namespace griffined_api.Models
 
         public string Section { get; set; } = string.Empty;
 
-        public int TotalHour { get; set; }
+        public double TotalHour { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 

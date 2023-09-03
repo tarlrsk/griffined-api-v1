@@ -6,7 +6,7 @@ namespace griffined_api.Extensions.DateTimeExtensions
     public static class DateTimeExtensions
     {
         // Extension method to convert DateTime to String (format: dd-MMMM-yyyy).
-        public static string ToDateString(this DateTime dateTime, string format = "dd-MMMM-yyyy")
+        public static string ToDateString(this DateTime dateTime, string format = "dd MMM yyyy")
         {
             return dateTime.ToString(format, CultureInfo.InvariantCulture);
         }
@@ -18,7 +18,13 @@ namespace griffined_api.Extensions.DateTimeExtensions
         }
 
         // Extension method to convert DateTime to String (format: dd-MMMM-yyyy HH:mm:ss).
-        public static string ToDateTimeString(this DateTime dateTime, string format = "dd-MMMM-yy HH:mm:ss")
+        public static string ToDateTimeString(this DateTime dateTime, string format = "dd MMM yyyy HH:mm:ss")
+        {
+            return dateTime.ToString(format, CultureInfo.InvariantCulture);
+        }
+
+        // Extension method to convert DateTime to String (format: ddd dd-MMMM-yyyy)
+        public static string ToDateWithDayString(this DateTime dateTime, string format = "dddd, dd MMM yyyy")
         {
             return dateTime.ToString(format, CultureInfo.InvariantCulture);
         }

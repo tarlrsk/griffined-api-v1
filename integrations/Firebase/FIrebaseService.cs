@@ -36,6 +36,12 @@ namespace griffined_api.integrations
             return azureId;
         }
 
+        public string GetRoleWithToken()
+        {
+            var role = _httpContextAccessor?.HttpContext?.User?.FindFirstValue(ClaimTypes.Role) ?? "";
+            return role;
+        }
+
         // Google Storage
         public async Task<string> UploadRegistrationRequestPaymentFile(int requestId, DateTime createdDate, IFormFile file)
         {

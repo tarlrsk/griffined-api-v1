@@ -76,7 +76,8 @@ namespace griffined_api.Services.AttendanceService
             {
                 var allSubjectsDto = new StudySubjectResponseDto
                 {
-                    StudySubjectId = dbStudySubject.Subject.Id,
+                    StudySubjectId = dbStudySubject.Id,
+                    SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject
                 };
 

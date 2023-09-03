@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230902070338_Change_Hour_To_Double")]
+    partial class ChangeHourToDouble
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -542,8 +545,6 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("AppointmentId");
 
-                    b.HasIndex("Date");
-
                     b.ToTable("Schedule", (string)null);
                 });
 
@@ -1013,6 +1014,9 @@ namespace griffinedapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1025,19 +1029,11 @@ namespace griffinedapi.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.HasIndex("StaffId");
 
                     b.HasIndex("StudyCourseId");
-
-                    b.HasIndex("Type");
 
                     b.ToTable("StudyCourseHistory", (string)null);
                 });
@@ -1649,7 +1645,7 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.StudyCourseHistory", b =>
                 {
-                    b.HasOne("griffined_api.Models.Staff", "Staff")
+                    b.HasOne("griffined_api.Models.Staff", "ByStaff")
                         .WithMany("StudyCourseHistories")
                         .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1661,7 +1657,7 @@ namespace griffinedapi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Staff");
+                    b.Navigation("ByStaff");
 
                     b.Navigation("StudyCourse");
                 });

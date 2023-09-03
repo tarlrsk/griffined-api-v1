@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
+    [Index(nameof(Date))]
     public class Schedule
     {
         public int Id { get; set; }

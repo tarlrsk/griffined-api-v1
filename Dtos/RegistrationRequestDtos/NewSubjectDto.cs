@@ -10,6 +10,6 @@ namespace griffined_api.Dtos.RegistrationRequestDto
         [Required]
         public string Subject { get; set; } = string.Empty;
         [Required]
-        public int Hour { get; set; }
+        public double Hour { get; set; }
     }
 }

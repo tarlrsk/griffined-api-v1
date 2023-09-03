@@ -17,7 +17,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string Level { get; set; } = string.Empty;
         public string Section { get; set; } = string.Empty;
         public int StudentCount { get; set; }
-        public int TotalHour { get; set; }
+        public double TotalHour { get; set; }
         public string StartDate { get; set; } = string.Empty;
         public string EndDate { get; set; } = string.Empty;
         public Method Method { get; set; }

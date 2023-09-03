@@ -15,7 +15,7 @@ namespace griffined_api.Models
             _teacherService = teacherService;
         }
 
-        [HttpGet, Authorize(Roles = "oa, ea, master")]
+        [HttpGet, Authorize(Roles = "oa, ea, ec, master")]
         public async Task<ActionResult> Get()
         {
             return Ok(await _teacherService.GetTeacher());

@@ -111,7 +111,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("payment/{requestId}"), Authorize(Roles = "oa, master")]
+        [HttpPut("payment/{requestId}"), Authorize(Roles = "ec, oa, master")]
         public async Task<ActionResult> UpdatePayment(int requestId, [FromForm] UpdatePaymentRequestDto updatePaymentRequest)
         {
             return Ok(await _registrationRequestService.UpdatePayment(requestId, updatePaymentRequest));

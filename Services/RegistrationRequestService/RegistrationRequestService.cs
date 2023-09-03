@@ -332,6 +332,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         .ThenInclude(m => m.Student)
                     .Include(r => r.NewCourseRequests)
                     .Include(r => r.StudentAddingRequest)
+                        .ThenInclude(s => s.StudyCourse)
                     .ToListAsync();
 
             var data = new List<RegistrationRequestResponseDto>();
@@ -362,14 +363,19 @@ namespace griffined_api.Services.RegistrationRequestService
                         if (!requestDto.StudyCourseType.Any(t => t == dbNewCourse.StudyCourseType))
                             requestDto.StudyCourseType.Add(dbNewCourse.StudyCourseType);
                     }
+                    requestDto.Section = registrationRequest.Section;
                 }
                 else
                 {
+                    var section = registrationRequest.StudentAddingRequest.ElementAt(0).StudyCourse.Section;
                     foreach (var dbStudentAdding in registrationRequest.StudentAddingRequest)
                     {
                         if (!requestDto.StudyCourseType.Any(t => t == dbStudentAdding.StudyCourseType))
                             requestDto.StudyCourseType.Add(dbStudentAdding.StudyCourseType);
+                        if(dbStudentAdding.StudyCourse.Section != section)
+                            section = "Multiple";
                     }
+                    requestDto.Section = section;
                 }
 
                 requestDto.RequestId = registrationRequest.Id;
@@ -382,7 +388,6 @@ namespace griffined_api.Services.RegistrationRequestService
                 requestDto.ScheduleError = registrationRequest.ScheduleError;
                 requestDto.NewCourseDetailError = registrationRequest.NewCourseDetailError;
                 requestDto.HasSchedule = registrationRequest.HasSchedule;
-                requestDto.Section = registrationRequest.Section;
 
                 var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var scheduledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
@@ -522,8 +527,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     LevelId = dbRequestedCourse.LevelId,
                     Level = dbRequestedCourse.Level?.level,
                     TotalHours = dbRequestedCourse.TotalHours,
-                    StartDate = dbRequestedCourse.StartDate.ToString("dd-MMMM-yyyy"),
-                    EndDate = dbRequestedCourse.EndDate.ToString("ddd-MMMM-yyyy"),
+                    StartDate = dbRequestedCourse.StartDate.ToDateString(),
+                    EndDate = dbRequestedCourse.EndDate.ToDateString(),
                     Method = dbRequestedCourse.Method,
                     StudyCourseType = dbRequestedCourse.StudyCourseType,
                 };
@@ -713,7 +718,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 RequestId = dbRequest.Id,
                 Section = dbRequest.Section,
                 RegistrationRequestType = dbRequest.Type,
-                RegistrationStatus = dbRequest.RegistrationStatus
+                RegistrationStatus = dbRequest.RegistrationStatus,
+                PaymentType = dbRequest.PaymentType,
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
@@ -750,6 +756,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     var requestedCourse = new RequestedCourseResponseDto()
                     {
                         Section = dbRequestedCourse.StudyCourse?.Section,
+                        StudyCourseId = dbRequestedCourse.StudyCourse?.Id,
                         CourseId = dbRequestedCourse.Course.Id,
                         Course = dbRequestedCourse.Course.course,
                         LevelId = dbRequestedCourse.LevelId,
@@ -765,6 +772,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var requestSubject = new RequestedSubjectResponseDto()
                         {
+                            StudySubjectId = dbRequestSubject.Id,
                             SubjectId = dbRequestSubject.Subject.Id,
                             Subject = dbRequestSubject.Subject.subject,
                             Hour = dbRequestSubject.Hour,
@@ -787,6 +795,9 @@ namespace griffined_api.Services.RegistrationRequestService
                                         .ThenInclude(c => c.Subject)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
@@ -807,6 +818,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var requestedCourse = new RequestedCourseResponseDto()
                     {
+                        StudyCourseId = dbStudentAddingRequest.StudyCourse.Id,
                         Section = dbStudentAddingRequest.StudyCourse?.Section,
                         CourseId = dbStudentAddingRequest.StudyCourse!.Course.Id,
                         Course = dbStudentAddingRequest.StudyCourse.Course.course,
@@ -822,6 +834,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var requestSubject = new RequestedSubjectResponseDto()
                         {
+                            StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
                             Hour = dbStudySubject.Hour,
@@ -1012,6 +1025,9 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.Course)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(c => c.Subject)
                             .Include(r => r.StudentAddingRequest)
@@ -1036,6 +1052,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     var requestedCourse = new RequestedCourseResponseDto()
                     {
                         Section = dbStudentAddingRequest.StudyCourse?.Section,
+                        StudyCourseId = dbStudentAddingRequest.StudyCourse?.Id,
                         CourseId = dbStudentAddingRequest.StudyCourse!.Course.Id,
                         Course = dbStudentAddingRequest.StudyCourse.Course.course,
                         LevelId = dbStudentAddingRequest.StudyCourse.LevelId,
@@ -1052,6 +1069,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
+                            StudySubjectId = dbStudySubject.Id,
                             Hour = dbStudySubject.Hour,
                         };
                         requestedCourse.subjects.Add(requestSubject);
@@ -2013,7 +2031,9 @@ namespace griffined_api.Services.RegistrationRequestService
                     FullName = comment.Staff.FullName,
                     CreatedAt = comment.DateCreated.ToDateTimeString(),
                     Comment = comment.Comment
-                }).ToList()
+                })
+                .OrderByDescending(c => c.CreatedAt.ToDateTime())
+                .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
