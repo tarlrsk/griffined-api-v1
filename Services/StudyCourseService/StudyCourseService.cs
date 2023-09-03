@@ -1270,13 +1270,10 @@ namespace griffined_api.Services.StudyCourseService
 
             var dbTeacher = await _context.Teachers.ToListAsync();
 
-            foreach (var studySubjectId in updateRequest.StudySubjectIds)
+            foreach (var dbStudySubject in dbStudySubjects)
             {
-                foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == studySubjectId))
+                foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == dbStudySubject.Id))
                 {
-                    var dbStudySubject = dbStudySubjects.FirstOrDefault(s => s.Id == studySubjectId)
-                                        ?? throw new NotFoundException($"StudySubject with ID {studySubjectId} is not found.");
-
                     var classCount = dbStudySubject.StudyClasses.Count;
                     var studyClass = new StudyClass
                     {
