@@ -90,6 +90,12 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.GetStudyCourseMember(studyCourseId));
         }
 
+        [HttpGet("course-detail/{studyCourseId}/history"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> GetCourseHistory(int studyCourseId)
+        {
+            return Ok(await _studyCourseService.GetStudyCourseHistory(studyCourseId));
+        }
+
         [HttpPost("add/student"), Authorize(Roles = "ea, master")]
         public async Task<ActionResult> EaAddStudent(EaStudentManagementRequestDto requestDto)
         {
@@ -108,13 +114,13 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.GetCourseProgress(studyCourseId));
         }
 
-        [HttpPut("schedule"), Authorize(Roles = "ea,master")]
+        [HttpPut("schedule"), Authorize(Roles = "ea, master")]
         public async Task<ActionResult> UpdateScheduleWithoutRequest(UpdateStudyCourseRequestDto updateRequest)
         {
             return Ok(await _studyCourseService.UpdateScheduleWithoutCancelRequest(updateRequest));
         }
 
-        [HttpGet("today/{date}"), Authorize(Roles= "teacher,student")]
+        [HttpGet("today/{date}"), Authorize(Roles = "teacher, student")]
         public async Task<ActionResult> GetToday(string date)
         {
             return Ok(await _studyCourseService.GetMobileTodayClass(date));
