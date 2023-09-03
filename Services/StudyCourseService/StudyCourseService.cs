@@ -977,7 +977,9 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherNickname = dbStudyClass.Teacher.Nickname,
                     ClassStatus = dbStudyClass.Status,
                     // TODO TeacherWorkType
-                })).ToList()
+                }))
+                .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
+                .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
