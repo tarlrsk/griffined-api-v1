@@ -1273,7 +1273,7 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
                     Staff = staff,
-                    DateUpdated = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
                     Type = StudyCourseHistoryType.Schedule
                 };
 
@@ -1330,7 +1330,7 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         StudyCourse = dbStudySubject.StudyCourse,
                         Staff = staff,
-                        DateUpdated = DateTime.Now,
+                        UpdatedDate = DateTime.Now,
                         Type = StudyCourseHistoryType.Schedule
                     };
 
