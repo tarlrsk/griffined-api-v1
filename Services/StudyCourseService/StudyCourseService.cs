@@ -1273,7 +1273,9 @@ namespace griffined_api.Services.StudyCourseService
                     Type = StudyCourseHistoryType.Schedule
                 };
 
-                string removedStudyClassHistory = $"Removed {dbRemoveStudyClass.StudyCourse} {dbRemoveStudyClass.StudySubject} on {dbRemoveStudyClass.Schedule.Date.ToDateString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}";
+                string removedStudyClassHistoryDescription = $"Removed {dbRemoveStudyClass.StudyCourse} {dbRemoveStudyClass.StudySubject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}";
+
+                removeHistory.Description = removedStudyClassHistoryDescription;
             }
 
             var dbStudySubjects = await _context.StudySubjects
