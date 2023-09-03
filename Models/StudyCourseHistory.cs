@@ -15,7 +15,7 @@ namespace griffined_api.Models
         public int? StaffId { get; set; }
 
         public string Description { get; set; } = string.Empty;
-        public DateTime DateUpdated { get; set; }
+        public DateTime UpdatedDate { get; set; }
         public StudyCourseHistoryType Type { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]

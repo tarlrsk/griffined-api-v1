@@ -1111,7 +1111,7 @@ namespace griffined_api.Services.StudyCourseService
             {
                 StudyCourse = dbStudyCourse,
                 Staff = staff,
-                DateUpdated = DateTime.Now,
+                UpdatedDate = DateTime.Now,
                 Type = StudyCourseHistoryType.Member
             };
 
@@ -1178,7 +1178,7 @@ namespace griffined_api.Services.StudyCourseService
             {
                 StudyCourse = dbStudyCourse,
                 Staff = staff,
-                DateUpdated = DateTime.Now,
+                UpdatedDate = DateTime.Now,
                 Type = StudyCourseHistoryType.Member
             };
 
@@ -1273,7 +1273,7 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
                     Staff = staff,
-                    DateUpdated = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
                     Type = StudyCourseHistoryType.Schedule
                 };
 
@@ -1330,7 +1330,7 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         StudyCourse = dbStudySubject.StudyCourse,
                         Staff = staff,
-                        DateUpdated = DateTime.Now,
+                        UpdatedDate = DateTime.Now,
                         Type = StudyCourseHistoryType.Schedule
                     };
 
@@ -1432,6 +1432,29 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
-    }
 
+        public async Task<ServiceResponse<List<StudyCourseHistoryResponseDto>>> GetStudyCourseHistory(int studyCourseId)
+        {
+            var response = new ServiceResponse<List<StudyCourseHistoryResponseDto>>();
+
+            var dbStudyCourseHistories = await _context.StudyCourseHistories
+                                        .Include(sch => sch.Staff)
+                                        .Where(sch => sch.StudyCourse.Id == studyCourseId)
+                                        .ToListAsync()
+                                        ?? throw new NotFoundException("No Records Found.");
+
+            var data = dbStudyCourseHistories.Select(history => new StudyCourseHistoryResponseDto
+            {
+                Date = history.UpdatedDate.ToDateTimeString(),
+                RecordType = history.Type,
+                Record = $"[{history.Staff.Role} {history.Staff.Nickname}/{history.Staff.FirstName}] {history.Description}"
+            })
+            .OrderByDescending(sch => sch.Date.ToDateTime())
+            .ToList();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
+    }
 }
