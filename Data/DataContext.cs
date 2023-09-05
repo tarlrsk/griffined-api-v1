@@ -126,6 +126,10 @@ namespace griffined_api.Data
                     .WithMany(e => e.ClassCancellationRequests)
                     .HasForeignKey(e => e.StudyCourseId);
 
+                entity.HasOne(e => e.StudySubject)
+                    .WithMany(e => e.ClassCancellationRequests)
+                    .HasForeignKey(e => e.StudySubjectId);
+
                 entity.HasOne(e => e.StudyClass)
                     .WithMany(e => e.ClassCancellationRequests)
                     .HasForeignKey(e => e.StudyClassId);
@@ -564,6 +568,10 @@ namespace griffined_api.Data
                     .HasForeignKey(e => e.StudySubjectId);
 
                 entity.HasMany(e => e.StudyClasses)
+                    .WithOne(e => e.StudySubject)
+                    .HasForeignKey(e => e.StudySubjectId);
+
+                entity.HasMany(e => e.ClassCancellationRequests)
                     .WithOne(e => e.StudySubject)
                     .HasForeignKey(e => e.StudySubjectId);
             });

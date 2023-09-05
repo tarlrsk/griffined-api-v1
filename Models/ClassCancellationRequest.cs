@@ -18,6 +18,7 @@ namespace griffined_api.Models
 
         public DateTime RequestedDate { get; set; }
         public virtual CancellationRole RequestedRole { get; set; }
+        public virtual ClassCancellationRequestStatus Status { get; set; }
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student? Student { get; set; }
