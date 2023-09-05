@@ -108,9 +108,9 @@ builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
 // Add Quartz services
 builder.Services.AddSingleton<IJobFactory, QuartzJobFactory>();
 builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-builder.Services.AddSingleton<UpdateClassStatusJob>(); // Register your job here
 
-// Configure the job and trigger
+// Update Class Status Job
+builder.Services.AddSingleton<UpdateClassStatusJob>();
 builder.Services.AddSingleton(new JobSchedule(
     jobType: typeof(UpdateClassStatusJob),
     cronExpression: "0 0/1 * 1/1 * ? *")); // Adjust the cron expression
