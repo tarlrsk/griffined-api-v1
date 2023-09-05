@@ -24,7 +24,7 @@ namespace griffined_api.Extensions.DateTimeExtensions
         }
 
         // Extension method to convert DateTime to String (format: ddd dd-MMMM-yyyy)
-        public static string ToDateWithDay(this DateTime dateTime, string format = "dddd, dd MMM yyyy")
+        public static string ToDateWithDayString(this DateTime dateTime, string format = "dddd, dd MMM yyyy")
         {
             return dateTime.ToString(format, CultureInfo.InvariantCulture);
         }

@@ -977,7 +977,9 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherNickname = dbStudyClass.Teacher.Nickname,
                     ClassStatus = dbStudyClass.Status,
                     // TODO TeacherWorkType
-                })).ToList()
+                }))
+                .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
+                .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -1109,7 +1111,7 @@ namespace griffined_api.Services.StudyCourseService
             {
                 StudyCourse = dbStudyCourse,
                 Staff = staff,
-                DateUpdated = DateTime.Now,
+                UpdatedDate = DateTime.Now,
                 Type = StudyCourseHistoryType.Member
             };
 
@@ -1176,7 +1178,7 @@ namespace griffined_api.Services.StudyCourseService
             {
                 StudyCourse = dbStudyCourse,
                 Staff = staff,
-                DateUpdated = DateTime.Now,
+                UpdatedDate = DateTime.Now,
                 Type = StudyCourseHistoryType.Member
             };
 
@@ -1246,7 +1248,16 @@ namespace griffined_api.Services.StudyCourseService
 
         public async Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest)
         {
+            var staffId = _firebaseService.GetAzureIdWithToken();
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == staffId) ?? throw new NotFoundException("No Staff Found");
+
             var dbRemoveStudyClasses = await _context.StudyClasses
+                                        .Include(c => c.StudyCourse)
+                                            .ThenInclude(sc => sc.Course)
+                                        .Include(c => c.StudySubject)
+                                            .ThenInclude(ss => ss.Subject)
+                                        .Include(c => c.Schedule)
+                                        .Include(c => c.Teacher)
                                         .Include(c => c.Attendances)
                                         .Where(c => updateRequest.RemoveStudyClassId.Contains(c.Id)).ToListAsync();
 
@@ -1257,9 +1268,24 @@ namespace griffined_api.Services.StudyCourseService
                     _context.StudentAttendances.Remove(dbAttendance);
                 }
                 dbRemoveStudyClass.Status = ClassStatus.Deleted;
+
+                var removeHistory = new StudyCourseHistory
+                {
+                    StudyCourse = dbRemoveStudyClass.StudyCourse,
+                    Staff = staff,
+                    UpdatedDate = DateTime.Now,
+                    Type = StudyCourseHistoryType.Schedule
+                };
+
+                string removedStudyClassHistoryDescription = $"Removed {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+
+                removeHistory.Description = removedStudyClassHistoryDescription;
+                dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
             }
 
             var dbStudySubjects = await _context.StudySubjects
+                            .Include(s => s.StudyCourse)
+                                .ThenInclude(sc => sc.Course)
                             .Include(s => s.Subject)
                             .Include(s => s.StudyClasses)
                             .Include(s => s.StudyCourse)
@@ -1299,8 +1325,22 @@ namespace griffined_api.Services.StudyCourseService
                     }
 
                     dbStudySubject.StudyClasses.Add(studyClass);
+
+                    var addHistory = new StudyCourseHistory
+                    {
+                        StudyCourse = dbStudySubject.StudyCourse,
+                        Staff = staff,
+                        UpdatedDate = DateTime.Now,
+                        Type = StudyCourseHistoryType.Schedule
+                    };
+
+                    string addedStudyClassHistoryDescription = $"Added {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
+
+                    addHistory.Description = addedStudyClassHistoryDescription;
+                    studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
                 }
             }
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -1350,7 +1390,9 @@ namespace griffined_api.Services.StudyCourseService
                                 && c.Status != ClassStatus.Deleted
                                 && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId))
                                 .ToListAsync();
-            }else{
+            }
+            else
+            {
                 throw new InternalServerException("Something went wrong with User.");
             }
 
@@ -1390,6 +1432,29 @@ namespace griffined_api.Services.StudyCourseService
             };
             return response;
         }
-    }
 
+        public async Task<ServiceResponse<List<StudyCourseHistoryResponseDto>>> GetStudyCourseHistory(int studyCourseId)
+        {
+            var response = new ServiceResponse<List<StudyCourseHistoryResponseDto>>();
+
+            var dbStudyCourseHistories = await _context.StudyCourseHistories
+                                        .Include(sch => sch.Staff)
+                                        .Where(sch => sch.StudyCourse.Id == studyCourseId)
+                                        .ToListAsync()
+                                        ?? throw new NotFoundException("No Records Found.");
+
+            var data = dbStudyCourseHistories.Select(history => new StudyCourseHistoryResponseDto
+            {
+                Date = history.UpdatedDate.ToDateTimeString(),
+                RecordType = history.Type,
+                Record = $"[{history.Staff.Role.ToUpper()} {history.Staff.Nickname}/{history.Staff.FirstName}] {history.Description}"
+            })
+            .OrderByDescending(sch => sch.Date.ToDateTime())
+            .ToList();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
+    }
 }
