@@ -14,5 +14,6 @@ namespace griffined_api.Services.StaffService
         Task<ServiceResponse<List<StaffResponseDto>>> DeleteStaff(int id);
         Task<ServiceResponse<StaffResponseDto>> DisableStaff(int id);
         Task<ServiceResponse<StaffResponseDto>> EnableStaff(int id);
+        Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password);
     }
 }

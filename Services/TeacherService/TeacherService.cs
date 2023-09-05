@@ -14,9 +14,11 @@ namespace griffined_api.Services.TeacherService
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public TeacherService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        private readonly IFirebaseService _firebaseService;
+        public TeacherService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
         {
             _httpContextAccessor = httpContextAccessor;
+            _firebaseService = firebaseService;
             _mapper = mapper;
             _context = context;
         }
@@ -176,6 +178,21 @@ namespace griffined_api.Services.TeacherService
             response.Data = _mapper.Map<GetTeacherDto>(teacher);
 
             return response;
+        }
+
+        public async Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password)
+        {
+            if (password.Password != password.VerifyPassword)
+                throw new BadRequestException("Both Password must be the same");
+
+            await _firebaseService.ChangePasswordWithUid(uid, password.Password);
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+
         }
 
         private async Task AddStaffFireStoreAsync(Teacher staff)
