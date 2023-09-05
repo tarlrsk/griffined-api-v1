@@ -16,6 +16,7 @@ global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
 global using griffined_api.Enums;
 global using griffined_api.Exceptions;
+global using griffined_api.Jobs;
 global using griffined_api.Middlewares;
 global using griffined_api.Models;
 global using griffined_api.integrations.Firebase;
@@ -24,6 +25,7 @@ global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.CourseService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
+global using griffined_api.Services.StudentReportService;
 global using griffined_api.Services.TeacherService;
 global using griffined_api.Services.RegistrationRequestService;
 global using griffined_api.Services.StudyCourseService;
@@ -31,7 +33,6 @@ global using griffined_api.integrations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
-global using System.Text;
 
 //Authen
 global using Microsoft.IdentityModel.Tokens;
@@ -47,8 +48,11 @@ using Swashbuckle.AspNetCore.Filters;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using FirebaseAdmin;
-using FirebaseAdminAuthentication.DependencyInjection.Extensions;
-using griffined_api.Services.StudentReportService;
+
+// Background Tasks
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +103,19 @@ builder.Services.AddSingleton<UrlSigner>(_ => UrlSigner.FromCredential(GoogleCre
 
 var storageClient = StorageClient.Create();
 builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
+
+
+// Add Quartz services
+builder.Services.AddSingleton<IJobFactory, QuartzJobFactory>();
+builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+builder.Services.AddSingleton<UpdateClassStatusJob>(); // Register your job here
+
+// Configure the job and trigger
+builder.Services.AddSingleton(new JobSchedule(
+    jobType: typeof(UpdateClassStatusJob),
+    cronExpression: "0 0/1 * 1/1 * ? *")); // Adjust the cron expression
+
+builder.Services.AddHostedService<QuartzHostedService>();
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {
