@@ -20,7 +20,7 @@ global using griffined_api.Middlewares;
 global using griffined_api.Models;
 global using griffined_api.integrations.Firebase;
 global using griffined_api.Services.AttendanceService;
-global using griffined_api.Services.ClassCancellationRequest;
+global using griffined_api.Services.ClassCancellationRequestService;
 global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.CourseService;
 global using griffined_api.Services.StaffService;
@@ -50,7 +50,6 @@ using Google.Cloud.Storage.V1;
 using FirebaseAdmin;
 using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 using griffined_api.Services.StudentReportService;
-using griffined_api.Services.ClassCancellationRequest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +64,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddLogging();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
-builder.Services.AddScoped<IClassCancellationRequest, ClassCancellationRequest>();
+builder.Services.AddScoped<IClassCancellationRequestService, ClassCancellationRequestService>();
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
