@@ -17,19 +17,13 @@ namespace griffined_api.Jobs
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
             var jobType = bundle.JobDetail.JobType;
-            var job = _serviceProvider.GetRequiredService(jobType) as IJob;
-
-            if (job == null)
-            {
-                throw new InvalidOperationException($"Failed to resolve job of type {jobType.FullName}");
-            }
-
+            var job = _serviceProvider.GetRequiredService(jobType) as IJob ?? throw new InvalidOperationException($"Failed to resolve job of type {jobType.FullName}");
             return job;
         }
 
         public void ReturnJob(IJob job)
         {
-            // If you need to do something when a job is returned to the factory
+            // TODO when job is returned to factory
         }
     }
 
