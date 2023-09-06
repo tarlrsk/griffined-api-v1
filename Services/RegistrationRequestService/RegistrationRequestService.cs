@@ -257,6 +257,7 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var dbStudyCourse = await _context.StudyCourses
                                                 .Include(s => s.StudySubjects)
+                                                    .ThenInclude(s => s.StudySubjectMember)
                                                 .FirstOrDefaultAsync(s => s.Id == studyCourse.StudyCourseId) ?? throw new NotFoundException($"Study Course with ID {studyCourse.StudyCourseId} not found");
 
                 var newStudentAddingRequest = new StudentAddingRequest
@@ -276,6 +277,9 @@ namespace griffined_api.Services.RegistrationRequestService
 
                     foreach (var dbStudent in dbStudents)
                     {
+                        if (dbStudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                            throw new BadRequestException($"Student with code {dbStudent.StudentCode} is already enrolled this subject.");
+                        
                         dbStudySubject.StudySubjectMember.Add(new StudySubjectMember()
                         {
                             Student = dbStudent,
