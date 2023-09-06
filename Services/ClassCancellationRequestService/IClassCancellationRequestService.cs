@@ -13,5 +13,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
         Task<ServiceResponse<ClassCancellationRequestDetailResponseDto>> GetClassCancellationRequestDetailByRequestId(int requestId);
         Task<ServiceResponse<string>> EaTakeRequest(int requestId);
         Task<ServiceResponse<string>> EaReleaseRequest(int requestId);
+        Task<ServiceResponse<string>> UpdateScheduleWithRequest(int requestId);
     }
 }
