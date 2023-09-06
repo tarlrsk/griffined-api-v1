@@ -4,6 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Google.Api;
+using griffined_api.Dtos.ClassCancellationRequestDto;
+using griffined_api.Dtos.StudyCourseDtos;
+using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace griffined_api.Services.ClassCancellationRequestService
 {
@@ -64,6 +68,119 @@ namespace griffined_api.Services.ClassCancellationRequestService
             var response = new ServiceResponse<string>
             {
                 StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<ClassCancellationRequestResponseDto>>> ListAllClassCancellationRequest()
+        {
+            var dbRequests = await _context.ClassCancellationRequests
+                            .Include(r => r.StudyCourse)
+                                .ThenInclude(c => c.Course)
+                            .Include(r => r.StudyCourse)
+                                .ThenInclude(c => c.Level)
+                            .Include(r => r.StudyCourse)
+                                .ThenInclude(c => c.StudySubjects)
+                                    .ThenInclude(c => c.Subject)
+                            .Include(r => r.StudyCourse)
+                                .ThenInclude(c => c.StudySubjects)
+                                    .ThenInclude(c => c.StudySubjectMember)
+                            .Include(r => r.StudyClass)
+                                .ThenInclude(c => c.Schedule)
+                            .Include(r => r.Student)
+                            .Include(r => r.Teacher)
+                            .ToListAsync();
+
+
+            var data = new List<ClassCancellationRequestResponseDto>();
+            foreach (var dbRequest in dbRequests)
+            {
+                var cancellationRequestDto = new ClassCancellationRequestResponseDto
+                {
+                    RequestId = dbRequest.Id,
+                    StudyCourseId = dbRequest.StudyCourse.Id,
+                    Section = dbRequest.StudyCourse.Section,
+                    RequestedRole = dbRequest.RequestedRole,
+                    Course = dbRequest.StudyCourse.Course.course,
+                    Level = dbRequest.StudyCourse.Level?.level,
+                    StudyCourseType = dbRequest.StudyCourse.StudyCourseType,
+                    RequestedDate = dbRequest.RequestedDate.ToDateTimeString(),
+                    CancelledDate = dbRequest.StudyClass.Schedule.Date.ToDateString(),
+                    CancelledFromTime = dbRequest.StudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    CancelledToTime = dbRequest.StudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    Status = dbRequest.Status,
+                };
+
+                if (dbRequest.RequestedRole == CancellationRole.Student)
+                {
+                    if (dbRequest.Student == null)
+                        throw new NotFoundException("Student is not found.");
+
+                    foreach (var dbStudySubject in dbRequest.StudyCourse.StudySubjects)
+                    {
+                        if (dbStudySubject.StudySubjectMember.Any(m => m.StudentId == dbRequest.StudentId))
+                        {
+                            cancellationRequestDto.StudySubjects.Add(new StudySubjectResponseDto
+                            {
+                                StudySubjectId = dbStudySubject.Id,
+                                SubjectId = dbStudySubject.Subject.Id,
+                                Subject = dbStudySubject.Subject.subject,
+                            });
+                        }
+                    }
+
+                    cancellationRequestDto.RequestedBy = new RequestedByResponseDto
+                    {
+                        UserId = dbRequest.Student.Id,
+                        FirstName = dbRequest.Student.FirstName,
+                        LastName = dbRequest.Student.LastName,
+                        NickName = dbRequest.Student.Nickname,
+                    };
+                }
+                else
+                {
+                    if (dbRequest.Teacher == null)
+                        throw new NotFoundException("Teacher is not found.");
+
+                    foreach (var dbStudySubject in dbRequest.StudyCourse.StudySubjects)
+                    {
+                        cancellationRequestDto.StudySubjects.Add(new StudySubjectResponseDto
+                        {
+                            StudySubjectId = dbStudySubject.Id,
+                            SubjectId = dbStudySubject.Subject.Id,
+                            Subject = dbStudySubject.Subject.subject,
+                        });
+                    }
+
+                    cancellationRequestDto.RequestedBy = new RequestedByResponseDto
+                    {
+                        UserId = dbRequest.Teacher.Id,
+                        FirstName = dbRequest.Teacher.FirstName,
+                        LastName = dbRequest.Teacher.LastName,
+                        NickName = dbRequest.Teacher.Nickname,
+                    };
+                }
+
+                if (dbRequest.TakenByEAId != null)
+                {
+                    var takenByEA = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.TakenByEAId)
+                                    ?? throw new InternalServerException("Something went wrong with Taken By Staff");
+
+                    cancellationRequestDto.TakenByEA = new StaffNameOnlyResponseDto
+                    {
+                        StaffId = takenByEA.Id,
+                        FullName = takenByEA.FirstName + " " + takenByEA.LastName,
+                        Nickname = takenByEA.Nickname,
+                    };
+                }
+
+                data.Add(cancellationRequestDto);
+            }
+
+            var response = new ServiceResponse<List<ClassCancellationRequestResponseDto>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
             };
             return response;
         }

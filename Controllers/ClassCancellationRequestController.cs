@@ -23,5 +23,11 @@ namespace griffined_api.Controllers
             return Ok(await _classCancellation.AddClassCancellationRequest(studyClassId));
         }
 
+        [HttpGet(), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> ListAllClassCancellationRequest()
+        {
+            return Ok(await _classCancellation.ListAllClassCancellationRequest());
+        }
+
     }
 }
