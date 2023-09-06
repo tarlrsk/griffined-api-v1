@@ -34,5 +34,17 @@ namespace griffined_api.Controllers
         {
             return Ok(await _classCancellation.GetClassCancellationRequestDetailByRequestId(requestId));
         }
+
+        [HttpPut("take/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaTakeRequest(int requestId)
+        {
+            return Ok(await _classCancellation.EaTakeRequest(requestId));
+        }
+
+        [HttpPut("release/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> EaReleaseRequest(int requestId)
+        {
+            return Ok(await _classCancellation.EaReleaseRequest(requestId));
+        }
     }
 }
