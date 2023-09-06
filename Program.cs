@@ -16,6 +16,7 @@ global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
 global using griffined_api.Enums;
 global using griffined_api.Exceptions;
+global using griffined_api.Jobs;
 global using griffined_api.Middlewares;
 global using griffined_api.Models;
 global using griffined_api.integrations.Firebase;
@@ -51,8 +52,6 @@ using FirebaseAdmin;
 
 // Background Tasks
 using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,9 +104,11 @@ builder.Services.AddSingleton(_ => UrlSigner.FromCredential(GoogleCredential.Fro
 var storageClient = StorageClient.Create();
 builder.Services.AddSingleton(_ => StorageClient.Create());
 
+builder.Services.AddInfrastructure();
+
 builder.Services.ConfigureSwaggerGen(setup =>
 {
-    setup.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    setup.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "House of Griffin",
         Version = "v1.0.2"
@@ -135,4 +136,3 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
-
