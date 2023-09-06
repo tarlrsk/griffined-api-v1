@@ -6,32 +6,29 @@ namespace griffined_api.Jobs.UpdateClassStatus
     public class UpdateClassStatusJob : IJob
     {
         private readonly DataContext _context;
-        private readonly ILogger<UpdateClassStatusJob> _logger;
-        public UpdateClassStatusJob(DataContext context, ILogger<UpdateClassStatusJob> logger)
+        public UpdateClassStatusJob(DataContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var dbStudyClasses = await _context.StudyClasses.ToListAsync();
+            var dbStudyClasses = await _context.StudyClasses
+                                .Include(sc => sc.Schedule)
+                                .ToListAsync();
 
             foreach (var dbStudyClass in dbStudyClasses)
             {
                 var classEndTime = dbStudyClass.Schedule.Date.Add(dbStudyClass.Schedule.ToTime);
 
-                if (dbStudyClass.Status == ClassStatus.Checked)
+                if (dbStudyClass.Status == ClassStatus.None)
                 {
-                    _logger.LogInformation($"No changes at {DateTime.Now}");
-                    continue;
-                }
+                    if (DateTime.Now >= classEndTime)
+                    {
+                        dbStudyClass.Status = ClassStatus.Unchecked;
 
-                if (DateTime.Now > classEndTime)
-                {
-                    dbStudyClass.Status = ClassStatus.Unchecked;
-                    _logger.LogInformation($"Class Status changed to Unchecked at {DateTime.Now}");
-                    await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync();
+                    }
                 }
             }
 

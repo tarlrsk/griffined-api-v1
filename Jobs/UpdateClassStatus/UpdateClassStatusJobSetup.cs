@@ -13,8 +13,9 @@ namespace griffined_api.Jobs.UpdateClassStatus
                 .AddTrigger(trigger =>
                     trigger
                         .ForJob(jobKey)
-                        .WithSimpleSchedule(schedule =>
-                            schedule.WithIntervalInSeconds(10).RepeatForever()));
+                        .WithCronSchedule("0 0 0 * * ?"));
+            // .WithSimpleSchedule(schedule =>
+            //     schedule.WithIntervalInMinutes(1).RepeatForever()));
         }
     }
 }
