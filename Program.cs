@@ -52,8 +52,6 @@ using FirebaseAdmin;
 
 // Background Tasks
 using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,27 +99,16 @@ builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
 
-builder.Services.AddSingleton<UrlSigner>(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
+builder.Services.AddSingleton(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
 
 var storageClient = StorageClient.Create();
-builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
+builder.Services.AddSingleton(_ => StorageClient.Create());
 
-
-// Add Quartz services
-builder.Services.AddSingleton<IJobFactory, QuartzJobFactory>();
-builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-
-// Update Class Status Job
-builder.Services.AddSingleton<UpdateClassStatusJob>();
-builder.Services.AddSingleton(new JobSchedule(
-    jobType: typeof(UpdateClassStatusJob),
-    cronExpression: "0 0/1 * 1/1 * ? *")); // Adjust the cron expression
-
-builder.Services.AddHostedService<QuartzHostedService>();
+builder.Services.AddInfrastructure();
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {
-    setup.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    setup.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "House of Griffin",
         Version = "v1.0.2"
@@ -149,4 +136,3 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
-
