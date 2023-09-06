@@ -6,6 +6,7 @@ using System.Net;
 using griffined_api.Dtos.ClassCancellationRequestDto;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+
 namespace griffined_api.Services.ClassCancellationRequestService
 {
     public class ClassCancellationRequestService : IClassCancellationRequestService
