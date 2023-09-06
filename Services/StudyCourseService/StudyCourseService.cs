@@ -154,6 +154,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
+                        Hour = dbStudySubject.Hour,
                     });
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
@@ -386,6 +387,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
+                        Hour = dbStudySubject.Hour,
                     };
                     studyCourse.StudySubjects.Add(studySubject);
                 }
@@ -440,6 +442,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
+                        Hour = dbStudySubject.Hour,
                     };
                     studyCourse.StudySubjects.Add(studySubject);
                 }
@@ -506,6 +509,7 @@ namespace griffined_api.Services.StudyCourseService
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
+                    Hour = dbStudySubject.Hour,
                 });
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
@@ -606,6 +610,7 @@ namespace griffined_api.Services.StudyCourseService
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
+                    Hour = dbStudySubject.Hour,
                 });
             }
 
@@ -737,7 +742,8 @@ namespace griffined_api.Services.StudyCourseService
                         {
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Id,
-                            Subject = dbStudySubject.Subject.subject
+                            Subject = dbStudySubject.Subject.subject,
+                            Hour = dbStudySubject.Hour,
                         },
                         FiftyPercentReport = studentReport?.Progression == Progression.FiftyPercent
                             ? new ReportFileResponseDto
@@ -949,7 +955,8 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
-                    Subject = dbStudySubject.Subject.subject
+                    Subject = dbStudySubject.Subject.subject,
+                    Hour = dbStudySubject.Hour,
                 }).ToList(),
                 Level = new Dtos.LevelDtos.LevelResponseDto
                 {
@@ -1022,7 +1029,8 @@ namespace griffined_api.Services.StudyCourseService
                                 {
                                     StudySubjectId = member.StudySubject.Id,
                                     SubjectId = member.StudySubject.Subject.Id,
-                                    Subject = member.StudySubject.Subject.subject
+                                    Subject = member.StudySubject.Subject.subject,
+                                    Hour = member.StudySubject.Hour,
                                 }).ToList()
                             }).ToList(),
 
@@ -1042,7 +1050,8 @@ namespace griffined_api.Services.StudyCourseService
                                 {
                                     StudySubjectId = cls.StudySubject.Id,
                                     SubjectId = cls.StudySubject.Subject.Id,
-                                    Subject = cls.StudySubject.Subject.subject
+                                    Subject = cls.StudySubject.Subject.subject,
+                                    Hour = cls.StudySubject.Hour,
                                 }).ToList()
                             }).ToList()
             };

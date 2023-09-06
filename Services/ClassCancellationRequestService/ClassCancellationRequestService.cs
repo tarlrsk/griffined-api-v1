@@ -137,7 +137,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         UserId = dbRequest.Student.Id,
                         FirstName = dbRequest.Student.FirstName,
                         LastName = dbRequest.Student.LastName,
-                        NickName = dbRequest.Student.Nickname,
+                        Nickname = dbRequest.Student.Nickname,
                     };
                 }
                 else
@@ -160,7 +160,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         UserId = dbRequest.Teacher.Id,
                         FirstName = dbRequest.Teacher.FirstName,
                         LastName = dbRequest.Teacher.LastName,
-                        NickName = dbRequest.Teacher.Nickname,
+                        Nickname = dbRequest.Teacher.Nickname,
                     };
                 }
 
@@ -255,7 +255,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     UserId = dbRequest.Student.Id,
                     FirstName = dbRequest.Student.FirstName,
                     LastName = dbRequest.Student.LastName,
-                    NickName = dbRequest.Student.Nickname,
+                    Nickname = dbRequest.Student.Nickname,
                     Phone = dbRequest.Student.Phone,
                     Email = dbRequest.Student.Email,
                     Line = dbRequest.Student.Line,
@@ -281,7 +281,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     UserId = dbRequest.Teacher.Id,
                     FirstName = dbRequest.Teacher.FirstName,
                     LastName = dbRequest.Teacher.LastName,
-                    NickName = dbRequest.Teacher.Nickname,
+                    Nickname = dbRequest.Teacher.Nickname,
                     Phone = dbRequest.Teacher.Phone,
                     Email = dbRequest.Teacher.Email,
                     Line = dbRequest.Teacher.Line,
