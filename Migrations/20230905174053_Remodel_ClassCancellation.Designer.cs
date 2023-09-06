@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230905174053_Remodel_ClassCancellation")]
+    partial class RemodelClassCancellation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,9 +126,6 @@ namespace griffinedapi.Migrations
                     b.Property<int>("RequestedRole")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
@@ -139,9 +139,6 @@ namespace griffinedapi.Migrations
 
                     b.Property<int?>("StudySubjectId")
                         .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TakenByEAId")
                         .HasColumnType("int");
 
                     b.Property<int?>("TeacherId")
