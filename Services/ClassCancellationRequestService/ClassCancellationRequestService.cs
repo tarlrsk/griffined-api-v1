@@ -347,5 +347,42 @@ namespace griffined_api.Services.ClassCancellationRequestService
             };
             return response;
         }
+
+        public async Task<ServiceResponse<string>> EaTakeRequest(int requestId)
+        {
+            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(c => c.Id == requestId)
+                            ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
+
+            if(dbRequest.TakenByEAId != null)
+                throw new ConflictException($"Request Already Taken By Another EA");
+
+            var eaId = _firebaseService.GetAzureIdWithToken();
+
+            dbRequest.TakenByEAId = eaId;
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>{
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> EaReleaseRequest(int requestId)
+        {
+            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(c => c.Id == requestId)
+                            ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
+
+            if(dbRequest.TakenByEAId == null)
+                throw new ConflictException("EA haven't take this request yet.");
+
+            dbRequest.TakenByEAId = null;
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>{
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
     }
 }
