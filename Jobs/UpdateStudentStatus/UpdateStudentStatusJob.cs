@@ -22,6 +22,8 @@ namespace griffined_api.Jobs.UpdateStudentStatus
                 }
             }
 
+            await _context.SaveChangesAsync();
+
             await Task.CompletedTask;
         }
     }
