@@ -17,6 +17,10 @@ namespace griffined_api.Dtos.ClassCancellationRequestDto
         public string Course { get; set; } = string.Empty;
         public string? Level { get; set; }
         public List<StudySubjectResponseDto> StudySubjects { get; set; } = new List<StudySubjectResponseDto>();
+        public string StartDate { get; set; } = string.Empty;
+        public string EndDate { get; set; } = string.Empty;
+        public double TotalHour { get; set; }
+        public Method Method { get; set; }
         public string RequestedDate { get; set; } = string.Empty;
         public string CancelledDate { get; set; } = string.Empty;
         public string CancelledFromTime { get; set; } = string.Empty;
