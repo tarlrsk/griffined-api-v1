@@ -29,6 +29,9 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .Include(c => c.StudySubject)
                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
                             ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
+            
+            if(dbStudyClass.StudyCourse.StudyCourseType == StudyCourseType.Group)
+                throw new BadRequestException($"Group Class cannot cancel");
 
             var classCancellationRequest = new ClassCancellationRequest
             {
