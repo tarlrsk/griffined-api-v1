@@ -16,7 +16,6 @@ global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
 global using griffined_api.Enums;
 global using griffined_api.Exceptions;
-global using griffined_api.Jobs;
 global using griffined_api.Middlewares;
 global using griffined_api.Models;
 global using griffined_api.integrations.Firebase;
@@ -99,23 +98,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
 
-builder.Services.AddSingleton<UrlSigner>(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
+builder.Services.AddSingleton(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
 
 var storageClient = StorageClient.Create();
-builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
-
-
-// Add Quartz services
-builder.Services.AddSingleton<IJobFactory, QuartzJobFactory>();
-builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-
-// Update Class Status Job
-builder.Services.AddSingleton<UpdateClassStatusJob>();
-builder.Services.AddSingleton(new JobSchedule(
-    jobType: typeof(UpdateClassStatusJob),
-    cronExpression: "0 0/1 * 1/1 * ? *")); // Adjust the cron expression
-
-builder.Services.AddHostedService<QuartzHostedService>();
+builder.Services.AddSingleton(_ => StorageClient.Create());
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {
