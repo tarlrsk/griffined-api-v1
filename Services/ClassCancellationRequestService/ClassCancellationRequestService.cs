@@ -220,6 +220,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 StudyCourseId = dbRequest.StudyCourse.Id,
                 Section = dbRequest.StudyCourse.Section,
                 RequestedRole = dbRequest.RequestedRole,
+                CourseId = dbRequest.StudyCourse.Course.Id,
                 Course = dbRequest.StudyCourse.Course.course,
                 Level = dbRequest.StudyCourse.Level?.level,
                 StudyCourseType = dbRequest.StudyCourse.StudyCourseType,

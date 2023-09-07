@@ -14,6 +14,7 @@ namespace griffined_api.Dtos.ClassCancellationRequestDto
         public StudyCourseType StudyCourseType { get; set; }
         public virtual CancellationRole RequestedRole { get; set; }
         public RequestedByWithContactResponseDto RequestedBy { get; set; } = new RequestedByWithContactResponseDto();
+        public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
         public string? Level { get; set; }
         public List<StudySubjectResponseDto> StudySubjects { get; set; } = new List<StudySubjectResponseDto>();
