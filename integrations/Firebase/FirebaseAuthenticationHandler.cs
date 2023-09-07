@@ -7,7 +7,7 @@ using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-namespace griffined_api.integrations.Firebase
+namespace griffined_api.Integrations.Firebase
 {
     public class FirebaseAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
