@@ -27,8 +27,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .Include(c => c.StudySubject)
                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
                             ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
-            
-            if(dbStudyClass.StudyCourse.StudyCourseType == StudyCourseType.Group)
+
+            if (dbStudyClass.StudyCourse.StudyCourseType == StudyCourseType.Group)
                 throw new BadRequestException($"Group Class cannot cancel");
 
             var classCancellationRequest = new ClassCancellationRequest
@@ -209,6 +209,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                     .ThenInclude(c => c.StudySubjectMember)
                             .Include(r => r.StudyClass)
                                 .ThenInclude(c => c.Schedule)
+                            .Include(r => r.StudySubject)
+                                .ThenInclude(s => s.Subject)
                             .Include(r => r.Student)
                             .Include(r => r.Teacher)
                             .FirstOrDefaultAsync(r => r.Id == requestId)
@@ -229,10 +231,21 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 Method = dbRequest.StudyCourse.Method,
                 TotalHour = dbRequest.StudyCourse.TotalHour,
                 RequestedDate = dbRequest.RequestedDate.ToDateTimeString(),
-                CancelledDate = dbRequest.StudyClass.Schedule.Date.ToDateString(),
-                CancelledFromTime = dbRequest.StudyClass.Schedule.FromTime.ToTimeSpanString(),
-                CancelledToTime = dbRequest.StudyClass.Schedule.ToTime.ToTimeSpanString(),
                 Status = dbRequest.Status,
+                RequestedClass = new CancelledInfoResponseDto
+                {
+                    ClassId = dbRequest.StudyClass.Id,
+                    ClassNo = dbRequest.StudyClass.ClassNumber,
+                    StudyCourseId = dbRequest.StudyCourse.Id,
+                    CourseId = dbRequest.StudyCourse.Course.Id,
+                    Course = dbRequest.StudyCourse.Course.course,
+                    StudySubjectId = dbRequest.StudySubject.Id,
+                    SubjectId = dbRequest.StudySubject.Subject.Id,
+                    Subject = dbRequest.StudySubject.Subject.subject,
+                    Date = dbRequest.StudyClass.Schedule.Date.ToDateString(),
+                    FromTime = dbRequest.StudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    TomTime = dbRequest.StudyClass.Schedule.ToTime.ToTimeSpanString(),
+                },
             };
 
             if (dbRequest.RequestedRole == CancellationRole.Student)
@@ -249,6 +262,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
+                            Hour = dbStudySubject.Hour,
                         });
                     }
                 }
@@ -308,7 +322,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             foreach (var dbStudySubject in dbRequest.StudyCourse.StudySubjects)
             {
-                if (dbRequest.RequestedRole == CancellationRole.Student 
+                if (dbRequest.RequestedRole == CancellationRole.Student
                 && dbStudySubject.StudySubjectMember.Any(s => s.StudentId != dbRequest.StudentId))
                 {
                     continue;
@@ -344,7 +358,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             cancellationRequestDto.Schedules = rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
 
-            var response = new ServiceResponse<ClassCancellationRequestDetailResponseDto>{
+            var response = new ServiceResponse<ClassCancellationRequestDetailResponseDto>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = cancellationRequestDto,
             };
@@ -356,7 +371,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
             var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(c => c.Id == requestId)
                             ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
 
-            if(dbRequest.TakenByEAId != null)
+            if (dbRequest.TakenByEAId != null)
                 throw new ConflictException($"Request Already Taken By Another EA");
 
             var eaId = _firebaseService.GetAzureIdWithToken();
@@ -365,7 +380,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             await _context.SaveChangesAsync();
 
-            var response = new ServiceResponse<string>{
+            var response = new ServiceResponse<string>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
             };
             return response;
@@ -376,13 +392,14 @@ namespace griffined_api.Services.ClassCancellationRequestService
             var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(c => c.Id == requestId)
                             ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
 
-            if(dbRequest.TakenByEAId == null)
+            if (dbRequest.TakenByEAId == null)
                 throw new ConflictException("EA haven't take this request yet.");
 
             dbRequest.TakenByEAId = null;
             await _context.SaveChangesAsync();
 
-            var response = new ServiceResponse<string>{
+            var response = new ServiceResponse<string>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
             };
             return response;
