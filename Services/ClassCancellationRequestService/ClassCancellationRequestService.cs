@@ -384,11 +384,5 @@ namespace griffined_api.Services.ClassCancellationRequestService
             };
             return response;
         }
-
-        public async Task<ServiceResponse<string>> UpdateScheduleWithRequest(int requestId)
-        {
-            
-            throw new NotImplementedException();
-        }
     }
 }
