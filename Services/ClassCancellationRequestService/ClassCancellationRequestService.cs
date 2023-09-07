@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using Google.Api;
+using System.Net;
 using griffined_api.Dtos.ClassCancellationRequestDto;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace griffined_api.Services.ClassCancellationRequestService
 {
@@ -225,6 +223,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 Course = dbRequest.StudyCourse.Course.course,
                 Level = dbRequest.StudyCourse.Level?.level,
                 StudyCourseType = dbRequest.StudyCourse.StudyCourseType,
+                StartDate = dbRequest.StudyCourse.StartDate.ToDateString(),
+                EndDate = dbRequest.StudyCourse.EndDate.ToDateString(),
+                Method = dbRequest.StudyCourse.Method,
+                TotalHour = dbRequest.StudyCourse.TotalHour,
                 RequestedDate = dbRequest.RequestedDate.ToDateTimeString(),
                 CancelledDate = dbRequest.StudyClass.Schedule.Date.ToDateString(),
                 CancelledFromTime = dbRequest.StudyClass.Schedule.FromTime.ToTimeSpanString(),
