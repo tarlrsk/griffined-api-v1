@@ -10,7 +10,7 @@ namespace griffined_api.Jobs
 {
     public static class QuartzDependencyInjecetion
     {
-        public static void AddInfrastructure(this IServiceCollection services)
+        public static void AddQuartzInfrastructure(this IServiceCollection services)
         {
             services.AddQuartz(options => { });
 
