@@ -6,7 +6,7 @@ using griffined_api.Dtos.StudyCourseDtos;
 
 namespace griffined_api.Dtos.ClassCancellationRequestDto
 {
-    public class CancelledInfoResponseDto
+    public class CancellationInfoResponseDto
     {
         public int ClassId { get; set; }
         public int ClassNo { get; set; }

@@ -232,7 +232,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 TotalHour = dbRequest.StudyCourse.TotalHour,
                 RequestedDate = dbRequest.RequestedDate.ToDateTimeString(),
                 Status = dbRequest.Status,
-                RequestedClass = new CancelledInfoResponseDto
+                RequestedClass = new CancellationInfoResponseDto
                 {
                     ClassId = dbRequest.StudyClass.Id,
                     ClassNo = dbRequest.StudyClass.ClassNumber,
