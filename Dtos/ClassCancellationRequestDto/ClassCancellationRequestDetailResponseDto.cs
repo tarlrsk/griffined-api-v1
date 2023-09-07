@@ -23,11 +23,9 @@ namespace griffined_api.Dtos.ClassCancellationRequestDto
         public double TotalHour { get; set; }
         public Method Method { get; set; }
         public string RequestedDate { get; set; } = string.Empty;
-        public string CancelledDate { get; set; } = string.Empty;
-        public string CancelledFromTime { get; set; } = string.Empty;
-        public string CancelledToTime { get; set; } = string.Empty;
         public StaffNameOnlyResponseDto? TakenByEA { get; set; }
         public ClassCancellationRequestStatus Status { get; set; }
+        public CancellationInfoResponseDto RequestedClass { get; set; } = new CancellationInfoResponseDto();
         public List<ScheduleResponseDto> Schedules { get; set; } = new List<ScheduleResponseDto>();
     }
 }
