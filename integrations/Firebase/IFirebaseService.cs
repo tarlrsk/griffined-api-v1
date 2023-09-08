@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace griffined_api.integrations.Firebase
+namespace griffined_api.Integrations.Firebase
 {
     public interface IFirebaseService
     {
