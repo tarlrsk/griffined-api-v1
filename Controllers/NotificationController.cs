@@ -34,5 +34,14 @@ namespace griffined_api.Controllers
                 return NotFound(response);
             return Ok(response);
         }
+
+        [HttpGet("staff"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> GetStaffNotifications()
+        {
+            var response = await _notificationService.GetStaffNotifications();
+            if (response == null)
+                return NotFound(response);
+            return Ok(response);
+        }
     }
 }
