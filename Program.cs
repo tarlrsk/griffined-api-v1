@@ -105,8 +105,6 @@ builder.Services.AddSingleton(_ => StorageClient.Create());
 
 builder.Services.AddQuartzInfrastructure();
 
-builder.Services.AddSignalR();
-
 builder.Services.ConfigureSwaggerGen(setup =>
 {
     setup.SwaggerDoc("v1", new OpenApiInfo
