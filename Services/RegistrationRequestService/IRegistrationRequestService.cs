@@ -12,6 +12,7 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<string>> AddNewRequestedCourses(NewCoursesRequestDto newCourses);
         Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> filesToUpload);
         Task<ServiceResponse<List<RegistrationRequestResponseDto>>> ListRegistrationRequests();
+        Task<ServiceResponse<EcRegistrationRequestDetailResponseDto>> EcGetRequestDetail(int requestId);
         Task<ServiceResponse<RegistrationRequestPendingEADetailResponseDto>> GetPendingEADetail(int requestId);
         Task<ServiceResponse<string>> DeclineSchedule(int requestId);
         Task<ServiceResponse<RegistrationRequestPendingEADetail2ResponseDto>> GetPendingEADetail2(int requestId);
