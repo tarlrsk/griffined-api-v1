@@ -18,6 +18,6 @@ namespace griffined_api.Dtos.ClassCancellationRequestDto
         public string Subject { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
-        public string TomTime { get; set; } = string.Empty;
+        public string ToTime { get; set; } = string.Empty;
     }
 }
