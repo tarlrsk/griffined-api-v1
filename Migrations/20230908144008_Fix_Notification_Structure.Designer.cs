@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230908144008_Fix_Notification_Structure")]
+    partial class FixNotificationStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -881,6 +884,7 @@ namespace griffinedapi.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("StudyCourseId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -1242,6 +1246,7 @@ namespace griffinedapi.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AppointmentId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateCreated")
@@ -1255,6 +1260,7 @@ namespace griffinedapi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("StudyCourseId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("TeacherId")
@@ -1621,7 +1627,9 @@ namespace griffinedapi.Migrations
 
                     b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
                         .WithMany("StudentNotifications")
-                        .HasForeignKey("StudyCourseId");
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Student");
 
@@ -1790,11 +1798,15 @@ namespace griffinedapi.Migrations
                 {
                     b.HasOne("griffined_api.Models.Appointment", "Appointment")
                         .WithMany("TeacherNotifications")
-                        .HasForeignKey("AppointmentId");
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
                         .WithMany("TeacherNotifications")
-                        .HasForeignKey("StudyCourseId");
+                        .HasForeignKey("StudyCourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("griffined_api.Models.Teacher", "Teacher")
                         .WithMany("TeacherNotifications")

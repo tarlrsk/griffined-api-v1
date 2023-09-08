@@ -187,6 +187,7 @@ namespace griffined_api.Services.StudyCourseService
                 studyCourse.StudentCount = studentCount;
                 studyCourses.Add(studyCourse);
             }
+
             response.Data = studyCourses;
             response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;

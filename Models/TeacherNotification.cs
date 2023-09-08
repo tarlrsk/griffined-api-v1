@@ -14,17 +14,19 @@ namespace griffined_api.Models
         public int? StudyCourseId { get; set; }
         public int? AppointmentId { get; set; }
 
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public virtual TeacherNotificationType Type { get; set; }
-        public bool hasRead { get; set; }
+        public bool HasRead { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
         public virtual Teacher Teacher { get; set; } = new Teacher();
 
         [ForeignKey(nameof(StudyCourseId))]
-        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
+        public virtual StudyCourse? StudyCourse { get; set; }
 
         [ForeignKey(nameof(AppointmentId))]
-        public virtual Appointment Appointment { get; set; } = new Appointment();
+        public virtual Appointment? Appointment { get; set; }
     }
 }
