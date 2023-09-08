@@ -9,5 +9,6 @@ namespace griffined_api.Services.NotificationService
     public interface INotificationService
     {
         Task<ServiceResponse<List<StudentNotificationResponseDto>>> GetStudentNotifications();
+        Task<ServiceResponse<List<TeacherNotificationResponseDto>>> GetTeacherNotifications();
     }
 }

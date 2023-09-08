@@ -25,5 +25,14 @@ namespace griffined_api.Controllers
                 return NotFound(response);
             return Ok(response);
         }
+
+        [HttpGet("teacher"), Authorize(Roles = "teacher, master")]
+        public async Task<ActionResult> GetTeacherNotifications()
+        {
+            var response = await _notificationService.GetTeacherNotifications();
+            if (response == null)
+                return NotFound(response);
+            return Ok(response);
+        }
     }
 }
