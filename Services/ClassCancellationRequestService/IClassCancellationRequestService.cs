@@ -8,10 +8,11 @@ namespace griffined_api.Services.ClassCancellationRequestService
 {
     public interface IClassCancellationRequestService
     {
-        Task<ServiceResponse<string>> AddClassCancellationRequest(int studyClassId); 
+        Task<ServiceResponse<string>> AddClassCancellationRequest(int studyClassId);
         Task<ServiceResponse<List<ClassCancellationRequestResponseDto>>> ListAllClassCancellationRequest();
         Task<ServiceResponse<ClassCancellationRequestDetailResponseDto>> GetClassCancellationRequestDetailByRequestId(int requestId);
         Task<ServiceResponse<string>> EaTakeRequest(int requestId);
         Task<ServiceResponse<string>> EaReleaseRequest(int requestId);
+        Task<ServiceResponse<string>> RejectRequest(int requestId, string rejectedReason);
     }
 }
