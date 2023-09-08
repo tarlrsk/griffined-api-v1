@@ -41,7 +41,7 @@ namespace griffined_api.Integrations.Firebase
                 return AuthenticateResult.Fail("Invalid scheme");
             }
 
-            string token = bearerToken.Substring("Bearer ".Length);
+            string token = bearerToken["Bearer ".Length..];
 
             try
             {
