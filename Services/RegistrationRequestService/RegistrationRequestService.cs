@@ -511,6 +511,17 @@ namespace griffined_api.Services.RegistrationRequestService
                             Method = dbRequestedCourse.Method,
                             StudyCourseType = dbRequestedCourse.StudyCourseType,
                         };
+                        foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                        {
+                            var requestSubject = new RequestedSubjectResponseDto()
+                            {
+                                StudySubjectId = dbRequestSubject.Id,
+                                SubjectId = dbRequestSubject.Subject.Id,
+                                Subject = dbRequestSubject.Subject.subject,
+                                Hour = dbRequestSubject.Hour,
+                            };
+                            requestedCourse.subjects.Add(requestSubject);
+                        }
                         requestDetail.Courses.Add(requestedCourse);
                     }
                 }
@@ -751,6 +762,17 @@ namespace griffined_api.Services.RegistrationRequestService
                             Method = dbRequestedCourse.Method,
                             StudyCourseType = dbRequestedCourse.StudyCourseType,
                         };
+                        foreach (var dbRequestSubject in dbRequestedCourse.NewCourseSubjectRequests)
+                        {
+                            var requestSubject = new RequestedSubjectResponseDto()
+                            {
+                                StudySubjectId = dbRequestSubject.Id,
+                                SubjectId = dbRequestSubject.Subject.Id,
+                                Subject = dbRequestSubject.Subject.subject,
+                                Hour = dbRequestSubject.Hour,
+                            };
+                            requestedCourse.subjects.Add(requestSubject);
+                        }
                         requestDetail.Courses.Add(requestedCourse);
                     }
                 }
