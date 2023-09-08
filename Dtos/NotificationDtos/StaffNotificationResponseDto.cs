@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.NotificationDto
 {
-    public class NotificationResponseDto
+    public class StaffNotificationResponseDto
     {
         public int StaffId { get; set; }
         public int? StudyCourseId { get; set; }
