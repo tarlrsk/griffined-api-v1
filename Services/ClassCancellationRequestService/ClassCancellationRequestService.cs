@@ -408,7 +408,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
         public async Task<ServiceResponse<string>> RejectRequest(int requestId, string rejectedReason)
         {
-            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(r => r.Id == requestId)
+            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(r => r.Id == requestId
+                            && r.Status == ClassCancellationRequestStatus.None)
                             ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
                             
             if (dbRequest.TakenByEAId == null)
