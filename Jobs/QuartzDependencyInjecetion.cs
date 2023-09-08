@@ -1,4 +1,5 @@
 using griffined_api.Jobs.UpdateClassStatus;
+using griffined_api.Jobs.UpdateStudentStatus;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace griffined_api.Jobs
 {
     public static class QuartzDependencyInjecetion
     {
-        public static void AddInfrastructure(this IServiceCollection services)
+        public static void AddQuartzInfrastructure(this IServiceCollection services)
         {
             services.AddQuartz(options => { });
 
@@ -20,6 +21,8 @@ namespace griffined_api.Jobs
             });
 
             services.ConfigureOptions<UpdateClassStatusJobSetup>();
+
+            services.ConfigureOptions<UpdateStudentStatusJobSetup>();
         }
     }
 }
