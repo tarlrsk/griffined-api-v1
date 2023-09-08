@@ -16,6 +16,7 @@ namespace griffined_api.Models
         public int? StudySubjectId { get; set; }
         public int? StudyClassId { get; set; }
         public int? TakenByEAId { get; set; }
+        public string? RejectedReason { get; set; }
 
         public DateTime RequestedDate { get; set; }
         public virtual CancellationRole RequestedRole { get; set; }
