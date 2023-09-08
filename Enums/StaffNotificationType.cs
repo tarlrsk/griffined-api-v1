@@ -11,6 +11,6 @@ namespace griffined_api.Enums
     public enum StaffNotificationType
     {
         ClassCancellationRequest,
-        CourseApproval
+        RegistrationRequest
     }
 }
