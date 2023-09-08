@@ -14,6 +14,7 @@ namespace griffined_api.Services.RegistrationRequestService
         Task<ServiceResponse<List<RegistrationRequestResponseDto>>> ListRegistrationRequests();
         Task<ServiceResponse<EcRegistrationRequestDetailResponseDto>> EcGetRequestDetail(int requestId);
         Task<ServiceResponse<EaRegistrationRequestDetailResponseDto>> EaGetRequestDetail(int requestId);
+        Task<ServiceResponse<OaRegistrationRequestDetailResponseDto>> OaGetRequestDetail(int requestId);
         Task<ServiceResponse<RegistrationRequestPendingEADetailResponseDto>> GetPendingEADetail(int requestId);
         Task<ServiceResponse<string>> DeclineSchedule(int requestId);
         Task<ServiceResponse<RegistrationRequestPendingEADetail2ResponseDto>> GetPendingEADetail2(int requestId);

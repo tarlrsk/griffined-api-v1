@@ -61,6 +61,12 @@ namespace griffined_api.Controllers
             return Ok(await _registrationRequestService.EaGetRequestDetail(requestId));
         }
 
+        [HttpGet("oa/{requestId}"), Authorize(Roles = "oa, master")]
+        public async Task<ActionResult> GetOaRequestDetail(int requestId)
+        {
+            return Ok(await _registrationRequestService.OaGetRequestDetail(requestId));
+        }
+
         [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, ec, master")]
         public async Task<ActionResult> GetPendingEADetail(int requestId)
         {
