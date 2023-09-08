@@ -24,9 +24,9 @@ namespace griffined_api.Models
         public virtual Teacher Teacher { get; set; } = new Teacher();
 
         [ForeignKey(nameof(StudyCourseId))]
-        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
+        public virtual StudyCourse? StudyCourse { get; set; }
 
         [ForeignKey(nameof(AppointmentId))]
-        public virtual Appointment Appointment { get; set; } = new Appointment();
+        public virtual Appointment? Appointment { get; set; }
     }
 }

@@ -29,9 +29,9 @@ namespace griffined_api.Models
         public virtual StudyCourse? StudyCourse { get; set; } = new StudyCourse();
 
         [ForeignKey(nameof(RegistrationRequestId))]
-        public virtual RegistrationRequest? RegistrationRequest { get; set; } = new RegistrationRequest();
+        public virtual RegistrationRequest? RegistrationRequest { get; set; }
 
         [ForeignKey(nameof(CancellationRequestId))]
-        public virtual ClassCancellationRequest? CancellationRequest { get; set; } = new ClassCancellationRequest();
+        public virtual ClassCancellationRequest? CancellationRequest { get; set; }
     }
 }
