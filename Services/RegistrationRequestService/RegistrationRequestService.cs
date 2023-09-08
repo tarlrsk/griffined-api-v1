@@ -471,6 +471,10 @@ namespace griffined_api.Services.RegistrationRequestService
                 RegistrationRequestType = dbRequest.Type,
                 RegistrationStatus = dbRequest.RegistrationStatus,
                 PaymentType = dbRequest.PaymentType,
+                PaymentError = dbRequest.PaymentError,
+                ScheduleError = dbRequest.ScheduleError,
+                NewCourseDetailError = dbRequest.NewCourseDetailError,
+                HasSchedule = dbRequest.HasSchedule,
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
