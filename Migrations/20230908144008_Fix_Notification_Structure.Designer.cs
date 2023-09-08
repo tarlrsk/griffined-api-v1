@@ -12,7 +12,7 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230908141522_Fix_Notification_Structure")]
+    [Migration("20230908144008_Fix_Notification_Structure")]
     partial class FixNotificationStructure
     {
         /// <inheritdoc />
@@ -1529,11 +1529,11 @@ namespace griffinedapi.Migrations
             modelBuilder.Entity("griffined_api.Models.StaffNotification", b =>
                 {
                     b.HasOne("griffined_api.Models.ClassCancellationRequest", "CancellationRequest")
-                        .WithMany()
+                        .WithMany("StaffNotifications")
                         .HasForeignKey("CancellationRequestId");
 
                     b.HasOne("griffined_api.Models.RegistrationRequest", "RegistrationRequest")
-                        .WithMany()
+                        .WithMany("StaffNotifications")
                         .HasForeignKey("RegistrationRequestId");
 
                     b.HasOne("griffined_api.Models.Staff", "Staff")
@@ -1839,6 +1839,11 @@ namespace griffinedapi.Migrations
                     b.Navigation("TeacherNotifications");
                 });
 
+            modelBuilder.Entity("griffined_api.Models.ClassCancellationRequest", b =>
+                {
+                    b.Navigation("StaffNotifications");
+                });
+
             modelBuilder.Entity("griffined_api.Models.Course", b =>
                 {
                     b.Navigation("Levels");
@@ -1873,6 +1878,8 @@ namespace griffinedapi.Migrations
                     b.Navigation("RegistrationRequestMembers");
 
                     b.Navigation("RegistrationRequestPaymentFiles");
+
+                    b.Navigation("StaffNotifications");
 
                     b.Navigation("StudentAddingRequest");
                 });
