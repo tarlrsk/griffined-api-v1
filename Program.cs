@@ -103,7 +103,7 @@ builder.Services.AddSingleton(_ => UrlSigner.FromCredential(GoogleCredential.Fro
 var storageClient = StorageClient.Create();
 builder.Services.AddSingleton(_ => StorageClient.Create());
 
-builder.Services.AddQuartzQuartzInfrastructure();
+builder.Services.AddQuartzInfrastructure();
 
 builder.Services.AddSignalR();
 
