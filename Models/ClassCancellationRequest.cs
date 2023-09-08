@@ -36,5 +36,7 @@ namespace griffined_api.Models
 
         [ForeignKey(nameof(StudyClassId))]
         public virtual StudyClass StudyClass { get; set; } = new StudyClass();
+
+        public virtual ICollection<StaffNotification> StaffNotifications { get; set; } = new List<StaffNotification>();
     }
 }
