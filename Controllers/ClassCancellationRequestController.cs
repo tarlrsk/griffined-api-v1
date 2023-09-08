@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using griffined_api.Dtos.ClassCancellationRequestDto;
 
 namespace griffined_api.Controllers
 {
@@ -16,7 +17,7 @@ namespace griffined_api.Controllers
         {
             _classCancellation = classCancellation;
         }
-        
+
         [HttpPost("{studyClassId}"), Authorize(Roles = "student, teacher, master")]
         public async Task<ActionResult> AddClassCancellationRequest(int studyClassId)
         {
@@ -45,6 +46,12 @@ namespace griffined_api.Controllers
         public async Task<ActionResult> EaReleaseRequest(int requestId)
         {
             return Ok(await _classCancellation.EaReleaseRequest(requestId));
+        }
+
+        [HttpPut("reject/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> RejectRequest(int requestId, RejectedClassCancellationRequestDto rejectedRequest)
+        {
+            return Ok(await _classCancellation.RejectRequest(requestId, rejectedRequest.RejectedReason));
         }
     }
 }

@@ -232,6 +232,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 TotalHour = dbRequest.StudyCourse.TotalHour,
                 RequestedDate = dbRequest.RequestedDate.ToDateTimeString(),
                 Status = dbRequest.Status,
+                RejectedReason = dbRequest.RejectedReason,
                 RequestedClass = new CancellationInfoResponseDto
                 {
                     ClassId = dbRequest.StudyClass.Id,
@@ -396,6 +397,29 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 throw new ConflictException("EA haven't take this request yet.");
 
             dbRequest.TakenByEAId = null;
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> RejectRequest(int requestId, string rejectedReason)
+        {
+            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(r => r.Id == requestId)
+                            ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
+                            
+            if (dbRequest.TakenByEAId == null)
+                throw new ConflictException("EA haven't take this request yet.");
+
+            if (dbRequest.TakenByEAId != _firebaseService.GetAzureIdWithToken())
+                throw new ConflictException("You don't have permission to reject this request.");
+            
+            dbRequest.RejectedReason = rejectedReason;
+            dbRequest.Status = ClassCancellationRequestStatus.Rejected;
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
