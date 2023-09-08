@@ -30,13 +30,39 @@ namespace griffined_api.Services.NotificationService
 
             var data = dbStudentNotifications.Select(sn => new StudentNotificationResponseDto
             {
-                StudentId = sn.Student.Id,
-                StudyCourseId = sn.StudyCourse.Id,
+                StudentId = studentId,
+                StudyCourseId = sn.StudyCourseId,
                 Title = sn.Title,
                 Message = sn.Message,
                 DateCreated = sn.DateCreated.ToDateTimeString(),
                 Type = sn.Type,
                 HasRead = sn.HasRead
+            }).ToList();
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Data = data;
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<TeacherNotificationResponseDto>>> GetTeacherNotifications()
+        {
+            var response = new ServiceResponse<List<TeacherNotificationResponseDto>>();
+
+            int teacherId = _firebaseService.GetAzureIdWithToken();
+
+            var dbTeacherNotifications = await _context.TeacherNotifications
+                                        .Where(tn => tn.Teacher.Id == teacherId)
+                                        .ToListAsync();
+
+            var data = dbTeacherNotifications.Select(tn => new TeacherNotificationResponseDto
+            {
+                TeacherId = teacherId,
+                StudyCourseId = tn.StudyCourseId,
+                Title = tn.Title,
+                Message = tn.Message,
+                DateCreated = tn.DateCreated.ToDateTimeString(),
+                Type = tn.Type,
+                HasRead = tn.HasRead
             }).ToList();
 
             response.StatusCode = (int)HttpStatusCode.OK;
