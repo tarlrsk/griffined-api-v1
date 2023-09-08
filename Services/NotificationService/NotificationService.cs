@@ -30,8 +30,8 @@ namespace griffined_api.Services.NotificationService
 
             var data = dbStudentNotifications.Select(sn => new StudentNotificationResponseDto
             {
-                StudentId = sn.Student.Id,
-                StudyCourseId = sn.StudyCourse.Id,
+                StudentId = studentId,
+                StudyCourseId = sn.StudyCourseId,
                 Title = sn.Title,
                 Message = sn.Message,
                 DateCreated = sn.DateCreated.ToDateTimeString(),
