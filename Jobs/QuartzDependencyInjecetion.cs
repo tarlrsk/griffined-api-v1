@@ -1,4 +1,5 @@
 using griffined_api.Jobs.UpdateClassStatus;
+using griffined_api.Jobs.UpdateStudentStatus;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace griffined_api.Jobs
             });
 
             services.ConfigureOptions<UpdateClassStatusJobSetup>();
+
+            services.ConfigureOptions<UpdateStudentStatusJobSetup>();
         }
     }
 }
