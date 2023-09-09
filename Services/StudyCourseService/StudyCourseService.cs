@@ -969,6 +969,7 @@ namespace griffined_api.Services.StudyCourseService
                 StartDate = dbStudyCourse.StartDate.ToDateString(),
                 EndDate = dbStudyCourse.EndDate.ToDateString(),
                 TotalHour = dbStudyCourse.TotalHour,
+                Status = dbStudyCourse.Status,
                 Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
                 {
                     StudyCourseId = dbStudyCourse.Id,
