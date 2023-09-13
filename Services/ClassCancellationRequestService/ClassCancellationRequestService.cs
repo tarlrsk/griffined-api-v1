@@ -498,8 +498,24 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 }
             }
 
-            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("Request is not found.");
+            var dbRequest = await _context.ClassCancellationRequests
+                            .Include(r => r.Student)
+                            .Include(r => r.StudyCourse)
+                            .Include(r => r.StudyClass)
+                                .ThenInclude(sc => sc.Schedule)
+                            .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("Request is not found.");
             dbRequest.Status = ClassCancellationRequestStatus.Completed;
+
+            var studentNotification = new StudentNotification
+            {
+                Student = dbRequest.Student!,
+                StudyCourse = dbRequest.StudyCourse,
+                Title = "Your Class Has Been Cancelled.",
+                Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                DateCreated = DateTime.Now,
+                Type = StudentNotificationType.ClassCancellation,
+                HasRead = false
+            };
 
             await _context.SaveChangesAsync();
 
@@ -529,7 +545,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
             {
                 Student = dbRequest.Student!,
                 StudyCourse = dbRequest.StudyCourse,
-                Title = "Class Cancellation",
+                Title = "Cancellation Request Rejected",
                 Message = "Your class cancellation request has been rejected.",
                 DateCreated = DateTime.Now,
                 Type = StudentNotificationType.ClassCancellation,
