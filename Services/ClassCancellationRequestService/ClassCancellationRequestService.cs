@@ -408,22 +408,58 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
         public async Task<ServiceResponse<string>> RejectRequest(int requestId, string rejectedReason)
         {
-            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(r => r.Id == requestId
+            var dbRequest = await _context.ClassCancellationRequests
+                            .Include(r => r.Student)
+                            .Include(r => r.StudyCourse)
+                            .FirstOrDefaultAsync(r => r.Id == requestId
                             && r.Status == ClassCancellationRequestStatus.None)
                             ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
-                            
+
             if (dbRequest.TakenByEAId == null)
-                throw new ConflictException("EA haven't take this request yet.");
+                throw new ConflictException("EA hasn't taken this request yet.");
 
             if (dbRequest.TakenByEAId != _firebaseService.GetAzureIdWithToken())
                 throw new ConflictException("You don't have permission to reject this request.");
-            
+
             dbRequest.RejectedReason = rejectedReason;
             dbRequest.Status = ClassCancellationRequestStatus.Rejected;
+
+            var studentNotification = new StudentNotification
+            {
+                Student = dbRequest.Student!,
+                StudyCourse = dbRequest.StudyCourse,
+                Title = "Class Cancellation",
+                Message = "Your class cancellation request has been rejected.",
+                DateCreated = DateTime.Now,
+                Type = StudentNotificationType.ClassCancellation,
+                HasRead = false
+            };
 
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> ApproveRequest(int studyCourseId)
+        {
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(c => c.StudyClasses)
+                                .FirstOrDefaultAsync(c => c.Id == studyCourseId)
+                                ?? throw new NotFoundException($"StudyCourse with ID {studyCourseId} is not found.");
+
+            dbStudyCourse.Status = StudyCourseStatus.Cancelled;
+            foreach (var dbStudyClass in dbStudyCourse.StudyClasses)
+            {
+                dbStudyClass.Status = ClassStatus.Deleted;
+            }
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>()
             {
                 StatusCode = (int)HttpStatusCode.OK,
             };

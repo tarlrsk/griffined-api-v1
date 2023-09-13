@@ -53,5 +53,11 @@ namespace griffined_api.Controllers
         {
             return Ok(await _classCancellation.RejectRequest(requestId, rejectedRequest.RejectedReason));
         }
+
+        [HttpPut("cancel/{studyCourseId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> CancelStudyCourse(int studyCourseId)
+        {
+            return Ok(await _classCancellation.ApproveRequest(studyCourseId));
+        }
     }
 }

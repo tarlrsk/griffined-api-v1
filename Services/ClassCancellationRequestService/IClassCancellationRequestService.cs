@@ -14,5 +14,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
         Task<ServiceResponse<string>> EaTakeRequest(int requestId);
         Task<ServiceResponse<string>> EaReleaseRequest(int requestId);
         Task<ServiceResponse<string>> RejectRequest(int requestId, string rejectedReason);
+        Task<ServiceResponse<string>> ApproveRequest(int studyCourseId);
     }
 }

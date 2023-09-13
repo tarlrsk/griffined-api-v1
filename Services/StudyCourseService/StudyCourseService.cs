@@ -1569,27 +1569,5 @@ namespace griffined_api.Services.StudyCourseService
             response.Data = data;
             return response;
         }
-
-        public async Task<ServiceResponse<string>> CancelStudyCourse(int studyCourseId)
-        {
-            var dbStudyCourse = await _context.StudyCourses
-                                .Include(c => c.StudyClasses)
-                                .FirstOrDefaultAsync(c => c.Id == studyCourseId)
-                                ?? throw new NotFoundException($"StudyCourse with ID {studyCourseId} is not found.");
-            
-            dbStudyCourse.Status = StudyCourseStatus.Cancelled;
-            foreach(var dbStudyClass in dbStudyCourse.StudyClasses)
-            {
-                dbStudyClass.Status = ClassStatus.Deleted;
-            }
-
-            await _context.SaveChangesAsync();
-
-            var response = new ServiceResponse<string>()
-            {
-                StatusCode = (int)HttpStatusCode.OK,
-            };
-            return response;
-        }
     }
 }
