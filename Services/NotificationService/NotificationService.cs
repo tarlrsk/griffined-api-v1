@@ -5,6 +5,8 @@ using System.Net;
 using System.Threading.Tasks;
 using griffined_api.Dtos.NotificationDto;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 
 namespace griffined_api.Services.NotificationService
 {
@@ -95,6 +97,46 @@ namespace griffined_api.Services.NotificationService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> MarkAsRead(int notificationId, string role)
+        {
+            switch (role)
+            {
+                case "student":
+                    var dbStudentNotification = await _context.StudentNotifications
+                                                .FirstOrDefaultAsync(sn => sn.Id == notificationId)
+                                                ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
+
+                    dbStudentNotification.HasRead = true;
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "teacher":
+                    var dbTeacherNotification = await _context.TeacherNotifications
+                            .FirstOrDefaultAsync(sn => sn.Id == notificationId)
+                            ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
+
+                    dbTeacherNotification.HasRead = true;
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "staff":
+                    var dbStaffNotification = await _context.StaffNotifications
+                                .FirstOrDefaultAsync(sn => sn.Id == notificationId)
+                                ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
+
+                    dbStaffNotification.HasRead = true;
+                    await _context.SaveChangesAsync();
+                    break;
+            }
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
             return response;
         }
     }
