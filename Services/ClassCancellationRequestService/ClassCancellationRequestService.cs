@@ -479,6 +479,18 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Attendance = Attendance.None,
                             Student = dbMember.Student,
                         });
+
+
+                        var makeupClassStudentNotification = new StudentNotification
+                        {
+                            Student = dbMember.Student,
+                            StudyCourse = dbStudySubject.StudyCourse,
+                            Title = "You have been assigned to a make up class",
+                            Message = $"You have been assigned to a make up class on {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}).",
+                            DateCreated = DateTime.Now,
+                            Type = StudentNotificationType.MakeupClass,
+                            HasRead = false
+                        };
                     }
 
                     dbStudySubject.StudyClasses.Add(studyClass);
@@ -541,7 +553,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
             dbRequest.RejectedReason = rejectedReason;
             dbRequest.Status = ClassCancellationRequestStatus.Rejected;
 
-            var studentNotification = new StudentNotification
+            var classCancellationStudentNotification = new StudentNotification
             {
                 Student = dbRequest.Student!,
                 StudyCourse = dbRequest.StudyCourse,
