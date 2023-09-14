@@ -406,20 +406,163 @@ namespace griffined_api.Services.ClassCancellationRequestService
             return response;
         }
 
+        public async Task<ServiceResponse<string>> UpdateScheduleWithClassCancellationRequest(int requestId, UpdateStudyCourseRequestDto updateRequest)
+        {
+            var staffId = _firebaseService.GetAzureIdWithToken();
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == staffId) ?? throw new NotFoundException("No Staff Found");
+
+            var dbRemoveStudyClasses = await _context.StudyClasses
+                                        .Include(c => c.StudyCourse)
+                                            .ThenInclude(sc => sc.Course)
+                                        .Include(c => c.StudySubject)
+                                            .ThenInclude(ss => ss.Subject)
+                                        .Include(c => c.Schedule)
+                                        .Include(c => c.Teacher)
+                                        .Include(c => c.Attendances)
+                                        .Where(c => updateRequest.RemoveStudyClassId.Contains(c.Id)).ToListAsync();
+
+            foreach (var dbRemoveStudyClass in dbRemoveStudyClasses)
+            {
+                dbRemoveStudyClass.Status = ClassStatus.Cancelled;
+
+                var removeHistory = new StudyCourseHistory
+                {
+                    StudyCourse = dbRemoveStudyClass.StudyCourse,
+                    Staff = staff,
+                    UpdatedDate = DateTime.Now,
+                    Type = StudyCourseHistoryType.Schedule
+                };
+
+                string removedStudyClassHistoryDescription = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+
+                removeHistory.Description = removedStudyClassHistoryDescription;
+                dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
+            }
+
+            var dbStudySubjects = await _context.StudySubjects
+                            .Include(s => s.StudyCourse)
+                                .ThenInclude(sc => sc.Course)
+                            .Include(s => s.Subject)
+                            .Include(s => s.StudyClasses)
+                            .Include(s => s.StudyCourse)
+                            .Include(s => s.StudySubjectMember)
+                                .ThenInclude(s => s.Student)
+                            .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
+                            .ToListAsync();
+
+            var dbTeacher = await _context.Teachers.ToListAsync();
+
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == dbStudySubject.Id))
+                {
+                    var classCount = dbStudySubject.StudyClasses.Count;
+                    var studyClass = new StudyClass
+                    {
+                        //TODO Class Count
+                        Teacher = dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
+                                ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found."),
+                        StudyCourse = dbStudySubject.StudyCourse,
+                        IsMakeup = true,
+                        Schedule = new Schedule
+                        {
+                            Date = newSchedule.Date.ToDateTime(),
+                            FromTime = newSchedule.FromTime.ToTimeSpan(),
+                            ToTime = newSchedule.ToTime.ToTimeSpan(),
+                            Type = ScheduleType.Class,
+                        },
+                    };
+                    foreach (var dbMember in dbStudySubject.StudySubjectMember)
+                    {
+                        studyClass.Attendances.Add(new StudentAttendance
+                        {
+                            Attendance = Attendance.None,
+                            Student = dbMember.Student,
+                        });
+
+
+                        var makeupClassStudentNotification = new StudentNotification
+                        {
+                            Student = dbMember.Student,
+                            StudyCourse = dbStudySubject.StudyCourse,
+                            Title = "You have been assigned to a make up class",
+                            Message = $"You have been assigned to a make up class on {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}).",
+                            DateCreated = DateTime.Now,
+                            Type = StudentNotificationType.MakeupClass,
+                            HasRead = false
+                        };
+                    }
+
+                    dbStudySubject.StudyClasses.Add(studyClass);
+
+                    var addHistory = new StudyCourseHistory
+                    {
+                        StudyCourse = dbStudySubject.StudyCourse,
+                        Staff = staff,
+                        UpdatedDate = DateTime.Now,
+                        Type = StudyCourseHistoryType.Schedule
+                    };
+
+                    string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
+
+                    addHistory.Description = addedStudyClassHistoryDescription;
+                    studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
+                }
+            }
+
+            var dbRequest = await _context.ClassCancellationRequests
+                            .Include(r => r.Student)
+                            .Include(r => r.StudyCourse)
+                            .Include(r => r.StudyClass)
+                                .ThenInclude(sc => sc.Schedule)
+                            .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("Request is not found.");
+            dbRequest.Status = ClassCancellationRequestStatus.Completed;
+
+            var studentNotification = new StudentNotification
+            {
+                Student = dbRequest.Student!,
+                StudyCourse = dbRequest.StudyCourse,
+                Title = "Your Class Has Been Cancelled.",
+                Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                DateCreated = DateTime.Now,
+                Type = StudentNotificationType.ClassCancellation,
+                HasRead = false
+            };
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>();
+            return response;
+        }
+
         public async Task<ServiceResponse<string>> RejectRequest(int requestId, string rejectedReason)
         {
-            var dbRequest = await _context.ClassCancellationRequests.FirstOrDefaultAsync(r => r.Id == requestId
+            var dbRequest = await _context.ClassCancellationRequests
+                            .Include(r => r.Student)
+                            .Include(r => r.StudyCourse)
+                            .FirstOrDefaultAsync(r => r.Id == requestId
                             && r.Status == ClassCancellationRequestStatus.None)
                             ?? throw new NotFoundException($"Request with ID {requestId} is not found.");
-                            
+
             if (dbRequest.TakenByEAId == null)
-                throw new ConflictException("EA haven't take this request yet.");
+                throw new ConflictException("EA hasn't taken this request yet.");
 
             if (dbRequest.TakenByEAId != _firebaseService.GetAzureIdWithToken())
                 throw new ConflictException("You don't have permission to reject this request.");
-            
+
             dbRequest.RejectedReason = rejectedReason;
             dbRequest.Status = ClassCancellationRequestStatus.Rejected;
+
+            var classCancellationStudentNotification = new StudentNotification
+            {
+                Student = dbRequest.Student!,
+                StudyCourse = dbRequest.StudyCourse,
+                Title = "Cancellation Request Rejected",
+                Message = "Your class cancellation request has been rejected.",
+                DateCreated = DateTime.Now,
+                Type = StudentNotificationType.ClassCancellation,
+                HasRead = false
+            };
 
             await _context.SaveChangesAsync();
 
