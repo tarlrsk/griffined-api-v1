@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using griffined_api.Dtos.NotificationDto;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace griffined_api.Services.NotificationService
 {
