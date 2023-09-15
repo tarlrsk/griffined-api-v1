@@ -64,6 +64,11 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             _context.ClassCancellationRequests.Add(classCancellationRequest);
 
+            var staffNotification = new StaffNotification
+            {
+
+            };
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
