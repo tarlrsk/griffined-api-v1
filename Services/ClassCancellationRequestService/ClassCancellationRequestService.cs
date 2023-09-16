@@ -76,8 +76,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Title = "New Class Cancellation Request",
                     Message = "A new class cancellation request has been requested. Click here for more details.",
                     DateCreated = DateTime.Now,
-                    HasRead = false,
-                    Type = StaffNotificationType.ClassCancellationRequest
+                    Type = StaffNotificationType.ClassCancellationRequest,
+                    HasRead = false
                 };
             }
 

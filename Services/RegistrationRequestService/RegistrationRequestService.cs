@@ -217,6 +217,25 @@ namespace griffined_api.Services.RegistrationRequestService
                 };
                 request.RegistrationRequestComments.Add(newComment);
             }
+
+            var dbEAs = await _context.Staff
+                        .Where(s => s.Role == "ea")
+                        .ToListAsync();
+
+            foreach (var ea in dbEAs)
+            {
+                var notification = new StaffNotification
+                {
+                    Staff = ea,
+                    RegistrationRequest = request,
+                    Title = "New Course Registration Request",
+                    Message = "A new course registration request has been requested. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest,
+                    HasRead = false
+                };
+            }
+
             _context.RegistrationRequests.Add(request);
             await _context.SaveChangesAsync();
 
