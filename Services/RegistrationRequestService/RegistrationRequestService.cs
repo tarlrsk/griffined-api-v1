@@ -729,7 +729,7 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
-                if (dbRequest.RegistrationStatus == RegistrationStatus.PendingEA)
+                if (dbRequest.HasSchedule == false)
                 {
                     dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
