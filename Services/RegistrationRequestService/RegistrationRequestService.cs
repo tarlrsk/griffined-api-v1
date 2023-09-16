@@ -341,6 +341,25 @@ namespace griffined_api.Services.RegistrationRequestService
                     });
                 }
             }
+
+            var dbOAs = await _context.Staff
+                        .Where(s => s.Role == "oa")
+                        .ToListAsync();
+
+            foreach (var oa in dbOAs)
+            {
+                var notification = new StaffNotification
+                {
+                    Staff = oa,
+                    RegistrationRequest = request,
+                    Title = "New Student Adding Request",
+                    Message = "A new student adding request has been requested. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest,
+                    HasRead = false
+                };
+            }
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK; ;
