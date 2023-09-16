@@ -39,7 +39,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 StudySubject = dbStudyClass.StudySubject,
             };
 
-
             var role = _firebaseService.GetRoleWithToken();
             var userId = _firebaseService.GetAzureIdWithToken();
 
@@ -64,10 +63,23 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             _context.ClassCancellationRequests.Add(classCancellationRequest);
 
-            var staffNotification = new StaffNotification
-            {
+            var dbEAs = await _context.Staff
+                        .Where(s => s.Role == "ea")
+                        .ToListAsync();
 
-            };
+            foreach (var ea in dbEAs)
+            {
+                var eaNotification = new StaffNotification
+                {
+                    Staff = ea,
+                    CancellationRequest = classCancellationRequest,
+                    Title = "New Class Cancellation Request",
+                    Message = "A new class cancellation request has been requested. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    HasRead = false,
+                    Type = StaffNotificationType.ClassCancellationRequest
+                };
+            }
 
             await _context.SaveChangesAsync();
 
