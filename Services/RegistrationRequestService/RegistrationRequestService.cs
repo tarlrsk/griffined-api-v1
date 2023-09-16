@@ -2145,8 +2145,24 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.RegistrationStatus = RegistrationStatus.Cancelled;
             dbRequest.CancelledBy = _firebaseService.GetAzureIdWithToken();
 
-            await _context.SaveChangesAsync();
+            var ec = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId) ?? throw new NotFoundException("EC not found.");
 
+            var oa = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy) ?? throw new NotFoundException("OA not found.");
+
+            var ecNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "Payment Declined",
+                Message = $"A payment for registration request ID {dbRequest.Id} has been declined by OA {oa.Nickname}. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
+            await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
             {
