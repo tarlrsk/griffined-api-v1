@@ -352,8 +352,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     Staff = oa,
                     RegistrationRequest = request,
-                    Title = "New Student Adding Request",
-                    Message = "A new student adding request has been requested. Click here for more details.",
+                    Title = "New Student Adding Payment Approval Request",
+                    Message = "A new student adding payment approval request has been requested. Click here for more details.",
                     DateCreated = DateTime.Now,
                     Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
@@ -1744,6 +1744,25 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.RegistrationStatus = RegistrationStatus.PendingOA;
             dbRequest.PaymentType = paymentRequest.PaymentType;
             dbRequest.PaymentByStaffId = _firebaseService.GetAzureIdWithToken();
+
+            var dbOAs = await _context.Staff
+                        .Where(s => s.Role == "oa")
+                        .ToListAsync();
+
+            foreach (var oa in dbOAs)
+            {
+                var notification = new StaffNotification
+                {
+                    Staff = oa,
+                    RegistrationRequest = dbRequest,
+                    Title = "New Registration Request Payment Approval Request",
+                    Message = "A new payment approval request for a registration request has been requested. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest,
+                    HasRead = false
+                };
+            }
+
             await _context.SaveChangesAsync();
 
 
