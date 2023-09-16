@@ -100,8 +100,10 @@ namespace griffined_api.Services.NotificationService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> MarkAsRead(int notificationId, string role)
+        public async Task<ServiceResponse<string>> MarkAsRead(int notificationId)
         {
+            var role = _firebaseService.GetRoleWithToken();
+
             switch (role)
             {
                 case "student":
