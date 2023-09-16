@@ -509,6 +509,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 RegistrationRequestType = dbRequest.Type,
                 RegistrationStatus = dbRequest.RegistrationStatus,
                 PaymentType = dbRequest.PaymentType,
+                PaymentStatus = dbRequest.PaymentStatus,
                 PaymentError = dbRequest.PaymentError,
                 ScheduleError = dbRequest.ScheduleError,
                 NewCourseDetailError = dbRequest.NewCourseDetailError,
@@ -516,7 +517,7 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
-                if (dbRequest.RegistrationStatus == RegistrationStatus.PendingEA)
+                if (dbRequest.HasSchedule == false)
                 {
                     dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
@@ -760,6 +761,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 RegistrationRequestType = dbRequest.Type,
                 RegistrationStatus = dbRequest.RegistrationStatus,
                 PaymentType = dbRequest.PaymentType,
+                PaymentStatus = dbRequest.PaymentStatus,
                 PaymentError = dbRequest.PaymentError,
                 ScheduleError = dbRequest.ScheduleError,
                 NewCourseDetailError = dbRequest.NewCourseDetailError,
@@ -767,7 +769,7 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
-                if (dbRequest.RegistrationStatus == RegistrationStatus.PendingEA)
+                if (dbRequest.HasSchedule == false)
                 {
                     dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
@@ -1021,6 +1023,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 RegistrationRequestType = dbRequest.Type,
                 RegistrationStatus = dbRequest.RegistrationStatus,
                 PaymentType = dbRequest.PaymentType,
+                PaymentStatus = dbRequest.PaymentStatus,
                 PaymentError = dbRequest.PaymentError,
                 ScheduleError = dbRequest.ScheduleError,
                 NewCourseDetailError = dbRequest.NewCourseDetailError,
@@ -1028,7 +1031,7 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
             {
-                if (dbRequest.RegistrationStatus == RegistrationStatus.PendingEA)
+                if (dbRequest.HasSchedule == false)
                 {
                     dbRequest = await _context.RegistrationRequests
                             .Include(r => r.NewCourseRequests)
