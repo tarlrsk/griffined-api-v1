@@ -2184,6 +2184,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                         .Where(f => updatePayment.FilesToDelete
                                         .Contains(f.FileName))
                                         .ToList();
+
             foreach (var file in removeFiles)
             {
                 await _firebaseService.DeleteStorageFileByObjectName(file.ObjectName);
@@ -2205,6 +2206,8 @@ namespace griffined_api.Services.RegistrationRequestService
 
             if (dbRequest.PaymentStatus != null)
                 dbRequest.PaymentStatus = updatePayment.PaymentStatus;
+
+            // TODO Notifications
 
             await _context.SaveChangesAsync();
 
@@ -2700,93 +2703,6 @@ namespace griffined_api.Services.RegistrationRequestService
             return response;
         }
 
-
-        // Private Service
-        private static List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
-        {
-            var rawSchedules = new List<ScheduleResponseDto>();
-            foreach (var dbRequestedCourse in requests)
-            {
-                if (dbRequestedCourse.StudyCourse == null)
-                    throw new InternalServerException($"New Course with ID {dbRequestedCourse.Id} does not contain any StudyCourse");
-
-                foreach (var dbStudySubject in dbRequestedCourse.StudyCourse.StudySubjects)
-                {
-                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
-                    {
-                        var schedule = new ScheduleResponseDto()
-                        {
-                            StudyCourseId = dbStudySubject.StudyCourse.Id,
-                            StudyClassId = dbStudyClass.Id,
-                            ClassNo = dbStudyClass.ClassNumber,
-                            Room = null,
-                            Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            CourseSubject = dbRequestedCourse.Course.course + " "
-                                            + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
-                                            + " " + (dbRequestedCourse.Level?.level ?? ""),
-                            CourseId = dbRequestedCourse.Course.Id,
-                            Course = dbRequestedCourse.Course.course,
-                            StudySubjectId = dbStudySubject.Id,
-                            SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
-                            ClassStatus = dbStudyClass.Status,
-                            //TODO Teacher Work Type
-                        };
-                        rawSchedules.Add(schedule);
-                    }
-                }
-            }
-            return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
-        }
-        private static List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
-        {
-            var rawSchedules = new List<ScheduleResponseDto>();
-            foreach (var dbStudentAddingRequest in requests)
-            {
-                if (dbStudentAddingRequest.StudyCourse == null)
-                    throw new InternalServerException($"Student Adding with ID {dbStudentAddingRequest.Id} does not contain any StudyCourse");
-
-                foreach (var dbStudySubject in dbStudentAddingRequest.StudyCourse.StudySubjects)
-                {
-                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
-                    {
-                        var schedule = new ScheduleResponseDto()
-                        {
-                            StudyCourseId = dbStudySubject.StudyCourse.Id,
-                            StudyClassId = dbStudyClass.Id,
-                            ClassNo = dbStudyClass.ClassNumber,
-                            Room = null,
-                            Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            CourseSubject = dbStudentAddingRequest.StudyCourse.Course.course + " "
-                                            + dbStudySubject.Subject.subject
-                                            + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
-                            CourseId = dbStudentAddingRequest.StudyCourse.Course.Id,
-                            Course = dbStudentAddingRequest.StudyCourse.Course.course,
-                            StudySubjectId = dbStudySubject.Subject.Id,
-                            SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
-                            ClassStatus = dbStudyClass.Status,
-                            //TODO Teacher Work Type
-                        };
-                        rawSchedules.Add(schedule);
-                    }
-                }
-            }
-            return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
-        }
-
         public async Task<ServiceResponse<string>> EaTakeRequest(int requestId)
         {
             var dbRequest = await _context.RegistrationRequests
@@ -2880,6 +2796,93 @@ namespace griffined_api.Services.RegistrationRequestService
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
             return response;
+        }
+
+        // Private Service
+        private static List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
+        {
+            var rawSchedules = new List<ScheduleResponseDto>();
+            foreach (var dbRequestedCourse in requests)
+            {
+                if (dbRequestedCourse.StudyCourse == null)
+                    throw new InternalServerException($"New Course with ID {dbRequestedCourse.Id} does not contain any StudyCourse");
+
+                foreach (var dbStudySubject in dbRequestedCourse.StudyCourse.StudySubjects)
+                {
+                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                    {
+                        var schedule = new ScheduleResponseDto()
+                        {
+                            StudyCourseId = dbStudySubject.StudyCourse.Id,
+                            StudyClassId = dbStudyClass.Id,
+                            ClassNo = dbStudyClass.ClassNumber,
+                            Room = null,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            CourseSubject = dbRequestedCourse.Course.course + " "
+                                            + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
+                                            + " " + (dbRequestedCourse.Level?.level ?? ""),
+                            CourseId = dbRequestedCourse.Course.Id,
+                            Course = dbRequestedCourse.Course.course,
+                            StudySubjectId = dbStudySubject.Id,
+                            SubjectId = dbStudySubject.Subject.Id,
+                            Subject = dbStudySubject.Subject.subject,
+                            TeacherId = dbStudyClass.Teacher.Id,
+                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                            TeacherLastName = dbStudyClass.Teacher.LastName,
+                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            ClassStatus = dbStudyClass.Status,
+                            //TODO Teacher Work Type
+                        };
+                        rawSchedules.Add(schedule);
+                    }
+                }
+            }
+            return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
+        }
+
+        private static List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
+        {
+            var rawSchedules = new List<ScheduleResponseDto>();
+            foreach (var dbStudentAddingRequest in requests)
+            {
+                if (dbStudentAddingRequest.StudyCourse == null)
+                    throw new InternalServerException($"Student Adding with ID {dbStudentAddingRequest.Id} does not contain any StudyCourse");
+
+                foreach (var dbStudySubject in dbStudentAddingRequest.StudyCourse.StudySubjects)
+                {
+                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                    {
+                        var schedule = new ScheduleResponseDto()
+                        {
+                            StudyCourseId = dbStudySubject.StudyCourse.Id,
+                            StudyClassId = dbStudyClass.Id,
+                            ClassNo = dbStudyClass.ClassNumber,
+                            Room = null,
+                            Date = dbStudyClass.Schedule.Date.ToDateString(),
+                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            CourseSubject = dbStudentAddingRequest.StudyCourse.Course.course + " "
+                                            + dbStudySubject.Subject.subject
+                                            + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
+                            CourseId = dbStudentAddingRequest.StudyCourse.Course.Id,
+                            Course = dbStudentAddingRequest.StudyCourse.Course.course,
+                            StudySubjectId = dbStudySubject.Subject.Id,
+                            SubjectId = dbStudySubject.Subject.Id,
+                            Subject = dbStudySubject.Subject.subject,
+                            TeacherId = dbStudyClass.Teacher.Id,
+                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                            TeacherLastName = dbStudyClass.Teacher.LastName,
+                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            ClassStatus = dbStudyClass.Status,
+                            //TODO Teacher Work Type
+                        };
+                        rawSchedules.Add(schedule);
+                    }
+                }
+            }
+            return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
     }
 }
