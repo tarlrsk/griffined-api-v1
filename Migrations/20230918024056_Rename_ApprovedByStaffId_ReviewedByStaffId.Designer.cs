@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230918024056_Rename_ApprovedByStaffId_ReviewedByStaffId")]
+    partial class RenameApprovedByStaffIdReviewedByStaffId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1536,7 +1539,7 @@ namespace griffinedapi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("griffined_api.Models.StudyCourse", null)
+                    b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
                         .WithMany("StaffNotifications")
                         .HasForeignKey("StudyCourseId");
 
@@ -1545,6 +1548,8 @@ namespace griffinedapi.Migrations
                     b.Navigation("RegistrationRequest");
 
                     b.Navigation("Staff");
+
+                    b.Navigation("StudyCourse");
                 });
 
             modelBuilder.Entity("griffined_api.Models.StudentAddingRequest", b =>
@@ -1656,7 +1661,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
                         .WithMany("StudyClasses")
                         .HasForeignKey("StudyCourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.StudySubject", "StudySubject")
@@ -1721,7 +1726,7 @@ namespace griffinedapi.Migrations
                     b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
                         .WithMany("StudySubjects")
                         .HasForeignKey("StudyCourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("griffined_api.Models.Subject", "Subject")

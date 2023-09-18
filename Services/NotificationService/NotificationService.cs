@@ -33,7 +33,6 @@ namespace griffined_api.Services.NotificationService
             var data = dbStaffNotifications.Select(sn => new StaffNotificationResponseDto
             {
                 StaffId = staffId,
-                StudyCourseId = sn.StudyCourseId,
                 RegistrationRequestId = sn.RegistrationRequestId,
                 CancellationRequestId = sn.CancellationRequestId,
                 Title = sn.Title,
@@ -61,7 +60,6 @@ namespace griffined_api.Services.NotificationService
             var data = dbStudentNotifications.Select(sn => new StudentNotificationResponseDto
             {
                 StudentId = studentId,
-                StudyCourseId = sn.StudyCourseId,
                 Title = sn.Title,
                 Message = sn.Message,
                 DateCreated = sn.DateCreated.ToDateTimeString(),
@@ -87,7 +85,6 @@ namespace griffined_api.Services.NotificationService
             var data = dbTeacherNotifications.Select(tn => new TeacherNotificationResponseDto
             {
                 TeacherId = teacherId,
-                StudyCourseId = tn.StudyCourseId,
                 Title = tn.Title,
                 Message = tn.Message,
                 DateCreated = tn.DateCreated.ToDateTimeString(),
@@ -102,7 +99,7 @@ namespace griffined_api.Services.NotificationService
 
         public async Task<ServiceResponse<string>> MarkAsRead(int notificationId)
         {
-            var role = _firebaseService.GetRoleWithToken();
+            string role = _firebaseService.GetRoleWithToken();
 
             switch (role)
             {

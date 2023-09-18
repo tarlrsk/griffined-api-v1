@@ -270,6 +270,26 @@ namespace griffined_api.Services.StudyCourseService
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ScheduledByStaffId = _firebaseService.GetAzureIdWithToken();
             dbRequest.HasSchedule = true;
+
+            var ec = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CreatedByStaffId)
+                    ?? throw new NotFoundException("EC not found.");
+
+            var ea = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                    ?? throw new NotFoundException("EA not found.");
+
+            var ecNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "New Schedule Created",
+                Message = $"A new schedule for registration request ID {dbRequest.Id} has been created by EA {ea.Nickname}",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<String> { StatusCode = (int)HttpStatusCode.OK };
