@@ -343,8 +343,8 @@ namespace griffined_api.Services.RegistrationRequestService
             }
 
             var dbOAs = await _context.Staff
-                        .Where(s => s.Role == "oa")
-                        .ToListAsync();
+            .Where(s => s.Role == "oa")
+            .ToListAsync();
 
             foreach (var oa in dbOAs)
             {
@@ -434,7 +434,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var ec = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CreatedByStaffId);
                 var scheduledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ScheduledByStaffId);
                 var takenBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.TakenByEAId);
-                var oa = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ApprovedByStaffId);
+                var oa = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.ReviewedByStaffId);
                 var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == registrationRequest.CancelledBy);
 
                 if (ec != null)
@@ -2067,7 +2067,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             dbRequest.PaymentStatus = paymentStatus;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
-            dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.ReviewedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -2084,7 +2084,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
             dbRequest.PaymentError = true;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
-            dbRequest.ApprovedByStaffId = _firebaseService.GetAzureIdWithToken();
+            dbRequest.ReviewedByStaffId = _firebaseService.GetAzureIdWithToken();
             await _context.SaveChangesAsync();
             var response = new ServiceResponse<string>
             {
@@ -2210,7 +2210,20 @@ namespace griffined_api.Services.RegistrationRequestService
             if (dbRequest.PaymentStatus != null)
                 dbRequest.PaymentStatus = updatePayment.PaymentStatus;
 
-            // TODO Notifications
+            var oa = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.ReviewedByStaffId)
+                    ?? throw new NotFoundException("OA not found.");
+
+            var oaNotification = new StaffNotification
+            {
+                Staff = oa,
+                RegistrationRequest = dbRequest,
+                Title = $"Registration Request ID {dbRequest.Id} Payment Updated",
+                Message = "A declined payment review has been updated. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
 
             await _context.SaveChangesAsync();
 
@@ -2409,7 +2422,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var dbStaff = await _context.Staff.ToListAsync();
             var ec = dbStaff.FirstOrDefault(s => s.Id == dbRequest.CreatedByStaffId);
             var ea = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ScheduledByStaffId);
-            var oa = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ApprovedByStaffId);
+            var oa = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ReviewedByStaffId);
             var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == dbRequest.CancelledBy);
 
             if (ec != null)
@@ -2654,7 +2667,7 @@ namespace griffined_api.Services.RegistrationRequestService
             var dbStaff = await _context.Staff.ToListAsync();
             var ec = dbStaff.FirstOrDefault(s => s.Id == dbRequest.CreatedByStaffId);
             var ea = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ScheduledByStaffId);
-            var oa = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ApprovedByStaffId);
+            var oa = dbStaff.FirstOrDefault(s => s.Id == dbRequest.ReviewedByStaffId);
             var cancelledBy = dbStaff.FirstOrDefault(s => s.Id == dbRequest.CancelledBy);
 
             if (ec != null)
