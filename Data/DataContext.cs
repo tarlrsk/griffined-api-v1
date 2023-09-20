@@ -121,13 +121,11 @@ namespace griffined_api.Data
 
                 entity.HasOne(e => e.Appointment)
                     .WithMany(e => e.AppointmentSlots)
-                    .HasForeignKey(e => e.AppointmentId)
-                    .IsRequired(false);
+                    .HasForeignKey(e => e.AppointmentId);
 
                 entity.HasOne(e => e.Schedule)
                     .WithOne(e => e.AppointmentSlot)
-                    .HasForeignKey<AppointmentSlot>(e => e.ScheduleId)
-                    .IsRequired(false);
+                    .HasForeignKey<AppointmentSlot>(e => e.ScheduleId);
             });
 
             modelBuilder.Entity<ClassCancellationRequest>(entity =>
@@ -340,7 +338,7 @@ namespace griffined_api.Data
 
                 entity.HasOne(e => e.AppointmentSlot)
                     .WithOne(e => e.Schedule)
-                    .HasForeignKey<AppointmentSlot>(e => e.AppointmentId);
+                    .HasForeignKey<AppointmentSlot>(e => e.ScheduleId);
             });
 
             modelBuilder.Entity<Staff>(entity =>
