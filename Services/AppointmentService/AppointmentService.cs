@@ -22,12 +22,15 @@ namespace griffined_api.Services.AppointmentService
 
         public async Task<ServiceResponse<string>> AddNewAppointment(NewAppointmentRequestDto newAppointment)
         {
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
+                        ?? throw new BadRequestException("Staff is not found.");
+
             var appointment = new Appointment()
             {
                 Title = newAppointment.Title,
                 AppointmentType = newAppointment.AppointmentType,
                 Description = newAppointment.Description,
-                CreatedByStaffId = _firebaseService.GetAzureIdWithToken(),
+                Staff = dbStaff,
             };
 
             var teachers = await _context.Teachers.ToListAsync();
