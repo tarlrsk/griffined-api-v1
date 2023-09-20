@@ -10,13 +10,14 @@ namespace griffined_api.Models
     public class AppointmentSlot
     {
         public int Id { get; set; }
-        public int AppointmentId { get; set; }
-        public int ScheduleId { get; set; }
-        public virtual AppointmentSlotStatus AppointmentSlotStatus { get; set; }
+        public int? AppointmentId { get; set; }
+        public int? ScheduleId { get; set; }
+        public AppointmentSlotStatus AppointmentSlotStatus { get; set; }
         
         [ForeignKey(nameof(AppointmentId))]
         public virtual Appointment Appointment { get; set; } = new Appointment();
+        
         [ForeignKey(nameof(ScheduleId))]
-        public virtual Schedule Schedules { get; set; } = new Schedule();
+        public virtual Schedule Schedule { get; set; } = new Schedule();
     }
 }
