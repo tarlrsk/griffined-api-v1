@@ -25,7 +25,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{studyClassI}"), Authorize(Roles = "teacher, master")]
+        [HttpPut("{studyClassId}"), Authorize(Roles = "teacher, master")]
         public async Task<ActionResult> UpdateStudentAttendance(int studyClassId, List<UpdateAttendanceRequestDto> updateAttendanceRequests)
         {
             var response = await _attendanceService.UpdateStudentAttendance(studyClassId, updateAttendanceRequests);
