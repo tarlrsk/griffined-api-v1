@@ -20,7 +20,7 @@ namespace griffined_api.Models
 
 
         [ForeignKey(nameof(CreatedByStaffId))]
-        public virtual Staff? Staff { get; set; }
+        public virtual Staff Staff { get; set; } = new Staff();
 
         public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
         public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
