@@ -9,5 +9,6 @@ namespace griffined_api.Services.AppointmentService
     public interface IAppointmentService
     {
         Task<ServiceResponse<string>> AddNewAppointment(NewAppointmentRequestDto newAppointment);
+        Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments();
     }
 }
