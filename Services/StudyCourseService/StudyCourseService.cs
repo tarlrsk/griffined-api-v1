@@ -298,7 +298,7 @@ namespace griffined_api.Services.StudyCourseService
                 Staff = ec,
                 RegistrationRequest = dbRequest,
                 Title = "New Schedule Created",
-                Message = $"A new schedule for registration request ID {dbRequest.Id} has been created by EA {ea.Nickname}. Click here for more details.",
+                Message = $"A new schedule for Section '{dbRequest.Section}' has been created by EA {ea.Nickname}. Click here for more details.",
                 DateCreated = DateTime.Now,
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false
