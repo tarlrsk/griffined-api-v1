@@ -2011,6 +2011,17 @@ namespace griffined_api.Services.RegistrationRequestService
                                 }
                             }
                         }
+
+                        var teacherNotification = new TeacherNotification
+                        {
+                            Teacher = dbNewCourseRequest.StudyCourse.StudyClasses.First().Teacher,
+                            StudyCourse = dbNewCourseRequest.StudyCourse,
+                            Title = "New Course Assigned",
+                            Message = "You have been assigned to a new course. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = TeacherNotificationType.NewCourse,
+                            HasRead = false
+                        };
                     }
 
                     if (dbNewCourseRequest.StudyCourse == null)
