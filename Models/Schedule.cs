@@ -11,7 +11,6 @@ namespace griffined_api.Models
     public class Schedule
     {
         public int Id { get; set; }
-        public int? AppointmentId { get; set; }
 
         public DateTime Date { get; set; }
         public TimeSpan FromTime { get; set; }
@@ -19,8 +18,6 @@ namespace griffined_api.Models
 
         public virtual ScheduleType Type { get; set; }
         public virtual StudyClass? StudyClass { get; set; }
-
-        [ForeignKey(nameof(AppointmentId))]
-        public virtual Appointment? Appointment { get; set; }
+        public virtual AppointmentSlot? AppointmentSlot { get; set; }
     }
 }
