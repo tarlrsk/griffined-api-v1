@@ -84,7 +84,7 @@ namespace griffined_api.Services.CheckAvailableService
                     {
                         var conflict = new ConflictScheduleResponseDto
                         {
-                            ConflictMessage = dbStudyClass.Schedule.Date.ToDateString() + "("
+                            Message = dbStudyClass.Schedule.Date.ToDateString() + "("
                                             + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
                                             + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
                                             + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
@@ -94,7 +94,7 @@ namespace griffined_api.Services.CheckAvailableService
                         {
                             if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
                             {
-                                conflict.Members.Add(new ConflictMemberResponseDto
+                                conflict.ConflictMembers.Add(new ConflictMemberResponseDto
                                 {
                                     Role = "Student",
                                     FirstName = dbStudent.FirstName,
@@ -107,7 +107,7 @@ namespace griffined_api.Services.CheckAvailableService
 
                         if (dbStudyClass.TeacherId == requestedTeacher.Id)
                         {
-                            conflict.Members.Add(new ConflictMemberResponseDto
+                            conflict.ConflictMembers.Add(new ConflictMemberResponseDto
                             {
                                 Role = "Teacher",
                                 FirstName = requestedTeacher.FirstName,
@@ -141,7 +141,7 @@ namespace griffined_api.Services.CheckAvailableService
 
                         var conflict = new ConflictScheduleResponseDto
                         {
-                            ConflictMessage = localSchedule.Date.ToDateTime().ToDateString() + "("
+                            Message = localSchedule.Date.ToDateTime().ToDateString() + "("
                                             + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString()
                                             + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Current Course: "
                                             + conflictCourse.course + " "
@@ -150,7 +150,7 @@ namespace griffined_api.Services.CheckAvailableService
 
                         foreach (var dbStudent in dbRequestedStudents)
                         {
-                            conflict.Members.Add(new ConflictMemberResponseDto
+                            conflict.ConflictMembers.Add(new ConflictMemberResponseDto
                             {
                                 Role = "Student",
                                 FirstName = dbStudent.FirstName,
@@ -162,7 +162,7 @@ namespace griffined_api.Services.CheckAvailableService
 
                         if (dbTeacher.Id == requestedTeacher.Id)
                         {
-                            conflict.Members.Add(new ConflictMemberResponseDto
+                            conflict.ConflictMembers.Add(new ConflictMemberResponseDto
                             {
                                 Role = "Teacher",
                                 FirstName = requestedTeacher.FirstName,
@@ -187,14 +187,14 @@ namespace griffined_api.Services.CheckAvailableService
 
                         var conflict = new ConflictScheduleResponseDto
                         {
-                            ConflictMessage = dbAppointmentSchedule.Date.ToDateString() + "("
+                            Message = dbAppointmentSchedule.Date.ToDateString() + "("
                                             + dbAppointmentSchedule.FromTime.ToTimeSpanString() + " - "
                                             + dbAppointmentSchedule.ToTime.ToTimeSpanString() + "), "
                                             + dbAppointmentSchedule.AppointmentSlot.Appointment.AppointmentType
                                             + " Appointment: " + dbAppointmentSchedule.AppointmentSlot.Appointment.Title,
                         };
 
-                        conflict.Members.Add(new ConflictMemberResponseDto
+                        conflict.ConflictMembers.Add(new ConflictMemberResponseDto
                         {
                             Role = "Teacher",
                             FirstName = requestedTeacher.FirstName,

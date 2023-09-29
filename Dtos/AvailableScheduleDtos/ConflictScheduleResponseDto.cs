@@ -10,7 +10,7 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
 {
     public class ConflictScheduleResponseDto
     {
-        public string ConflictMessage { get; set; } = string.Empty;
-        public List<ConflictMemberResponseDto> Members { get; set; } = new List<ConflictMemberResponseDto>();
+        public string Message { get; set; } = string.Empty;
+        public List<ConflictMemberResponseDto> ConflictMembers { get; set; } = new List<ConflictMemberResponseDto>();
     }
 }
