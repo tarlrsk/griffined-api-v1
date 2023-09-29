@@ -55,6 +55,14 @@ namespace griffined_api.Services.CheckAvailableService
                             || c.Status == ClassStatus.PendingCancellation))
                             .ToListAsync();
 
+            var dbAppointmentSchedules = await _context.Schedules
+                                    .Include(s => s.AppointmentSlot)
+                                        .ThenInclude(a => a!.Appointment)
+                                            .ThenInclude(a => a.AppointmentMembers)
+                                                .ThenInclude(m => m.Teacher)
+                                    .Where(s => listRequestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment).ToListAsync();
+
+
             var allCourse = await _context.Courses.Include(c => c.Subjects).Include(c => c.Levels).ToListAsync();
 
             var requestedStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == requestedSchedule.RequestedStudySubjectId);
@@ -62,7 +70,7 @@ namespace griffined_api.Services.CheckAvailableService
             var requestedTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == requestedSchedule.TeacherId)
                                 ?? throw new NotFoundException($"Teacher with ID {requestedSchedule.TeacherId} is not found.");
 
-            var conflictSchedule = new List<ConflictScheduleResponseDto>();
+            var conflictSchedule = new List<ConflictClassResponseDto>();
             var availableSchedule = new List<AvailableScheduleResponseDto>();
 
             var data = new CheckScheduleResultResponseDto();
@@ -74,7 +82,7 @@ namespace griffined_api.Services.CheckAvailableService
                     if (requestedSchedule.FromTime.ToTimeSpan().TotalMilliseconds < dbStudyClass.Schedule.ToTime.TotalMilliseconds
                         && dbStudyClass.Schedule.FromTime.TotalMilliseconds < requestedSchedule.ToTime.ToTimeSpan().TotalMilliseconds)
                     {
-                        var conflict = new ConflictScheduleResponseDto
+                        var conflict = new ConflictClassResponseDto
                         {
                             StudyCourseId = dbStudyClass.StudySubject.StudyCourse.Id,
                             CourseId = dbStudyClass.StudySubject.StudyCourse.Course.Id,
@@ -100,6 +108,11 @@ namespace griffined_api.Services.CheckAvailableService
                     }
                 }
 
+                foreach (var dbAppointmentSchedule in dbAppointmentSchedules.Where(s => s.Date == requestDate))
+                {
+                    
+                }
+
                 foreach (var localSchedule in requestedSchedule.LocalSchedule.Where(s => s.Date.ToDateTime() == requestDate))
                 {
                     if (requestedSchedule.FromTime.ToTimeSpan().TotalMilliseconds < localSchedule.ToTime.ToTimeSpan().TotalMilliseconds
@@ -115,7 +128,7 @@ namespace griffined_api.Services.CheckAvailableService
                         var conflictLevel = conflictCourse.Levels.FirstOrDefault(c => c.Id == localSchedule.LevelId);
 
 
-                        var conflict = new ConflictScheduleResponseDto
+                        var conflict = new ConflictClassResponseDto
                         {
                             StudyCourseId = dbStudySubject?.StudyCourse.Id,
                             CourseId = conflictCourse.Id,
@@ -173,7 +186,7 @@ namespace griffined_api.Services.CheckAvailableService
             }
 
             if (data.IsConflict)
-                data.ConflictSchedule = conflictSchedule;
+                data.ConflictClasses = conflictSchedule;
             else
                 data.AvailableSchedule = availableSchedule;
 
