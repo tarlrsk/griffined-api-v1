@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
-    public class ConflictScheduleResponseDto
+    public class ConflictClassResponseDto
     {
         public string Date { get; set; } = string.Empty;
         public string FromTime { get; set; } = string.Empty;
