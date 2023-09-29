@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Google.Api;
+using Google.Type;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 
@@ -55,13 +56,7 @@ namespace griffined_api.Services.CheckAvailableService
                             || c.Status == ClassStatus.PendingCancellation))
                             .ToListAsync();
 
-            var dbAppointmentSchedules = await _context.Schedules
-                                    .Include(s => s.AppointmentSlot)
-                                        .ThenInclude(a => a!.Appointment)
-                                            .ThenInclude(a => a.AppointmentMembers)
-                                                .ThenInclude(m => m.Teacher)
-                                    .Where(s => listRequestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment).ToListAsync();
-
+            var dbRequestedStudents = await _context.Students.Where(s => requestedSchedule.StudentIds.Contains(s.Id)).ToListAsync();
 
             var allCourse = await _context.Courses.Include(c => c.Subjects).Include(c => c.Levels).ToListAsync();
 
@@ -70,8 +65,16 @@ namespace griffined_api.Services.CheckAvailableService
             var requestedTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == requestedSchedule.TeacherId)
                                 ?? throw new NotFoundException($"Teacher with ID {requestedSchedule.TeacherId} is not found.");
 
-            var conflictClasses = new List<ConflictClassResponseDto>();
-            var conflictAoppointment = new List<ConflictAppointmentResponseDto>();
+            var dbAppointmentSchedules = await _context.Schedules
+                                    .Include(s => s.AppointmentSlot)
+                                        .ThenInclude(a => a!.Appointment)
+                                            .ThenInclude(a => a.AppointmentMembers)
+                                                .ThenInclude(m => m.Teacher)
+                                    .Where(s => listRequestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment
+                                    && s.AppointmentSlot!.Appointment.AppointmentMembers.Any(m => m.TeacherId == requestedTeacher.Id)).ToListAsync();
+
+            var conflictSchedule = new List<ConflictScheduleResponseDto>();
+            var conflictAoppointment = new List<ConflictScheduleResponseDto>();
             var availableSchedule = new List<AvailableScheduleResponseDto>();
 
             var data = new CheckScheduleResultResponseDto();
@@ -83,28 +86,44 @@ namespace griffined_api.Services.CheckAvailableService
                     if (requestedSchedule.FromTime.ToTimeSpan().TotalMilliseconds < dbStudyClass.Schedule.ToTime.TotalMilliseconds
                         && dbStudyClass.Schedule.FromTime.TotalMilliseconds < requestedSchedule.ToTime.ToTimeSpan().TotalMilliseconds)
                     {
-                        var conflict = new ConflictClassResponseDto
+                        var conflict = new ConflictScheduleResponseDto
                         {
-                            StudyCourseId = dbStudyClass.StudySubject.StudyCourse.Id,
-                            CourseId = dbStudyClass.StudySubject.StudyCourse.Course.Id,
-                            Course = dbStudyClass.StudySubject.StudyCourse.Course.course,
-                            StudySubjectId = dbStudyClass.StudySubject.Id,
-                            SubjectId = dbStudyClass.StudySubject.Subject.Id,
-                            Subject = dbStudyClass.StudySubject.Subject.subject,
-                            LevelId = dbStudyClass.StudyCourse.Level?.Id,
-                            Level = dbStudyClass.StudyCourse.Level?.level,
-                            Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
-                            // TODO Teacher WorkType
+                            ConflictMessage = dbStudyClass.Schedule.Date.ToDateString() + "("
+                                            + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
+                                            + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
+                                            + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
                         };
-                        if (!conflictClasses.Contains(conflict))
+
+                        foreach (var dbStudent in dbRequestedStudents)
                         {
-                            conflictClasses.Add(conflict);
+                            if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                            {
+                                conflict.Members.Add(new ConflictMemberResponseDto
+                                {
+                                    Role = "Student",
+                                    FirstName = dbStudent.FirstName,
+                                    LastName = dbStudent.LastName,
+                                    Nickname = dbStudent.Nickname,
+                                    FullName = dbStudent.FullName,
+                                });
+                            }
+                        }
+
+                        if (dbStudyClass.TeacherId == requestedTeacher.Id)
+                        {
+                            conflict.Members.Add(new ConflictMemberResponseDto
+                            {
+                                Role = "Teacher",
+                                FirstName = requestedTeacher.FirstName,
+                                LastName = requestedTeacher.LastName,
+                                FullName = requestedTeacher.FullName,
+                                Nickname = requestedTeacher.Nickname,
+                            });
+                        }
+
+                        if (!conflictSchedule.Contains(conflict))
+                        {
+                            conflictSchedule.Add(conflict);
                         }
                     }
                 }
@@ -124,28 +143,41 @@ namespace griffined_api.Services.CheckAvailableService
                         var conflictLevel = conflictCourse.Levels.FirstOrDefault(c => c.Id == localSchedule.LevelId);
 
 
-                        var conflict = new ConflictClassResponseDto
+                        var conflict = new ConflictScheduleResponseDto
                         {
-                            StudyCourseId = dbStudySubject?.StudyCourse.Id,
-                            CourseId = conflictCourse.Id,
-                            Course = conflictCourse.course,
-                            StudySubjectId = dbStudySubject?.Id,
-                            SubjectId = conflictSubject.Id,
-                            Subject = conflictSubject.subject,
-                            LevelId = conflictLevel?.Id,
-                            Level = conflictLevel?.level,
-                            Date = localSchedule.Date.ToDateTime().ToDateString(),
-                            FromTime = localSchedule.FromTime.ToTimeSpan().ToTimeSpanString(),
-                            ToTime = localSchedule.ToTime.ToTimeSpan().ToTimeSpanString(),
-                            TeacherId = dbTeacher.Id,
-                            TeacherFirstName = dbTeacher.FirstName,
-                            TeacherLastName = dbTeacher.LastName,
-                            TeacherNickname = dbTeacher.Nickname,
-                            // TODO Teacher WorkType
+                            ConflictMessage = localSchedule.Date.ToDateTime().ToDateString() + "("
+                                            + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString() 
+                                            + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Current Course: "
+                                            + conflictCourse.course + " "
+                                            + conflictSubject.subject + " " + (conflictLevel?.level ?? ""),
                         };
 
-                        if (!conflictClasses.Contains(conflict))
-                            conflictClasses.Add(conflict);
+                        foreach (var dbStudent in dbRequestedStudents)
+                        {
+                            conflict.Members.Add(new ConflictMemberResponseDto
+                            {
+                                Role = "Student",
+                                FirstName = dbStudent.FirstName,
+                                LastName = dbStudent.LastName,
+                                Nickname = dbStudent.Nickname,
+                                FullName = dbStudent.FullName,
+                            });
+                        }
+
+                        if (dbTeacher.Id == requestedTeacher.Id)
+                        {
+                            conflict.Members.Add(new ConflictMemberResponseDto
+                            {
+                                Role = "Teacher",
+                                FirstName = requestedTeacher.FirstName,
+                                LastName = requestedTeacher.LastName,
+                                FullName = requestedTeacher.FullName,
+                                Nickname = requestedTeacher.Nickname,
+                            });
+                        }
+
+                        if (!conflictSchedule.Contains(conflict))
+                            conflictSchedule.Add(conflict);
                     }
                 }
 
@@ -157,27 +189,36 @@ namespace griffined_api.Services.CheckAvailableService
                         if (dbAppointmentSchedule.AppointmentSlot == null)
                             throw new InternalServerException("Something went wrong with Schedule Appointment");
 
-                        var conflict = new ConflictAppointmentResponseDto
+                        var conflict = new ConflictScheduleResponseDto
                         {
-                            AppointmentId = dbAppointmentSchedule.AppointmentSlot.AppointmentId,
-                            AppointmentType = dbAppointmentSchedule.AppointmentSlot.Appointment.AppointmentType,
-                            Title = dbAppointmentSchedule.AppointmentSlot.Appointment.Title,
-                            Description = dbAppointmentSchedule.AppointmentSlot.Appointment.Description,
-                            Date = dbAppointmentSchedule.Date.ToDateString(),
-                            FromTime = dbAppointmentSchedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbAppointmentSchedule.ToTime.ToTimeSpanString(),
+                            ConflictMessage = dbAppointmentSchedule.Date.ToDateString() + "("
+                                            + dbAppointmentSchedule.FromTime.ToTimeSpanString() + " - "
+                                            + dbAppointmentSchedule.ToTime.ToTimeSpanString() + "), "
+                                            + dbAppointmentSchedule.AppointmentSlot.Appointment.AppointmentType
+                                            + " Appointment: " + dbAppointmentSchedule.AppointmentSlot.Appointment.Title,
                         };
+
+                        conflict.Members.Add(new ConflictMemberResponseDto
+                        {
+                            Role = "Teacher",
+                            FirstName = requestedTeacher.FirstName,
+                            LastName = requestedTeacher.LastName,
+                            FullName = requestedTeacher.FullName,
+                            Nickname = requestedTeacher.Nickname,
+                        });
 
                         if (!conflictAoppointment.Contains(conflict))
                             conflictAoppointment.Add(conflict);
                     }
                 }
 
+                conflictSchedule.AddRange(conflictAoppointment);
+
                 var availableCourse = allCourse.FirstOrDefault(c => c.Id == requestedSchedule.RequestedCourseId) ?? throw new NotFoundException("Course ID is not found");
                 var availableSubject = availableCourse.Subjects.FirstOrDefault(c => c.Id == requestedSchedule.RequestedSubjectId) ?? throw new NotFoundException("Subject ID is not found");
                 var availableLevel = availableCourse.Levels.FirstOrDefault(c => c.Id == requestedSchedule.RequestedLevelId);
 
-                if (conflictClasses.IsNullOrEmpty() && conflictAoppointment.IsNullOrEmpty())
+                if (conflictSchedule.IsNullOrEmpty())
                 {
                     availableSchedule.Add(new AvailableScheduleResponseDto
                     {
@@ -207,8 +248,7 @@ namespace griffined_api.Services.CheckAvailableService
 
             if (data.IsConflict)
             {
-                data.ConflictClasses = conflictClasses;
-                data.ConflictAppointments = conflictAoppointment;
+                data.ConflictSchedule = conflictSchedule;
             }
             else
             {
