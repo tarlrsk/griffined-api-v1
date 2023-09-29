@@ -7,7 +7,7 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
 {
     public class AvailableTeacherResponseDto
     {
-        public int Id { get; set; }
+        public int TeacherId { get; set; }
         public string FirebaseId { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

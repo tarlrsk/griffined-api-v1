@@ -244,7 +244,7 @@ namespace griffined_api.Services.CheckAvailableService
                 {
                     data.Add(new AvailableTeacherResponseDto
                     {
-                        Id = dbTeacher.Id,
+                        TeacherId = dbTeacher.Id,
                         FirebaseId = dbTeacher.FirebaseId,
                         FirstName = dbTeacher.FirstName,
                         LastName = dbTeacher.LastName,
