@@ -139,9 +139,9 @@ namespace griffined_api.Services.CheckAvailableService
                             conflictSchedule.Add(conflict);
                     }
                 }
-                
-                var availableCourse = allCourse.FirstOrDefault(c => c.Id == requestedSchedule.RequestedCourseId)?? throw new NotFoundException("Course ID is not found");
-                var availableSubject = availableCourse.Subjects.FirstOrDefault(c => c.Id == requestedSchedule.RequestedSubjectId)?? throw new NotFoundException("Subject ID is not found");
+
+                var availableCourse = allCourse.FirstOrDefault(c => c.Id == requestedSchedule.RequestedCourseId) ?? throw new NotFoundException("Course ID is not found");
+                var availableSubject = availableCourse.Subjects.FirstOrDefault(c => c.Id == requestedSchedule.RequestedSubjectId) ?? throw new NotFoundException("Subject ID is not found");
                 var availableLevel = availableCourse.Levels.FirstOrDefault(c => c.Id == requestedSchedule.RequestedLevelId);
 
                 if (conflictSchedule.IsNullOrEmpty())
@@ -184,6 +184,82 @@ namespace griffined_api.Services.CheckAvailableService
             };
 
             return response;
+        }
+
+        public async Task<ServiceResponse<List<AvailableTeacherResponseDto>>> GetAvailableTeacherForAppointment(List<LocalAppointmentRequestDto> appointmentRequestDtos)
+        {
+            var requestedDate = appointmentRequestDtos.Select(a => a.Date.ToDateTime()).ToList();
+
+            var dbClassSchedules = await _context.Schedules
+                                    .Include(s => s.StudyClass)
+                                    .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Class).ToListAsync();
+
+            var dbAppointmentSchedules = await _context.Schedules
+                                    .Include(s => s.AppointmentSlot)
+                                        .ThenInclude(a => a!.Appointment)
+                                            .ThenInclude(a => a.AppointmentMembers)
+                                                .ThenInclude(m => m.Teacher)
+                                    .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment).ToListAsync();
+
+            var dbTeachers = await _context.Teachers
+                                .Include(t => t.WorkTimes)
+                                .Where(t => t.IsActive == true)
+                                .ToListAsync();
+
+            List<AvailableTeacherResponseDto> data = new();
+
+            foreach (var dbTeacher in dbTeachers)
+            {
+                var isConflict = false;
+                foreach (var appointmentRequest in appointmentRequestDtos)
+                {
+                    foreach (var dbClassSchedule in dbClassSchedules.Where(s => s.Date == appointmentRequest.Date.ToDateTime()))
+                    {
+                        if (appointmentRequest.FromTime.ToTimeSpan().TotalMilliseconds < dbClassSchedule.ToTime.TotalMilliseconds
+                        && dbClassSchedule.FromTime.TotalMilliseconds < appointmentRequest.ToTime.ToTimeSpan().TotalMilliseconds
+                        && dbClassSchedule.StudyClass?.TeacherId == dbTeacher.Id)
+                        {
+                            isConflict = true;
+                            break;
+                        }
+                    }
+
+                    if (isConflict == true)
+                    {
+                        break;
+                    }
+
+                    foreach (var dbAppointmentSchedule in dbAppointmentSchedules.Where(s => s.Date == appointmentRequest.Date.ToDateTime()))
+                    {
+                        if (appointmentRequest.FromTime.ToTimeSpan().TotalMilliseconds < dbAppointmentSchedule.ToTime.TotalMilliseconds
+                        && dbAppointmentSchedule.FromTime.TotalMilliseconds < appointmentRequest.ToTime.ToTimeSpan().TotalMilliseconds
+                        && dbAppointmentSchedule.AppointmentSlot?.Appointment?.AppointmentMembers?.Any(m => m.TeacherId == dbTeacher.Id) == true)
+                        {
+                            isConflict = true;
+                            break;
+                        }
+                    }
+                }
+                if (isConflict == false)
+                {
+                    data.Add(new AvailableTeacherResponseDto
+                    {
+                        Id = dbTeacher.Id,
+                        FirebaseId = dbTeacher.FirebaseId,
+                        FirstName = dbTeacher.FirstName,
+                        LastName = dbTeacher.LastName,
+                        FullName = dbTeacher.FullName,
+                        Nickname = dbTeacher.Nickname,
+                        // TODO Teacher WorkType
+                    });
+                }
+            }
+
+            return new ServiceResponse<List<AvailableTeacherResponseDto>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
         }
 
         // public async Task<ServiceResponse<List<GetAvailableTeacherDto>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId)
