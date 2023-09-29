@@ -146,7 +146,7 @@ namespace griffined_api.Services.CheckAvailableService
                         var conflict = new ConflictScheduleResponseDto
                         {
                             ConflictMessage = localSchedule.Date.ToDateTime().ToDateString() + "("
-                                            + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString() 
+                                            + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString()
                                             + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Current Course: "
                                             + conflictCourse.course + " "
                                             + conflictSubject.subject + " " + (conflictLevel?.level ?? ""),
