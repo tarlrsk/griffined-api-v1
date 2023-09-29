@@ -6,6 +6,7 @@ using Google.Type;
 using griffined_api.Dtos.StudyCourseDtos;
 using Newtonsoft.Json;
 
+
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
     public class CheckScheduleResultResponseDto
