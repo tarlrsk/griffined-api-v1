@@ -247,13 +247,9 @@ namespace griffined_api.Services.CheckAvailableService
             }
 
             if (data.IsConflict)
-            {
                 data.ConflictSchedule = conflictSchedule;
-            }
             else
-            {
                 data.AvailableSchedule = availableSchedule;
-            }
 
             var response = new ServiceResponse<CheckScheduleResultResponseDto>
             {
