@@ -489,6 +489,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Type = ScheduleType.Class,
                         },
                     };
+
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
                         studyClass.Attendances.Add(new StudentAttendance
@@ -546,6 +547,17 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 HasRead = false
             };
 
+            var teacherNotification = new TeacherNotification
+            {
+                Teacher = dbRequest.Teacher!,
+                StudyCourse = dbRequest.StudyCourse,
+                Title = "Your Class Has Been Cancelled.",
+                Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                DateCreated = DateTime.Now,
+                Type = TeacherNotificationType.ClassCancellation,
+                HasRead = false
+            };
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>();
@@ -570,16 +582,32 @@ namespace griffined_api.Services.ClassCancellationRequestService
             dbRequest.RejectedReason = rejectedReason;
             dbRequest.Status = ClassCancellationRequestStatus.Rejected;
 
-            var classCancellationStudentNotification = new StudentNotification
+            if (dbRequest.RequestedRole == CancellationRole.Student)
             {
-                Student = dbRequest.Student!,
-                StudyCourse = dbRequest.StudyCourse,
-                Title = "Cancellation Request Rejected",
-                Message = "Your class cancellation request has been rejected.",
-                DateCreated = DateTime.Now,
-                Type = StudentNotificationType.ClassCancellation,
-                HasRead = false
-            };
+                var classCancellationStudentNotification = new StudentNotification
+                {
+                    Student = dbRequest.Student!,
+                    StudyCourse = dbRequest.StudyCourse,
+                    Title = "Cancellation Request Rejected",
+                    Message = "Your class cancellation request has been rejected.",
+                    DateCreated = DateTime.Now,
+                    Type = StudentNotificationType.ClassCancellation,
+                    HasRead = false
+                };
+            }
+            else
+            {
+                var classCancellationTeacherNotification = new TeacherNotification
+                {
+                    Teacher = dbRequest.Teacher!,
+                    StudyCourse = dbRequest.StudyCourse,
+                    Title = "Cancellation Request Rejected",
+                    Message = "Your class cancellation request has been rejected.",
+                    DateCreated = DateTime.Now,
+                    Type = TeacherNotificationType.ClassCancellation,
+                    HasRead = false
+                };
+            }
 
             await _context.SaveChangesAsync();
 

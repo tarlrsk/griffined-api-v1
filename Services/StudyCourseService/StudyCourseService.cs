@@ -82,11 +82,25 @@ namespace griffined_api.Services.StudyCourseService
                         totalSubjectHour += studyClass.Schedule.FromTime.Subtract(studyClass.Schedule.ToTime).TotalHours;
                     }
                 }
+
                 studySubject.Subject = newStudySubject;
                 studySubject.Hour = totalSubjectHour;
                 studyCourse.StudySubjects.Add(studySubject);
+
+                var teacherNotification = new TeacherNotification
+                {
+                    Teacher = studyCourse.StudyClasses.First().Teacher,
+                    StudyCourse = studyCourse,
+                    Title = "New Course Assigned",
+                    Message = "You have been assigned to a new course. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = TeacherNotificationType.NewCourse,
+                    HasRead = false
+                };
             }
+
             _context.StudyCourses.Add(studyCourse);
+
             await _context.SaveChangesAsync();
             response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
@@ -284,7 +298,7 @@ namespace griffined_api.Services.StudyCourseService
                 Staff = ec,
                 RegistrationRequest = dbRequest,
                 Title = "New Schedule Created",
-                Message = $"A new schedule for registration request ID {dbRequest.Id} has been created by EA {ea.Nickname}",
+                Message = $"A new schedule for Section '{dbRequest.Section}' has been created by EA {ea.Nickname}. Click here for more details.",
                 DateCreated = DateTime.Now,
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false

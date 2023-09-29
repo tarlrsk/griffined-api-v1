@@ -41,6 +41,16 @@ namespace griffined_api.Services.AppointmentService
                 {
                     Teacher = teacher,
                 });
+
+                var teacherNotification = new TeacherNotification
+                {
+                    Teacher = teacher,
+                    Appointment = appointment,
+                    Title = "New Appointment",
+                    Message = "You have been added to a new Appointment.",
+                    Type = TeacherNotificationType.NewAppointment,
+                    HasRead = false
+                };
             }
 
             foreach (var newSchedule in newAppointment.Schedules)
@@ -76,17 +86,19 @@ namespace griffined_api.Services.AppointmentService
                             .ToListAsync();
 
             var data = new List<AppointmentResponseDto>();
-            
-            foreach(var dbAppointment in dbAppointments)
+
+            foreach (var dbAppointment in dbAppointments)
             {
-                data.Add(new AppointmentResponseDto{
+                data.Add(new AppointmentResponseDto
+                {
                     AppointmentId = dbAppointment.Id,
                     AppointmentType = dbAppointment.AppointmentType,
                     Title = dbAppointment.Title,
                     Description = dbAppointment.Description,
                     StartDate = dbAppointment.AppointmentSlots.Min(a => a.Schedule.Date).ToDateString(),
                     EndDate = dbAppointment.AppointmentSlots.Max(a => a.Schedule.Date).ToDateString(),
-                    CreatedBy = new StaffNameOnlyResponseDto{
+                    CreatedBy = new StaffNameOnlyResponseDto
+                    {
                         StaffId = dbAppointment.Staff?.Id,
                         FirstName = dbAppointment.Staff?.FirstName,
                         LastName = dbAppointment.Staff?.LastName,
@@ -97,7 +109,8 @@ namespace griffined_api.Services.AppointmentService
                 });
             }
 
-            return new ServiceResponse<List<AppointmentResponseDto>>{
+            return new ServiceResponse<List<AppointmentResponseDto>>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
             };
