@@ -74,7 +74,7 @@ namespace griffined_api.Services.CheckAvailableService
                                     && s.AppointmentSlot!.Appointment.AppointmentMembers.Any(m => m.TeacherId == requestedTeacher.Id)).ToListAsync();
 
             var conflictSchedule = new List<ConflictScheduleResponseDto>();
-            var conflictAoppointment = new List<ConflictScheduleResponseDto>();
+            var conflictAppointment = new List<ConflictScheduleResponseDto>();
             var availableSchedule = new List<AvailableScheduleResponseDto>();
 
             var data = new CheckScheduleResultResponseDto();
@@ -207,12 +207,12 @@ namespace griffined_api.Services.CheckAvailableService
                             Nickname = requestedTeacher.Nickname,
                         });
 
-                        if (!conflictAoppointment.Contains(conflict))
-                            conflictAoppointment.Add(conflict);
+                        if (!conflictAppointment.Contains(conflict))
+                            conflictAppointment.Add(conflict);
                     }
                 }
 
-                conflictSchedule.AddRange(conflictAoppointment);
+                conflictSchedule.AddRange(conflictAppointment);
 
                 var availableCourse = allCourse.FirstOrDefault(c => c.Id == requestedSchedule.RequestedCourseId) ?? throw new NotFoundException("Course ID is not found");
                 var availableSubject = availableCourse.Subjects.FirstOrDefault(c => c.Id == requestedSchedule.RequestedSubjectId) ?? throw new NotFoundException("Subject ID is not found");
