@@ -2008,6 +2008,17 @@ namespace griffined_api.Services.RegistrationRequestService
                                     };
 
                                     _context.StudentAttendances.Add(attendance);
+
+                                    var studentNotification = new StudentNotification
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyCourse = dbNewCourseRequest.StudyCourse,
+                                        Title = "Registration Request Approval",
+                                        Message = "The registration request has been approved. Click here for more details.",
+                                        Type = StudentNotificationType.RegistrationRequest,
+                                        DateCreated = DateTime.Now,
+                                        HasRead = false
+                                    };
                                 }
                             }
                         }
@@ -2054,6 +2065,17 @@ namespace griffined_api.Services.RegistrationRequestService
                                     };
 
                                     _context.StudentAttendances.Add(attendance);
+
+                                    var studentNotification = new StudentNotification
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyCourse = dbStudentAddingRequest.StudyCourse,
+                                        Title = "Registration Request Approval",
+                                        Message = "The registration request has been approved. Click here for more details.",
+                                        Type = StudentNotificationType.RegistrationRequest,
+                                        DateCreated = DateTime.Now,
+                                        HasRead = false
+                                    };
                                 }
                             }
                         }
@@ -2075,6 +2097,18 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
 
+            var ec = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.CreatedByStaffId) ?? throw new NotFoundException("No EC Found.");
+
+            var staffNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "Registration Request Approval",
+                Message = "The registration request has been approved. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
 
             dbRequest.PaymentStatus = paymentStatus;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
