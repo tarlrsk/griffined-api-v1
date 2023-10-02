@@ -2244,7 +2244,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     Title = "Registration Request Cancelled",
                     Message = "The registration request has been cancelled. Click here for more details.",
                     DateCreated = DateTime.Now,
-                    Type = StaffNotificationType.RegistrationRequest
+                    Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
                 };
             }
