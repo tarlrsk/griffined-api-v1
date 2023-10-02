@@ -2127,14 +2127,37 @@ namespace griffined_api.Services.RegistrationRequestService
             var dbRequest = await _context.RegistrationRequests
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
+
             dbRequest.PaymentError = true;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ReviewedByStaffId = _firebaseService.GetAzureIdWithToken();
+
+            var ec = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId)
+                    ?? throw new NotFoundException("EC not found.");
+
+            var oa = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy)
+                    ?? throw new NotFoundException("OA not found.");
+
+            var ecNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "Payment Declined",
+                Message = $"A payment for registration request ID {dbRequest.Id} has been declined by OA {oa.Nickname}. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
             await _context.SaveChangesAsync();
+
             var response = new ServiceResponse<string>
             {
                 StatusCode = (int)HttpStatusCode.OK
             };
+
             return response;
         }
 
@@ -2194,21 +2217,37 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.CancelledBy = _firebaseService.GetAzureIdWithToken();
 
             var ec = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId) ?? throw new NotFoundException("EC not found.");
+                .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId)
+                ?? throw new NotFoundException("EC not found.");
 
-            var oa = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy) ?? throw new NotFoundException("OA not found.");
+            var ea = await _context.Staff
+                .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                ?? throw new NotFoundException("EA not found.");
 
             var ecNotification = new StaffNotification
             {
                 Staff = ec,
                 RegistrationRequest = dbRequest,
-                Title = "Payment Declined",
-                Message = $"A payment for registration request ID {dbRequest.Id} has been declined by OA {oa.Nickname}. Click here for more details.",
+                Title = "Registration Request Cancelled",
+                Message = "The registration request has been cancelled. Click here for more details.",
                 DateCreated = DateTime.Now,
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false
             };
+
+            if (dbRequest.HasSchedule)
+            {
+                var eaNotificationSchedule = new StaffNotification
+                {
+                    Staff = ea,
+                    RegistrationRequest = dbRequest,
+                    Title = "Registration Request Cancelled",
+                    Message = "The registration request has been cancelled. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest
+                    HasRead = false
+                };
+            }
 
             await _context.SaveChangesAsync();
 
