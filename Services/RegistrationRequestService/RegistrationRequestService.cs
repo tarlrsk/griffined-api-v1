@@ -1381,6 +1381,22 @@ namespace griffined_api.Services.RegistrationRequestService
 
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEA;
             dbRequest.ScheduleError = true;
+
+            var ea = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                    ?? throw new NotFoundException("EA not found.");
+
+            var eaNotification = new StaffNotification
+            {
+                Staff = ea,
+                RegistrationRequest = dbRequest,
+                Title = "Schedule Declined",
+                Message = "The schedule has been declined. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -2828,6 +2844,24 @@ namespace griffined_api.Services.RegistrationRequestService
                 .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("No registration request found.");
 
             dbRequest.TakenByEAId = null;
+
+            var eas = await _context.Staff
+                    .Where(s => s.Role == "ea")
+                    .ToListAsync();
+
+            foreach (var ea in eas)
+            {
+                var notification = new StaffNotification
+                {
+                    Staff = ea,
+                    RegistrationRequest = dbRequest,
+                    Title = "New Registration Request",
+                    Message = "There is an available registration request. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest,
+                    HasRead = false
+                };
+            }
 
             await _context.SaveChangesAsync();
 
