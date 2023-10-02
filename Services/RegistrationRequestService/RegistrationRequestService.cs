@@ -2896,6 +2896,72 @@ namespace griffined_api.Services.RegistrationRequestService
 
             dbRequest.RegistrationRequestComments.Add(newComment);
 
+            switch (dbStaff.Role)
+            {
+                case "ec":
+                    var ecNotificationEAs = await _context.Staff
+                            .Where(s => s.Role == "ea")
+                            .ToListAsync();
+
+                    foreach (var ea in ecNotificationEAs)
+                    {
+                        var eaNotification = new StaffNotification
+                        {
+                            Staff = ea,
+                            RegistrationRequest = dbRequest,
+                            Title = "Comment",
+                            Message = $"EC {dbStaff.Nickname} commented on the registration request. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+
+                    break;
+
+                case "ea":
+                    var eaNotificationECs = await _context.Staff
+                            .Where(s => s.Role == "ec")
+                            .ToListAsync();
+
+                    foreach (var ec in eaNotificationECs)
+                    {
+                        var ecNotification = new StaffNotification
+                        {
+                            Staff = ec,
+                            RegistrationRequest = dbRequest,
+                            Title = "Comment",
+                            Message = $"EA {dbStaff.Nickname} commented on the registration request. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+
+                    break;
+
+                case "oa":
+                    var oaNotificationECs = await _context.Staff
+                            .Where(s => s.Role == "ec")
+                            .ToListAsync();
+
+                    foreach (var ec in oaNotificationECs)
+                    {
+                        var ecNotification = new StaffNotification
+                        {
+                            Staff = ec,
+                            RegistrationRequest = dbRequest,
+                            Title = "Comment",
+                            Message = $"OA {dbStaff.Nickname} commented on the registration request. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+
+                    break;
+            }
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
