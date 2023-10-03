@@ -52,6 +52,7 @@ using FirebaseAdmin;
 
 // Background Tasks
 using Quartz;
+using griffined_api.Services.NotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IClassCancellationRequestService, ClassCancellationRe
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IRegistrationRequestService, RegistrationRequestService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
