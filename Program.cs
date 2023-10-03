@@ -25,6 +25,7 @@ global using griffined_api.Services.AppointmentService;
 global using griffined_api.Services.ClassCancellationRequestService;
 global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.CourseService;
+global using griffined_api.Services.NotificationService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
 global using griffined_api.Services.StudentReportService;
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IClassCancellationRequestService, ClassCancellationRe
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IRegistrationRequestService, RegistrationRequestService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
