@@ -15,6 +15,7 @@ namespace griffined_api.Enums
         ClassCancellation,
         NewAppointment,
         NewAppointmentType,
-        AppointmentCancellation
+        AppointmentCancellation,
+        StudentReport
     }
 }

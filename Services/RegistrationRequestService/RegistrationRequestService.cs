@@ -1381,6 +1381,22 @@ namespace griffined_api.Services.RegistrationRequestService
 
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEA;
             dbRequest.ScheduleError = true;
+
+            var ea = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                    ?? throw new NotFoundException("EA not found.");
+
+            var eaNotification = new StaffNotification
+            {
+                Staff = ea,
+                RegistrationRequest = dbRequest,
+                Title = "Schedule Declined",
+                Message = "The schedule has been declined. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -2008,6 +2024,17 @@ namespace griffined_api.Services.RegistrationRequestService
                                     };
 
                                     _context.StudentAttendances.Add(attendance);
+
+                                    var studentNotification = new StudentNotification
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyCourse = dbNewCourseRequest.StudyCourse,
+                                        Title = "Registration Request Approval",
+                                        Message = "The registration request has been approved. Click here for more details.",
+                                        Type = StudentNotificationType.RegistrationRequest,
+                                        DateCreated = DateTime.Now,
+                                        HasRead = false
+                                    };
                                 }
                             }
                         }
@@ -2054,6 +2081,17 @@ namespace griffined_api.Services.RegistrationRequestService
                                     };
 
                                     _context.StudentAttendances.Add(attendance);
+
+                                    var studentNotification = new StudentNotification
+                                    {
+                                        Student = dbStudySubjectMember.Student,
+                                        StudyCourse = dbStudentAddingRequest.StudyCourse,
+                                        Title = "Registration Request Approval",
+                                        Message = "The registration request has been approved. Click here for more details.",
+                                        Type = StudentNotificationType.RegistrationRequest,
+                                        DateCreated = DateTime.Now,
+                                        HasRead = false
+                                    };
                                 }
                             }
                         }
@@ -2075,6 +2113,18 @@ namespace griffined_api.Services.RegistrationRequestService
                 }
             }
 
+            var ec = await _context.Staff.FirstOrDefaultAsync(s => s.Id == dbRequest.CreatedByStaffId) ?? throw new NotFoundException("No EC Found.");
+
+            var staffNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "Registration Request Approval",
+                Message = "The registration request has been approved. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
 
             dbRequest.PaymentStatus = paymentStatus;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
@@ -2093,14 +2143,37 @@ namespace griffined_api.Services.RegistrationRequestService
             var dbRequest = await _context.RegistrationRequests
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
+
             dbRequest.PaymentError = true;
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ReviewedByStaffId = _firebaseService.GetAzureIdWithToken();
+
+            var ec = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId)
+                    ?? throw new NotFoundException("EC not found.");
+
+            var oa = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy)
+                    ?? throw new NotFoundException("OA not found.");
+
+            var ecNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "Payment Declined",
+                Message = $"A payment for registration request ID {dbRequest.Id} has been declined by OA {oa.Nickname}. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
             await _context.SaveChangesAsync();
+
             var response = new ServiceResponse<string>
             {
                 StatusCode = (int)HttpStatusCode.OK
             };
+
             return response;
         }
 
@@ -2160,21 +2233,37 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.CancelledBy = _firebaseService.GetAzureIdWithToken();
 
             var ec = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId) ?? throw new NotFoundException("EC not found.");
+                .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId)
+                ?? throw new NotFoundException("EC not found.");
 
-            var oa = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy) ?? throw new NotFoundException("OA not found.");
+            var ea = await _context.Staff
+                .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                ?? throw new NotFoundException("EA not found.");
 
             var ecNotification = new StaffNotification
             {
                 Staff = ec,
                 RegistrationRequest = dbRequest,
-                Title = "Payment Declined",
-                Message = $"A payment for registration request ID {dbRequest.Id} has been declined by OA {oa.Nickname}. Click here for more details.",
+                Title = "Registration Request Cancelled",
+                Message = "The registration request has been cancelled. Click here for more details.",
                 DateCreated = DateTime.Now,
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false
             };
+
+            if (dbRequest.HasSchedule)
+            {
+                var eaNotificationSchedule = new StaffNotification
+                {
+                    Staff = ea,
+                    RegistrationRequest = dbRequest,
+                    Title = "Registration Request Cancelled",
+                    Message = "The registration request has been cancelled. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest,
+                    HasRead = false
+                };
+            }
 
             await _context.SaveChangesAsync();
 
@@ -2756,6 +2845,24 @@ namespace griffined_api.Services.RegistrationRequestService
 
             dbRequest.TakenByEAId = null;
 
+            var eas = await _context.Staff
+                    .Where(s => s.Role == "ea")
+                    .ToListAsync();
+
+            foreach (var ea in eas)
+            {
+                var notification = new StaffNotification
+                {
+                    Staff = ea,
+                    RegistrationRequest = dbRequest,
+                    Title = "New Registration Request",
+                    Message = "There is an available registration request. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.RegistrationRequest,
+                    HasRead = false
+                };
+            }
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -2788,6 +2895,72 @@ namespace griffined_api.Services.RegistrationRequestService
             };
 
             dbRequest.RegistrationRequestComments.Add(newComment);
+
+            switch (dbStaff.Role)
+            {
+                case "ec":
+                    var ecNotificationEAs = await _context.Staff
+                            .Where(s => s.Role == "ea")
+                            .ToListAsync();
+
+                    foreach (var ea in ecNotificationEAs)
+                    {
+                        var eaNotification = new StaffNotification
+                        {
+                            Staff = ea,
+                            RegistrationRequest = dbRequest,
+                            Title = "Comment",
+                            Message = $"EC {dbStaff.Nickname} commented on the registration request. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+
+                    break;
+
+                case "ea":
+                    var eaNotificationECs = await _context.Staff
+                            .Where(s => s.Role == "ec")
+                            .ToListAsync();
+
+                    foreach (var ec in eaNotificationECs)
+                    {
+                        var ecNotification = new StaffNotification
+                        {
+                            Staff = ec,
+                            RegistrationRequest = dbRequest,
+                            Title = "Comment",
+                            Message = $"EA {dbStaff.Nickname} commented on the registration request. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+
+                    break;
+
+                case "oa":
+                    var oaNotificationECs = await _context.Staff
+                            .Where(s => s.Role == "ec")
+                            .ToListAsync();
+
+                    foreach (var ec in oaNotificationECs)
+                    {
+                        var ecNotification = new StaffNotification
+                        {
+                            Staff = ec,
+                            RegistrationRequest = dbRequest,
+                            Title = "Comment",
+                            Message = $"OA {dbStaff.Nickname} commented on the registration request. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+
+                    break;
+            }
 
             await _context.SaveChangesAsync();
 
