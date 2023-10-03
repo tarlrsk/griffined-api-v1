@@ -36,5 +36,11 @@ namespace griffined_api.Controllers
             return Ok(await _appointmentService.GetAppointmentById(appointmentId));
         }
 
+        [HttpPut("{appointmentId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> UpdateAppointmentById(int appointmentId, UpdateAppointmentRequestDto updateAppointmentRequestDto)
+        {
+            return Ok(await _appointmentService.UpdateApoointmentById(appointmentId, updateAppointmentRequestDto));
+        }
+
     }
 }
