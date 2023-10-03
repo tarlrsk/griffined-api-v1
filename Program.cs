@@ -25,6 +25,7 @@ global using griffined_api.Services.AppointmentService;
 global using griffined_api.Services.ClassCancellationRequestService;
 global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.CourseService;
+global using griffined_api.Services.NotificationService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
 global using griffined_api.Services.StudentReportService;
@@ -52,7 +53,6 @@ using FirebaseAdmin;
 
 // Background Tasks
 using Quartz;
-using griffined_api.Services.NotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 

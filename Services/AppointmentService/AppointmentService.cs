@@ -135,9 +135,10 @@ namespace griffined_api.Services.AppointmentService
                 Status = dbAppointment.AppointmentStatus,
             };
 
-            foreach(var dbMember in dbAppointment.AppointmentMembers)
+            foreach (var dbMember in dbAppointment.AppointmentMembers)
             {
-                data.Teachers.Add(new TeacherNameResponseDto{
+                data.Teachers.Add(new TeacherNameResponseDto
+                {
                     TeacherId = dbMember.Teacher.Id,
                     FirstName = dbMember.Teacher.FirstName,
                     LastName = dbMember.Teacher.LastName,
@@ -145,9 +146,10 @@ namespace griffined_api.Services.AppointmentService
                 });
             }
 
-            foreach(var dbSlot in dbAppointment.AppointmentSlots)
+            foreach (var dbSlot in dbAppointment.AppointmentSlots)
             {
-                data.Schedules.Add(new AppointmentScheduleResponseDto{
+                data.Schedules.Add(new AppointmentScheduleResponseDto
+                {
                     ScheduleId = dbSlot.Schedule.Id,
                     Date = dbSlot.Schedule.Date.ToDateString(),
                     FromTime = dbSlot.Schedule.FromTime.ToTimeSpanString(),
