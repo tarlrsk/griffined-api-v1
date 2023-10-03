@@ -177,8 +177,9 @@ namespace griffined_api.Services.AppointmentService
 
             foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
             {
-                var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId)
-                                    ?? throw new NotFoundException($"Delete Schedule ID {deleteScheduleId} is not found.");
+                var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId 
+                                    && a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted)
+                                    ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
                 deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.Deleted;
             }
 
