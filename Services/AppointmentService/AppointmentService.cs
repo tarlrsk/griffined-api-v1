@@ -115,5 +115,51 @@ namespace griffined_api.Services.AppointmentService
                 Data = data,
             };
         }
+
+        public async Task<ServiceResponse<AppointmentDetailResponseDto>> GetAppointmentById(int appointmentId)
+        {
+            var dbAppointment = await _context.Appointments
+                                .Include(a => a.AppointmentMembers)
+                                    .ThenInclude(m => m.Teacher)
+                                .Include(a => a.AppointmentSlots)
+                                    .ThenInclude(s => s.Schedule)
+                                .FirstOrDefaultAsync(a => a.Id == appointmentId)
+                                ?? throw new NotFoundException("Appointment is not found.");
+
+            var data = new AppointmentDetailResponseDto
+            {
+                AppointmentId = dbAppointment.Id,
+                AppointmentType = dbAppointment.AppointmentType,
+                Title = dbAppointment.Title,
+                Description = dbAppointment.Description,
+                Status = dbAppointment.AppointmentStatus,
+            };
+
+            foreach(var dbMember in dbAppointment.AppointmentMembers)
+            {
+                data.Teachers.Add(new TeacherNameResponseDto{
+                    TeacherId = dbMember.Teacher.Id,
+                    FirstName = dbMember.Teacher.FirstName,
+                    LastName = dbMember.Teacher.LastName,
+                    Nickname = dbMember.Teacher.Nickname,
+                });
+            }
+
+            foreach(var dbSlot in dbAppointment.AppointmentSlots)
+            {
+                data.Schedules.Add(new AppointmentScheduleResponseDto{
+                    ScheduleId = dbSlot.Schedule.Id,
+                    Date = dbSlot.Schedule.Date.ToDateString(),
+                    FromTime = dbSlot.Schedule.FromTime.ToTimeSpanString(),
+                    ToTime = dbSlot.Schedule.ToTime.ToTimeSpanString(),
+                });
+            }
+
+            return new ServiceResponse<AppointmentDetailResponseDto>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+        }
     }
 }

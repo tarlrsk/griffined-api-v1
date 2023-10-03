@@ -29,5 +29,12 @@ namespace griffined_api.Controllers
         {
             return Ok(await _appointmentService.ListAllAppointments());
         }
+
+        [HttpGet("{appointmentId}"), Authorize(Roles = "ec, ea, master")]
+        public async Task<ActionResult> GetAppointmentById(int appointmentId)
+        {
+            return Ok(await _appointmentService.GetAppointmentById(appointmentId));
+        }
+
     }
 }
