@@ -174,6 +174,10 @@ namespace griffined_api.Services.AppointmentService
                                 .FirstOrDefaultAsync(a => a.Id == appointmentId)
                                 ?? throw new NotFoundException($"Appointment With ID {appointmentId} is not found");
 
+            dbAppointment.Title = updateAppointmentRequestDto.Title ?? dbAppointment.Title;
+            dbAppointment.AppointmentType = updateAppointmentRequestDto.AppointmentType ?? dbAppointment.AppointmentType;
+            dbAppointment.Description = updateAppointmentRequestDto.Description ?? dbAppointment.Description;
+
 
             foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
             {
