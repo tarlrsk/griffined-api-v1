@@ -78,7 +78,7 @@ namespace griffined_api.Services.ScheduleService
                     TeacherId = groupedSchedule.Teacher?.Id,
                     Teacher = groupedSchedule.Teacher?.Nickname,
                 };
-                for (int i = 8; i <= 20; i++)
+                for (int i = 8; i < 20; i++)
                 {
                     var firstHalf = TimeSpan.FromHours(i);
                     var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
@@ -93,6 +93,7 @@ namespace griffined_api.Services.ScheduleService
                             {
                                 hourSlot = new DailyCalendarHalfSlotResponseDto
                                 {
+                                    Hour = i,
                                     FirstHalf = new DailyCalendarSlotResponseDto
                                     {
                                         ScheduleId = schedule.Id,
@@ -162,6 +163,7 @@ namespace griffined_api.Services.ScheduleService
                             {
                                 hourSlot = new DailyCalendarHalfSlotResponseDto
                                 {
+                                    Hour = i,
                                     SecondHalf = new DailyCalendarSlotResponseDto
                                     {
                                         ScheduleId = schedule.Id,
