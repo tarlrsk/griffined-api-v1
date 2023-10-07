@@ -174,20 +174,26 @@ namespace griffined_api.Services.AppointmentService
                                 .FirstOrDefaultAsync(a => a.Id == appointmentId)
                                 ?? throw new NotFoundException($"Appointment With ID {appointmentId} is not found");
 
+            dbAppointment.Title = updateAppointmentRequestDto.Title;
+            dbAppointment.AppointmentType = updateAppointmentRequestDto.AppointmentType;
+            dbAppointment.Description = updateAppointmentRequestDto.Description;
+
 
             foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
             {
-                var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId 
+                var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId
                                     && a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted)
                                     ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
                 deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.Deleted;
             }
 
-            foreach(var addSchedule in updateAppointmentRequestDto.ScheduleToAdd)
+            foreach (var addSchedule in updateAppointmentRequestDto.ScheduleToAdd)
             {
-                dbAppointment.AppointmentSlots.Add(new AppointmentSlot{
+                dbAppointment.AppointmentSlots.Add(new AppointmentSlot
+                {
                     AppointmentSlotStatus = AppointmentSlotStatus.None,
-                    Schedule = new Schedule {
+                    Schedule = new Schedule
+                    {
                         Date = addSchedule.Date.ToDateTime(),
                         FromTime = addSchedule.FromTime.ToTimeSpan(),
                         ToTime = addSchedule.ToTime.ToTimeSpan(),
