@@ -11,5 +11,6 @@ namespace griffined_api.Services.AppointmentService
         Task<ServiceResponse<string>> AddNewAppointment(NewAppointmentRequestDto newAppointment);
         Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments();
         Task<ServiceResponse<AppointmentDetailResponseDto>> GetAppointmentById(int appointmentId);
+        Task<ServiceResponse<string>> UpdateApoointmentById(int appointmentId, UpdateAppointmentRequestDto updateAppointmentRequestDto);
     }
 }

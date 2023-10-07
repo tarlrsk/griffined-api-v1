@@ -121,7 +121,8 @@ namespace griffined_api.Services.AppointmentService
             var dbAppointment = await _context.Appointments
                                 .Include(a => a.AppointmentMembers)
                                     .ThenInclude(m => m.Teacher)
-                                .Include(a => a.AppointmentSlots)
+                                .Include(a => a.AppointmentSlots
+                                    .Where(s => s.AppointmentSlotStatus != AppointmentSlotStatus.Deleted))
                                     .ThenInclude(s => s.Schedule)
                                 .FirstOrDefaultAsync(a => a.Id == appointmentId)
                                 ?? throw new NotFoundException("Appointment is not found.");
@@ -135,19 +136,22 @@ namespace griffined_api.Services.AppointmentService
                 Status = dbAppointment.AppointmentStatus,
             };
 
-            foreach(var dbMember in dbAppointment.AppointmentMembers)
+            foreach (var dbMember in dbAppointment.AppointmentMembers)
             {
-                data.Teachers.Add(new TeacherNameResponseDto{
+                data.Teachers.Add(new TeacherNameResponseDto
+                {
                     TeacherId = dbMember.Teacher.Id,
                     FirstName = dbMember.Teacher.FirstName,
                     LastName = dbMember.Teacher.LastName,
                     Nickname = dbMember.Teacher.Nickname,
+                    FullName = dbMember.Teacher.FullName,
                 });
             }
 
-            foreach(var dbSlot in dbAppointment.AppointmentSlots)
+            foreach (var dbSlot in dbAppointment.AppointmentSlots)
             {
-                data.Schedules.Add(new AppointmentScheduleResponseDto{
+                data.Schedules.Add(new AppointmentScheduleResponseDto
+                {
                     ScheduleId = dbSlot.Schedule.Id,
                     Date = dbSlot.Schedule.Date.ToDateString(),
                     FromTime = dbSlot.Schedule.FromTime.ToTimeSpanString(),
@@ -159,6 +163,44 @@ namespace griffined_api.Services.AppointmentService
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
+            };
+        }
+
+        public async Task<ServiceResponse<string>> UpdateApoointmentById(int appointmentId, UpdateAppointmentRequestDto updateAppointmentRequestDto)
+        {
+            var dbAppointment = await _context.Appointments
+                                .Include(a => a.AppointmentSlots)
+                                    .ThenInclude(s => s.Schedule)
+                                .FirstOrDefaultAsync(a => a.Id == appointmentId)
+                                ?? throw new NotFoundException($"Appointment With ID {appointmentId} is not found");
+
+
+            foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
+            {
+                var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId 
+                                    && a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted)
+                                    ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
+                deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.Deleted;
+            }
+
+            foreach(var addSchedule in updateAppointmentRequestDto.ScheduleToAdd)
+            {
+                dbAppointment.AppointmentSlots.Add(new AppointmentSlot{
+                    AppointmentSlotStatus = AppointmentSlotStatus.None,
+                    Schedule = new Schedule {
+                        Date = addSchedule.Date.ToDateTime(),
+                        FromTime = addSchedule.FromTime.ToTimeSpan(),
+                        ToTime = addSchedule.ToTime.ToTimeSpan(),
+                        Type = ScheduleType.Appointment,
+                    },
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
             };
         }
     }
