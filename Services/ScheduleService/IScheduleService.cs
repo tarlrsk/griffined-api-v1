@@ -9,5 +9,6 @@ namespace griffined_api.Services.ScheduleService
     public interface IScheduleService
     {
         Task<ServiceResponse<List<DailyCalendarResponseDto>>> GetDailyCalendarForStaff(string date);
+        Task<ServiceResponse<List<TodayMobileResponseDto>>> GetMobileTodayClass(string date);
     }
 }

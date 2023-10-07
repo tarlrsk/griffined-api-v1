@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading.Tasks;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace griffined_api.Services.ScheduleService
 {
@@ -19,6 +18,121 @@ namespace griffined_api.Services.ScheduleService
             _firebaseService = firebaseService;
         }
 
+        public async Task<ServiceResponse<List<TodayMobileResponseDto>>> GetMobileTodayClass(string requestDate)
+        {
+            var userId = _firebaseService.GetAzureIdWithToken();
+            var role = _firebaseService.GetRoleWithToken();
+            List<StudyClass> dbStudyClasses = new();
+            List<AppointmentSlot> dbAppointmentSlots = new();
+            if (role == "teacher")
+            {
+                dbStudyClasses = await _context.StudyClasses
+                                .Include(c => c.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                                .Include(c => c.Teacher)
+                                .Include(c => c.Schedule)
+                                .Where(c =>
+                                c.Schedule.Date == requestDate.ToDateTime()
+                                && c.Status != ClassStatus.Cancelled
+                                && c.Status != ClassStatus.Deleted
+                                && c.TeacherId == userId)
+                                .ToListAsync();
+
+                dbAppointmentSlots = await _context.AppointmentSlots
+                                    .Include(a => a.Appointment)
+                                        .ThenInclude(a => a.AppointmentMembers)
+                                    .Include(a => a.Schedule)
+                                    .Where(a =>
+                                    a.Schedule.Date == requestDate.ToDateTime()
+                                    && a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted
+                                    && a.Appointment.AppointmentMembers.Any(a => a.TeacherId == userId))
+                                    .ToListAsync();
+            }
+            else if (role == "student")
+            {
+                dbStudyClasses = await _context.StudyClasses
+                                .Include(c => c.StudySubject)
+                                    .ThenInclude(s => s.Subject)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                                .Include(c => c.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                                .Include(c => c.Teacher)
+                                .Include(c => c.Schedule)
+                                .Where(c =>
+                                c.Schedule.Date == requestDate.ToDateTime()
+                                && c.Status != ClassStatus.Cancelled
+                                && c.Status != ClassStatus.Deleted
+                                && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId))
+                                .ToListAsync();
+            }
+            else
+            {
+                throw new InternalServerException("Something went wrong with User.");
+            }
+
+
+            var data = new List<TodayMobileResponseDto>();
+            foreach (var dbStudyClass in dbStudyClasses)
+            {
+                data.Add(new TodayMobileResponseDto
+                {
+                    Type = ScheduleType.Class,
+                    Date = dbStudyClass.Schedule.Date.ToDateString(),
+                    FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    Class = new TodayMobileClassResponseDto
+                    {
+                        StudyClassId = dbStudyClass.Id,
+                        StudyCourseId = dbStudyClass.StudyCourse.Id,
+                        CourseId = dbStudyClass.StudyCourse.Course.Id,
+                        Course = dbStudyClass.StudyCourse.Course.course,
+                        StudySubjectId = dbStudyClass.StudySubject.Id,
+                        SubjectId = dbStudyClass.StudySubject.Subject.Id,
+                        Subject = dbStudyClass.StudySubject.Subject.subject,
+                        LevelId = dbStudyClass.StudyCourse.Level?.Id,
+                        Level = dbStudyClass.StudyCourse.Level?.level,
+                        Section = dbStudyClass.StudyCourse.Section,
+                        Room = dbStudyClass.Room,
+                        StudyCourseType = dbStudyClass.StudyCourse.StudyCourseType,
+                        TeacherId = dbStudyClass.Teacher.Id,
+                        TeacherFirstName = dbStudyClass.Teacher.FirstName,
+                        TeacherLastName = dbStudyClass.Teacher.LastName,
+                        TeacherNickname = dbStudyClass.Teacher.Nickname,
+                    },
+                });
+            }
+
+            foreach (var dbAppointmentSlot in dbAppointmentSlots)
+            {
+                data.Add(new TodayMobileResponseDto
+                {
+                    Type = ScheduleType.Appointment,
+                    Date = dbAppointmentSlot.Schedule.Date.ToDateString(),
+                    FromTime = dbAppointmentSlot.Schedule.FromTime.ToTimeSpanString(),
+                    ToTime = dbAppointmentSlot.Schedule.ToTime.ToTimeSpanString(),
+                    Appointment = new TodayMobileAppointmentResponseDto
+                    {
+                        Title = dbAppointmentSlot.Appointment.Title,
+                        Description = dbAppointmentSlot.Appointment.Description,
+                        AppointmentType = dbAppointmentSlot.Appointment.AppointmentType,
+                    },
+                });
+            }
+
+            data = data.OrderBy(d => d.FromTime.ToTimeSpan()).ToList();
+
+            var response = new ServiceResponse<List<TodayMobileResponseDto>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+            return response;
+        }
         public async Task<ServiceResponse<List<DailyCalendarResponseDto>>> GetDailyCalendarForStaff(string requestedDate)
         {
             var dbSchedules = await _context.Schedules

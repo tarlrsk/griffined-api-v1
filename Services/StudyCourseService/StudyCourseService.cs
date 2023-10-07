@@ -1,6 +1,7 @@
 using AutoMapper.Execution;
 using Azure;
 using Google.Api;
+using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -1396,7 +1397,7 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<List<TodayClassMobileResponse>>> GetMobileTodayClass(string requestDate)
+        public async Task<ServiceResponse<List<TodayClassMobileResponseDto>>> GetMobileTodayClass(string requestDate)
         {
             var userId = _firebaseService.GetAzureIdWithToken();
             var role = _firebaseService.GetRoleWithToken();
@@ -1443,10 +1444,10 @@ namespace griffined_api.Services.StudyCourseService
             }
 
 
-            var data = new List<TodayClassMobileResponse>();
+            var data = new List<TodayClassMobileResponseDto>();
             foreach (var dbStudyClass in dbStudyClasses)
             {
-                var studyClass = new TodayClassMobileResponse
+                var studyClass = new TodayClassMobileResponseDto
                 {
                     StudyClassId = dbStudyClass.Id,
                     StudyCourseId = dbStudyClass.StudyCourse.Id,
@@ -1471,7 +1472,7 @@ namespace griffined_api.Services.StudyCourseService
                 data.Add(studyClass);
             }
 
-            var response = new ServiceResponse<List<TodayClassMobileResponse>>
+            var response = new ServiceResponse<List<TodayClassMobileResponseDto>>
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
