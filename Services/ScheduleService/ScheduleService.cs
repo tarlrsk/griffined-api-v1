@@ -75,6 +75,7 @@ namespace griffined_api.Services.ScheduleService
             {
                 var dailyCalendar = new DailyCalendarResponseDto
                 {
+                    Id = groupedSchedule.Teacher?.Id,
                     TeacherId = groupedSchedule.Teacher?.Id,
                     Teacher = groupedSchedule.Teacher?.Nickname,
                 };
@@ -93,7 +94,6 @@ namespace griffined_api.Services.ScheduleService
                             {
                                 hourSlot = new DailyCalendarHalfSlotResponseDto
                                 {
-                                    Hour = i,
                                     FirstHalf = new DailyCalendarSlotResponseDto
                                     {
                                         ScheduleId = schedule.Id,
@@ -163,7 +163,6 @@ namespace griffined_api.Services.ScheduleService
                             {
                                 hourSlot = new DailyCalendarHalfSlotResponseDto
                                 {
-                                    Hour = i,
                                     SecondHalf = new DailyCalendarSlotResponseDto
                                     {
                                         ScheduleId = schedule.Id,
