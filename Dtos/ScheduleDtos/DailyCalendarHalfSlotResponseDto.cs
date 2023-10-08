@@ -9,7 +9,6 @@ namespace griffined_api.Dtos.ScheduleDtos
 {
     public class DailyCalendarHalfSlotResponseDto
     {
-        public int Hour { get; set; }
         public DailyCalendarSlotResponseDto? FirstHalf { get; set; }
         public DailyCalendarSlotResponseDto? SecondHalf { get; set; }
     }
