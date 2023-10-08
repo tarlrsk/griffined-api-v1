@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Google.Rpc;
 using griffined_api.Dtos.StudentReportDtos;
+using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Controllers
 {
@@ -30,6 +31,12 @@ namespace griffined_api.Controllers
         public async Task<ActionResult> GetDailyCalendarForStaff(string date)
         {
             return Ok(await _scheduleService.GetDailyCalendarForStaff(date));
+        }
+
+        [HttpPut("studyclass/room"), Authorize(Roles = "ec, ea, oa, master")]
+        public async Task<ActionResult> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto> requestDto)
+        {
+            return Ok(await _scheduleService.UpdateStudyClassRoomByScheduleIds(requestDto));
         }
     }
 }

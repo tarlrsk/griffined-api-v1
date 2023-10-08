@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Google.Api;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 
@@ -349,6 +350,27 @@ namespace griffined_api.Services.ScheduleService
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
+            };
+        }
+
+        public async Task<ServiceResponse<string>> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto> requestDto)
+        {
+            var dbStudyClasses = await _context.StudyClasses
+                            .Include(c => c.Schedule)
+                            .Where(c => requestDto.Select(r => r.ScheduleId).Contains(c.Schedule.Id))
+                            .ToListAsync();
+
+            foreach(var newRoom in requestDto)
+            {
+                var dbStudyClass = dbStudyClasses.FirstOrDefault(s => s.Id == newRoom.ScheduleId) 
+                                    ?? throw new NotFoundException($"Schedule With ID {newRoom.ScheduleId} is not found.");
+                dbStudyClass.Room = newRoom.Room;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<string>{
+                StatusCode = (int)HttpStatusCode.OK,
             };
         }
     }
