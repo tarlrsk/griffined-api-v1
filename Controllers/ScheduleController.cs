@@ -20,6 +20,12 @@ namespace griffined_api.Controllers
             _scheduleService = scheduleService;
         }
 
+        [HttpGet("today/{date}"), Authorize(Roles = "teacher, student")]
+        public async Task<ActionResult> GetToday(string date)
+        {
+            return Ok(await _scheduleService.GetMobileTodayClass(date));
+        }
+        
         [HttpGet("staff/{date}"), Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetDailyCalendarForStaff(string date)
         {

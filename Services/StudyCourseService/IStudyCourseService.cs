@@ -1,3 +1,4 @@
+using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<string>> EaRemoveStudent(EaStudentManagementRequestDto requestDto);
         Task<ServiceResponse<string>> UpdateScheduleWithoutCancelRequest(UpdateStudyCourseRequestDto updateRequest);
         Task<ServiceResponse<ClassProgressResponseDto>> GetCourseProgress(int studyCourseId);
-        Task<ServiceResponse<List<TodayClassMobileResponse>>> GetMobileTodayClass(string date);
+        Task<ServiceResponse<List<TodayClassMobileResponseDto>>> GetMobileTodayClass(string date);
         Task<ServiceResponse<List<StudyCourseHistoryResponseDto>>> GetStudyCourseHistory(int studyCourseId);
         Task<ServiceResponse<string>> CancelStudyCourse(int studyCourseId);
     }
