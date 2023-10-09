@@ -2232,30 +2232,15 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.RegistrationStatus = RegistrationStatus.Cancelled;
             dbRequest.CancelledBy = _firebaseService.GetAzureIdWithToken();
 
-            var ec = await _context.Staff
-                .FirstOrDefaultAsync(s => s.Id == dbRequest.PaymentByStaffId)
-                ?? throw new NotFoundException("EC not found.");
-
-            var ea = await _context.Staff
-                .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
-                ?? throw new NotFoundException("EA not found.");
-
-            var ecNotification = new StaffNotification
+            if (dbRequest.RegistrationStatus != RegistrationStatus.PendingEC)
             {
-                Staff = ec,
-                RegistrationRequest = dbRequest,
-                Title = "Registration Request Cancelled",
-                Message = "The registration request has been cancelled. Click here for more details.",
-                DateCreated = DateTime.Now,
-                Type = StaffNotificationType.RegistrationRequest,
-                HasRead = false
-            };
+                var ec = await _context.Staff
+                .FirstOrDefaultAsync(s => s.Id == dbRequest.CreatedByStaffId)
+                ?? throw new NotFoundException($"EC with ID {dbRequest.CreatedByStaffId} is not found.");
 
-            if (dbRequest.HasSchedule)
-            {
-                var eaNotificationSchedule = new StaffNotification
+                var ecNotification = new StaffNotification
                 {
-                    Staff = ea,
+                    Staff = ec,
                     RegistrationRequest = dbRequest,
                     Title = "Registration Request Cancelled",
                     Message = "The registration request has been cancelled. Click here for more details.",
@@ -2264,6 +2249,30 @@ namespace griffined_api.Services.RegistrationRequestService
                     HasRead = false
                 };
             }
+
+            if (dbRequest.RegistrationStatus != RegistrationStatus.PendingEA)
+            {
+                var ea = await _context.Staff
+                .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                ?? throw new NotFoundException($"EA with ID {dbRequest.ScheduledByStaffId} not found.");
+
+                if (dbRequest.HasSchedule)
+                {
+                    var eaNotificationSchedule = new StaffNotification
+                    {
+                        Staff = ea,
+                        RegistrationRequest = dbRequest,
+                        Title = "Registration Request Cancelled",
+                        Message = "The registration request has been cancelled. Click here for more details.",
+                        DateCreated = DateTime.Now,
+                        Type = StaffNotificationType.RegistrationRequest,
+                        HasRead = false
+                    };
+                }
+            }
+
+
+
 
             await _context.SaveChangesAsync();
 
