@@ -2232,7 +2232,31 @@ namespace griffined_api.Services.RegistrationRequestService
             dbRequest.RegistrationStatus = RegistrationStatus.Cancelled;
             dbRequest.CancelledBy = _firebaseService.GetAzureIdWithToken();
 
-            if (dbRequest.RegistrationStatus != RegistrationStatus.PendingEC)
+            if (dbRequest.RegistrationStatus == RegistrationStatus.PendingEC)
+            {
+                if (dbRequest.Type == RegistrationRequestType.NewRequestedCourse)
+                {
+                    if (dbRequest.HasSchedule)
+                    {
+                        var ea = await _context.Staff
+                            .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                            ?? throw new NotFoundException($"EA with ID {dbRequest.ScheduledByStaffId} not found.");
+
+                        var eaNotificationSchedule = new StaffNotification
+                        {
+                            Staff = ea,
+                            RegistrationRequest = dbRequest,
+                            Title = "Registration Request Cancelled",
+                            Message = "The registration request has been cancelled. Click here for more details.",
+                            DateCreated = DateTime.Now,
+                            Type = StaffNotificationType.RegistrationRequest,
+                            HasRead = false
+                        };
+                    }
+                }
+            }
+
+            if (dbRequest.RegistrationStatus == RegistrationStatus.PendingEA)
             {
                 var ec = await _context.Staff
                 .FirstOrDefaultAsync(s => s.Id == dbRequest.CreatedByStaffId)
@@ -2248,16 +2272,13 @@ namespace griffined_api.Services.RegistrationRequestService
                     Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
                 };
-            }
-
-            if (dbRequest.RegistrationStatus != RegistrationStatus.PendingEA)
-            {
-                var ea = await _context.Staff
-                .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
-                ?? throw new NotFoundException($"EA with ID {dbRequest.ScheduledByStaffId} not found.");
 
                 if (dbRequest.HasSchedule)
                 {
+                    var ea = await _context.Staff
+                            .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                            ?? throw new NotFoundException($"EA with ID {dbRequest.ScheduledByStaffId} not found.");
+
                     var eaNotificationSchedule = new StaffNotification
                     {
                         Staff = ea,
@@ -2270,9 +2291,6 @@ namespace griffined_api.Services.RegistrationRequestService
                     };
                 }
             }
-
-
-
 
             await _context.SaveChangesAsync();
 
