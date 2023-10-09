@@ -19,10 +19,13 @@ namespace griffined_api.Services.RegistrationRequestService
     {
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
-        public RegistrationRequestService(DataContext context, IFirebaseService firebaseService)
+        private readonly ITeacherService _teacherService;
+
+        public RegistrationRequestService(DataContext context, IFirebaseService firebaseService, ITeacherService teacherService)
         {
             _context = context;
             _firebaseService = firebaseService;
+            _teacherService = teacherService;
         }
 
         public async Task<ServiceResponse<String>> AddNewRequestedCourses(NewCoursesRequestDto newRequestedCourses)
@@ -584,6 +587,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
@@ -645,6 +649,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -836,6 +841,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
@@ -897,6 +903,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -1098,6 +1105,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
@@ -1159,6 +1167,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -1426,6 +1435,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                 .ThenInclude(c => c!.StudySubjects)
                                     .ThenInclude(s => s.StudyClasses)
                                         .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                         .Include(r => r.RegistrationRequestMembers)
                             .ThenInclude(m => m.Student)
                         .Include(r => r.NewCoursePreferredDayRequests)
@@ -1566,6 +1576,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.NewCoursePreferredDayRequests)
@@ -1626,6 +1637,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -1823,6 +1835,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.RegistrationRequestPaymentFiles)
@@ -1879,6 +1892,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -2401,6 +2415,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.RegistrationRequestPaymentFiles)
@@ -2464,6 +2479,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -2642,6 +2658,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.RegistrationRequestMembers)
                                 .ThenInclude(m => m.Student)
                             .Include(r => r.RegistrationRequestPaymentFiles)
@@ -2709,6 +2726,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(c => c.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                                                .ThenInclude(t => t.WorkTimes)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(c => c.StudySubjects)
@@ -3026,7 +3044,7 @@ namespace griffined_api.Services.RegistrationRequestService
         }
 
         // Private Service
-        private static List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
+        private List<ScheduleResponseDto> NewCourseRequestMapScheduleDto(ICollection<NewCourseRequest> requests)
         {
             var rawSchedules = new List<ScheduleResponseDto>();
             foreach (var dbRequestedCourse in requests)
@@ -3060,7 +3078,12 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
-                            //TODO Teacher Work Type
+                            TeacherWorkType = _teacherService.FindTeacherWorkType(
+                                dbStudyClass.Teacher,
+                                dbStudyClass.Schedule.Date,
+                                dbStudyClass.Schedule.FromTime,
+                                dbStudyClass.Schedule.ToTime
+                            ),
                         };
                         rawSchedules.Add(schedule);
                     }
@@ -3069,7 +3092,7 @@ namespace griffined_api.Services.RegistrationRequestService
             return rawSchedules.OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime()).ToList();
         }
 
-        private static List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
+        private List<ScheduleResponseDto> StudentAddingRequestMapScheduleDto(ICollection<StudentAddingRequest> requests)
         {
             var rawSchedules = new List<ScheduleResponseDto>();
             foreach (var dbStudentAddingRequest in requests)
@@ -3103,7 +3126,11 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
-                            //TODO Teacher Work Type
+                            TeacherWorkType = _teacherService.FindTeacherWorkType(
+                                dbStudyClass.Teacher, 
+                                dbStudyClass.Schedule.Date, 
+                                dbStudyClass.Schedule.FromTime, 
+                                dbStudyClass.Schedule.ToTime),
                         };
                         rawSchedules.Add(schedule);
                     }

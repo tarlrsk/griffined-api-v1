@@ -4,7 +4,7 @@ namespace griffined_api.Dtos.WorkTimeDtos
     {
 
         [Required]
-        public string Day { get; set; } = string.Empty;
+        public Enums.DayOfWeek Day { get; set; }
         private TimeOnly _fromTime;
         [Required]
         public string FromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
