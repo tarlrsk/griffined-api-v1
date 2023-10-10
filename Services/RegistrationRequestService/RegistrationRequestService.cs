@@ -237,6 +237,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
                 };
+
+                _context.StaffNotifications.Add(notification);
             }
 
             _context.RegistrationRequests.Add(request);
@@ -361,6 +363,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
                 };
+
+                _context.StaffNotifications.Add(notification);
             }
 
             await _context.SaveChangesAsync();
@@ -1406,6 +1410,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 HasRead = false
             };
 
+            _context.StaffNotifications.Add(eaNotification);
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
@@ -1792,6 +1798,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
                 };
+
+                _context.StaffNotifications.Add(notification);
             }
 
             await _context.SaveChangesAsync();
@@ -2049,6 +2057,8 @@ namespace griffined_api.Services.RegistrationRequestService
                                         DateCreated = DateTime.Now,
                                         HasRead = false
                                     };
+
+                                    _context.StudentNotifications.Add(studentNotification);
                                 }
                             }
                         }
@@ -2063,6 +2073,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Type = TeacherNotificationType.NewCourse,
                             HasRead = false
                         };
+
+                        _context.TeacherNotifications.Add(teacherNotification);
                     }
 
                     if (dbNewCourseRequest.StudyCourse == null)
@@ -2106,6 +2118,8 @@ namespace griffined_api.Services.RegistrationRequestService
                                         DateCreated = DateTime.Now,
                                         HasRead = false
                                     };
+
+                                    _context.StudentNotifications.Add(studentNotification);
                                 }
                             }
                         }
@@ -2139,6 +2153,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false
             };
+
+            _context.StaffNotifications.Add(staffNotification);
 
             dbRequest.PaymentStatus = paymentStatus;
             dbRequest.RegistrationStatus = RegistrationStatus.Completed;
@@ -2180,6 +2196,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false
             };
+
+            _context.StaffNotifications.Add(ecNotification);
 
             await _context.SaveChangesAsync();
 
@@ -2266,6 +2284,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Type = StaffNotificationType.RegistrationRequest,
                             HasRead = false
                         };
+
+                        _context.StaffNotifications.Add(eaNotificationSchedule);
                     }
                 }
             }
@@ -2287,6 +2307,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     HasRead = false
                 };
 
+                _context.StaffNotifications.Add(ecNotification);
+
                 if (dbRequest.HasSchedule)
                 {
                     var ea = await _context.Staff
@@ -2303,6 +2325,8 @@ namespace griffined_api.Services.RegistrationRequestService
                         Type = StaffNotificationType.RegistrationRequest,
                         HasRead = false
                     };
+
+                    _context.StaffNotifications.Add(eaNotificationSchedule);
                 }
             }
 
@@ -2314,7 +2338,6 @@ namespace griffined_api.Services.RegistrationRequestService
             };
             return response;
         }
-
 
         public async Task<ServiceResponse<string>> UpdatePayment(int requestId, UpdatePaymentRequestDto updatePayment)
         {
@@ -2365,6 +2388,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 Type = StaffNotificationType.RegistrationRequest,
                 HasRead = false
             };
+
+            _context.StaffNotifications.Add(oaNotification);
 
             await _context.SaveChangesAsync();
 
@@ -2906,6 +2931,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     Type = StaffNotificationType.RegistrationRequest,
                     HasRead = false
                 };
+
+                _context.StaffNotifications.Add(notification);
             }
 
             await _context.SaveChangesAsync();
@@ -2960,6 +2987,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Type = StaffNotificationType.RegistrationRequest,
                             HasRead = false
                         };
+
+                        _context.StaffNotifications.Add(eaNotification);
                     }
 
                     break;
@@ -2981,6 +3010,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Type = StaffNotificationType.RegistrationRequest,
                             HasRead = false
                         };
+
+                        _context.StaffNotifications.Add(ecNotification);
                     }
 
                     break;
@@ -3002,6 +3033,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Type = StaffNotificationType.RegistrationRequest,
                             HasRead = false
                         };
+
+                        _context.StaffNotifications.Add(ecNotification);
                     }
 
                     break;
@@ -3127,9 +3160,9 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
                             TeacherWorkType = _teacherService.FindTeacherWorkType(
-                                dbStudyClass.Teacher, 
-                                dbStudyClass.Schedule.Date, 
-                                dbStudyClass.Schedule.FromTime, 
+                                dbStudyClass.Teacher,
+                                dbStudyClass.Schedule.Date,
+                                dbStudyClass.Schedule.FromTime,
                                 dbStudyClass.Schedule.ToTime),
                         };
                         rawSchedules.Add(schedule);

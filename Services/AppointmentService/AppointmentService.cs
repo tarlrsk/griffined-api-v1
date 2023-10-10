@@ -51,6 +51,8 @@ namespace griffined_api.Services.AppointmentService
                     Type = TeacherNotificationType.NewAppointment,
                     HasRead = false
                 };
+
+                _context.TeacherNotifications.Add(teacherNotification);
             }
 
             foreach (var newSchedule in newAppointment.Schedules)

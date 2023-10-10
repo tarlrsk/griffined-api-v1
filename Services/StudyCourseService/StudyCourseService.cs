@@ -101,6 +101,8 @@ namespace griffined_api.Services.StudyCourseService
                     Type = TeacherNotificationType.NewCourse,
                     HasRead = false
                 };
+
+                _context.TeacherNotifications.Add(teacherNotification);
             }
 
             _context.StudyCourses.Add(studyCourse);
@@ -314,10 +316,12 @@ namespace griffined_api.Services.StudyCourseService
                 HasRead = false
             };
 
+            _context.StaffNotifications.Add(ecNotification);
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<String> { StatusCode = (int)HttpStatusCode.OK };
-            ;
+
             return response;
         }
 
@@ -1041,7 +1045,7 @@ namespace griffined_api.Services.StudyCourseService
                         dbStudyClass.Schedule.Date,
                         dbStudyClass.Schedule.FromTime,
                         dbStudyClass.Schedule.ToTime
-                    ), 
+                    ),
                 }))
                 .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
                 .ToList()
