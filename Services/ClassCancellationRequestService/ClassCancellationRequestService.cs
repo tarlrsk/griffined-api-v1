@@ -79,6 +79,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Type = StaffNotificationType.ClassCancellationRequest,
                     HasRead = false
                 };
+
+                _context.StaffNotifications.Add(eaNotification);
             }
 
             await _context.SaveChangesAsync();
@@ -509,6 +511,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Type = StudentNotificationType.MakeupClass,
                             HasRead = false
                         };
+
+                        _context.StudentNotifications.Add(makeupClassStudentNotification);
                     }
 
                     dbStudySubject.StudyClasses.Add(studyClass);
@@ -547,6 +551,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 HasRead = false
             };
 
+            _context.StudentNotifications.Add(studentNotification);
+
             var teacherNotification = new TeacherNotification
             {
                 Teacher = dbRequest.Teacher!,
@@ -557,6 +563,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 Type = TeacherNotificationType.ClassCancellation,
                 HasRead = false
             };
+
+            _context.TeacherNotifications.Add(teacherNotification);
 
             await _context.SaveChangesAsync();
 
@@ -594,6 +602,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Type = StudentNotificationType.ClassCancellation,
                     HasRead = false
                 };
+
+                _context.StudentNotifications.Add(classCancellationStudentNotification);
             }
             else
             {
@@ -607,6 +617,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Type = TeacherNotificationType.ClassCancellation,
                     HasRead = false
                 };
+
+                _context.TeacherNotifications.Add(classCancellationTeacherNotification);
             }
 
             await _context.SaveChangesAsync();

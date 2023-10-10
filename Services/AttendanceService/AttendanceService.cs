@@ -166,6 +166,8 @@ namespace griffined_api.Services.AttendanceService
                     break;
             }
 
+            _context.TeacherNotifications.Add(teacherNotification);
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
