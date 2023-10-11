@@ -97,6 +97,96 @@ namespace griffined_api.Services.NotificationService
             return response;
         }
 
+        public async Task<ServiceResponse<string>> MarkAllAsRead()
+        {
+            string role = _firebaseService.GetRoleWithToken();
+
+            switch (role)
+            {
+                case "student":
+                    int studentId = _firebaseService.GetAzureIdWithToken();
+
+                    var dbStudentNotifications = await _context.StudentNotifications
+                                                .Where(sn => sn.Student.Id == studentId && sn.HasRead == false)
+                                                .ToListAsync();
+
+                    foreach (var dbStudentNotification in dbStudentNotifications)
+                    {
+                        dbStudentNotification.HasRead = true;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "teacher":
+                    int teacherId = _firebaseService.GetAzureIdWithToken();
+
+                    var dbTeacherNotifications = await _context.TeacherNotifications
+                                                .Where(tn => tn.Teacher.Id == teacherId && tn.HasRead == false)
+                                                .ToListAsync();
+
+                    foreach (var dbTeacherNotification in dbTeacherNotifications)
+                    {
+                        dbTeacherNotification.HasRead = true;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "ec":
+                    int ecId = _firebaseService.GetAzureIdWithToken();
+
+                    var dbECNotifications = await _context.StaffNotifications
+                                            .Where(en => en.Staff.Id == ecId && en.HasRead == false)
+                                            .ToListAsync();
+
+                    foreach (var dbECNotification in dbECNotifications)
+                    {
+                        dbECNotification.HasRead = true;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "ea":
+                    int eaId = _firebaseService.GetAzureIdWithToken();
+
+                    var dbEANotifications = await _context.StaffNotifications
+                                            .Where(en => en.Staff.Id == eaId && en.HasRead == false)
+                                            .ToListAsync();
+
+                    foreach (var dbEANotification in dbEANotifications)
+                    {
+                        dbEANotification.HasRead = true;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "oa":
+                    int oaId = _firebaseService.GetAzureIdWithToken();
+
+                    var dbOANotifications = await _context.StaffNotifications
+                                            .Where(on => on.Staff.Id == oaId && on.HasRead == false)
+                                            .ToListAsync();
+
+                    foreach (var dbECNotification in dbOANotifications)
+                    {
+                        dbECNotification.HasRead = true;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    break;
+            }
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
+            return response;
+        }
+
         public async Task<ServiceResponse<string>> MarkAsRead(int notificationId)
         {
             string role = _firebaseService.GetRoleWithToken();
@@ -105,7 +195,7 @@ namespace griffined_api.Services.NotificationService
             {
                 case "student":
                     var dbStudentNotification = await _context.StudentNotifications
-                                                .FirstOrDefaultAsync(sn => sn.Id == notificationId)
+                                                .FirstOrDefaultAsync(sn => sn.Id == notificationId && sn.HasRead == false)
                                                 ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
 
                     dbStudentNotification.HasRead = true;
@@ -114,19 +204,37 @@ namespace griffined_api.Services.NotificationService
 
                 case "teacher":
                     var dbTeacherNotification = await _context.TeacherNotifications
-                            .FirstOrDefaultAsync(sn => sn.Id == notificationId)
+                            .FirstOrDefaultAsync(tn => tn.Id == notificationId && tn.HasRead == false)
                             ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
 
                     dbTeacherNotification.HasRead = true;
                     await _context.SaveChangesAsync();
                     break;
 
-                case "staff":
-                    var dbStaffNotification = await _context.StaffNotifications
-                                .FirstOrDefaultAsync(sn => sn.Id == notificationId)
+                case "ec":
+                    var dbECNotification = await _context.StaffNotifications
+                                .FirstOrDefaultAsync(en => en.Id == notificationId && en.HasRead == false)
                                 ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
 
-                    dbStaffNotification.HasRead = true;
+                    dbECNotification.HasRead = true;
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "ea":
+                    var dbEANotification = await _context.StaffNotifications
+                                .FirstOrDefaultAsync(en => en.Id == notificationId && en.HasRead == false)
+                                ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
+
+                    dbEANotification.HasRead = true;
+                    await _context.SaveChangesAsync();
+                    break;
+
+                case "oa":
+                    var dbOANotification = await _context.StaffNotifications
+                                .FirstOrDefaultAsync(on => on.Id == notificationId && on.HasRead == false)
+                                ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
+
+                    dbOANotification.HasRead = true;
                     await _context.SaveChangesAsync();
                     break;
             }

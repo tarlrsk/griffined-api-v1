@@ -12,5 +12,6 @@ namespace griffined_api.Services.NotificationService
         Task<ServiceResponse<List<TeacherNotificationResponseDto>>> GetTeacherNotifications();
         Task<ServiceResponse<List<StaffNotificationResponseDto>>> GetStaffNotifications();
         Task<ServiceResponse<string>> MarkAsRead(int notificationId);
+        Task<ServiceResponse<string>> MarkAllAsRead();
     }
 }
