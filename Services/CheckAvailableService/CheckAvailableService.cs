@@ -452,5 +452,77 @@ namespace griffined_api.Services.CheckAvailableService
             };
         }
 
+        public async Task<ServiceResponse<StudentAddingConflictResponseDto>> CheckStudentAddingConflict(StudentAddingConflictRequestDto requestDto)
+        {
+            var requestedStudySubject = await _context.StudySubjects
+                                .Include(s => s.StudyClasses)
+                                    .ThenInclude(c => c.Schedule)
+                                .FirstOrDefaultAsync(s => s.Id == requestDto.StudySubjectId)
+                                ?? throw new NotFoundException($"Study Subject with ID {requestDto.StudySubjectId} is not found.");
+
+            var dbStudyClasses = await _context.StudyClasses
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.StudyCourse)
+                                    .ThenInclude(c => c.Course)
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.StudyCourse)
+                                    .ThenInclude(c => c.Level)
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.Subject)
+                            .Include(c => c.StudySubject)
+                                .ThenInclude(s => s.StudySubjectMember)
+                            .Include(c => c.Teacher)
+                            .Include(c => c.Schedule)
+                            .Where(c => c.StudySubject.StudySubjectMember.Any(member => requestDto.StudentIds.Contains(member.StudentId))
+                            && (c.Status == ClassStatus.None
+                            || c.Status == ClassStatus.PendingCancellation))
+                            .ToListAsync();
+
+            var dbStudents = await _context.Students.Where(s => requestDto.StudentIds.Contains(s.Id)).ToListAsync();
+
+            StudentAddingConflictResponseDto data = new();
+
+            foreach (var requestedSchedule in requestedStudySubject.StudyClasses.Select(c => c.Schedule))
+            {
+                foreach (var dbStudyClass in dbStudyClasses.Where(c => c.Schedule.Date == requestedSchedule.Date))
+                {
+                    if (dbStudyClass.Schedule.FromTime < requestedSchedule.ToTime
+                    && requestedSchedule.FromTime < dbStudyClass.Schedule.ToTime)
+                    {
+                        var conflict = new ConflictScheduleResponseDto
+                        {
+                            Message = dbStudyClass.Schedule.Date.ToDateString() + "("
+                                            + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
+                                            + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
+                                            + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
+                        };
+
+                        foreach (var dbStudent in dbStudents)
+                        {
+                            if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                            {
+                                conflict.ConflictMembers.Add(new ConflictMemberResponseDto
+                                {
+                                    Role = "Student",
+                                    FirstName = dbStudent.FirstName,
+                                    LastName = dbStudent.LastName,
+                                    Nickname = dbStudent.Nickname,
+                                    FullName = dbStudent.FullName,
+                                });
+                            }
+                        }
+                        if(!data.ConflictMessages.Contains(conflict))
+                            data.ConflictMessages.Add(conflict);
+                        
+                        data.IsConflict = true;
+                    }
+                }
+            }
+
+            return new ServiceResponse<StudentAddingConflictResponseDto>{
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+        }
     }
 }
