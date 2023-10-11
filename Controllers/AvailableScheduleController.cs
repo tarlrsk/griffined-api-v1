@@ -37,5 +37,11 @@ namespace griffined_api.Controllers
             return Ok(await _checkAvailable.CheckAppointmentConflict(requestDto));
         }
 
+        [HttpPost("student-adding"), Authorize(Roles = "master, ea")]
+        public async Task<ActionResult> CheckStudentAddingConflict(StudentAddingConflictRequestDto requestDto)
+        {
+            return Ok(await _checkAvailable.CheckStudentAddingConflict(requestDto));
+        }
+
     }
 }
