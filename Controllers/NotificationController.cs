@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
-using griffined_api.Services.NotificationService;
 
 namespace griffined_api.Controllers
 {
@@ -48,6 +46,13 @@ namespace griffined_api.Controllers
         public async Task<ActionResult> MarkAsRead(int notificationId)
         {
             var response = await _notificationService.MarkAsRead(notificationId);
+            return Ok(response);
+        }
+
+        [HttpPut("/mark-all-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master")]
+        public async Task<ActionResult> MarkAllAsRead()
+        {
+            var response = await _notificationService.MarkAllAsRead();
             return Ok(response);
         }
     }
