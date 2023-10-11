@@ -13,7 +13,7 @@ namespace griffined_api.Models
         public int? CreatedByStaffId { get; set; }
         public int? PaymentByStaffId { get; set; }
         public int? ScheduledByStaffId { get; set; }
-        public int? ApprovedByStaffId { get; set; }
+        public int? ReviewedByStaffId { get; set; }
         public int? CancelledBy { get; set; }
         public int? TakenByEAId { get; set; }
 

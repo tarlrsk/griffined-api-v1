@@ -123,7 +123,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("cancel/{requestId}"), Authorize(Roles = "ec,ea, master")]
+        [HttpPut("cancel/{requestId}"), Authorize(Roles = "ec, ea, master")]
         public async Task<ActionResult> CancelRequest(int requestId)
         {
             var response = await _registrationRequestService.CancelRequest(requestId);

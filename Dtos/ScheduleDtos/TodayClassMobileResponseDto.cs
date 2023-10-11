@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using griffined_api.Dtos.StudyCourseDtos;
 
-namespace griffined_api.Services.StudyCourseService
+namespace griffined_api.Dtos.ScheduleDtos
 {
-    public class TodayClassMobileResponse
+    public class TodayClassMobileResponseDto
     {
         public int StudyClassId { get; set; }
         public StudyCourseType StudyCourseType { get; set; }

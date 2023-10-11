@@ -34,7 +34,6 @@ namespace griffined_api.Services.NotificationService
             {
                 Id = sn.Id,
                 StaffId = staffId,
-                StudyCourseId = sn.StudyCourseId,
                 RegistrationRequestId = sn.RegistrationRequestId,
                 CancellationRequestId = sn.CancellationRequestId,
                 Title = sn.Title,
@@ -63,7 +62,6 @@ namespace griffined_api.Services.NotificationService
             {
                 Id = sn.Id,
                 StudentId = studentId,
-                StudyCourseId = sn.StudyCourseId,
                 Title = sn.Title,
                 Message = sn.Message,
                 DateCreated = sn.DateCreated.ToDateTimeString(),
@@ -90,7 +88,6 @@ namespace griffined_api.Services.NotificationService
             {
                 Id = tn.Id,
                 TeacherId = teacherId,
-                StudyCourseId = tn.StudyCourseId,
                 Title = tn.Title,
                 Message = tn.Message,
                 DateCreated = tn.DateCreated.ToDateTimeString(),
@@ -103,8 +100,10 @@ namespace griffined_api.Services.NotificationService
             return response;
         }
 
-        public async Task<ServiceResponse<string>> MarkAsRead(int notificationId, string role)
+        public async Task<ServiceResponse<string>> MarkAsRead(int notificationId)
         {
+            string role = _firebaseService.GetRoleWithToken();
+
             switch (role)
             {
                 case "student":

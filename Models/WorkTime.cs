@@ -12,7 +12,7 @@ namespace griffined_api.Models
         public int Id { get; set; }
         public int? TeacherId { get; set; }
 
-        public string Day { get; set; } = string.Empty;
+        public Enums.DayOfWeek Day { get; set; }
         public TimeSpan FromTime { get; set; }
         public TimeSpan ToTime { get; set; }
 

@@ -11,7 +11,6 @@ namespace griffined_api.Models
     {
         public int Id { get; set; }
         public int? StaffId { get; set; }
-        public int? StudyCourseId { get; set; }
         public int? RegistrationRequestId { get; set; }
         public int? CancellationRequestId { get; set; }
 
@@ -24,9 +23,6 @@ namespace griffined_api.Models
 
         [ForeignKey(nameof(StaffId))]
         public virtual Staff Staff { get; set; } = new Staff();
-
-        [ForeignKey(nameof(StudyCourseId))]
-        public virtual StudyCourse? StudyCourse { get; set; } = new StudyCourse();
 
         [ForeignKey(nameof(RegistrationRequestId))]
         public virtual RegistrationRequest? RegistrationRequest { get; set; }

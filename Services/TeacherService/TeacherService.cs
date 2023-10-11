@@ -253,5 +253,18 @@ namespace griffined_api.Services.TeacherService
             return response;
         }
 
+        public TeacherWorkType FindTeacherWorkType(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
+        {
+            var requestedDay = date.DayOfWeek;
+
+            var workDay = dbTeacher.WorkTimes.FirstOrDefault(t => t.Day.ToString() == requestedDay.ToString());
+            if(workDay == null)
+                return TeacherWorkType.Special;
+            else if(workDay.FromTime >= toTime && fromTime >= workDay.ToTime)
+                return TeacherWorkType.Overtime;
+            else
+                return TeacherWorkType.Normal;
+        }
+
     }
 }
