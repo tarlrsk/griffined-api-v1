@@ -9,7 +9,6 @@ namespace griffined_api.Services.CheckAvailableService
     {
         Task<ServiceResponse<CheckScheduleResultResponseDto>> GetAvailableSchedule(RequestedScheduleRequestDto requestedSchedule);
         Task<ServiceResponse<List<AvailableTeacherResponseDto>>> GetAvailableTeacherForAppointment(List<LocalAppointmentRequestDto> appointmentRequestDtos);
-        // Task<ServiceResponse<List<GetAvailableTeacherDto>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId);
-        // Task<ServiceResponse<List<GetAvailableTimeDto>>> GetAvailableTime([FromQuery]int[] listOfStudentId, string date, int hour, int classId);
+        Task<ServiceResponse<CheckAppointmentConflictResponseDto>> CheckAppointmentConflict(CheckAppointmentConflictRequestDto requestDto);
     }
 }

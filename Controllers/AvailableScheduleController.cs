@@ -31,19 +31,11 @@ namespace griffined_api.Controllers
             return Ok(await _checkAvailable.GetAvailableTeacherForAppointment(appointmentRequestDtos));
         }
 
-        // [HttpGet("time")]
-        // public async Task<ActionResult<ServiceResponse<List<GetAvailableTimeDto>>>> GetAvailableTime([FromQuery] int[] listOfStudentId, string date, int hour, int classId)
-        // {
-        //     var response = await _checkAvailable.GetAvailableTime(listOfStudentId, date, hour, classId);
-        //     return Ok(response);
-        // }
-
-        // [HttpGet("teacher")]
-        // public async Task<ActionResult<ServiceResponse<List<GetAvailableTeacherDto>>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId)
-        // {
-        //     var response = await _checkAvailable.GetAvailableTeacher(fromTime, toTime, date, classId);
-        //     return Ok(response);
-        // }
+        [HttpPost("appointment"), Authorize(Roles = "master, ea")]
+        public async Task<ActionResult> CheckAppointmentConflict(CheckAppointmentConflictRequestDto requestDto)
+        {
+            return Ok(await _checkAvailable.CheckAppointmentConflict(requestDto));
+        }
 
     }
 }

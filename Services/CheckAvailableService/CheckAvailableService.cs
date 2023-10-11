@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Google.Api;
 using griffined_api.Extensions.DateTimeExtensions;
 
 namespace griffined_api.Services.CheckAvailableService
@@ -236,9 +237,9 @@ namespace griffined_api.Services.CheckAvailableService
                         TeacherLastName = requestedTeacher.LastName,
                         TeacherNickname = requestedTeacher.Nickname,
                         TeacherWorkType = _teacherService.FindTeacherWorkType(
-                            requestedTeacher, 
-                            requestDate, 
-                            requestedSchedule.FromTime.ToTimeSpan(), 
+                            requestedTeacher,
+                            requestDate,
+                            requestedSchedule.FromTime.ToTimeSpan(),
                             requestedSchedule.ToTime.ToTimeSpan())
                     });
                 }
@@ -337,5 +338,124 @@ namespace griffined_api.Services.CheckAvailableService
                 Data = data,
             };
         }
+
+
+        public async Task<ServiceResponse<CheckAppointmentConflictResponseDto>> CheckAppointmentConflict(CheckAppointmentConflictRequestDto requestDto)
+        {
+            int? dbCurrentAppointmentId = null;
+            if (requestDto.CurrentAppointment != 0 && requestDto.CurrentAppointment != null)
+            {
+                var dbCurrentAppointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == requestDto.CurrentAppointment);
+                dbCurrentAppointmentId = dbCurrentAppointment?.Id;
+            }
+
+            var dbClassSchedules = await _context.Schedules
+                                    .Include(s => s.StudyClass)
+                                        .ThenInclude(c => c!.Teacher)
+                                    .Include(s => s.StudyClass)
+                                        .ThenInclude(c => c!.StudySubject)
+                                            .ThenInclude(s => s.Subject)
+                                    .Include(s => s.StudyClass)
+                                        .ThenInclude(c => c!.StudyCourse)
+                                            .ThenInclude(s => s.Course)
+                                    .Include(s => s.StudyClass)
+                                        .ThenInclude(c => c!.StudyCourse)
+                                            .ThenInclude(s => s.Level)
+                                    .Where(s => requestDto.AppointmentSchedule.Select(a => a.Date.ToDateTime()).Contains(s.Date)).ToListAsync();
+
+            var dbAppointmentSchedules = await _context.Schedules
+                                    .Include(s => s.AppointmentSlot)
+                                        .ThenInclude(a => a!.Appointment)
+                                            .ThenInclude(a => a.AppointmentMembers)
+                                                .ThenInclude(m => m.Teacher)
+                                    .Where(s => requestDto.AppointmentSchedule.Select(a => a.Date.ToDateTime()).Contains(s.Date)
+                                    && s.AppointmentSlot != null
+                                    && s.AppointmentSlot.AppointmentId != dbCurrentAppointmentId)
+                                    .ToListAsync();
+
+            var dbTeachers = await _context.Teachers.Where(t => requestDto.TeacherIds.Contains(t.Id)).ToListAsync();
+
+
+            var data = new CheckAppointmentConflictResponseDto();
+            foreach (var requestSchedule in requestDto.AppointmentSchedule)
+            {
+                foreach (var dbSchedule in dbClassSchedules.Where(s => s.Date == requestSchedule.Date.ToDateTime()))
+                {
+                    if (dbSchedule.FromTime < requestSchedule.ToTime.ToTimeSpan()
+                        && requestSchedule.FromTime.ToTimeSpan() < dbSchedule.ToTime)
+                    {
+                        if (dbSchedule.StudyClass != null)
+                        {
+                            var conflictTeacher = dbTeachers.FirstOrDefault(t => t.Id == dbSchedule.StudyClass?.TeacherId);
+                            if (conflictTeacher != null)
+                            {
+                                var conflictMessage = new ConflictScheduleResponseDto
+                                {
+                                    Message = dbSchedule.Date.ToDateString() + "("
+                                            + dbSchedule.FromTime.ToTimeSpanString() + " - " + dbSchedule.ToTime.ToTimeSpanString() + "), "
+                                            + dbSchedule.StudyClass.StudyCourse.StudyCourseType + " Course: " + dbSchedule.StudyClass.StudyCourse.Course.course + " "
+                                            + dbSchedule.StudyClass.StudySubject.Subject.subject + " " + (dbSchedule.StudyClass.StudyCourse.Level?.level ?? "")
+                                };
+
+                                conflictMessage.ConflictMembers.Add(new ConflictMemberResponseDto
+                                {
+                                    Role = "Teacher",
+                                    FirstName = conflictTeacher.FirstName,
+                                    LastName = conflictTeacher.LastName,
+                                    Nickname = conflictTeacher.Nickname,
+                                    FullName = conflictTeacher.FullName,
+                                });
+                                if (!data.ConflictMessages.Contains(conflictMessage))
+                                {
+                                    data.ConflictMessages.Add(conflictMessage);
+                                }
+                                data.IsConflict = true;
+                            }
+                        }
+                    }
+                }
+
+                foreach (var dbSchedule in dbAppointmentSchedules.Where(s => s.Date == requestSchedule.Date.ToDateTime()))
+                {
+                    if (dbSchedule.AppointmentSlot != null)
+                    {
+                        var conflictMessage = new ConflictScheduleResponseDto
+                        {
+                            Message = dbSchedule.Date.ToDateString() + "("
+                                        + dbSchedule.FromTime.ToTimeSpanString() + " - "
+                                        + dbSchedule.ToTime.ToTimeSpanString() + "), "
+                                        + dbSchedule.AppointmentSlot.Appointment.AppointmentType
+                                        + " Appointment: " + dbSchedule.AppointmentSlot.Appointment.Title
+                        };
+
+                        var conflictTeachers = dbTeachers.Where(t => dbSchedule.AppointmentSlot.Appointment.AppointmentMembers.Select(m => m.TeacherId).Contains(t.Id)).ToList();
+                        foreach (var conflictTeacher in conflictTeachers)
+                        {
+                            conflictMessage.ConflictMembers.Add(new ConflictMemberResponseDto
+                            {
+                                Role = "Teacher",
+                                FirstName = conflictTeacher.FirstName,
+                                LastName = conflictTeacher.LastName,
+                                Nickname = conflictTeacher.Nickname,
+                                FullName = conflictTeacher.FullName,
+                            });
+                            if (!data.ConflictMessages.Contains(conflictMessage))
+                            {
+                                data.ConflictMessages.Add(conflictMessage);
+                            }
+                            data.IsConflict = true;
+                        }
+                    }
+                }
+
+            }
+
+            return new ServiceResponse<CheckAppointmentConflictResponseDto>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = data,
+            };
+        }
+
     }
 }
