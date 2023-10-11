@@ -362,7 +362,7 @@ namespace griffined_api.Services.ScheduleService
 
             foreach(var newRoom in requestDto)
             {
-                var dbStudyClass = dbStudyClasses.FirstOrDefault(s => s.Id == newRoom.ScheduleId) 
+                var dbStudyClass = dbStudyClasses.FirstOrDefault(s => s.Schedule.Id == newRoom.ScheduleId) 
                                     ?? throw new NotFoundException($"Schedule With ID {newRoom.ScheduleId} is not found.");
                 dbStudyClass.Room = newRoom.Room;
             }
