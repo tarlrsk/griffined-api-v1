@@ -260,7 +260,7 @@ namespace griffined_api.Services.TeacherService
             var workDay = dbTeacher.WorkTimes.FirstOrDefault(t => t.Day.ToString() == requestedDay.ToString());
             if(workDay == null)
                 return TeacherWorkType.Special;
-            else if(workDay.FromTime >= toTime && fromTime >= workDay.ToTime)
+            else if(workDay.FromTime >= toTime || fromTime >= workDay.ToTime)
                 return TeacherWorkType.Overtime;
             else
                 return TeacherWorkType.Normal;
