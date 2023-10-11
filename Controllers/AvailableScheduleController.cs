@@ -26,9 +26,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost("teacher"), Authorize(Roles = "master, ea")]
-        public async Task<ActionResult> GetAvailableTeacherForAppointment(List<LocalAppointmentRequestDto> appointmentRequestDtos)
+        public async Task<ActionResult> GetAvailableTeacherForAppointment(int? appointmentId, List<LocalAppointmentRequestDto> appointmentRequestDtos)
         {
-            return Ok(await _checkAvailable.GetAvailableTeacherForAppointment(appointmentRequestDtos));
+            return Ok(await _checkAvailable.GetAvailableTeacherForAppointment(appointmentId, appointmentRequestDtos));
         }
 
         [HttpPost("appointment"), Authorize(Roles = "master, ea")]
