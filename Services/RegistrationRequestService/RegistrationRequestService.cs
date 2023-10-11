@@ -178,7 +178,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
 
                     var level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
-                    if (newRequestedCourse.Level != null && level != null)
+                    if (newRequestedCourse.Level != null && level == null)
                     {
                         var newLevel = new Level
                         {
