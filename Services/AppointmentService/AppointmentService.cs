@@ -173,12 +173,16 @@ namespace griffined_api.Services.AppointmentService
             var dbAppointment = await _context.Appointments
                                 .Include(a => a.AppointmentSlots)
                                     .ThenInclude(s => s.Schedule)
+                                .Include(a => a.AppointmentMembers)
+                                    .ThenInclude(m => m.Teacher)
                                 .FirstOrDefaultAsync(a => a.Id == appointmentId)
                                 ?? throw new NotFoundException($"Appointment With ID {appointmentId} is not found");
 
             dbAppointment.Title = updateAppointmentRequestDto.Title;
             dbAppointment.AppointmentType = updateAppointmentRequestDto.AppointmentType;
             dbAppointment.Description = updateAppointmentRequestDto.Description;
+
+            var dbTeachers = await _context.Teachers.ToListAsync();
 
 
             foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
@@ -201,6 +205,21 @@ namespace griffined_api.Services.AppointmentService
                         ToTime = addSchedule.ToTime.ToTimeSpan(),
                         Type = ScheduleType.Appointment,
                     },
+                });
+            }
+
+            var deleteMembers = dbAppointment.AppointmentMembers.Where(m => updateAppointmentRequestDto.TeacherToDelete.Contains(m.Teacher.Id)).ToList();
+
+            foreach (var deleteMember in deleteMembers)
+            {
+                _context.AppointmentMembers.Remove(deleteMember);
+            }
+
+            foreach (var addTeacher in updateAppointmentRequestDto.TeacherToAdd )
+            {
+                var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == addTeacher) ?? throw new NotFoundException($"Teacher with ID {addTeacher} is not found.");
+                dbAppointment.AppointmentMembers.Add(new AppointmentMember{
+                    Teacher = dbTeacher,
                 });
             }
 
