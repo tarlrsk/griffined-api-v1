@@ -7,6 +7,7 @@ namespace griffined_api.Dtos.NotificationDto
 {
     public class StaffNotificationResponseDto
     {
+        public int Id { get; set; }
         public int StaffId { get; set; }
         public int? StudyCourseId { get; set; }
         public int? RegistrationRequestId { get; set; }

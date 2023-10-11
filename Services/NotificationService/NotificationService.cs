@@ -32,6 +32,7 @@ namespace griffined_api.Services.NotificationService
 
             var data = dbStaffNotifications.Select(sn => new StaffNotificationResponseDto
             {
+                Id = sn.Id,
                 StaffId = staffId,
                 RegistrationRequestId = sn.RegistrationRequestId,
                 CancellationRequestId = sn.CancellationRequestId,
@@ -59,6 +60,7 @@ namespace griffined_api.Services.NotificationService
 
             var data = dbStudentNotifications.Select(sn => new StudentNotificationResponseDto
             {
+                Id = sn.Id,
                 StudentId = studentId,
                 Title = sn.Title,
                 Message = sn.Message,
@@ -84,6 +86,7 @@ namespace griffined_api.Services.NotificationService
 
             var data = dbTeacherNotifications.Select(tn => new TeacherNotificationResponseDto
             {
+                Id = tn.Id,
                 TeacherId = teacherId,
                 Title = tn.Title,
                 Message = tn.Message,
