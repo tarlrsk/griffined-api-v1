@@ -263,7 +263,7 @@ namespace griffined_api.Services.CheckAvailableService
             return response;
         }
 
-        public async Task<ServiceResponse<List<AvailableTeacherResponseDto>>> GetAvailableTeacherForAppointment(List<LocalAppointmentRequestDto> appointmentRequestDtos)
+        public async Task<ServiceResponse<List<AvailableTeacherResponseDto>>> GetAvailableTeacherForAppointment(int? appointmentId, List<LocalAppointmentRequestDto> appointmentRequestDtos)
         {
             var requestedDate = appointmentRequestDtos.Select(a => a.Date.ToDateTime()).ToList();
 
@@ -276,7 +276,9 @@ namespace griffined_api.Services.CheckAvailableService
                                         .ThenInclude(a => a!.Appointment)
                                             .ThenInclude(a => a.AppointmentMembers)
                                                 .ThenInclude(m => m.Teacher)
-                                    .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment).ToListAsync();
+                                    .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment
+                                    && s.AppointmentSlot != null
+                                    && s.AppointmentSlot.AppointmentId != appointmentId).ToListAsync();
 
             var dbTeachers = await _context.Teachers
                                 .Include(t => t.WorkTimes)
@@ -342,13 +344,6 @@ namespace griffined_api.Services.CheckAvailableService
 
         public async Task<ServiceResponse<CheckAppointmentConflictResponseDto>> CheckAppointmentConflict(CheckAppointmentConflictRequestDto requestDto)
         {
-            int? dbCurrentAppointmentId = null;
-            if (requestDto.CurrentAppointment != 0 && requestDto.CurrentAppointment != null)
-            {
-                var dbCurrentAppointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == requestDto.CurrentAppointment);
-                dbCurrentAppointmentId = dbCurrentAppointment?.Id;
-            }
-
             var dbClassSchedules = await _context.Schedules
                                     .Include(s => s.StudyClass)
                                         .ThenInclude(c => c!.Teacher)
@@ -370,7 +365,7 @@ namespace griffined_api.Services.CheckAvailableService
                                                 .ThenInclude(m => m.Teacher)
                                     .Where(s => requestDto.AppointmentSchedule.Select(a => a.Date.ToDateTime()).Contains(s.Date)
                                     && s.AppointmentSlot != null
-                                    && s.AppointmentSlot.AppointmentId != dbCurrentAppointmentId)
+                                    && s.AppointmentSlot.AppointmentId != requestDto.AppointmentId)
                                     .ToListAsync();
 
             var dbTeachers = await _context.Teachers.Where(t => requestDto.TeacherIds.Contains(t.Id)).ToListAsync();
