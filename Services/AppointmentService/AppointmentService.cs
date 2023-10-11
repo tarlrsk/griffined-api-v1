@@ -212,7 +212,7 @@ namespace griffined_api.Services.AppointmentService
 
             foreach (var deleteMember in deleteMembers)
             {
-                dbAppointment.AppointmentMembers.Remove(deleteMember);
+                _context.AppointmentMembers.Remove(deleteMember);
             }
 
             foreach (var addTeacher in updateAppointmentRequestDto.TeacherToAdd )
