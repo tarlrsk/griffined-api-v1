@@ -1463,7 +1463,9 @@ namespace griffined_api.Services.StudyCourseService
                                 c.Schedule.Date == requestDate.ToDateTime()
                                 && c.Status != ClassStatus.Cancelled
                                 && c.Status != ClassStatus.Deleted
-                                && c.TeacherId == userId)
+                                && c.TeacherId == userId
+                                && c.StudyCourse.Status != StudyCourseStatus.Pending
+                                && c.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                 .ToListAsync();
             }
             else if (role == "student")
@@ -1481,7 +1483,7 @@ namespace griffined_api.Services.StudyCourseService
                                 c.Schedule.Date == requestDate.ToDateTime()
                                 && c.Status != ClassStatus.Cancelled
                                 && c.Status != ClassStatus.Deleted
-                                && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId))
+                                && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId && m.Status == StudySubjectMemberStatus.Success))
                                 .ToListAsync();
             }
             else
