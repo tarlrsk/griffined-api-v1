@@ -23,6 +23,7 @@ namespace griffined_api.Models
         public virtual Staff Staff { get; set; } = new Staff();
 
         public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
+        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
         public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
         public virtual ICollection<AppointmentSlot> AppointmentSlots { get; set; } = new List<AppointmentSlot>();
     }
