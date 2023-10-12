@@ -49,7 +49,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("/mark-all-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master")]
+        [HttpPut("mark-all-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master")]
         public async Task<ActionResult> MarkAllAsRead()
         {
             var response = await _notificationService.MarkAllAsRead();
