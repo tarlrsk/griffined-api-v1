@@ -28,6 +28,7 @@ namespace griffined_api.Services.NotificationService
 
             var dbStaffNotifications = await _context.StaffNotifications
                                         .Where(sn => sn.Staff.Id == staffId)
+                                        .OrderByDescending(sn => sn.DateCreated)
                                         .ToListAsync();
 
             var data = dbStaffNotifications.Select(sn => new StaffNotificationResponseDto
@@ -56,6 +57,7 @@ namespace griffined_api.Services.NotificationService
 
             var dbStudentNotifications = await _context.StudentNotifications
                                         .Where(sn => sn.Student.Id == studentId)
+                                        .OrderByDescending(sn => sn.DateCreated)
                                         .ToListAsync();
 
             var data = dbStudentNotifications.Select(sn => new StudentNotificationResponseDto
@@ -82,6 +84,7 @@ namespace griffined_api.Services.NotificationService
 
             var dbTeacherNotifications = await _context.TeacherNotifications
                                         .Where(tn => tn.Teacher.Id == teacherId)
+                                        .OrderByDescending(sn => sn.DateCreated)
                                         .ToListAsync();
 
             var data = dbTeacherNotifications.Select(tn => new TeacherNotificationResponseDto
