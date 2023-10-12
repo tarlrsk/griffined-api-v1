@@ -412,33 +412,37 @@ namespace griffined_api.Services.CheckAvailableService
 
                 foreach (var dbSchedule in dbAppointmentSchedules.Where(s => s.Date == requestSchedule.Date.ToDateTime()))
                 {
-                    if (dbSchedule.AppointmentSlot != null)
+                    if (dbSchedule.FromTime < requestSchedule.ToTime.ToTimeSpan()
+                        && requestSchedule.FromTime.ToTimeSpan() < dbSchedule.ToTime)
                     {
-                        var conflictMessage = new ConflictScheduleResponseDto
+                        if (dbSchedule.AppointmentSlot != null)
                         {
-                            Message = dbSchedule.Date.ToDateString() + "("
-                                        + dbSchedule.FromTime.ToTimeSpanString() + " - "
-                                        + dbSchedule.ToTime.ToTimeSpanString() + "), "
-                                        + dbSchedule.AppointmentSlot.Appointment.AppointmentType
-                                        + " Appointment: " + dbSchedule.AppointmentSlot.Appointment.Title
-                        };
-
-                        var conflictTeachers = dbTeachers.Where(t => dbSchedule.AppointmentSlot.Appointment.AppointmentMembers.Select(m => m.TeacherId).Contains(t.Id)).ToList();
-                        foreach (var conflictTeacher in conflictTeachers)
-                        {
-                            conflictMessage.ConflictMembers.Add(new ConflictMemberResponseDto
+                            var conflictMessage = new ConflictScheduleResponseDto
                             {
-                                Role = "Teacher",
-                                FirstName = conflictTeacher.FirstName,
-                                LastName = conflictTeacher.LastName,
-                                Nickname = conflictTeacher.Nickname,
-                                FullName = conflictTeacher.FullName,
-                            });
-                        }
-                        if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
-                        {
-                            data.ConflictMessages.Add(conflictMessage);
-                            data.IsConflict = true;
+                                Message = dbSchedule.Date.ToDateString() + "("
+                                            + dbSchedule.FromTime.ToTimeSpanString() + " - "
+                                            + dbSchedule.ToTime.ToTimeSpanString() + "), "
+                                            + dbSchedule.AppointmentSlot.Appointment.AppointmentType
+                                            + " Appointment: " + dbSchedule.AppointmentSlot.Appointment.Title
+                            };
+
+                            var conflictTeachers = dbTeachers.Where(t => dbSchedule.AppointmentSlot.Appointment.AppointmentMembers.Select(m => m.TeacherId).Contains(t.Id)).ToList();
+                            foreach (var conflictTeacher in conflictTeachers)
+                            {
+                                conflictMessage.ConflictMembers.Add(new ConflictMemberResponseDto
+                                {
+                                    Role = "Teacher",
+                                    FirstName = conflictTeacher.FirstName,
+                                    LastName = conflictTeacher.LastName,
+                                    Nickname = conflictTeacher.Nickname,
+                                    FullName = conflictTeacher.FullName,
+                                });
+                            }
+                            if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
+                            {
+                                data.ConflictMessages.Add(conflictMessage);
+                                data.IsConflict = true;
+                            }
                         }
                     }
                 }
