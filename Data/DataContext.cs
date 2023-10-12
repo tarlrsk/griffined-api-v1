@@ -113,11 +113,15 @@ namespace griffined_api.Data
 
                 entity.HasOne(e => e.Appointment)
                     .WithMany(e => e.AppointmentHistories)
-                    .HasForeignKey(e => e.StaffId);
+                    .HasForeignKey(e => e.AppointmentId);
 
                 entity.HasOne(e => e.Staff)
                     .WithMany(e => e.AppointmentHistories)
                     .HasForeignKey(e => e.StaffId);
+
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.AppointmentHistories)
+                    .HasForeignKey(e => e.TeacherId);
             });
 
             modelBuilder.Entity<AppointmentMember>(entity =>
@@ -690,6 +694,10 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.StudyClasses)
                     .WithOne(e => e.Teacher)
                     .HasForeignKey(e => e.TeacherId);
+
+                entity.HasMany(e => e.AppointmentHistories)
+                .WithOne(e => e.Teacher)
+                .HasForeignKey(e => e.TeacherId);
 
                 entity.HasMany(e => e.AppointmentMembers)
                     .WithOne(e => e.Teacher)

@@ -12,12 +12,16 @@ namespace griffined_api.Models
         public int Id { get; set; }
         public int? AppointmentId { get; set; }
         public int? StaffId { get; set; }
+        public int? TeacherId { get; set; }
 
         public string Description { get; set; } = string.Empty;
         public DateTime UpdatedDate { get; set; }
 
         [ForeignKey(nameof(AppointmentId))]
         public virtual Appointment Appointment { get; set; } = new Appointment();
+
+        [ForeignKey(nameof(TeacherId))]
+        public virtual Teacher? Teacher { get; set; } = new Teacher();
 
         [ForeignKey(nameof(StaffId))]
         public virtual Staff Staff { get; set; } = new Staff();

@@ -12,8 +12,8 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231012035658_Add_Appointment_History")]
-    partial class AddAppointmentHistory
+    [Migration("20231012042548_Add_AppointmentHistory_Table")]
+    partial class AddAppointmentHistoryTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -112,12 +112,19 @@ namespace griffinedapi.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
+                    b.Property<int?>("TeacherId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppointmentId");
+
                     b.HasIndex("StaffId");
+
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("AppointmentHistory", (string)null);
                 });
@@ -1392,7 +1399,7 @@ namespace griffinedapi.Migrations
                 {
                     b.HasOne("griffined_api.Models.Appointment", "Appointment")
                         .WithMany("AppointmentHistories")
-                        .HasForeignKey("StaffId")
+                        .HasForeignKey("AppointmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1402,9 +1409,15 @@ namespace griffinedapi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
+                        .WithMany("AppointmentHistories")
+                        .HasForeignKey("TeacherId");
+
                     b.Navigation("Appointment");
 
                     b.Navigation("Staff");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("griffined_api.Models.AppointmentMember", b =>
@@ -2074,6 +2087,8 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.Teacher", b =>
                 {
+                    b.Navigation("AppointmentHistories");
+
                     b.Navigation("AppointmentMembers");
 
                     b.Navigation("ClassCancellationRequests");
