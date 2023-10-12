@@ -19,5 +19,6 @@ namespace griffined_api.Models
         
         [ForeignKey(nameof(ScheduleId))]
         public virtual Schedule Schedule { get; set; } = new Schedule();
+        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
     }
 }
