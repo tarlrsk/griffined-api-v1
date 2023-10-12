@@ -17,6 +17,7 @@ namespace griffined_api.Data
         // Models
         public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<Appointment> Appointments { get; set; }
+        public virtual DbSet<AppointmentHistory> AppointmentHistories { get; set; }
         public virtual DbSet<AppointmentMember> AppointmentMembers { get; set; }
         public virtual DbSet<AppointmentSlot> AppointmentSlots { get; set; }
         public virtual DbSet<ClassCancellationRequest> ClassCancellationRequests { get; set; }
@@ -85,6 +86,10 @@ namespace griffined_api.Data
             {
                 entity.ToTable("Appointment");
 
+                entity.HasMany(e => e.AppointmentHistories)
+                    .WithOne(e => e.Appointment)
+                    .HasForeignKey(e => e.AppointmentId);
+
                 entity.HasMany(e => e.AppointmentMembers)
                     .WithOne(e => e.Appointment)
                     .HasForeignKey(e => e.AppointmentId);
@@ -100,6 +105,23 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.TeacherNotifications)
                     .WithOne(e => e.Appointment)
                     .HasForeignKey(e => e.AppointmentId);
+            });
+
+            modelBuilder.Entity<AppointmentHistory>(entity =>
+            {
+                entity.ToTable("AppointmentHistory");
+
+                entity.HasOne(e => e.Appointment)
+                    .WithMany(e => e.AppointmentHistories)
+                    .HasForeignKey(e => e.AppointmentId);
+
+                entity.HasOne(e => e.Staff)
+                    .WithMany(e => e.AppointmentHistories)
+                    .HasForeignKey(e => e.StaffId);
+
+                entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.AppointmentHistories)
+                    .HasForeignKey(e => e.TeacherId);
             });
 
             modelBuilder.Entity<AppointmentMember>(entity =>
@@ -348,6 +370,10 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.Appointments)
                     .WithOne(e => e.Staff)
                     .HasForeignKey(e => e.CreatedByStaffId);
+
+                entity.HasMany(e => e.AppointmentHistories)
+                    .WithOne(e => e.Staff)
+                    .HasForeignKey(e => e.StaffId);
 
                 entity.HasMany(e => e.StaffNotifications)
                     .WithOne(e => e.Staff)
@@ -668,6 +694,10 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.StudyClasses)
                     .WithOne(e => e.Teacher)
                     .HasForeignKey(e => e.TeacherId);
+
+                entity.HasMany(e => e.AppointmentHistories)
+                .WithOne(e => e.Teacher)
+                .HasForeignKey(e => e.TeacherId);
 
                 entity.HasMany(e => e.AppointmentMembers)
                     .WithOne(e => e.Teacher)
