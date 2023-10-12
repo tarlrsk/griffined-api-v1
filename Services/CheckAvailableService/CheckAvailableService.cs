@@ -543,7 +543,7 @@ namespace griffined_api.Services.CheckAvailableService
                                 });
                             }
                         }
-                        if (!data.ConflictMessages.Contains(conflict))
+                        if (!data.ConflictMessages.Any(c => c.Message == conflict.Message))
                             data.ConflictMessages.Add(conflict);
 
                         data.IsConflict = true;
