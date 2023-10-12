@@ -400,7 +400,7 @@ namespace griffined_api.Services.CheckAvailableService
                                     Nickname = conflictTeacher.Nickname,
                                     FullName = conflictTeacher.FullName,
                                 });
-                                if (!data.ConflictMessages.Contains(conflictMessage))
+                                if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
                                 {
                                     data.ConflictMessages.Add(conflictMessage);
                                 }
@@ -434,12 +434,44 @@ namespace griffined_api.Services.CheckAvailableService
                                 Nickname = conflictTeacher.Nickname,
                                 FullName = conflictTeacher.FullName,
                             });
-                            if (!data.ConflictMessages.Contains(conflictMessage))
-                            {
-                                data.ConflictMessages.Add(conflictMessage);
-                            }
-                            data.IsConflict = true;
                         }
+                        if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
+                        {
+                            data.ConflictMessages.Add(conflictMessage);
+                        }
+                        data.IsConflict = true;
+                    }
+                }
+
+                foreach (var requestSchedule2 in requestDto.AppointmentSchedule.Where(s => s != requestSchedule && s.Date == requestSchedule.Date))
+                {
+                    if (requestSchedule2.FromTime.ToTimeSpan() < requestSchedule.ToTime.ToTimeSpan()
+                    && requestSchedule.FromTime.ToTimeSpan() < requestSchedule2.ToTime.ToTimeSpan())
+                    {
+                        var conflictMessage = new ConflictScheduleResponseDto
+                        {
+                            Message = requestSchedule2.Date.ToDateTime().ToDateString() + "("
+                                        + requestSchedule2.FromTime.ToTimeSpan().ToTimeSpanString() + " - "
+                                        + requestSchedule2.ToTime.ToTimeSpan().ToTimeSpanString() + "), "
+                                        + "Current Appointment"
+                        };
+
+                        foreach (var dbTeacher in dbTeachers)
+                        {
+                            conflictMessage.ConflictMembers.Add(new ConflictMemberResponseDto
+                            {
+                                Role = "Teacher",
+                                FirstName = dbTeacher.FirstName,
+                                LastName = dbTeacher.LastName,
+                                Nickname = dbTeacher.Nickname,
+                                FullName = dbTeacher.FullName,
+                            });
+                        }
+                        if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message))
+                        {
+                            data.ConflictMessages.Add(conflictMessage);
+                        }
+                        data.IsConflict = true;
                     }
                 }
 
@@ -511,15 +543,16 @@ namespace griffined_api.Services.CheckAvailableService
                                 });
                             }
                         }
-                        if(!data.ConflictMessages.Contains(conflict))
+                        if (!data.ConflictMessages.Any(c => c.Message == conflict.Message))
                             data.ConflictMessages.Add(conflict);
-                        
+
                         data.IsConflict = true;
                     }
                 }
             }
 
-            return new ServiceResponse<StudentAddingConflictResponseDto>{
+            return new ServiceResponse<StudentAddingConflictResponseDto>
+            {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
             };
