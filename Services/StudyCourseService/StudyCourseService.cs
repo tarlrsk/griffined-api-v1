@@ -67,13 +67,13 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
 
-                        var studyClass = new StudyClass()
+                        var studyClass = new StudyClass
                         {
                             IsMakeup = false,
                             ClassNumber = classNumber,
                             Teacher = teacher,
                             StudyCourse = studyCourse,
-                            Schedule = new Schedule()
+                            Schedule = new Schedule
                             {
                                 Date = newSchedule.Date.ToDateTime(),
                                 FromTime = newSchedule.FromTime.ToTimeSpan(),
@@ -90,10 +90,21 @@ namespace griffined_api.Services.StudyCourseService
                 studySubject.Subject = newStudySubject;
                 studySubject.Hour = totalSubjectHour;
                 studyCourse.StudySubjects.Add(studySubject);
+            }
 
+            var studySubjects = studyCourse.StudySubjects.ToList();
+
+            var teachersInCourse = studySubjects
+                .SelectMany(ss => ss.StudyClasses)
+                .Select(sc => sc.Teacher)
+                .Distinct()
+                .ToList();
+
+            foreach (var teacher in teachersInCourse)
+            {
                 var teacherNotification = new TeacherNotification
                 {
-                    Teacher = studyCourse.StudyClasses.First().Teacher,
+                    Teacher = teacher,
                     StudyCourse = studyCourse,
                     Title = "New Course Assigned",
                     Message = "You have been assigned to a new course. Click here for more details.",
