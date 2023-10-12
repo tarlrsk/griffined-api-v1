@@ -19,6 +19,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string EndDate { get; set; } = string.Empty;
         public double TotalHour { get; set; }
         public int HourPerDay { get; set; }
+        public StudyCourseStatus Status { get; set; }
         public List<ScheduleResponseDto> Schedules { get; set; } = new();
     }
 }

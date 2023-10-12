@@ -13,7 +13,7 @@ namespace griffined_api.Models
         public int? CreatedByStaffId { get; set; }
         public int? PaymentByStaffId { get; set; }
         public int? ScheduledByStaffId { get; set; }
-        public int? ApprovedByStaffId { get; set; }
+        public int? ReviewedByStaffId { get; set; }
         public int? CancelledBy { get; set; }
         public int? TakenByEAId { get; set; }
 
@@ -35,5 +35,6 @@ namespace griffined_api.Models
         public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
         public virtual ICollection<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; } = new List<NewCoursePreferredDayRequest>();
         public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; } = new List<RegistrationRequestComment>();
+        public virtual ICollection<StaffNotification> StaffNotifications { get; set; } = new List<StaffNotification>();
     }
 }

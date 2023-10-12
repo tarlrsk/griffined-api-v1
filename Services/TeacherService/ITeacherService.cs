@@ -16,5 +16,7 @@ namespace griffined_api.Services.TeacherService
         Task<ServiceResponse<List<GetTeacherDto>>> DeleteTeacher(int id);
         Task<ServiceResponse<GetTeacherDto>> DisableTeacher(int id);
         Task<ServiceResponse<GetTeacherDto>> EnableTeacher(int id);
+        Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password);
+        TeacherWorkType FindTeacherWorkType(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime);
     }
 }

@@ -8,8 +8,6 @@ namespace griffined_api.Controllers
     [ApiController]
     [Route("api/v1/available")]
 
-    [Authorize(Roles = "ea, master")]
-
     public class CheckAvailable : ControllerBase
     {
         private readonly ICheckAvailableService _checkAvailable;
@@ -25,19 +23,23 @@ namespace griffined_api.Controllers
             return Ok(await _checkAvailable.GetAvailableSchedule(requestedSchedule));
         }
 
-        // [HttpGet("time")]
-        // public async Task<ActionResult<ServiceResponse<List<GetAvailableTimeDto>>>> GetAvailableTime([FromQuery] int[] listOfStudentId, string date, int hour, int classId)
-        // {
-        //     var response = await _checkAvailable.GetAvailableTime(listOfStudentId, date, hour, classId);
-        //     return Ok(response);
-        // }
+        [HttpPost("teacher"), Authorize(Roles = "master, ea")]
+        public async Task<ActionResult> GetAvailableTeacherForAppointment(int? appointmentId, List<LocalAppointmentRequestDto> appointmentRequestDtos)
+        {
+            return Ok(await _checkAvailable.GetAvailableTeacherForAppointment(appointmentId, appointmentRequestDtos));
+        }
 
-        // [HttpGet("teacher")]
-        // public async Task<ActionResult<ServiceResponse<List<GetAvailableTeacherDto>>>> GetAvailableTeacher(string fromTime, string toTime, string date, int classId)
-        // {
-        //     var response = await _checkAvailable.GetAvailableTeacher(fromTime, toTime, date, classId);
-        //     return Ok(response);
-        // }
+        [HttpPost("appointment"), Authorize(Roles = "master, ea")]
+        public async Task<ActionResult> CheckAppointmentConflict(CheckAppointmentConflictRequestDto requestDto)
+        {
+            return Ok(await _checkAvailable.CheckAppointmentConflict(requestDto));
+        }
+
+        [HttpPost("student-adding"), Authorize(Roles = "master, ec, ea")]
+        public async Task<ActionResult> CheckStudentAddingConflict(StudentAddingConflictRequestDto requestDto)
+        {
+            return Ok(await _checkAvailable.CheckStudentAddingConflict(requestDto));
+        }
 
     }
 }

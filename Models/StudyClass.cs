@@ -34,6 +34,6 @@ namespace griffined_api.Models
         public virtual Teacher Teacher { get; set; } = new Teacher();
 
         public virtual ICollection<StudentAttendance> Attendances { get; set; } = new List<StudentAttendance>();
-        public virtual ICollection<CancellationRequest> CancellationRequests { get; set; } = new List<CancellationRequest>();
+        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
     }
 }

@@ -1,6 +1,7 @@
 using AutoMapper.Execution;
 using Azure;
 using Google.Api;
+using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -18,10 +19,13 @@ namespace griffined_api.Services.StudyCourseService
     {
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
-        public StudyCourseService(DataContext context, IFirebaseService firebaseService)
+        private readonly ITeacherService _teacherService;
+
+        public StudyCourseService(DataContext context, IFirebaseService firebaseService, ITeacherService teacherService)
         {
             _context = context;
             _firebaseService = firebaseService;
+            _teacherService = teacherService;
         }
         public async Task<ServiceResponse<string>> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
         {
@@ -63,13 +67,13 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
 
-                        var studyClass = new StudyClass()
+                        var studyClass = new StudyClass
                         {
                             IsMakeup = false,
                             ClassNumber = classNumber,
                             Teacher = teacher,
                             StudyCourse = studyCourse,
-                            Schedule = new Schedule()
+                            Schedule = new Schedule
                             {
                                 Date = newSchedule.Date.ToDateTime(),
                                 FromTime = newSchedule.FromTime.ToTimeSpan(),
@@ -82,11 +86,38 @@ namespace griffined_api.Services.StudyCourseService
                         totalSubjectHour += studyClass.Schedule.FromTime.Subtract(studyClass.Schedule.ToTime).TotalHours;
                     }
                 }
+
                 studySubject.Subject = newStudySubject;
                 studySubject.Hour = totalSubjectHour;
                 studyCourse.StudySubjects.Add(studySubject);
             }
+
+            var studySubjects = studyCourse.StudySubjects.ToList();
+
+            var teachersInCourse = studySubjects
+                .SelectMany(ss => ss.StudyClasses)
+                .Select(sc => sc.Teacher)
+                .Distinct()
+                .ToList();
+
+            foreach (var teacher in teachersInCourse)
+            {
+                var teacherNotification = new TeacherNotification
+                {
+                    Teacher = teacher,
+                    StudyCourse = studyCourse,
+                    Title = "New Course Assigned",
+                    Message = "You have been assigned to a new course. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = TeacherNotificationType.NewCourse,
+                    HasRead = false
+                };
+
+                _context.TeacherNotifications.Add(teacherNotification);
+            }
+
             _context.StudyCourses.Add(studyCourse);
+
             await _context.SaveChangesAsync();
             response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
@@ -102,6 +133,7 @@ namespace griffined_api.Services.StudyCourseService
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.StudyClasses)
                                                 .ThenInclude(c => c.Teacher)
+                                                    .ThenInclude(t => t.WorkTimes)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.StudySubjectMember)
                                                 .ThenInclude(s => s.Student)
@@ -154,6 +186,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
+                        Hour = dbStudySubject.Hour,
                     });
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
@@ -177,7 +210,12 @@ namespace griffined_api.Services.StudyCourseService
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
-                            // TODO Teacher Work Type
+                            TeacherWorkType = _teacherService.FindTeacherWorkType(
+                                dbStudyClass.Teacher,
+                                dbStudyClass.Schedule.Date,
+                                dbStudyClass.Schedule.FromTime,
+                                dbStudyClass.Schedule.ToTime
+                            )
                         };
                         studyCourse.Schedules.Add(schedule);
                     }
@@ -186,6 +224,7 @@ namespace griffined_api.Services.StudyCourseService
                 studyCourse.StudentCount = studentCount;
                 studyCourses.Add(studyCourse);
             }
+
             response.Data = studyCourses;
             response.StatusCode = (int)HttpStatusCode.OK; ;
             return response;
@@ -268,10 +307,32 @@ namespace griffined_api.Services.StudyCourseService
             dbRequest.RegistrationStatus = RegistrationStatus.PendingEC;
             dbRequest.ScheduledByStaffId = _firebaseService.GetAzureIdWithToken();
             dbRequest.HasSchedule = true;
+
+            var ec = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CreatedByStaffId)
+                    ?? throw new NotFoundException("EC not found.");
+
+            var ea = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Id == dbRequest.ScheduledByStaffId)
+                    ?? throw new NotFoundException("EA not found.");
+
+            var ecNotification = new StaffNotification
+            {
+                Staff = ec,
+                RegistrationRequest = dbRequest,
+                Title = "New Schedule Created",
+                Message = $"A new schedule for Section '{dbRequest.Section}' has been created by EA {ea.Nickname}. Click here for more details.",
+                DateCreated = DateTime.Now,
+                Type = StaffNotificationType.RegistrationRequest,
+                HasRead = false
+            };
+
+            _context.StaffNotifications.Add(ecNotification);
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<String> { StatusCode = (int)HttpStatusCode.OK };
-            ;
+
             return response;
         }
 
@@ -386,6 +447,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
+                        Hour = dbStudySubject.Hour,
                     };
                     studyCourse.StudySubjects.Add(studySubject);
                 }
@@ -440,6 +502,7 @@ namespace griffined_api.Services.StudyCourseService
                         StudySubjectId = dbStudySubject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
                         Subject = dbStudySubject.Subject.subject,
+                        Hour = dbStudySubject.Hour,
                     };
                     studyCourse.StudySubjects.Add(studySubject);
                 }
@@ -466,6 +529,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.StudySubjects)
                                     .ThenInclude(c => c.StudyClasses)
                                         .ThenInclude(c => c.Teacher)
+                                            .ThenInclude(t => t.WorkTimes)
                                 .FirstOrDefaultAsync(c => c.Id == studyCourseId)
                                 ?? throw new NotFoundException($"Study Course with ID {studyCourseId} is not found.");
 
@@ -506,6 +570,7 @@ namespace griffined_api.Services.StudyCourseService
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
+                    Hour = dbStudySubject.Hour,
                 });
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
@@ -532,7 +597,12 @@ namespace griffined_api.Services.StudyCourseService
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
-                            // TODO WorkType
+                            TeacherWorkType = _teacherService.FindTeacherWorkType(
+                                dbStudyClass.Teacher,
+                                dbStudyClass.Schedule.Date,
+                                dbStudyClass.Schedule.FromTime,
+                                dbStudyClass.Schedule.ToTime
+                            ),
                         });
                     }
 
@@ -606,6 +676,7 @@ namespace griffined_api.Services.StudyCourseService
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
                     Subject = dbStudySubject.Subject.subject,
+                    Hour = dbStudySubject.Hour,
                 });
             }
 
@@ -619,6 +690,7 @@ namespace griffined_api.Services.StudyCourseService
                     ClassNo = dbStudyClass.StudyClass.ClassNumber,
                     Date = dbStudyClass.StudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbStudyClass.StudyClass.Schedule.FromTime.ToTimeSpanString(),
+                    ClassStatus = dbStudyClass.StudyClass.Status,
                     ToTime = dbStudyClass.StudyClass.Schedule.ToTime.ToTimeSpanString(),
                     StudyCourseId = dbStudyCourse.Id,
                     CourseId = dbStudyCourse.Course.Id,
@@ -633,7 +705,6 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherLastName = dbStudyClass.StudyClass.Teacher.LastName,
                     TeacherNickname = dbStudyClass.StudyClass.Teacher.Nickname,
                     Attendance = dbStudyClass.Attendance.Attendance,
-                    // TODO WorkType
                 });
             }
 
@@ -736,7 +807,8 @@ namespace griffined_api.Services.StudyCourseService
                         {
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Id,
-                            Subject = dbStudySubject.Subject.subject
+                            Subject = dbStudySubject.Subject.subject,
+                            Hour = dbStudySubject.Hour,
                         },
                         FiftyPercentReport = studentReport?.Progression == Progression.FiftyPercent
                             ? new ReportFileResponseDto
@@ -937,6 +1009,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.StudyClasses)
                                         .ThenInclude(sc => sc.Teacher)
+                                            .ThenInclude(t => t.WorkTimes)
                                 .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("Course not found.");
 
             var data = new StaffCoursesDetailResponseDto
@@ -948,7 +1021,8 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
-                    Subject = dbStudySubject.Subject.subject
+                    Subject = dbStudySubject.Subject.subject,
+                    Hour = dbStudySubject.Hour,
                 }).ToList(),
                 Level = new Dtos.LevelDtos.LevelResponseDto
                 {
@@ -960,6 +1034,7 @@ namespace griffined_api.Services.StudyCourseService
                 StartDate = dbStudyCourse.StartDate.ToDateString(),
                 EndDate = dbStudyCourse.EndDate.ToDateString(),
                 TotalHour = dbStudyCourse.TotalHour,
+                Status = dbStudyCourse.Status,
                 Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
                 {
                     StudyCourseId = dbStudyCourse.Id,
@@ -976,7 +1051,12 @@ namespace griffined_api.Services.StudyCourseService
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                     TeacherNickname = dbStudyClass.Teacher.Nickname,
                     ClassStatus = dbStudyClass.Status,
-                    // TODO TeacherWorkType
+                    TeacherWorkType = _teacherService.FindTeacherWorkType(
+                        dbStudyClass.Teacher,
+                        dbStudyClass.Schedule.Date,
+                        dbStudyClass.Schedule.FromTime,
+                        dbStudyClass.Schedule.ToTime
+                    ),
                 }))
                 .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
                 .ToList()
@@ -1021,7 +1101,8 @@ namespace griffined_api.Services.StudyCourseService
                                 {
                                     StudySubjectId = member.StudySubject.Id,
                                     SubjectId = member.StudySubject.Subject.Id,
-                                    Subject = member.StudySubject.Subject.subject
+                                    Subject = member.StudySubject.Subject.subject,
+                                    Hour = member.StudySubject.Hour,
                                 }).ToList()
                             }).ToList(),
 
@@ -1041,7 +1122,8 @@ namespace griffined_api.Services.StudyCourseService
                                 {
                                     StudySubjectId = cls.StudySubject.Id,
                                     SubjectId = cls.StudySubject.Subject.Id,
-                                    Subject = cls.StudySubject.Subject.subject
+                                    Subject = cls.StudySubject.Subject.subject,
+                                    Hour = cls.StudySubject.Hour,
                                 }).ToList()
                             }).ToList()
             };
@@ -1350,7 +1432,7 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
-        public async Task<ServiceResponse<List<TodayClassMobileResponse>>> GetMobileTodayClass(string requestDate)
+        public async Task<ServiceResponse<List<TodayClassMobileResponseDto>>> GetMobileTodayClass(string requestDate)
         {
             var userId = _firebaseService.GetAzureIdWithToken();
             var role = _firebaseService.GetRoleWithToken();
@@ -1397,10 +1479,10 @@ namespace griffined_api.Services.StudyCourseService
             }
 
 
-            var data = new List<TodayClassMobileResponse>();
+            var data = new List<TodayClassMobileResponseDto>();
             foreach (var dbStudyClass in dbStudyClasses)
             {
-                var studyClass = new TodayClassMobileResponse
+                var studyClass = new TodayClassMobileResponseDto
                 {
                     StudyClassId = dbStudyClass.Id,
                     StudyCourseId = dbStudyClass.StudyCourse.Id,
@@ -1425,7 +1507,7 @@ namespace griffined_api.Services.StudyCourseService
                 data.Add(studyClass);
             }
 
-            var response = new ServiceResponse<List<TodayClassMobileResponse>>
+            var response = new ServiceResponse<List<TodayClassMobileResponseDto>>
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data,
@@ -1454,6 +1536,28 @@ namespace griffined_api.Services.StudyCourseService
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
+            return response;
+        }
+
+        public async Task<ServiceResponse<string>> CancelStudyCourse(int studyCourseId)
+        {
+            var dbStudyCourse = await _context.StudyCourses
+                                .Include(c => c.StudyClasses)
+                                .FirstOrDefaultAsync(c => c.Id == studyCourseId)
+                                ?? throw new NotFoundException($"StudyCourse with ID {studyCourseId} is not found.");
+
+            dbStudyCourse.Status = StudyCourseStatus.Cancelled;
+            foreach (var dbStudyClass in dbStudyCourse.StudyClasses)
+            {
+                dbStudyClass.Status = ClassStatus.Deleted;
+            }
+
+            await _context.SaveChangesAsync();
+
+            var response = new ServiceResponse<string>()
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
             return response;
         }
     }

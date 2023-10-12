@@ -16,22 +16,26 @@ global using griffined_api.Dtos.UserDtos;
 global using griffined_api.Dtos.WorkTimeDtos;
 global using griffined_api.Enums;
 global using griffined_api.Exceptions;
+global using griffined_api.Integrations.Firebase;
+global using griffined_api.Jobs;
 global using griffined_api.Middlewares;
 global using griffined_api.Models;
-global using griffined_api.integrations.Firebase;
 global using griffined_api.Services.AttendanceService;
+global using griffined_api.Services.AppointmentService;
+global using griffined_api.Services.ClassCancellationRequestService;
 global using griffined_api.Services.CheckAvailableService;
 global using griffined_api.Services.CourseService;
+global using griffined_api.Services.NotificationService;
+global using griffined_api.Services.ScheduleService;
 global using griffined_api.Services.StaffService;
 global using griffined_api.Services.StudentService;
+global using griffined_api.Services.StudentReportService;
 global using griffined_api.Services.TeacherService;
 global using griffined_api.Services.RegistrationRequestService;
 global using griffined_api.Services.StudyCourseService;
-global using griffined_api.integrations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
-global using System.Text;
 
 //Authen
 global using Microsoft.IdentityModel.Tokens;
@@ -47,8 +51,9 @@ using Swashbuckle.AspNetCore.Filters;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using FirebaseAdmin;
-using FirebaseAdminAuthentication.DependencyInjection.Extensions;
-using griffined_api.Services.StudentReportService;
+
+// Background Tasks
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,10 +68,14 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddLogging();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IClassCancellationRequestService, ClassCancellationRequestService>();
 builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IRegistrationRequestService, RegistrationRequestService>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IStudentReportService, StudentReportService>();
@@ -95,14 +104,16 @@ builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
 
-builder.Services.AddSingleton<UrlSigner>(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
+builder.Services.AddSingleton(_ => UrlSigner.FromCredential(GoogleCredential.FromFile(Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"))));
 
 var storageClient = StorageClient.Create();
-builder.Services.AddSingleton<StorageClient>(_ => StorageClient.Create());
+builder.Services.AddSingleton(_ => StorageClient.Create());
+
+builder.Services.AddQuartzInfrastructure();
 
 builder.Services.ConfigureSwaggerGen(setup =>
 {
-    setup.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    setup.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "House of Griffin",
         Version = "v1.0.2"
@@ -130,4 +141,3 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
-

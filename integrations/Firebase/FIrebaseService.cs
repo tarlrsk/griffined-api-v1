@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FirebaseAdmin.Auth;
 using Google.Cloud.Storage.V1;
 
-namespace griffined_api.integrations
+namespace griffined_api.Integrations.Firebase
 {
     public class FirebaseService : IFirebaseService
     {

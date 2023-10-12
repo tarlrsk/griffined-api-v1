@@ -120,10 +120,10 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.UpdateScheduleWithoutCancelRequest(updateRequest));
         }
 
-        [HttpGet("today/{date}"), Authorize(Roles = "teacher, student")]
-        public async Task<ActionResult> GetToday(string date)
+        [HttpPut("cancel/{studyCourseId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> CancelStudyCourse(int studyCourseId)
         {
-            return Ok(await _studyCourseService.GetMobileTodayClass(date));
+            return Ok(await _studyCourseService.CancelStudyCourse(studyCourseId));
         }
     }
 }

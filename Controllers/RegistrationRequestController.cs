@@ -19,12 +19,14 @@ namespace griffined_api.Controllers
             _registrationRequestService = registrationRequestService;
 
         }
+
         [HttpPost("new-course"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> AddNewCoursesRequest(NewCoursesRequestDto newCourses)
         {
             var response = await _registrationRequestService.AddNewRequestedCourses(newCourses);
             return Ok(response);
         }
+
         [HttpPost("student-adding"), Authorize(Roles = "ec, master")]
         public async Task<ActionResult> AddStudentAddingRequest([FromForm] StudentAddingRequestDto newStudentAdding, [Required] List<IFormFile> filesToUpload)
         {
@@ -40,12 +42,29 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-
         [HttpGet, Authorize(Roles = "ec, ea, oa, master")]
         public async Task<ActionResult> GetAllRegistrationRequest()
         {
             var response = await _registrationRequestService.ListRegistrationRequests();
             return Ok(response);
+        }
+
+        [HttpGet("ec/{requestId}"), Authorize(Roles = "ec, master")]
+        public async Task<ActionResult> GetEcRequestDetail(int requestId)
+        {
+            return Ok(await _registrationRequestService.EcGetRequestDetail(requestId));
+        }
+
+        [HttpGet("ea/{requestId}"), Authorize(Roles = "ea, master")]
+        public async Task<ActionResult> GetEaRequestDetail(int requestId)
+        {
+            return Ok(await _registrationRequestService.EaGetRequestDetail(requestId));
+        }
+
+        [HttpGet("oa/{requestId}"), Authorize(Roles = "oa, master")]
+        public async Task<ActionResult> GetOaRequestDetail(int requestId)
+        {
+            return Ok(await _registrationRequestService.OaGetRequestDetail(requestId));
         }
 
         [HttpGet("pending-ea/{requestId}"), Authorize(Roles = "ea, ec, master")]
@@ -104,7 +123,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("cancel/{requestId}"), Authorize(Roles = "ec,ea, master")]
+        [HttpPut("cancel/{requestId}"), Authorize(Roles = "ec, ea, master")]
         public async Task<ActionResult> CancelRequest(int requestId)
         {
             var response = await _registrationRequestService.CancelRequest(requestId);

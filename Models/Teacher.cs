@@ -25,10 +25,16 @@ namespace griffined_api.Models
 
         public virtual ICollection<WorkTime> WorkTimes { get; set; } = new List<WorkTime>();
         public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
+        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
         public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
         public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
         public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
-        public virtual ICollection<CancellationRequest> CancellationRequests { get; set; } = new List<CancellationRequest>();
+        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
         public virtual ICollection<StudySubjectTeacher> StudySubjectTeachers { get; set; } = new List<StudySubjectTeacher>();
+
+        public static implicit operator Teacher(List<Teacher> v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

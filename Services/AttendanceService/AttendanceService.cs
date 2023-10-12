@@ -113,6 +113,61 @@ namespace griffined_api.Services.AttendanceService
                 dbClass.Status = ClassStatus.Checked;
             }
 
+            var dbStudyCourse = dbClass.StudyCourse;
+
+            var dbStudySubjects = await _context.StudySubjects
+                    .Include(ss => ss.StudyCourse)
+                        .ThenInclude(sc => sc.Course)
+                    .Include(ss => ss.Subject)
+                    .Include(ss => ss.StudyClasses)
+                    .Where(ss => ss.StudyCourse.Id == dbStudyCourse.Id)
+                    .ToListAsync()
+                    ?? throw new NotFoundException("No Subject Found.");
+
+            int completedClass = 0;
+            int incompleteClass = 0;
+
+            foreach (var dbStudySubject in dbStudySubjects)
+            {
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                {
+                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    {
+                        completedClass += 1;
+                    }
+                    else if (dbStudyClass.Status == ClassStatus.None)
+                    {
+                        incompleteClass += 1;
+                    }
+                }
+            }
+
+            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+            double progress = Math.Round(progressRatio * 100);
+
+            var teacherNotification = new TeacherNotification
+            {
+                Teacher = dbClass.Teacher,
+                StudyCourse = dbStudyCourse,
+                DateCreated = DateTime.Now,
+                Type = TeacherNotificationType.StudentReport,
+                HasRead = false
+            };
+
+            switch (progress)
+            {
+                case 50:
+                    teacherNotification.Title = "Course Progress Report";
+                    teacherNotification.Message = "The course has reached the 50% checkpoint. Please upload the student report. Click for more details.";
+                    break;
+                case 100:
+                    teacherNotification.Title = "Course Progress Report";
+                    teacherNotification.Message = "The course has been completed. Please upload the student report. Click for more details.";
+                    break;
+            }
+
+            _context.TeacherNotifications.Add(teacherNotification);
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;

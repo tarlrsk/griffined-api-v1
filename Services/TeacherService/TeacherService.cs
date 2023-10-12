@@ -14,9 +14,11 @@ namespace griffined_api.Services.TeacherService
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public TeacherService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        private readonly IFirebaseService _firebaseService;
+        public TeacherService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
         {
             _httpContextAccessor = httpContextAccessor;
+            _firebaseService = firebaseService;
             _mapper = mapper;
             _context = context;
         }
@@ -178,6 +180,21 @@ namespace griffined_api.Services.TeacherService
             return response;
         }
 
+        public async Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password)
+        {
+            if (password.Password != password.VerifyPassword)
+                throw new BadRequestException("Both Password must be the same");
+
+            await _firebaseService.ChangePasswordWithUid(uid, password.Password);
+
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+            };
+            return response;
+
+        }
+
         private async Task AddStaffFireStoreAsync(Teacher staff)
         {
             FirestoreDb db = FirestoreDb.Create(PROJECT_ID);
@@ -234,6 +251,19 @@ namespace griffined_api.Services.TeacherService
             response.StatusCode = (int)HttpStatusCode.OK;
 
             return response;
+        }
+
+        public TeacherWorkType FindTeacherWorkType(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
+        {
+            var requestedDay = date.DayOfWeek;
+
+            var workDay = dbTeacher.WorkTimes.FirstOrDefault(t => t.Day.ToString() == requestedDay.ToString());
+            if(workDay == null)
+                return TeacherWorkType.Special;
+            else if(workDay.FromTime >= toTime || fromTime >= workDay.ToTime)
+                return TeacherWorkType.Overtime;
+            else
+                return TeacherWorkType.Normal;
         }
 
     }
