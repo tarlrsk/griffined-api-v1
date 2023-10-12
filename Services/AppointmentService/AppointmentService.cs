@@ -254,6 +254,7 @@ namespace griffined_api.Services.AppointmentService
                     AppointmentSlot = deleteSchedule,
                     Staff = dbStaff,
                     UpdatedDate = DateTime.Now,
+                    Appointment = dbAppointment,
                 });
             }
 
@@ -279,6 +280,7 @@ namespace griffined_api.Services.AppointmentService
                     AppointmentSlot = appointmentSlot,
                     Staff = dbStaff,
                     UpdatedDate = DateTime.Now,
+                    Appointment = dbAppointment,
                 });
             }
 
@@ -293,6 +295,7 @@ namespace griffined_api.Services.AppointmentService
                     Type = AppointmentHistoryType.Member,
                     Staff = dbStaff,
                     UpdatedDate = DateTime.Now,
+                    Appointment = dbAppointment,
                 });
                 _context.AppointmentMembers.Remove(deleteMember);
             }
@@ -317,6 +320,7 @@ namespace griffined_api.Services.AppointmentService
                         Type = AppointmentHistoryType.Member,
                         Staff = dbStaff,
                         UpdatedDate = DateTime.Now,
+                        Appointment = dbAppointment,
                     });
                 }
             }
