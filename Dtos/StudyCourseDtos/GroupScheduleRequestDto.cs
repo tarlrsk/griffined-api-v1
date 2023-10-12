@@ -11,6 +11,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public int CourseId { get; set; }
         [Required]
         public List<int> SubjectIds { get; set; } = new List<int>();
+        [Required]
         public int LevelId { get; set; }
         [Required]
         public string Section{ get; set; } = string.Empty;
