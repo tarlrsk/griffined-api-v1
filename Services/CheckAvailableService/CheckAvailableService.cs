@@ -486,11 +486,12 @@ namespace griffined_api.Services.CheckAvailableService
 
         public async Task<ServiceResponse<StudentAddingConflictResponseDto>> CheckStudentAddingConflict(StudentAddingConflictRequestDto requestDto)
         {
-            var requestedStudySubject = await _context.StudySubjects
+            var requestedStudySubjects = await _context.StudySubjects
                                 .Include(s => s.StudyClasses)
                                     .ThenInclude(c => c.Schedule)
-                                .FirstOrDefaultAsync(s => s.Id == requestDto.StudySubjectId)
-                                ?? throw new NotFoundException($"Study Subject with ID {requestDto.StudySubjectId} is not found.");
+                                .Where(s => requestDto.StudySubjectIds.Contains(s.Id))
+                                .ToListAsync()
+                                ?? throw new NotFoundException($"Study Subject with ID {requestDto.StudySubjectIds} is not found.");
 
             var dbStudyClasses = await _context.StudyClasses
                             .Include(c => c.StudySubject)
@@ -513,40 +514,42 @@ namespace griffined_api.Services.CheckAvailableService
             var dbStudents = await _context.Students.Where(s => requestDto.StudentIds.Contains(s.Id)).ToListAsync();
 
             StudentAddingConflictResponseDto data = new();
-
-            foreach (var requestedSchedule in requestedStudySubject.StudyClasses.Select(c => c.Schedule))
+            foreach (var requestedStudySubject in requestedStudySubjects)
             {
-                foreach (var dbStudyClass in dbStudyClasses.Where(c => c.Schedule.Date == requestedSchedule.Date))
+                foreach (var requestedSchedule in requestedStudySubject.StudyClasses.Select(c => c.Schedule))
                 {
-                    if (dbStudyClass.Schedule.FromTime < requestedSchedule.ToTime
-                    && requestedSchedule.FromTime < dbStudyClass.Schedule.ToTime)
+                    foreach (var dbStudyClass in dbStudyClasses.Where(c => c.Schedule.Date == requestedSchedule.Date))
                     {
-                        var conflict = new ConflictScheduleResponseDto
+                        if (dbStudyClass.Schedule.FromTime < requestedSchedule.ToTime
+                        && requestedSchedule.FromTime < dbStudyClass.Schedule.ToTime)
                         {
-                            Message = dbStudyClass.Schedule.Date.ToDateString() + "("
-                                            + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
-                                            + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
-                                            + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
-                        };
-
-                        foreach (var dbStudent in dbStudents)
-                        {
-                            if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                            var conflict = new ConflictScheduleResponseDto
                             {
-                                conflict.ConflictMembers.Add(new ConflictMemberResponseDto
-                                {
-                                    Role = "Student",
-                                    FirstName = dbStudent.FirstName,
-                                    LastName = dbStudent.LastName,
-                                    Nickname = dbStudent.Nickname,
-                                    FullName = dbStudent.FullName,
-                                });
-                            }
-                        }
-                        if (!data.ConflictMessages.Any(c => c.Message == conflict.Message))
-                            data.ConflictMessages.Add(conflict);
+                                Message = dbStudyClass.Schedule.Date.ToDateString() + "("
+                                                + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
+                                                + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
+                                                + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
+                            };
 
-                        data.IsConflict = true;
+                            foreach (var dbStudent in dbStudents)
+                            {
+                                if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                                {
+                                    conflict.ConflictMembers.Add(new ConflictMemberResponseDto
+                                    {
+                                        Role = "Student",
+                                        FirstName = dbStudent.FirstName,
+                                        LastName = dbStudent.LastName,
+                                        Nickname = dbStudent.Nickname,
+                                        FullName = dbStudent.FullName,
+                                    });
+                                }
+                            }
+                            if (!data.ConflictMessages.Any(c => c.Message == conflict.Message))
+                                data.ConflictMessages.Add(conflict);
+
+                            data.IsConflict = true;
+                        }
                     }
                 }
             }
