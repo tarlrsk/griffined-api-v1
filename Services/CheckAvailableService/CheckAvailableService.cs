@@ -400,7 +400,7 @@ namespace griffined_api.Services.CheckAvailableService
                                     Nickname = conflictTeacher.Nickname,
                                     FullName = conflictTeacher.FullName,
                                 });
-                                if (!data.ConflictMessages.Contains(conflictMessage))
+                                if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
                                 {
                                     data.ConflictMessages.Add(conflictMessage);
                                 }
@@ -434,12 +434,12 @@ namespace griffined_api.Services.CheckAvailableService
                                 Nickname = conflictTeacher.Nickname,
                                 FullName = conflictTeacher.FullName,
                             });
-                            if (!data.ConflictMessages.Contains(conflictMessage))
-                            {
-                                data.ConflictMessages.Add(conflictMessage);
-                            }
-                            data.IsConflict = true;
                         }
+                        if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
+                        {
+                            data.ConflictMessages.Add(conflictMessage);
+                        }
+                        data.IsConflict = true;
                     }
                 }
 
@@ -466,13 +466,8 @@ namespace griffined_api.Services.CheckAvailableService
                                 Nickname = dbTeacher.Nickname,
                                 FullName = dbTeacher.FullName,
                             });
-                            if (!data.ConflictMessages.Contains(conflictMessage))
-                            {
-                                data.ConflictMessages.Add(conflictMessage);
-                            }
-                            data.IsConflict = true;
                         }
-                        if (!data.ConflictMessages.Contains(conflictMessage))
+                        if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message))
                         {
                             data.ConflictMessages.Add(conflictMessage);
                         }
