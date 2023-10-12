@@ -472,9 +472,12 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(m => m.StudySubject)
                                     .ThenInclude(s => s.StudyCourse)
                                         .ThenInclude(s => s.Level)
+                                .Include(m => m.StudyCourse)
+                                    .ThenInclude(s => s.Course)
                                 .Include(m => m.StudySubject)
                                     .ThenInclude(s => s.Subject)
-                                .Where(s => s.TeacherId == teacherId)
+                                .Where(s => s.TeacherId == teacherId && s.StudyCourse.Status != StudyCourseStatus.Pending
+                                && s.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                 .GroupBy(m => m.StudySubject.StudyCourse)
                                 .Select(group => new
                                 {
@@ -1194,7 +1197,9 @@ namespace griffined_api.Services.StudyCourseService
                 StudyCourse = dbStudyCourse,
                 Staff = staff,
                 UpdatedDate = DateTime.Now,
-                Type = StudyCourseHistoryType.Member
+                Type = StudyCourseHistoryType.Member,
+                Method = StudyCourseHistoryMethod.AddMember,
+                Student = student,
             };
 
             string joinedSubject = string.Join(",", subjectList);
@@ -1261,7 +1266,9 @@ namespace griffined_api.Services.StudyCourseService
                 StudyCourse = dbStudyCourse,
                 Staff = staff,
                 UpdatedDate = DateTime.Now,
-                Type = StudyCourseHistoryType.Member
+                Type = StudyCourseHistoryType.Member,
+                Method = StudyCourseHistoryMethod.RemoveMember,
+                Student = student,
             };
 
             string joinedSubject = string.Join(",", subjectList);
@@ -1356,7 +1363,9 @@ namespace griffined_api.Services.StudyCourseService
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
                     Staff = staff,
                     UpdatedDate = DateTime.Now,
-                    Type = StudyCourseHistoryType.Schedule
+                    Type = StudyCourseHistoryType.Schedule,
+                    Method = StudyCourseHistoryMethod.RemoveSchedule,
+                    StudyClass = dbRemoveStudyClass
                 };
 
                 string removedStudyClassHistoryDescription = $"Removed {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
@@ -1413,7 +1422,9 @@ namespace griffined_api.Services.StudyCourseService
                         StudyCourse = dbStudySubject.StudyCourse,
                         Staff = staff,
                         UpdatedDate = DateTime.Now,
-                        Type = StudyCourseHistoryType.Schedule
+                        Type = StudyCourseHistoryType.Schedule,
+                        Method = StudyCourseHistoryMethod.AddSchedule,
+                        StudyClass = studyClass
                     };
 
                     string addedStudyClassHistoryDescription = $"Added {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
