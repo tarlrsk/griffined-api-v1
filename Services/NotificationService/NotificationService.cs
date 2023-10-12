@@ -28,6 +28,7 @@ namespace griffined_api.Services.NotificationService
 
             var dbStaffNotifications = await _context.StaffNotifications
                                         .Where(sn => sn.Staff.Id == staffId)
+                                        .OrderByDescending(sn => sn.DateCreated)
                                         .ToListAsync();
 
             var data = dbStaffNotifications.Select(sn => new StaffNotificationResponseDto
@@ -56,6 +57,7 @@ namespace griffined_api.Services.NotificationService
 
             var dbStudentNotifications = await _context.StudentNotifications
                                         .Where(sn => sn.Student.Id == studentId)
+                                        .OrderByDescending(sn => sn.DateCreated)
                                         .ToListAsync();
 
             var data = dbStudentNotifications.Select(sn => new StudentNotificationResponseDto
@@ -82,6 +84,7 @@ namespace griffined_api.Services.NotificationService
 
             var dbTeacherNotifications = await _context.TeacherNotifications
                                         .Where(tn => tn.Teacher.Id == teacherId)
+                                        .OrderByDescending(sn => sn.DateCreated)
                                         .ToListAsync();
 
             var data = dbTeacherNotifications.Select(tn => new TeacherNotificationResponseDto
@@ -110,7 +113,7 @@ namespace griffined_api.Services.NotificationService
                     int studentId = _firebaseService.GetAzureIdWithToken();
 
                     var dbStudentNotifications = await _context.StudentNotifications
-                                                .Where(sn => sn.Student.Id == studentId && sn.HasRead == false)
+                                                .Where(sn => sn.Student.Id == studentId)
                                                 .ToListAsync();
 
                     foreach (var dbStudentNotification in dbStudentNotifications)
@@ -125,7 +128,7 @@ namespace griffined_api.Services.NotificationService
                     int teacherId = _firebaseService.GetAzureIdWithToken();
 
                     var dbTeacherNotifications = await _context.TeacherNotifications
-                                                .Where(tn => tn.Teacher.Id == teacherId && tn.HasRead == false)
+                                                .Where(tn => tn.Teacher.Id == teacherId)
                                                 .ToListAsync();
 
                     foreach (var dbTeacherNotification in dbTeacherNotifications)
@@ -142,7 +145,7 @@ namespace griffined_api.Services.NotificationService
                     int staffId = _firebaseService.GetAzureIdWithToken();
 
                     var dbStaffNotifications = await _context.StaffNotifications
-                                            .Where(sn => sn.Staff.Id == staffId && sn.HasRead == false)
+                                            .Where(sn => sn.Staff.Id == staffId)
                                             .ToListAsync();
 
                     foreach (var dbStaffNotification in dbStaffNotifications)
@@ -170,7 +173,7 @@ namespace griffined_api.Services.NotificationService
             {
                 case "student":
                     var dbStudentNotification = await _context.StudentNotifications
-                                                .FirstOrDefaultAsync(sn => sn.Id == notificationId && sn.HasRead == false)
+                                                .FirstOrDefaultAsync(sn => sn.Id == notificationId)
                                                 ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
 
                     dbStudentNotification.HasRead = true;
@@ -179,7 +182,7 @@ namespace griffined_api.Services.NotificationService
 
                 case "teacher":
                     var dbTeacherNotification = await _context.TeacherNotifications
-                            .FirstOrDefaultAsync(tn => tn.Id == notificationId && tn.HasRead == false)
+                            .FirstOrDefaultAsync(tn => tn.Id == notificationId)
                             ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
 
                     dbTeacherNotification.HasRead = true;
@@ -190,7 +193,7 @@ namespace griffined_api.Services.NotificationService
                 case "ea":
                 case "oa":
                     var dbStaffNotification = await _context.StaffNotifications
-                                .FirstOrDefaultAsync(sn => sn.Id == notificationId && sn.HasRead == false)
+                                .FirstOrDefaultAsync(sn => sn.Id == notificationId)
                                 ?? throw new NotFoundException($"Notification with ID {notificationId} not found.");
 
                     dbStaffNotification.HasRead = true;
