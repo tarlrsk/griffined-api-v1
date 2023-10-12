@@ -403,8 +403,8 @@ namespace griffined_api.Services.CheckAvailableService
                                 if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
                                 {
                                     data.ConflictMessages.Add(conflictMessage);
+                                    data.IsConflict = true;
                                 }
-                                data.IsConflict = true;
                             }
                         }
                     }
@@ -438,8 +438,8 @@ namespace griffined_api.Services.CheckAvailableService
                         if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message) && !conflictMessage.ConflictMembers.IsNullOrEmpty())
                         {
                             data.ConflictMessages.Add(conflictMessage);
+                            data.IsConflict = true;
                         }
-                        data.IsConflict = true;
                     }
                 }
 
@@ -470,8 +470,8 @@ namespace griffined_api.Services.CheckAvailableService
                         if (!data.ConflictMessages.Any(c => c.Message == conflictMessage.Message))
                         {
                             data.ConflictMessages.Add(conflictMessage);
+                            data.IsConflict = true;
                         }
-                        data.IsConflict = true;
                     }
                 }
 
@@ -546,9 +546,10 @@ namespace griffined_api.Services.CheckAvailableService
                             }
                         }
                         if (!data.ConflictMessages.Any(c => c.Message == conflict.Message))
+                        {
                             data.ConflictMessages.Add(conflict);
-
-                        data.IsConflict = true;
+                            data.IsConflict = true;
+                        }
                     }
                 }
 
@@ -579,9 +580,11 @@ namespace griffined_api.Services.CheckAvailableService
                         }
 
                         if (!data.ConflictMessages.Any(c => c.Message == conflict.Message))
+                        {
                             data.ConflictMessages.Add(conflict);
+                            data.IsConflict = true;
+                        }
 
-                        data.IsConflict = true;
                     }
                 }
             }
