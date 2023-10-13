@@ -25,6 +25,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
             var dbStudyClass = await _context.StudyClasses
                             .Include(c => c.StudyCourse)
                             .Include(c => c.StudySubject)
+                            .Include(c => c.Teacher)
                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
                             ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
 
@@ -62,6 +63,19 @@ namespace griffined_api.Services.ClassCancellationRequestService
             dbStudyClass.Status = ClassStatus.PendingCancellation;
 
             _context.ClassCancellationRequests.Add(classCancellationRequest);
+
+            var teacherNotification = new TeacherNotification
+            {
+                Teacher = dbStudyClass.Teacher,
+                StudyCourse = dbStudyClass.StudyCourse,
+                Title = "Your Class Has Been Cancelled.",
+                Message = $"Your class on {dbStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                DateCreated = DateTime.Now,
+                Type = TeacherNotificationType.ClassCancellation,
+                HasRead = false
+            };
+
+            _context.TeacherNotifications.Add(teacherNotification);
 
             var dbEAs = await _context.Staff
                         .Where(s => s.Role == "ea")
