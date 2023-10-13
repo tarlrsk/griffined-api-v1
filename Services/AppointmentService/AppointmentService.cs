@@ -126,6 +126,13 @@ namespace griffined_api.Services.AppointmentService
                                 .Include(a => a.AppointmentSlots
                                     .Where(s => s.AppointmentSlotStatus != AppointmentSlotStatus.Deleted))
                                     .ThenInclude(s => s.Schedule)
+                                .Include(a => a.AppointmentHistories)
+                                    .ThenInclude(a => a.Teacher)
+                                .Include(a => a.AppointmentHistories)
+                                    .ThenInclude(a => a.AppointmentSlot)
+                                        .ThenInclude(a => a!.Schedule)
+                                .Include(a => a.AppointmentHistories)
+                                    .ThenInclude(a => a.Staff)
                                 .FirstOrDefaultAsync(a => a.Id == appointmentId)
                                 ?? throw new NotFoundException("Appointment is not found.");
 
@@ -161,6 +168,52 @@ namespace griffined_api.Services.AppointmentService
                 });
             }
 
+            foreach (var dbAppointmentHistory in dbAppointment.AppointmentHistories)
+            {
+                var description = "";
+                switch (dbAppointmentHistory.Method)
+                {
+                    case AppointmentHistoryMethod.AddMember:
+                        description = $"Added Teacher {dbAppointmentHistory.Teacher?.FirstName} {dbAppointmentHistory.Teacher?.LastName[0]}. ({dbAppointmentHistory.Teacher?.Nickname}) to {dbAppointment.Title}";
+                        data.History.Add(new AppointmentHistoryResponseDto
+                        {
+                            RecordType = dbAppointmentHistory.Type,
+                            Date = dbAppointmentHistory.UpdatedDate.ToDateTimeString(),
+                            Record = $"[{dbAppointmentHistory.Staff?.Role.ToUpper()} {dbAppointmentHistory.Staff?.Nickname}/{dbAppointmentHistory?.Staff?.FirstName}] {description}"
+                        });
+                        break;
+                    case AppointmentHistoryMethod.RemoveMember:
+                        description = $"Removed Teacher {dbAppointmentHistory.Teacher?.FirstName} {dbAppointmentHistory.Teacher?.LastName[0]}. ({dbAppointmentHistory.Teacher?.Nickname}) to {dbAppointment.Title}";
+                        data.History.Add(new AppointmentHistoryResponseDto
+                        {
+                            RecordType = dbAppointmentHistory.Type,
+                            Date = dbAppointmentHistory.UpdatedDate.ToDateTimeString(),
+                            Record = $"[{dbAppointmentHistory.Staff?.Role.ToUpper()} {dbAppointmentHistory.Staff?.Nickname}/{dbAppointmentHistory?.Staff?.FirstName}] {description}"
+                        });
+                        break;
+                    case AppointmentHistoryMethod.AddSchedule:
+                        description = $"Added {dbAppointment.Title} on {dbAppointmentHistory.AppointmentSlot?.Schedule.Date.ToDateWithDayString()} ({dbAppointmentHistory.AppointmentSlot?.Schedule.FromTime.ToTimeSpanString()} - {dbAppointmentHistory.AppointmentSlot?.Schedule.ToTime.ToTimeSpanString()}).";
+                        data.History.Add(new AppointmentHistoryResponseDto
+                        {
+                            RecordType = dbAppointmentHistory.Type,
+                            Date = dbAppointmentHistory.UpdatedDate.ToDateTimeString(),
+                            Record = $"[{dbAppointmentHistory.Staff?.Role.ToUpper()} {dbAppointmentHistory.Staff?.Nickname}/{dbAppointmentHistory?.Staff?.FirstName}] {description}"
+                        });
+                        break;
+                    case AppointmentHistoryMethod.RemoveSchedule:
+                        description = $"Removed {dbAppointment.Title} on {dbAppointmentHistory.AppointmentSlot?.Schedule.Date.ToDateWithDayString()} ({dbAppointmentHistory.AppointmentSlot?.Schedule.FromTime.ToTimeSpanString()} - {dbAppointmentHistory.AppointmentSlot?.Schedule.ToTime.ToTimeSpanString()}).";
+                        data.History.Add(new AppointmentHistoryResponseDto
+                        {
+                            RecordType = dbAppointmentHistory.Type,
+                            Date = dbAppointmentHistory.UpdatedDate.ToDateTimeString(),
+                            Record = $"[{dbAppointmentHistory.Staff?.Role.ToUpper()} {dbAppointmentHistory.Staff?.Nickname}/{dbAppointmentHistory?.Staff?.FirstName}] {description}"
+                        });
+                        break;
+                    default:
+                        throw new InternalServerException("Something went wrong on History");
+                }
+            }
+
             return new ServiceResponse<AppointmentDetailResponseDto>
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -170,6 +223,9 @@ namespace griffined_api.Services.AppointmentService
 
         public async Task<ServiceResponse<string>> UpdateApoointmentById(int appointmentId, UpdateAppointmentRequestDto updateAppointmentRequestDto)
         {
+            var dbStaff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
+                        ?? throw new NotFoundException($"Current User Notfound");
+
             var dbAppointment = await _context.Appointments
                                 .Include(a => a.AppointmentSlots)
                                     .ThenInclude(s => s.Schedule)
@@ -191,11 +247,20 @@ namespace griffined_api.Services.AppointmentService
                                     && a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted)
                                     ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
                 deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.Deleted;
+                dbAppointment.AppointmentHistories.Add(new AppointmentHistory
+                {
+                    Method = AppointmentHistoryMethod.RemoveSchedule,
+                    Type = AppointmentHistoryType.Schedule,
+                    AppointmentSlot = deleteSchedule,
+                    Staff = dbStaff,
+                    UpdatedDate = DateTime.Now,
+                    Appointment = dbAppointment,
+                });
             }
 
             foreach (var addSchedule in updateAppointmentRequestDto.ScheduleToAdd)
             {
-                dbAppointment.AppointmentSlots.Add(new AppointmentSlot
+                var appointmentSlot = new AppointmentSlot
                 {
                     AppointmentSlotStatus = AppointmentSlotStatus.None,
                     Schedule = new Schedule
@@ -205,6 +270,17 @@ namespace griffined_api.Services.AppointmentService
                         ToTime = addSchedule.ToTime.ToTimeSpan(),
                         Type = ScheduleType.Appointment,
                     },
+                };
+
+                dbAppointment.AppointmentSlots.Add(appointmentSlot);
+                dbAppointment.AppointmentHistories.Add(new AppointmentHistory
+                {
+                    Method = AppointmentHistoryMethod.AddSchedule,
+                    Type = AppointmentHistoryType.Schedule,
+                    AppointmentSlot = appointmentSlot,
+                    Staff = dbStaff,
+                    UpdatedDate = DateTime.Now,
+                    Appointment = dbAppointment,
                 });
             }
 
@@ -212,15 +288,41 @@ namespace griffined_api.Services.AppointmentService
 
             foreach (var deleteMember in deleteMembers)
             {
+                dbAppointment.AppointmentHistories.Add(new AppointmentHistory
+                {
+                    Teacher = deleteMember.Teacher,
+                    Method = AppointmentHistoryMethod.RemoveMember,
+                    Type = AppointmentHistoryType.Member,
+                    Staff = dbStaff,
+                    UpdatedDate = DateTime.Now,
+                    Appointment = dbAppointment,
+                });
                 _context.AppointmentMembers.Remove(deleteMember);
             }
 
-            foreach (var addTeacher in updateAppointmentRequestDto.TeacherToAdd )
+            foreach (var addTeacher in updateAppointmentRequestDto.TeacherToAdd)
             {
                 var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == addTeacher) ?? throw new NotFoundException($"Teacher with ID {addTeacher} is not found.");
-                dbAppointment.AppointmentMembers.Add(new AppointmentMember{
-                    Teacher = dbTeacher,
-                });
+                if (dbAppointment.AppointmentMembers.Any(m => m.Teacher == dbTeacher))
+                {
+                    throw new BadRequestException($"Teacher ID {dbTeacher.Id} is already exist.");
+                }
+                else
+                {
+                    dbAppointment.AppointmentMembers.Add(new AppointmentMember
+                    {
+                        Teacher = dbTeacher,
+                    });
+                    dbAppointment.AppointmentHistories.Add(new AppointmentHistory
+                    {
+                        Teacher = dbTeacher,
+                        Method = AppointmentHistoryMethod.AddMember,
+                        Type = AppointmentHistoryType.Member,
+                        Staff = dbStaff,
+                        UpdatedDate = DateTime.Now,
+                        Appointment = dbAppointment,
+                    });
+                }
             }
 
             await _context.SaveChangesAsync();

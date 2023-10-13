@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231012075307_Fix_AppointmentHistory_Data")]
+    partial class FixAppointmentHistoryData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1123,17 +1126,8 @@ namespace griffinedapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Method")
-                        .HasColumnType("int");
-
                     b.Property<int?>("StaffId")
                         .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StudyClassId")
                         .HasColumnType("int");
 
                     b.Property<int?>("StudyCourseId")
@@ -1149,10 +1143,6 @@ namespace griffinedapi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("StaffId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("StudyClassId");
 
                     b.HasIndex("StudyCourseId");
 
@@ -1839,14 +1829,6 @@ namespace griffinedapi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("griffined_api.Models.Student", "Student")
-                        .WithMany("StudyCourseHistories")
-                        .HasForeignKey("StudentId");
-
-                    b.HasOne("griffined_api.Models.StudyClass", "StudyClass")
-                        .WithMany("StudyCourseHistories")
-                        .HasForeignKey("StudyClassId");
-
                     b.HasOne("griffined_api.Models.StudyCourse", "StudyCourse")
                         .WithMany("StudyCourseHistories")
                         .HasForeignKey("StudyCourseId")
@@ -1854,10 +1836,6 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.Navigation("Staff");
-
-                    b.Navigation("Student");
-
-                    b.Navigation("StudyClass");
 
                     b.Navigation("StudyCourse");
                 });
@@ -2061,8 +2039,6 @@ namespace griffinedapi.Migrations
 
                     b.Navigation("StudentNotifications");
 
-                    b.Navigation("StudyCourseHistories");
-
                     b.Navigation("StudySubjectMember");
                 });
 
@@ -2076,8 +2052,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("Attendances");
 
                     b.Navigation("ClassCancellationRequests");
-
-                    b.Navigation("StudyCourseHistories");
                 });
 
             modelBuilder.Entity("griffined_api.Models.StudyCourse", b =>

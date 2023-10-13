@@ -13,17 +13,23 @@ namespace griffined_api.Models
         public int? AppointmentId { get; set; }
         public int? StaffId { get; set; }
         public int? TeacherId { get; set; }
+        public int? AppointmentSlotId { get; set; }
 
-        public string Description { get; set; } = string.Empty;
+        public AppointmentHistoryMethod Method { get; set; }
+        public AppointmentHistoryType Type { get; set; }
         public DateTime UpdatedDate { get; set; }
 
         [ForeignKey(nameof(AppointmentId))]
         public virtual Appointment Appointment { get; set; } = new Appointment();
 
+        [ForeignKey(nameof(AppointmentSlotId))]
+        public virtual AppointmentSlot? AppointmentSlot { get; set; } 
+
         [ForeignKey(nameof(TeacherId))]
-        public virtual Teacher? Teacher { get; set; } = new Teacher();
+        public virtual Teacher? Teacher { get; set; }
 
         [ForeignKey(nameof(StaffId))]
-        public virtual Staff Staff { get; set; } = new Staff();
+        public virtual Staff? Staff { get; set; }
+
     }
 }

@@ -2007,6 +2007,11 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(s => s!.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Attendances)
+                            .Include(r => r.NewCourseRequests)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s!.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Teacher)
                             .Include(r => r.StudentAddingRequest)
                                 .ThenInclude(r => r.StudyCourse)
                                     .ThenInclude(s => s!.StudySubjects)
@@ -2016,6 +2021,11 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(s => s.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Attendances)
+                            .Include(r => r.StudentAddingRequest)
+                                .ThenInclude(r => r.StudyCourse)
+                                    .ThenInclude(s => s.StudySubjects)
+                                        .ThenInclude(s => s.StudyClasses)
+                                            .ThenInclude(c => c.Teacher)
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
 
@@ -2063,18 +2073,23 @@ namespace griffined_api.Services.RegistrationRequestService
                             }
                         }
 
-                        var teacherNotification = new TeacherNotification
-                        {
-                            Teacher = dbNewCourseRequest.StudyCourse.StudyClasses.First().Teacher,
-                            StudyCourse = dbNewCourseRequest.StudyCourse,
-                            Title = "New Course Assigned",
-                            Message = "You have been assigned to a new course. Click here for more details.",
-                            DateCreated = DateTime.Now,
-                            Type = TeacherNotificationType.NewCourse,
-                            HasRead = false
-                        };
+                        var teachersInCourse = dbNewCourseRequest.StudyCourse.StudySubjects.SelectMany(ss => ss.StudyClasses).Select(sc => sc.Teacher).Distinct().ToList();
 
-                        _context.TeacherNotifications.Add(teacherNotification);
+                        foreach (var teacher in teachersInCourse)
+                        {
+                            var teacherNotification = new TeacherNotification
+                            {
+                                Teacher = teacher,
+                                StudyCourse = dbNewCourseRequest.StudyCourse,
+                                Title = "New Course Assigned",
+                                Message = "You have been assigned to a new course. Click here for more details.",
+                                DateCreated = DateTime.Now,
+                                Type = TeacherNotificationType.NewCourse,
+                                HasRead = false
+                            };
+
+                            _context.TeacherNotifications.Add(teacherNotification);
+                        }
                     }
 
                     if (dbNewCourseRequest.StudyCourse == null)

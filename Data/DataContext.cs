@@ -122,6 +122,10 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.Teacher)
                     .WithMany(e => e.AppointmentHistories)
                     .HasForeignKey(e => e.TeacherId);
+
+                entity.HasOne(e => e.AppointmentSlot)
+                    .WithMany(e => e.AppointmentHistories)
+                    .HasForeignKey(e => e.AppointmentSlotId);
             });
 
             modelBuilder.Entity<AppointmentMember>(entity =>
@@ -144,6 +148,10 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.Appointment)
                     .WithMany(e => e.AppointmentSlots)
                     .HasForeignKey(e => e.AppointmentId);
+
+                entity.HasMany(e => e.AppointmentHistories)
+                    .WithOne(e => e.AppointmentSlot)
+                    .HasForeignKey(e => e.AppointmentSlotId);
 
                 entity.HasOne(e => e.Schedule)
                     .WithOne(e => e.AppointmentSlot)
@@ -436,6 +444,10 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.StudySubjectMember)
                     .WithOne(e => e.Student)
                     .HasForeignKey(e => e.StudentId);
+                
+                entity.HasMany(e => e.StudyCourseHistories)
+                    .WithOne(e => e.Student)
+                    .HasForeignKey(e => e.StudentId);
 
                 entity.HasMany(e => e.ClassCancellationRequests)
                     .WithOne(e => e.Student)
@@ -532,6 +544,10 @@ namespace griffined_api.Data
                     .WithMany(e => e.StudyClasses)
                     .HasForeignKey(e => e.StudySubjectId);
 
+                entity.HasMany(e => e.StudyCourseHistories)
+                    .WithOne(e => e.StudyClass)
+                    .HasForeignKey(e => e.StudyClassId);
+
                 entity.HasOne(e => e.Teacher)
                     .WithMany(e => e.StudyClasses)
                     .HasForeignKey(e => e.TeacherId);
@@ -605,6 +621,10 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.Staff)
                     .WithMany(e => e.StudyCourseHistories)
                     .HasForeignKey(e => e.StaffId);
+
+                entity.HasOne(e => e.StudyClass)
+                    .WithMany(e => e.StudyCourseHistories)
+                    .HasForeignKey(e => e.StudyClassId);
             });
 
             modelBuilder.Entity<StudySubject>(entity =>
