@@ -67,21 +67,21 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         .Where(s => s.Role == "ea")
                         .ToListAsync();
 
-            // foreach (var ea in dbEAs)
-            // {
-            //     var eaNotification = new StaffNotification
-            //     {
-            //         Staff = ea,
-            //         CancellationRequest = classCancellationRequest,
-            //         Title = "New Class Cancellation Request",
-            //         Message = "A new class cancellation request has been requested. Click here for more details.",
-            //         DateCreated = DateTime.Now,
-            //         Type = StaffNotificationType.ClassCancellationRequest,
-            //         HasRead = false
-            //     };
+            foreach (var ea in dbEAs)
+            {
+                var eaNotification = new StaffNotification
+                {
+                    Staff = ea,
+                    CancellationRequest = classCancellationRequest,
+                    Title = "New Class Cancellation Request",
+                    Message = "A new class cancellation request has been requested. Click here for more details.",
+                    DateCreated = DateTime.Now,
+                    Type = StaffNotificationType.ClassCancellationRequest,
+                    HasRead = false
+                };
 
-            //     _context.StaffNotifications.Add(eaNotification);
-            // }
+                _context.StaffNotifications.Add(eaNotification);
+            }
 
             await _context.SaveChangesAsync();
 
