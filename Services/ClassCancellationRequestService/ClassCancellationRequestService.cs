@@ -477,6 +477,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                 .ThenInclude(sc => sc.Course)
                             .Include(s => s.Subject)
                             .Include(s => s.StudyClasses)
+                                .ThenInclude(s => s.Teacher)
                             .Include(s => s.StudyCourse)
                             .Include(s => s.StudySubjectMember)
                                 .ThenInclude(s => s.Student)
@@ -515,18 +516,18 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         });
 
 
-                        // var makeupClassStudentNotification = new StudentNotification
-                        // {
-                        //     Student = dbMember.Student,
-                        //     StudyCourse = dbStudySubject.StudyCourse,
-                        //     Title = "You have been assigned to a make up class",
-                        //     Message = $"You have been assigned to a make up class on {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}).",
-                        //     DateCreated = DateTime.Now,
-                        //     Type = StudentNotificationType.MakeupClass,
-                        //     HasRead = false
-                        // };
+                        var makeupClassStudentNotification = new StudentNotification
+                        {
+                            Student = dbMember.Student,
+                            StudyCourse = dbStudySubject.StudyCourse,
+                            Title = "You have been assigned to a make up class",
+                            Message = $"You have been assigned to a make up class on {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}).",
+                            DateCreated = DateTime.Now,
+                            Type = StudentNotificationType.MakeupClass,
+                            HasRead = false
+                        };
 
-                        // _context.StudentNotifications.Add(makeupClassStudentNotification);
+                        _context.StudentNotifications.Add(makeupClassStudentNotification);
                     }
 
                     dbStudySubject.StudyClasses.Add(studyClass);
@@ -548,41 +549,49 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             var dbRequest = await _context.ClassCancellationRequests
                             .Include(r => r.Student)
+                            .Include(r => r.Teacher)
                             .Include(r => r.StudyCourse)
                             .Include(r => r.StudyClass)
                                 .ThenInclude(sc => sc.Schedule)
                             .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("Request is not found.");
             dbRequest.Status = ClassCancellationRequestStatus.Completed;
 
-            // var studentNotification = new StudentNotification
-            // {
-            //     Student = dbRequest.Student!,
-            //     StudyCourse = dbRequest.StudyCourse,
-            //     Title = "Your Class Has Been Cancelled.",
-            //     Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-            //     DateCreated = DateTime.Now,
-            //     Type = StudentNotificationType.ClassCancellation,
-            //     HasRead = false
-            // };
+            if (dbRequest.RequestedRole == CancellationRole.Student)
+            {
+                var studentNotification = new StudentNotification
+                {
+                    Student = dbRequest.Student!,
+                    StudyCourse = dbRequest.StudyCourse,
+                    Title = "Your Class Has Been Cancelled.",
+                    Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                    DateCreated = DateTime.Now,
+                    Type = StudentNotificationType.ClassCancellation,
+                    HasRead = false
+                };
 
-            // _context.StudentNotifications.Add(studentNotification);
+                _context.StudentNotifications.Add(studentNotification);
+            }
 
-            // var teacherNotification = new TeacherNotification
-            // {
-            //     Teacher = dbRequest.Teacher!,
-            //     StudyCourse = dbRequest.StudyCourse,
-            //     Title = "Your Class Has Been Cancelled.",
-            //     Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-            //     DateCreated = DateTime.Now,
-            //     Type = TeacherNotificationType.ClassCancellation,
-            //     HasRead = false
-            // };
+            var teacherNotification = new TeacherNotification
+            {
+                Teacher = dbRequest.Teacher!,
+                StudyCourse = dbRequest.StudyCourse,
+                Title = "Your Class Has Been Cancelled.",
+                Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                DateCreated = DateTime.Now,
+                Type = TeacherNotificationType.ClassCancellation,
+                HasRead = false
+            };
 
-            // _context.TeacherNotifications.Add(teacherNotification);
+            _context.TeacherNotifications.Add(teacherNotification);
 
             await _context.SaveChangesAsync();
 
-            var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK
+            };
+
             return response;
         }
 
