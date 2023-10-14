@@ -463,7 +463,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
                     Staff = staff,
                     UpdatedDate = DateTime.Now,
-                    Type = StudyCourseHistoryType.Schedule
+                    Type = StudyCourseHistoryType.Schedule,
+                    StudyClass = dbRemoveStudyClass,
                 };
 
                 string removedStudyClassHistoryDescription = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
@@ -537,7 +538,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         StudyCourse = dbStudySubject.StudyCourse,
                         Staff = staff,
                         UpdatedDate = DateTime.Now,
-                        Type = StudyCourseHistoryType.Schedule
+                        Type = StudyCourseHistoryType.Schedule,
+                        StudyClass = studyClass,
                     };
 
                     string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
