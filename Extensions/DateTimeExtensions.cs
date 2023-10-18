@@ -54,5 +54,15 @@ namespace griffined_api.Extensions.DateTimeExtensions
                 throw new ArgumentException("Invalid time format or time string.", nameof(timeString));
             }
         }
+
+        public static TimeSpan Max(TimeSpan t1, TimeSpan t2)
+        {
+            return t1 > t2 ? t1 : t2;
+        }
+
+        public static TimeSpan Min(TimeSpan t1, TimeSpan t2)
+        {
+            return t1 < t2 ? t1 : t2;
+        }
     }
 }

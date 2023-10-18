@@ -13,11 +13,13 @@ namespace griffined_api.Services.ClassCancellationRequestService
     {
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
+        private readonly ITeacherService _teacherService;
 
-        public ClassCancellationRequestService(DataContext context, IFirebaseService firebaseService)
+        public ClassCancellationRequestService(DataContext context, IFirebaseService firebaseService, ITeacherService teacherService)
         {
             _context = context;
             _firebaseService = firebaseService;
+            _teacherService = teacherService;
         }
 
         public async Task<ServiceResponse<string>> AddClassCancellationRequest(int studyClassId)
@@ -485,7 +487,9 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
                             .ToListAsync();
 
-            var dbTeacher = await _context.Teachers.ToListAsync();
+            var dbTeacher = await _context.Teachers
+                            .Include(t => t.WorkTimes)
+                            .ToListAsync();
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
@@ -507,6 +511,15 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Type = ScheduleType.Class,
                         },
                     };
+
+                    var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
+                    foreach(var (WorkType, Hours) in worktypes)
+                    {
+                        studyClass.TeacherShifts.Add(new TeacherShift{
+                            TeacherWorkType = WorkType,
+                            Hours = Hours,
+                        });
+                    }
 
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {

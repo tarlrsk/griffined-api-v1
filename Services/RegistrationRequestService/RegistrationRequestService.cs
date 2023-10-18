@@ -3126,12 +3126,6 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
-                            TeacherWorkType = _teacherService.FindTeacherWorkType(
-                                dbStudyClass.Teacher,
-                                dbStudyClass.Schedule.Date,
-                                dbStudyClass.Schedule.FromTime,
-                                dbStudyClass.Schedule.ToTime
-                            ),
                         };
                         rawSchedules.Add(schedule);
                     }
@@ -3174,11 +3168,6 @@ namespace griffined_api.Services.RegistrationRequestService
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
-                            TeacherWorkType = _teacherService.FindTeacherWorkType(
-                                dbStudyClass.Teacher,
-                                dbStudyClass.Schedule.Date,
-                                dbStudyClass.Schedule.FromTime,
-                                dbStudyClass.Schedule.ToTime),
                         };
                         rawSchedules.Add(schedule);
                     }
