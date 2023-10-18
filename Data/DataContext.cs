@@ -51,6 +51,7 @@ namespace griffined_api.Data
         public virtual DbSet<Subject> Subjects { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         public virtual DbSet<TeacherNotification> TeacherNotifications { get; set; }
+        public virtual DbSet<TeacherShift> TeacherShifts { get; set; }
         public virtual DbSet<WorkTime> WorkTimes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -444,7 +445,7 @@ namespace griffined_api.Data
                 entity.HasMany(e => e.StudySubjectMember)
                     .WithOne(e => e.Student)
                     .HasForeignKey(e => e.StudentId);
-                
+
                 entity.HasMany(e => e.StudyCourseHistories)
                     .WithOne(e => e.Student)
                     .HasForeignKey(e => e.StudentId);
@@ -551,6 +552,10 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.Teacher)
                     .WithMany(e => e.StudyClasses)
                     .HasForeignKey(e => e.TeacherId);
+
+                entity.HasMany(e => e.TeacherShifts)
+                    .WithOne(e => e.StudyClass)
+                    .HasForeignKey(e => e.StudyClassId);
 
                 entity.HasOne(e => e.StudyCourse)
                     .WithMany(e => e.StudyClasses)
@@ -731,6 +736,10 @@ namespace griffined_api.Data
                     .WithOne(e => e.Teacher)
                     .HasForeignKey(e => e.TeacherId);
 
+                entity.HasMany(e => e.TeacherShifts)
+                    .WithOne(e => e.Teacher)
+                    .HasForeignKey(e => e.TeacherId);
+
                 entity.HasMany(e => e.ClassCancellationRequests)
                     .WithOne(e => e.Teacher)
                     .HasForeignKey(e => e.TeacherId);
@@ -751,6 +760,19 @@ namespace griffined_api.Data
                 entity.HasOne(e => e.Appointment)
                     .WithMany(e => e.TeacherNotifications)
                     .HasForeignKey(e => e.AppointmentId);
+            });
+
+            modelBuilder.Entity<TeacherShift>(entity =>
+            {
+               entity.ToTable("TeacherShift");
+
+               entity.HasOne(e => e.Teacher)
+                    .WithMany(e => e.TeacherShifts)
+                    .HasForeignKey(e => e.TeacherId);
+                
+                entity.HasOne(e => e.StudyClass)
+                    .WithMany(e => e.TeacherShifts)
+                    .HasForeignKey(e => e.StudyClassId);
             });
 
             modelBuilder.Entity<WorkTime>(entity =>
