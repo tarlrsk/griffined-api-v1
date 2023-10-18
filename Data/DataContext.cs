@@ -47,7 +47,6 @@ namespace griffined_api.Data
         public virtual DbSet<StudyCourseHistory> StudyCourseHistories { get; set; }
         public virtual DbSet<StudySubject> StudySubjects { get; set; }
         public virtual DbSet<StudySubjectMember> StudySubjectMember { get; set; }
-        public virtual DbSet<StudySubjectTeacher> StudySubjectTeachers { get; set; }
         public virtual DbSet<Subject> Subjects { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         public virtual DbSet<TeacherNotification> TeacherNotifications { get; set; }
@@ -669,26 +668,9 @@ namespace griffined_api.Data
                     .WithMany(e => e.StudySubjectMember)
                     .HasForeignKey(e => e.StudySubjectId);
 
-                entity.HasMany(e => e.StudySubjectTeachers)
-                    .WithOne(e => e.StudySubjectMember)
-                    .HasForeignKey(e => e.StudySubjectMemberId);
-
                 entity.HasMany(e => e.StudentReports)
                     .WithOne(e => e.StudySubjectMember)
                     .HasForeignKey(e => e.StudySubjectMemberId);
-            });
-
-            modelBuilder.Entity<StudySubjectTeacher>(entity =>
-            {
-                entity.ToTable("StudySubjectTeacher");
-
-                entity.HasOne(e => e.StudySubjectMember)
-                    .WithMany(e => e.StudySubjectTeachers)
-                    .HasForeignKey(e => e.StudySubjectMemberId);
-
-                entity.HasOne(e => e.Teacher)
-                    .WithMany(e => e.StudySubjectTeachers)
-                    .HasForeignKey(e => e.TeacherId);
             });
 
             modelBuilder.Entity<Subject>(entity =>
@@ -764,12 +746,12 @@ namespace griffined_api.Data
 
             modelBuilder.Entity<TeacherShift>(entity =>
             {
-               entity.ToTable("TeacherShift");
+                entity.ToTable("TeacherShift");
 
-               entity.HasOne(e => e.Teacher)
-                    .WithMany(e => e.TeacherShifts)
-                    .HasForeignKey(e => e.TeacherId);
-                
+                entity.HasOne(e => e.Teacher)
+                     .WithMany(e => e.TeacherShifts)
+                     .HasForeignKey(e => e.TeacherId);
+
                 entity.HasOne(e => e.StudyClass)
                     .WithMany(e => e.TeacherShifts)
                     .HasForeignKey(e => e.StudyClassId);
