@@ -241,6 +241,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                         .ThenInclude(c => c.Teacher)
                             .Include(r => r.StudyCourse)
                                 .ThenInclude(c => c.StudySubjects)
+                                    .ThenInclude(c => c.StudyClasses)
+                                        .ThenInclude(c => c.TeacherShifts)
+                            .Include(r => r.StudyCourse)
+                                .ThenInclude(c => c.StudySubjects)
                                     .ThenInclude(c => c.StudySubjectMember)
                             .Include(r => r.StudyClass)
                                 .ThenInclude(c => c.Schedule)
@@ -388,6 +392,15 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         TeacherNickname = dbStudyClass.Teacher.Nickname,
                         ClassStatus = dbStudyClass.Status,
                     };
+
+                    foreach(var dbTeacherShift in dbStudyClass.TeacherShifts)
+                    {
+                        schedule.TeacherShifts.Add(new TeacherShiftResponseDto{
+                            Hours = dbTeacherShift.Hours,
+                            TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                        });
+                    }
+
                     rawSchedules.Add(schedule);
                 }
             }

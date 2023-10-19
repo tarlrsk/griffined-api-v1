@@ -146,7 +146,9 @@ namespace griffined_api.Services.StudyCourseService
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.StudyClasses)
                                                 .ThenInclude(c => c.Teacher)
-                                                    .ThenInclude(t => t.WorkTimes)
+                                        .Include(c => c.StudySubjects)
+                                            .ThenInclude(s => s.StudyClasses)
+                                                .ThenInclude(c => c.TeacherShifts)
                                         .Include(c => c.StudySubjects)
                                             .ThenInclude(s => s.StudySubjectMember)
                                                 .ThenInclude(s => s.Student)
@@ -224,6 +226,14 @@ namespace griffined_api.Services.StudyCourseService
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
                             ClassStatus = dbStudyClass.Status,
                         };
+                        foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
+                        {
+                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
+                            {
+                                Hours = dbTeacherShift.Hours,
+                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                            });
+                        }
                         studyCourse.Schedules.Add(schedule);
                     }
                 }
@@ -1032,7 +1042,9 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.StudyClasses)
                                         .ThenInclude(sc => sc.Teacher)
-                                            .ThenInclude(t => t.WorkTimes)
+                                .Include(sc => sc.StudySubjects)
+                                    .ThenInclude(ss => ss.StudyClasses)
+                                        .ThenInclude(sc => sc.TeacherShifts)
                                 .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("Course not found.");
 
             var data = new StaffCoursesDetailResponseDto
@@ -1074,6 +1086,10 @@ namespace griffined_api.Services.StudyCourseService
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                     TeacherNickname = dbStudyClass.Teacher.Nickname,
                     ClassStatus = dbStudyClass.Status,
+                    TeacherShifts = dbStudyClass.TeacherShifts.Select(shift => new TeacherShiftResponseDto{
+                        Hours = shift.Hours,
+                        TeacherWorkType = shift.TeacherWorkType,
+                    }).ToList(),
                 }))
                 .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
                 .ToList()
