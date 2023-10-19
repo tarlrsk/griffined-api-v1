@@ -236,11 +236,6 @@ namespace griffined_api.Services.CheckAvailableService
                         TeacherFirstName = requestedTeacher.FirstName,
                         TeacherLastName = requestedTeacher.LastName,
                         TeacherNickname = requestedTeacher.Nickname,
-                        TeacherWorkType = _teacherService.FindTeacherWorkType(
-                            requestedTeacher,
-                            requestDate,
-                            requestedSchedule.FromTime.ToTimeSpan(),
-                            requestedSchedule.ToTime.ToTimeSpan())
                     });
                 }
                 else
