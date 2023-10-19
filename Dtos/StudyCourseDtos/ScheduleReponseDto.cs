@@ -26,5 +26,6 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string TeacherLastName { get; set; } = string.Empty;
         public string TeacherNickname { get; set; } = string.Empty;
         public TeacherWorkType? TeacherWorkType { get; set; }
+        public List<TeacherShiftResponseDto> TeacherShifts { get; set; } = new List<TeacherShiftResponseDto>();
     }
 }
