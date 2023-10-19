@@ -88,6 +88,7 @@ namespace griffined_api.Services.StudyCourseService
                         {
                             studyClass.TeacherShifts.Add(new TeacherShift
                             {
+                                Teacher = teacher,
                                 TeacherWorkType = WorkType,
                                 Hours = Hours,
                             });
@@ -316,6 +317,7 @@ namespace griffined_api.Services.StudyCourseService
                         {
                             studyClass.TeacherShifts.Add(new TeacherShift
                             {
+                                Teacher = dbTeacher,
                                 TeacherWorkType = WorkType,
                                 Hours = Hours,
                             });
@@ -1424,6 +1426,7 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         studyClass.TeacherShifts.Add(new TeacherShift
                         {
+                            Teacher = dbTeacher,
                             TeacherWorkType = WorkType,
                             Hours = Hours,
                         });

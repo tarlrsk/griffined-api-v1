@@ -258,11 +258,11 @@ namespace griffined_api.Services.TeacherService
         {
             var requestedDay = date.DayOfWeek;
 
-            var workPeriod = dbTeacher.WorkTimes
+            var workPeriods = dbTeacher.WorkTimes
                 .Where(t => t.Day.ToString() == requestedDay.ToString())
                 .ToList();
 
-            if (workPeriod.Count == 0)
+            if (workPeriods.Count == 0)
             {
                 return new List<(TeacherWorkType, double)>
                 {
@@ -273,10 +273,10 @@ namespace griffined_api.Services.TeacherService
             {
                 var workTypeHours = new List<(TeacherWorkType, double)>();
 
-                foreach (var period in workPeriod)
+                foreach (var workPeriod in workPeriods)
                 {
-                    var intersectionStart = DateTimeExtensions.Max(fromTime, period.FromTime);
-                    var intersectionEnd = DateTimeExtensions.Min(toTime, period.ToTime);
+                    var intersectionStart = DateTimeExtensions.Max(fromTime, workPeriod.FromTime);
+                    var intersectionEnd = DateTimeExtensions.Min(toTime, workPeriod.ToTime);
                     var intersectionHours = (intersectionEnd - intersectionStart).TotalHours;
 
                     if (intersectionHours > 0)
@@ -284,29 +284,26 @@ namespace griffined_api.Services.TeacherService
                         workTypeHours.Add((TeacherWorkType.Normal, intersectionHours));
                     }
 
-                    if (fromTime < period.FromTime || toTime > period.ToTime)
+                    if (fromTime < workPeriod.FromTime || toTime > workPeriod.ToTime)
                     {
                         double beforeHours = 0;
                         double afterHours = 0;
 
-                        if (fromTime < period.FromTime)
+                        if (fromTime < workPeriod.FromTime)
                         {
-                            beforeHours = (period.FromTime - fromTime).TotalHours;
+                            beforeHours = (workPeriod.FromTime - fromTime).TotalHours;
                         }
 
-                        if (toTime > period.ToTime)
+                        if (toTime > workPeriod.ToTime)
                         {
-                            afterHours = (toTime - period.ToTime).TotalHours;
+                            afterHours = (toTime - workPeriod.ToTime).TotalHours;
                         }
 
-                        if (beforeHours > 0)
-                        {
-                            workTypeHours.Add((TeacherWorkType.Overtime, beforeHours));
-                        }
+                        var overtimeHours = beforeHours + afterHours;
 
-                        if (afterHours > 0)
+                        if (overtimeHours > 0)
                         {
-                            workTypeHours.Add((TeacherWorkType.Overtime, afterHours));
+                            workTypeHours.Add((TeacherWorkType.Overtime, overtimeHours));
                         }
                     }
                 }

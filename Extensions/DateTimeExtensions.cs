@@ -55,11 +55,13 @@ namespace griffined_api.Extensions.DateTimeExtensions
             }
         }
 
+        // Extension method to find maximum value of the two.
         public static TimeSpan Max(TimeSpan t1, TimeSpan t2)
         {
             return t1 > t2 ? t1 : t2;
         }
 
+        // Extension method to find minimum value of the two.
         public static TimeSpan Min(TimeSpan t1, TimeSpan t2)
         {
             return t1 < t2 ? t1 : t2;

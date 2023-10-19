@@ -516,6 +516,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     foreach(var (WorkType, Hours) in worktypes)
                     {
                         studyClass.TeacherShifts.Add(new TeacherShift{
+                            Teacher = dbTeacher,
                             TeacherWorkType = WorkType,
                             Hours = Hours,
                         });
