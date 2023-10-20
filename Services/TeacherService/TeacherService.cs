@@ -254,7 +254,7 @@ namespace griffined_api.Services.TeacherService
             return response;
         }
 
-        public List<(TeacherWorkType WorkType, double Hours)> GetTeacherWorkTypesWithHours(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
+        public List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
         {
             var requestedDay = date.DayOfWeek;
 
@@ -264,14 +264,17 @@ namespace griffined_api.Services.TeacherService
 
             if (workPeriods.Count == 0)
             {
-                return new List<(TeacherWorkType, double)>
+                return new List<TeacherShiftResponseDto>
                 {
-                    (TeacherWorkType.Special, (toTime - fromTime).TotalHours)
+                    new() {
+                        TeacherWorkType = TeacherWorkType.Special,
+                        Hours = (toTime - fromTime).TotalHours
+                    }
                 };
             }
             else
             {
-                var workTypeHours = new List<(TeacherWorkType, double)>();
+                var workTypeHours = new List<TeacherShiftResponseDto>();
 
                 foreach (var workPeriod in workPeriods)
                 {
@@ -281,7 +284,11 @@ namespace griffined_api.Services.TeacherService
 
                     if (intersectionHours > 0)
                     {
-                        workTypeHours.Add((TeacherWorkType.Normal, intersectionHours));
+                        workTypeHours.Add(new TeacherShiftResponseDto
+                        {
+                            Hours = intersectionHours,
+                            TeacherWorkType = TeacherWorkType.Normal,
+                        });
                     }
 
                     if (fromTime < workPeriod.FromTime || toTime > workPeriod.ToTime)
@@ -303,7 +310,11 @@ namespace griffined_api.Services.TeacherService
 
                         if (overtimeHours > 0)
                         {
-                            workTypeHours.Add((TeacherWorkType.Overtime, overtimeHours));
+                            workTypeHours.Add(new TeacherShiftResponseDto
+                            {
+                                Hours = overtimeHours,
+                                TeacherWorkType = TeacherWorkType.Overtime,
+                            });
                         }
                     }
                 }

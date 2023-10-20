@@ -526,12 +526,12 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     };
 
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
-                    foreach(var (WorkType, Hours) in worktypes)
+                    foreach(var worktype in worktypes)
                     {
                         studyClass.TeacherShifts.Add(new TeacherShift{
                             Teacher = dbTeacher,
-                            TeacherWorkType = WorkType,
-                            Hours = Hours,
+                            TeacherWorkType = worktype.TeacherWorkType,
+                            Hours = worktype.Hours,
                         });
                     }
 

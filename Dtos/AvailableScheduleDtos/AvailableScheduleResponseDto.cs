@@ -16,7 +16,7 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         public int SubjectId { get; set; }
         public string Subject { get; set; } = string.Empty;
         public int? LevelId { get; set; }
-        public string?Level { get; set; }
+        public string? Level { get; set; }
         public int? StudyClassId { get; set; }
         public int? ClassNo { get; set; }
         public string? Room { get; set; }
@@ -29,5 +29,6 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         public string TeacherLastName { get; set; } = string.Empty;
         public string TeacherNickname { get; set; } = string.Empty;
         public TeacherWorkType TeacherWorkType { get; set; }
+        public List<TeacherShiftResponseDto> TeacherShifts { get; set;} = new List<TeacherShiftResponseDto>();
     }
 }
