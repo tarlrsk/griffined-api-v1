@@ -31,10 +31,5 @@ namespace griffined_api.Models
         public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
         public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
         public virtual ICollection<TeacherShift> TeacherShifts { get; set; } = new List<TeacherShift>();
-
-        public static implicit operator Teacher(List<Teacher> v)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

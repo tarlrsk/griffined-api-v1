@@ -500,7 +500,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
                             .ToListAsync();
 
-            var dbTeacher = await _context.Teachers
+            var dbTeachers = await _context.Teachers
                             .Include(t => t.WorkTimes)
                             .ToListAsync();
 
@@ -509,11 +509,12 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == dbStudySubject.Id))
                 {
                     var classCount = dbStudySubject.StudyClasses.Count;
+                    var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
+                                ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found.");
                     var studyClass = new StudyClass
                     {
                         //TODO Class Count
-                        Teacher = dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
-                                ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found."),
+                        Teacher = dbTeacher,
                         StudyCourse = dbStudySubject.StudyCourse,
                         IsMakeup = true,
                         Schedule = new Schedule
@@ -569,7 +570,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         StudyClass = studyClass,
                     };
 
-                    string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
+                    string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
 
                     addHistory.Description = addedStudyClassHistoryDescription;
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
