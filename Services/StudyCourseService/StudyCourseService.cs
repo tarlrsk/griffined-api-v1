@@ -753,9 +753,9 @@ namespace griffined_api.Services.StudyCourseService
 
         public async Task<ServiceResponse<string>> UpdateStudyClassRoom(int studyClassId, string room)
         {
-            var dbClass = await _context.StudyClasses.FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"Class with ID {studyClassId} not found.");
+            var dbClass = await _context.StudyClasses.Include(c => c.Schedule).FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"Class with ID {studyClassId} not found.");
 
-            dbClass.Room = room;
+            dbClass.Schedule.Room = room;
 
             await _context.SaveChangesAsync();
 
@@ -1553,7 +1553,7 @@ namespace griffined_api.Services.StudyCourseService
                     Date = dbStudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                    Room = dbStudyClass.Room,
+                    Room = dbStudyClass.Schedule.Room,
                     StudyCourseType = dbStudyClass.StudyCourse.StudyCourseType,
                     TeacherId = dbStudyClass.Teacher.Id,
                     TeacherFirstName = dbStudyClass.Teacher.FirstName,
