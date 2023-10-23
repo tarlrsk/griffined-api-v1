@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
-    public class ConflictScheduleDetailReponseDto
+    public class ConflictScheduleDetailResponseDto
     {
         public int? ScheduleId { get; set; }
         public string Message { get; set; } = string.Empty;
