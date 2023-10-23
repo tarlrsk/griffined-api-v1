@@ -19,5 +19,6 @@ namespace griffined_api.Models
         public virtual ScheduleType Type { get; set; }
         public virtual StudyClass? StudyClass { get; set; }
         public virtual AppointmentSlot? AppointmentSlot { get; set; }
+        public string? Room { get; set; }
     }
 }

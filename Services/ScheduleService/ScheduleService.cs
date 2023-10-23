@@ -98,7 +98,7 @@ namespace griffined_api.Services.ScheduleService
                         LevelId = dbStudyClass.StudyCourse.Level?.Id,
                         Level = dbStudyClass.StudyCourse.Level?.level,
                         Section = dbStudyClass.StudyCourse.Section,
-                        Room = dbStudyClass.Room,
+                        Room = dbStudyClass.Schedule.Room,
                         StudyCourseType = dbStudyClass.StudyCourse.StudyCourseType,
                         TeacherId = dbStudyClass.Teacher.Id,
                         TeacherFirstName = dbStudyClass.Teacher.FirstName,
@@ -234,7 +234,7 @@ namespace griffined_api.Services.ScheduleService
                                     }
 
                                     hourSlot.FirstHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
-                                    hourSlot.FirstHalf.Room = schedule.StudyClass.Room;
+                                    hourSlot.FirstHalf.Room = schedule.StudyClass.Schedule.Room;
                                 }
                             }
                             else
@@ -266,7 +266,7 @@ namespace griffined_api.Services.ScheduleService
                                         }
 
                                         hourSlot.FirstHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
-                                        hourSlot.FirstHalf.Room = schedule.StudyClass.Room;
+                                        hourSlot.FirstHalf.Room = schedule.StudyClass.Schedule.Room;
                                     }
                                 }
                             }
@@ -303,7 +303,7 @@ namespace griffined_api.Services.ScheduleService
                                     }
 
                                     hourSlot.SecondHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
-                                    hourSlot.SecondHalf.Room = schedule.StudyClass.Room;
+                                    hourSlot.SecondHalf.Room = schedule.StudyClass.Schedule.Room;
                                 }
                             }
                             else
@@ -335,7 +335,7 @@ namespace griffined_api.Services.ScheduleService
                                         }
 
                                         hourSlot.SecondHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
-                                        hourSlot.SecondHalf.Room = schedule.StudyClass.Room;
+                                        hourSlot.SecondHalf.Room = schedule.StudyClass.Schedule.Room;
                                     }
                                 }
                             }
@@ -364,7 +364,7 @@ namespace griffined_api.Services.ScheduleService
             {
                 var dbStudyClass = dbStudyClasses.FirstOrDefault(s => s.Schedule.Id == newRoom.ScheduleId) 
                                     ?? throw new NotFoundException($"Schedule With ID {newRoom.ScheduleId} is not found.");
-                dbStudyClass.Room = newRoom.Room;
+                dbStudyClass.Schedule.Room = newRoom.Room;
             }
 
             await _context.SaveChangesAsync();
