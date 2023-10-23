@@ -55,8 +55,7 @@ namespace griffined_api.Services.CheckAvailableService
                             !requestedSchedule.CurrentStudySubjectId.Contains(c.StudySubject.Id)
                             && (c.TeacherId == requestedSchedule.TeacherId
                             || c.StudySubject.StudySubjectMember.Any(member => requestedSchedule.StudentIds.Contains(member.StudentId)))
-                            && (c.Status == ClassStatus.None
-                            || c.Status == ClassStatus.PendingCancellation))
+                            && c.Status != ClassStatus.Cancelled && c.Status != ClassStatus.Deleted)
                             .ToListAsync();
 
             var dbRequestedStudents = await _context.Students.Where(s => requestedSchedule.StudentIds.Contains(s.Id)).ToListAsync();
