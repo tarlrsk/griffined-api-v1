@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using AutoMapper.Execution;
 using Google.Api;
 using griffined_api.Extensions.DateTimeExtensions;
 
@@ -87,45 +88,68 @@ namespace griffined_api.Services.CheckAvailableService
                     if (requestedSchedule.FromTime.ToTimeSpan().TotalMilliseconds < dbStudyClass.Schedule.ToTime.TotalMilliseconds
                         && dbStudyClass.Schedule.FromTime.TotalMilliseconds < requestedSchedule.ToTime.ToTimeSpan().TotalMilliseconds)
                     {
-                        var conflict = new ConflictScheduleResponseDto
-                        {
-                            Message = dbStudyClass.Schedule.Date.ToDateString() + "("
-                                            + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
-                                            + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
-                                            + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
-                            StudyCourseId = dbStudyClass.StudyCourseId,
-                        };
+                        var conflict = conflictSchedule.FirstOrDefault(s => s.StudyCourseId == dbStudyClass.StudyCourseId);
 
-                        foreach (var dbStudent in dbRequestedStudents)
+                        if (conflict == null)
                         {
-                            if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                            conflict = new ConflictScheduleResponseDto
                             {
-                                conflict.ConflictMembers.Add(new ConflictMemberResponseDto
-                                {
-                                    Role = "Student",
-                                    FirstName = dbStudent.FirstName,
-                                    LastName = dbStudent.LastName,
-                                    Nickname = dbStudent.Nickname,
-                                    FullName = dbStudent.FullName,
-                                });
-                            }
-                        }
-
-                        if (dbStudyClass.TeacherId == requestedTeacher.Id)
-                        {
-                            conflict.ConflictMembers.Add(new ConflictMemberResponseDto
-                            {
-                                Role = "Teacher",
-                                FirstName = requestedTeacher.FirstName,
-                                LastName = requestedTeacher.LastName,
-                                FullName = requestedTeacher.FullName,
-                                Nickname = requestedTeacher.Nickname,
-                            });
-                        }
-
-                        if (!conflictSchedule.Contains(conflict))
-                        {
+                                Message = dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course,
+                                StudyCourseId = dbStudyClass.StudyCourseId,
+                            };
                             conflictSchedule.Add(conflict);
+                        }
+
+                        if (!conflict.ConflictScheduleDetail.Any(s => s.ScheduleId == dbStudyClass.ScheduleId))
+                        {
+                            var conflictScheduleDetail = new ConflictScheduleDetailReponseDto
+                            {
+                                Message = dbStudyClass.Schedule.Date.ToDateString() + "("
+                                                + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
+                                                + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
+                                                + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
+                                ScheduleId = dbStudyClass.ScheduleId,
+                            };
+
+                            foreach (var dbStudent in dbRequestedStudents)
+                            {
+                                if (dbStudyClass.StudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                                {
+                                    var conflictMember = new ConflictMemberResponseDto
+                                    {
+                                        Role = "Student",
+                                        MemberId = dbStudent.Id,
+                                        FirstName = dbStudent.FirstName,
+                                        LastName = dbStudent.LastName,
+                                        Nickname = dbStudent.Nickname,
+                                        FullName = dbStudent.FullName,
+                                    };
+                                    conflictScheduleDetail.ConflictMembers.Add(conflictMember);
+                                    if (!conflict.ConflictMembers.Any(m => m.MemberId == dbStudent.Id && m.Role == "Student"))
+                                    {
+                                        conflict.ConflictMembers.Add(conflictMember);
+                                    }
+                                }
+                            }
+
+                            if (dbStudyClass.TeacherId == requestedTeacher.Id)
+                            {
+                                var conflictMember = new ConflictMemberResponseDto
+                                {
+                                    Role = "Teacher",
+                                    MemberId = requestedTeacher.Id,
+                                    FirstName = requestedTeacher.FirstName,
+                                    LastName = requestedTeacher.LastName,
+                                    FullName = requestedTeacher.FullName,
+                                    Nickname = requestedTeacher.Nickname,
+                                };
+                                conflictScheduleDetail.ConflictMembers.Add(conflictMember);
+                                if (!conflict.ConflictMembers.Any(m => m.MemberId == requestedTeacher.Id && m.Role == "Teacher"))
+                                {
+                                    conflict.ConflictMembers.Add(conflictMember);
+                                }
+                            }
+                            conflict.ConflictScheduleDetail.Add(conflictScheduleDetail);
                         }
                     }
                 }
@@ -145,41 +169,63 @@ namespace griffined_api.Services.CheckAvailableService
                         var conflictLevel = conflictCourse.Levels.FirstOrDefault(c => c.Id == localSchedule.LevelId);
 
 
-                        var conflict = new ConflictScheduleResponseDto
+                        var conflict = conflictSchedule.FirstOrDefault(s => s.Message == "Current Course");
+                        if (conflict == null)
+                        {
+                            conflict = new ConflictScheduleResponseDto
+                            {
+                                Message = "Current Course",
+                            };
+                            conflictSchedule.Add(conflict);
+                        }
+                        var conflictScheduleDetail = new ConflictScheduleDetailReponseDto
                         {
                             Message = localSchedule.Date.ToDateTime().ToDateString() + "("
-                                            + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString()
-                                            + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Current Course: "
-                                            + conflictCourse.course + " "
-                                            + conflictSubject.subject + " " + (conflictLevel?.level ?? ""),
+                                                + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString()
+                                                + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Current Course: "
+                                                + conflictCourse.course + " "
+                                                + conflictSubject.subject + " " + (conflictLevel?.level ?? ""),
                         };
 
-                        foreach (var dbStudent in dbRequestedStudents)
+                        if (!conflict.ConflictScheduleDetail.Any(s => s.Message == conflictScheduleDetail.Message))
                         {
-                            conflict.ConflictMembers.Add(new ConflictMemberResponseDto
+                            foreach (var dbStudent in dbRequestedStudents)
                             {
-                                Role = "Student",
-                                FirstName = dbStudent.FirstName,
-                                LastName = dbStudent.LastName,
-                                Nickname = dbStudent.Nickname,
-                                FullName = dbStudent.FullName,
-                            });
-                        }
+                                var conflictMember = new ConflictMemberResponseDto
+                                {
+                                    Role = "Student",
+                                    MemberId = dbStudent.Id,
+                                    FirstName = dbStudent.FirstName,
+                                    LastName = dbStudent.LastName,
+                                    Nickname = dbStudent.Nickname,
+                                    FullName = dbStudent.FullName,
+                                };
+                                conflictScheduleDetail.ConflictMembers.Add(conflictMember);
+                                if (!conflict.ConflictMembers.Any(m => m.MemberId == dbStudent.Id && m.Role == "Student"))
+                                {
+                                    conflict.ConflictMembers.Add(conflictMember);
+                                }
+                            }
 
-                        if (dbTeacher.Id == requestedTeacher.Id)
-                        {
-                            conflict.ConflictMembers.Add(new ConflictMemberResponseDto
+                            if (dbTeacher.Id == requestedTeacher.Id)
                             {
-                                Role = "Teacher",
-                                FirstName = requestedTeacher.FirstName,
-                                LastName = requestedTeacher.LastName,
-                                FullName = requestedTeacher.FullName,
-                                Nickname = requestedTeacher.Nickname,
-                            });
+                                var conflictMember = new ConflictMemberResponseDto
+                                {
+                                    Role = "Teacher",
+                                    MemberId = requestedTeacher.Id,
+                                    FirstName = requestedTeacher.FirstName,
+                                    LastName = requestedTeacher.LastName,
+                                    FullName = requestedTeacher.FullName,
+                                    Nickname = requestedTeacher.Nickname,
+                                };
+                                conflictScheduleDetail.ConflictMembers.Add(conflictMember);
+                                if (!conflict.ConflictMembers.Any(m => m.MemberId == requestedTeacher.Id && m.Role == "Teacher"))
+                                {
+                                    conflict.ConflictMembers.Add(conflictMember);
+                                }
+                            }
+                            conflict.ConflictScheduleDetail.Add(conflictScheduleDetail);
                         }
-
-                        if (!conflictSchedule.Contains(conflict))
-                            conflictSchedule.Add(conflict);
                     }
                 }
 
@@ -191,27 +237,41 @@ namespace griffined_api.Services.CheckAvailableService
                         if (dbAppointmentSchedule.AppointmentSlot == null)
                             throw new InternalServerException("Something went wrong with Schedule Appointment");
 
-                        var conflict = new ConflictScheduleResponseDto
+
+                        var conflict = conflictSchedule.FirstOrDefault(c => c.AppointmentId == dbAppointmentSchedule.AppointmentSlot.AppointmentId);
+                        if (conflict == null)
+                        {
+                            conflict = new ConflictScheduleResponseDto
+                            {
+                                Message = dbAppointmentSchedule.AppointmentSlot.Appointment.AppointmentType
+                                            + "Appointment: " + dbAppointmentSchedule.AppointmentSlot.Appointment.Title,
+                                AppointmentId = dbAppointmentSchedule.AppointmentSlot.AppointmentId,
+                            };
+                            conflictSchedule.Add(conflict);
+                        }
+
+                        var conflictScheduleDetail = new ConflictScheduleDetailReponseDto
                         {
                             Message = dbAppointmentSchedule.Date.ToDateString() + "("
-                                            + dbAppointmentSchedule.FromTime.ToTimeSpanString() + " - "
-                                            + dbAppointmentSchedule.ToTime.ToTimeSpanString() + "), "
-                                            + dbAppointmentSchedule.AppointmentSlot.Appointment.AppointmentType
-                                            + " Appointment: " + dbAppointmentSchedule.AppointmentSlot.Appointment.Title,
-                            AppointmentId = dbAppointmentSchedule.AppointmentSlot.AppointmentId,
+                                                + dbAppointmentSchedule.FromTime.ToTimeSpanString() + " - "
+                                                + dbAppointmentSchedule.ToTime.ToTimeSpanString() + ")"
                         };
 
-                        conflict.ConflictMembers.Add(new ConflictMemberResponseDto
-                        {
+                        var conflictMember = new ConflictMemberResponseDto{
                             Role = "Teacher",
+                            MemberId = requestedTeacher.Id,
                             FirstName = requestedTeacher.FirstName,
                             LastName = requestedTeacher.LastName,
                             FullName = requestedTeacher.FullName,
                             Nickname = requestedTeacher.Nickname,
-                        });
+                        };
 
-                        if (!conflictAppointment.Contains(conflict))
-                            conflictAppointment.Add(conflict);
+                        conflictScheduleDetail.ConflictMembers.Add(conflictMember);
+                        if (!conflict.ConflictMembers.Any(m => m.MemberId == requestedTeacher.Id && m.Role == "Teacher"))
+                        {
+                            conflict.ConflictMembers.Add(conflictMember);
+                        }
+                        conflict.ConflictScheduleDetail.Add(conflictScheduleDetail);
                     }
                 }
 
@@ -269,6 +329,11 @@ namespace griffined_api.Services.CheckAvailableService
 
             var dbClassSchedules = await _context.Schedules
                                     .Include(s => s.StudyClass)
+                                        .ThenInclude(c => c!.StudyCourse)
+                                            .ThenInclude(c => c.Course)
+                                    .Include(s => s.StudyClass)
+                                        .ThenInclude(c => c!.StudySubject)
+                                            .ThenInclude(c => c.Subject)
                                     .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Class).ToListAsync();
 
             var dbAppointmentSchedules = await _context.Schedules
