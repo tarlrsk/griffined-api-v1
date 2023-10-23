@@ -45,6 +45,8 @@ namespace griffined_api.Services.CheckAvailableService
                                 .ThenInclude(s => s.Subject)
                             .Include(c => c.StudySubject)
                                 .ThenInclude(s => s.StudySubjectMember)
+                            .Include(c => c.StudyCourse)
+                                .ThenInclude(c => c.Course)
                             .Include(c => c.Teacher)
                             .Include(c => c.Schedule)
                             .Where(c => listRequestedDate.Contains(c.Schedule.Date) &&
@@ -91,6 +93,7 @@ namespace griffined_api.Services.CheckAvailableService
                                             + dbStudyClass.Schedule.FromTime.ToTimeSpanString() + " - " + dbStudyClass.Schedule.ToTime.ToTimeSpanString() + "), "
                                             + dbStudyClass.StudyCourse.StudyCourseType + " Course: " + dbStudyClass.StudyCourse.Course.course + " "
                                             + dbStudyClass.StudySubject.Subject.subject + " " + (dbStudyClass.StudyCourse.Level?.level ?? ""),
+                            StudyCourseId = dbStudyClass.StudyCourseId,
                         };
 
                         foreach (var dbStudent in dbRequestedStudents)
@@ -195,6 +198,7 @@ namespace griffined_api.Services.CheckAvailableService
                                             + dbAppointmentSchedule.ToTime.ToTimeSpanString() + "), "
                                             + dbAppointmentSchedule.AppointmentSlot.Appointment.AppointmentType
                                             + " Appointment: " + dbAppointmentSchedule.AppointmentSlot.Appointment.Title,
+                            AppointmentId = dbAppointmentSchedule.AppointmentSlot.AppointmentId,
                         };
 
                         conflict.ConflictMembers.Add(new ConflictMemberResponseDto
