@@ -171,12 +171,12 @@ namespace griffined_api.Services.CheckAvailableService
                         var conflictLevel = conflictCourse.Levels.FirstOrDefault(c => c.Id == localSchedule.LevelId);
 
 
-                        var conflict = conflictSchedule.FirstOrDefault(s => s.Message == "Current Course");
+                        var conflict = conflictSchedule.FirstOrDefault(s => s.Message == "Conflict with Current Course");
                         if (conflict == null)
                         {
                             conflict = new ConflictScheduleResponseDto
                             {
-                                Message = "Current Course",
+                                Message = "Conflict with Current Course",
                             };
                             conflictSchedule.Add(conflict);
                         }
@@ -184,7 +184,7 @@ namespace griffined_api.Services.CheckAvailableService
                         {
                             Message = localSchedule.Date.ToDateTime().ToDateString() + "("
                                                 + localSchedule.FromTime.ToTimeSpan().ToTimeSpanString()
-                                                + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Current Course: "
+                                                + " - " + localSchedule.ToTime.ToTimeSpan().ToTimeSpanString() + "), Conflict with Current Course: "
                                                 + conflictCourse.course + " "
                                                 + conflictSubject.subject + " " + (conflictLevel?.level ?? ""),
                         };
@@ -193,7 +193,7 @@ namespace griffined_api.Services.CheckAvailableService
                         {
                             foreach (var dbStudent in dbRequestedStudents)
                             {
-                                var conflictMember = new ConflictMemberResponseDto
+                                var conflictStudentMember = new ConflictMemberResponseDto
                                 {
                                     Role = "Student",
                                     MemberId = dbStudent.Id,
@@ -202,29 +202,26 @@ namespace griffined_api.Services.CheckAvailableService
                                     Nickname = dbStudent.Nickname,
                                     FullName = dbStudent.FullName,
                                 };
-                                conflictScheduleDetail.ConflictMembers.Add(conflictMember);
+                                conflictScheduleDetail.ConflictMembers.Add(conflictStudentMember);
                                 if (!conflict.ConflictMembers.Any(m => m.MemberId == dbStudent.Id && m.Role == "Student"))
                                 {
-                                    conflict.ConflictMembers.Add(conflictMember);
+                                    conflict.ConflictMembers.Add(conflictStudentMember);
                                 }
                             }
 
-                            if (dbTeacher.Id == requestedTeacher.Id)
+                            var conflictTeacherMember = new ConflictMemberResponseDto
                             {
-                                var conflictMember = new ConflictMemberResponseDto
-                                {
-                                    Role = "Teacher",
-                                    MemberId = requestedTeacher.Id,
-                                    FirstName = requestedTeacher.FirstName,
-                                    LastName = requestedTeacher.LastName,
-                                    FullName = requestedTeacher.FullName,
-                                    Nickname = requestedTeacher.Nickname,
-                                };
-                                conflictScheduleDetail.ConflictMembers.Add(conflictMember);
-                                if (!conflict.ConflictMembers.Any(m => m.MemberId == requestedTeacher.Id && m.Role == "Teacher"))
-                                {
-                                    conflict.ConflictMembers.Add(conflictMember);
-                                }
+                                Role = "Teacher",
+                                MemberId = dbTeacher.Id,
+                                FirstName = dbTeacher.FirstName,
+                                LastName = dbTeacher.LastName,
+                                FullName = dbTeacher.FullName,
+                                Nickname = dbTeacher.Nickname,
+                            };
+                            conflictScheduleDetail.ConflictMembers.Add(conflictTeacherMember);
+                            if (!conflict.ConflictMembers.Any(m => m.MemberId == requestedTeacher.Id && m.Role == "Teacher"))
+                            {
+                                conflict.ConflictMembers.Add(conflictTeacherMember);
                             }
                             conflict.ConflictScheduleDetail.Add(conflictScheduleDetail);
                         }
@@ -744,7 +741,7 @@ namespace griffined_api.Services.CheckAvailableService
                         {
                             Message = requestedStudyClass2.Schedule.Date.ToDateString() + "("
                                             + requestedStudyClass2.Schedule.FromTime.ToTimeSpanString() + " - " + requestedStudyClass2.Schedule.ToTime.ToTimeSpanString() + "), "
-                                            + requestedStudyClass2.StudyCourse.StudyCourseType + " Current Course: " + requestedStudyClass2.StudyCourse.Course.course + " "
+                                            + requestedStudyClass2.StudyCourse.StudyCourseType + " Conflict with Current Course: " + requestedStudyClass2.StudyCourse.Course.course + " "
                                             + requestedStudyClass2.StudySubject.Subject.subject + " " + (requestedStudyClass2.StudyCourse.Level?.level ?? ""),
                         };
 
