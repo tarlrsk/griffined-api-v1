@@ -10,6 +10,6 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         public int? StudyCourseId { get; set; }
         public int? AppointmentId { get; set; }
         public List<ConflictMemberResponseDto> ConflictMembers { get; set; } = new List<ConflictMemberResponseDto>();
-        public List<ConflictScheduleDetailReponseDto> ConflictScheduleDetail { get; set; } = new List<ConflictScheduleDetailReponseDto>();
+        public List<ConflictScheduleDetailResponseDto> ConflictScheduleDetail { get; set; } = new List<ConflictScheduleDetailResponseDto>();
     }
 }
