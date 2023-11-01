@@ -12,6 +12,8 @@ namespace griffined_api.Dtos.ScheduleDtos
         public int? Id { get; set; }
         public int? TeacherId { get; set; }
         public string? Teacher { get; set; }
+        public double Ot { get; set; }
+        public double Sp { get; set; }
         public List<DailyCalendarHalfSlotResponseDto?> HourSlots { get; set; } = new List<DailyCalendarHalfSlotResponseDto?>();
     }
 }
