@@ -340,7 +340,7 @@ namespace griffined_api.Services.ScheduleService
                                     hourSlot.SecondHalf = new DailyCalendarSlotResponseDto
                                     {
                                         ScheduleId = schedule.Id,
-                                        Time = $"{schedule.FromTime.ToTimeSpanString()} - {schedule.ToTime.ToTimeSpanString()}",
+                                        Time = $"{schedule.FromTime.ToTimeSpanString()}-{schedule.ToTime.ToTimeSpanString()}",
                                     };
 
                                     if (schedule.Type == ScheduleType.Appointment)
