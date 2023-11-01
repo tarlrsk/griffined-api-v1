@@ -13,5 +13,6 @@ namespace griffined_api.Dtos.ScheduleDtos
         public string Name { get; set; } = string.Empty;
         public string? Room { get; set; }
         public DailyCalendarType Type { get; set; }
+        public string Time { get; set; } = string.Empty;
     }
 }
