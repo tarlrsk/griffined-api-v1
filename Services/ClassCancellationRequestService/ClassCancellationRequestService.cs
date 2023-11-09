@@ -13,11 +13,13 @@ namespace griffined_api.Services.ClassCancellationRequestService
     {
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
+        private readonly ITeacherService _teacherService;
 
-        public ClassCancellationRequestService(DataContext context, IFirebaseService firebaseService)
+        public ClassCancellationRequestService(DataContext context, IFirebaseService firebaseService, ITeacherService teacherService)
         {
             _context = context;
             _firebaseService = firebaseService;
+            _teacherService = teacherService;
         }
 
         public async Task<ServiceResponse<string>> AddClassCancellationRequest(int studyClassId)
@@ -239,6 +241,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                         .ThenInclude(c => c.Teacher)
                             .Include(r => r.StudyCourse)
                                 .ThenInclude(c => c.StudySubjects)
+                                    .ThenInclude(c => c.StudyClasses)
+                                        .ThenInclude(c => c.TeacherShifts)
+                            .Include(r => r.StudyCourse)
+                                .ThenInclude(c => c.StudySubjects)
                                     .ThenInclude(c => c.StudySubjectMember)
                             .Include(r => r.StudyClass)
                                 .ThenInclude(c => c.Schedule)
@@ -368,7 +374,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         StudyCourseId = dbStudySubject.StudyCourse.Id,
                         StudyClassId = dbStudyClass.Id,
                         ClassNo = dbStudyClass.ClassNumber,
-                        Room = dbStudyClass.Room,
+                        Room = dbStudyClass.Schedule.Room,
                         Date = dbStudyClass.Schedule.Date.ToDateString(),
                         FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                         ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
@@ -386,6 +392,15 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         TeacherNickname = dbStudyClass.Teacher.Nickname,
                         ClassStatus = dbStudyClass.Status,
                     };
+
+                    foreach(var dbTeacherShift in dbStudyClass.TeacherShifts)
+                    {
+                        schedule.TeacherShifts.Add(new TeacherShiftResponseDto{
+                            Hours = dbTeacherShift.Hours,
+                            TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                        });
+                    }
+
                     rawSchedules.Add(schedule);
                 }
             }
@@ -485,18 +500,21 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
                             .ToListAsync();
 
-            var dbTeacher = await _context.Teachers.ToListAsync();
+            var dbTeachers = await _context.Teachers
+                            .Include(t => t.WorkTimes)
+                            .ToListAsync();
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
                 foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == dbStudySubject.Id))
                 {
                     var classCount = dbStudySubject.StudyClasses.Count;
+                    var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
+                                ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found.");
                     var studyClass = new StudyClass
                     {
                         //TODO Class Count
-                        Teacher = dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
-                                ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found."),
+                        Teacher = dbTeacher,
                         StudyCourse = dbStudySubject.StudyCourse,
                         IsMakeup = true,
                         Schedule = new Schedule
@@ -507,6 +525,16 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Type = ScheduleType.Class,
                         },
                     };
+
+                    var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
+                    foreach(var worktype in worktypes)
+                    {
+                        studyClass.TeacherShifts.Add(new TeacherShift{
+                            Teacher = dbTeacher,
+                            TeacherWorkType = worktype.TeacherWorkType,
+                            Hours = worktype.Hours,
+                        });
+                    }
 
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
@@ -542,7 +570,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         StudyClass = studyClass,
                     };
 
-                    string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeacher.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
+                    string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
 
                     addHistory.Description = addedStudyClassHistoryDescription;
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);

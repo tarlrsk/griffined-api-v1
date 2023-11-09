@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231018133748_Add_Hours_To_TeacherShift")]
+    partial class AddHoursToTeacherShift
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -616,9 +619,6 @@ namespace griffinedapi.Migrations
                     b.Property<TimeSpan>("FromTime")
                         .HasColumnType("time");
 
-                    b.Property<string>("Room")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<TimeSpan>("ToTime")
                         .HasColumnType("time");
 
@@ -1029,6 +1029,9 @@ namespace griffinedapi.Migrations
 
                     b.Property<bool>("IsMakeup")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Room")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ScheduleId")
                         .IsRequired()

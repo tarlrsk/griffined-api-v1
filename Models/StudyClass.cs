@@ -17,7 +17,6 @@ namespace griffined_api.Models
 
         public int ClassNumber { get; set; }
 
-        public string? Room { get; set; }
         public virtual ClassStatus Status { get; set; }
         public bool IsMakeup { get; set; } = false;
 
@@ -36,5 +35,6 @@ namespace griffined_api.Models
         public virtual ICollection<StudentAttendance> Attendances { get; set; } = new List<StudentAttendance>();
         public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
         public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; } = new List<StudyCourseHistory>();
+        public virtual ICollection<TeacherShift> TeacherShifts { get; set; } = new List<TeacherShift>();
     }
 }
