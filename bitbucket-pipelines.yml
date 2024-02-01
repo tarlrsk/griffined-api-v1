@@ -11,7 +11,7 @@ image: mcr.microsoft.com/dotnet/sdk:7.0
 definitions:
   steps:
     - step: &build
-        name: 'Dotnet Core Build'
+        name: "Dotnet Core Build"
         caches:
           - dotnetcore
         script:
@@ -24,23 +24,23 @@ definitions:
           - cd ./bin/Publish
           - zip -r main.zip .
         artifacts:
-          - 'bin/Publish/main.zip'
+          - "bin/Publish/main.zip"
     - step: &buildNoZip
-        name: 'Dotnet Core Build'
+        name: "Dotnet Core Build"
         caches:
           - dotnetcore
         script:
           - dotnet build
           - dotnet publish -c Release -o ./bin/Publish
         artifacts:
-          - 'bin/Publish/main.zip'
+          - "bin/Publish/main.zip"
     - step: &updateDB
         name: Update Database
         trigger: manual
         caches:
           - dotnetcore
         script:
-          - dotnet tool install --global dotnet-ef
+          - dotnet tool install --global dotnet-ef --version 7.0.3
           - export PATH="$PATH:/root/.dotnet/tools"
           - dotnet-ef database update
     - step: &prod_env
@@ -61,8 +61,8 @@ definitions:
             EOF
 
         artifacts:
-          - 'firebase-config.json'
-          - '.env'
+          - "firebase-config.json"
+          - ".env"
     - step: &stg_env
         name: Add Firebase Credential & Environment File
         script:
@@ -80,55 +80,54 @@ definitions:
             FIREBASE_BUCKET="$STG_FIREBASE_BUCKET"
             EOF
         artifacts:
-          - 'firebase-config.json'
-          - '.env'
-          
+          - "firebase-config.json"
+          - ".env"
+
 pipelines:
   pull-requests:
-    '{feature/*,refactor/*,update/*,migration/*,migrations/*,fix/*,test/*}':
+    "{feature/*,refactor/*,update/*,migration/*,migrations/*,fix/*,test/*}":
       - step: *stg_env
       - step: *buildNoZip
-    '{hotfix/*}':
+    "{hotfix/*}":
       - step: *prod_env
       - step: *buildNoZip
-    
+
   branches:
-    '{main}':
+    "{main}":
       - step: *prod_env
       - step: *build
       - parallel:
-        - step: *updateDB
-        - step:
-            name: Deploy Azure App Service Production
-            deployment: production
-            trigger: manual
-            script:
-              - pipe: atlassian/azure-web-apps-deploy:1.1.0
-                variables:
-                  AZURE_APP_ID: $AZURE_APP_ID
-                  AZURE_PASSWORD: $AZURE_PASSWORD
-                  AZURE_TENANT_ID: $AZURE_TENANT_ID
-                  AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
-                  AZURE_APP_NAME: $AZURE_APP_NAME
-                  ZIP_FILE: 'bin/Publish/main.zip'
-                  DEBUG: 'true'
-    '{develop}':
+          - step: *updateDB
+          - step:
+              name: Deploy Azure App Service Production
+              deployment: production
+              trigger: manual
+              script:
+                - pipe: atlassian/azure-web-apps-deploy:1.1.0
+                  variables:
+                    AZURE_APP_ID: $AZURE_APP_ID
+                    AZURE_PASSWORD: $AZURE_PASSWORD
+                    AZURE_TENANT_ID: $AZURE_TENANT_ID
+                    AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+                    AZURE_APP_NAME: $AZURE_APP_NAME
+                    ZIP_FILE: "bin/Publish/main.zip"
+                    DEBUG: "true"
+    "{develop}":
       - step: *stg_env
       - step: *build
       - parallel:
-        - step: *updateDB
-        - step:
-            name: Deploy Azure App Service Staging
-            deployment: staging
-            trigger: manual
-            script:
-              - pipe: atlassian/azure-web-apps-deploy:1.1.0
-                variables:
-                  AZURE_APP_ID: $AZURE_APP_ID
-                  AZURE_PASSWORD: $AZURE_PASSWORD
-                  AZURE_TENANT_ID: $AZURE_TENANT_ID
-                  AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
-                  AZURE_APP_NAME: $AZURE_APP_NAME
-                  ZIP_FILE: 'bin/Publish/main.zip'
-                  DEBUG: 'true'
-                
+          - step: *updateDB
+          - step:
+              name: Deploy Azure App Service Staging
+              deployment: staging
+              trigger: manual
+              script:
+                - pipe: atlassian/azure-web-apps-deploy:1.1.0
+                  variables:
+                    AZURE_APP_ID: $AZURE_APP_ID
+                    AZURE_PASSWORD: $AZURE_PASSWORD
+                    AZURE_TENANT_ID: $AZURE_TENANT_ID
+                    AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+                    AZURE_APP_NAME: $AZURE_APP_NAME
+                    ZIP_FILE: "bin/Publish/main.zip"
+                    DEBUG: "true"
