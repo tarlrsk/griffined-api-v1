@@ -639,9 +639,9 @@ namespace griffined_api.Services.StudentService
                 {
                     { "displayName", student.FullName },
                     { "email", student.Email },
-                    { "id", student.StudentCode },
+                    { "id", student.StudentCode! },
                     { "role", "student" },
-                    { "uid", student.FirebaseId }
+                    { "uid", student.FirebaseId! }
                 };
             await docRef.SetAsync(studentDoc);
         }

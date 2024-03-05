@@ -188,7 +188,7 @@ namespace griffined_api.Services.StudyCourseService
                             studyCourse.Members.Add(new StudentNameResponseDto
                             {
                                 StudentId = dbMember.Student.Id,
-                                StudentCode = dbMember.Student.StudentCode,
+                                StudentCode = dbMember.Student.StudentCode!,
                                 FirstName = dbMember.Student.FirstName,
                                 LastName = dbMember.Student.LastName,
                                 FullName = dbMember.Student.FullName,
@@ -971,7 +971,7 @@ namespace griffined_api.Services.StudyCourseService
                         var reportDto = new StudySubjectMemberWithReportsResponseDto
                         {
                             StudentId = dbStudySubjectMember.Student.Id,
-                            StudentCode = dbStudySubjectMember.Student.StudentCode,
+                            StudentCode = dbStudySubjectMember.Student.StudentCode!,
                             StudentFirstName = dbStudySubjectMember.Student.FirstName,
                             StudentLastName = dbStudySubjectMember.Student.LastName,
                             StudentNickname = dbStudySubjectMember.Student.Nickname,
@@ -1125,7 +1125,7 @@ namespace griffined_api.Services.StudyCourseService
                             .Select(group => new StudentStudySubjectMemberResponseDto
                             {
                                 StudentId = group.First().Student.Id,
-                                StudentCode = group.First().Student.StudentCode,
+                                StudentCode = group.First().Student.StudentCode!,
                                 StudentFirstName = group.First().Student.FirstName,
                                 StudentLastName = group.First().Student.LastName,
                                 StudentNickname = group.First().Student.Nickname,

@@ -206,7 +206,7 @@ namespace griffined_api.Services.TeacherService
                     { "email", staff.Email },
                     { "id", staff.Id },
                     { "role", "teacher" },
-                    { "uid", staff.FirebaseId}
+                    { "uid", staff.FirebaseId!}
 
                 };
             await docRef.SetAsync(staffDoc);

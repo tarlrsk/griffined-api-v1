@@ -428,7 +428,7 @@ namespace griffined_api.Services.CheckAvailableService
                 {
                     IsConflict = isConflict,
                     TeacherId = dbTeacher.Id,
-                    FirebaseId = dbTeacher.FirebaseId,
+                    FirebaseId = dbTeacher.FirebaseId!,
                     FirstName = dbTeacher.FirstName,
                     LastName = dbTeacher.LastName,
                     FullName = dbTeacher.FullName,

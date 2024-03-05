@@ -396,7 +396,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     var studentDto = new StudentNameResponseDto
                     {
                         StudentId = student.Student.Id,
-                        StudentCode = student.Student.StudentCode,
+                        StudentCode = student.Student.StudentCode!,
                         FirstName = student.Student.FirstName,
                         LastName = student.Student.LastName,
                         FullName = student.Student.FullName,
@@ -712,7 +712,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -974,7 +974,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -1246,7 +1246,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -1344,7 +1344,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -1536,7 +1536,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -1730,7 +1730,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -1994,7 +1994,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -2618,7 +2618,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
@@ -2873,7 +2873,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var member = new StudentNameResponseDto()
                 {
                     StudentId = dbMember.Student.Id,
-                    StudentCode = dbMember.Student.StudentCode,
+                    StudentCode = dbMember.Student.StudentCode!,
                     FirstName = dbMember.Student.FirstName,
                     LastName = dbMember.Student.LastName,
                     FullName = dbMember.Student.FullName,
