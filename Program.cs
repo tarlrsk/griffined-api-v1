@@ -54,6 +54,7 @@ using FirebaseAdmin;
 
 // Background Tasks
 using Quartz;
+using griffined_api.Services.ClientFirebaseService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +82,7 @@ builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IStudentReportService, StudentReportService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IStudyCourseService, StudyCourseService>();
+builder.Services.AddScoped<IClientFirebaseService, ClientFirebaseService>();
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>

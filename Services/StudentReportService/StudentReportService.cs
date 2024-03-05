@@ -127,7 +127,7 @@ namespace griffined_api.Services.StudentReportService
                 var studentDto = new StudentReportWithStudentResponseDto
                 {
                     StudentId = dbStudySubjectMember.Student.Id,
-                    StudentCode = dbStudySubjectMember.Student.StudentCode,
+                    StudentCode = dbStudySubjectMember.Student.StudentCode!,
                     FirstName = dbStudySubjectMember.Student.FirstName,
                     LastName = dbStudySubjectMember.Student.LastName,
                     Nickname = dbStudySubjectMember.Student.Nickname,
@@ -257,7 +257,7 @@ namespace griffined_api.Services.StudentReportService
                 var studentDto = new StudentReportWithStudentResponseDto
                 {
                     StudentId = dbStudySubjectMember.Student.Id,
-                    StudentCode = dbStudySubjectMember.Student.StudentCode,
+                    StudentCode = dbStudySubjectMember.Student.StudentCode!,
                     FirstName = dbStudySubjectMember.Student.FirstName,
                     LastName = dbStudySubjectMember.Student.LastName,
                     Nickname = dbStudySubjectMember.Student.Nickname,

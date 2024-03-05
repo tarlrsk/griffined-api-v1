@@ -11,8 +11,8 @@ namespace griffined_api.Models
     {
         public int Id { get; set; }
 
-        public string StudentCode { get; set; } = string.Empty;
-        public string FirebaseId { get; set; } = string.Empty;
+        public string? StudentCode { get; set; }
+        public string? FirebaseId { get; set; }
 
         public string Title { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
@@ -42,11 +42,11 @@ namespace griffined_api.Models
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
 
-        public StudentStatus Status { get; set; } = StudentStatus.Inactive;
+        public StudentStatus? Status { get; set; }
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public DateTime ExpiryDate { get; set; } = new DateTime(2030, 12, 31);
+        public DateTime? ExpiryDate { get; set; }
 
         public virtual ProfilePicture? ProfilePicture { get; set; }
         public virtual Parent? Parent { get; set; }
