@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Models
 {
     [ApiController]
-    [Route("api/v1/teacher")]
+    [Route("api/v1/teachers")]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService _teacherService;
@@ -39,7 +39,7 @@ namespace griffined_api.Models
             return Ok(response);
         }
 
-        [HttpPost, Authorize(Roles = "oa, ea, master")]
+        [HttpPost, Authorize(Roles = "oa, master")]
         public async Task<ActionResult> AddTeacher(AddTeacherDto newTeacher)
         {
             return Ok(await _teacherService.AddTeacher(newTeacher));

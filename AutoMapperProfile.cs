@@ -27,12 +27,15 @@ namespace griffined_api
 
             // Teacher
             CreateMap<Teacher, GetTeacherDto>()
-                .ForMember(dest => dest.WorkTimes, opt => opt.MapFrom(src => src.WorkTimes));
+                .ForMember(dest => dest.Mandays, opt => opt.MapFrom(src => src.Mandays));
             CreateMap<AddTeacherDto, Teacher>();
             CreateMap<Teacher, AvailableTeacherResponseDto>();
             CreateMap<UpdateTeacherDto, Teacher>();
 
             // WorkTime
+            CreateMap<Manday, MandayResponseDto>()
+                .ForMember(dest => dest.WorkDays, opt => opt.MapFrom(src => src.WorkTimes));
+            CreateMap<MandayRequestDto, Manday>();
             CreateMap<WorkTime, WorkTimeResponseDto>();
             CreateMap<WorkTimeRequestDto, WorkTime>();
 

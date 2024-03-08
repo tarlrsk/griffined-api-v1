@@ -1,15 +1,34 @@
+using Newtonsoft.Json;
+
 namespace griffined_api.Dtos.WorkTimeDtos
 {
-    public class WorkTimeRequestDto
+    public class MandayRequestDto
     {
+        [Required]
+        [JsonProperty("year")]
+        public int Year { get; set; }
 
         [Required]
+        [JsonProperty("workDays")]
+        public IEnumerable<WorkTimeRequestDto> WorkDays { get; set; } = new List<WorkTimeRequestDto>();
+    }
+
+    public class WorkTimeRequestDto
+    {
+        [Required]
+        [JsonProperty("day")]
         public Enums.DayOfWeek Day { get; set; }
-        private TimeOnly _fromTime;
+
         [Required]
-        public string FromTime { get { return _fromTime.ToString("HH:mm"); } set { _fromTime = TimeOnly.Parse(value); } }
-        private TimeOnly _toTime;
+        [JsonProperty("quarter")]
+        public int Quarter { get; set; }
+
         [Required]
-        public string ToTime { get { return _toTime.ToString("HH:mm"); } set { _toTime = TimeOnly.Parse(value); } }
+        [JsonProperty("fromTime")]
+        public TimeSpan FromTime { get; set; }
+
+        [Required]
+        [JsonProperty("toTime")]
+        public TimeSpan ToTime { get; set; }
     }
 }
