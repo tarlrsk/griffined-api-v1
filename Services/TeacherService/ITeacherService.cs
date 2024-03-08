@@ -68,6 +68,15 @@ namespace griffined_api.Services.TeacherService
         /// <param name="password"></param>
         /// <returns></returns>
         Task<ServiceResponse<string>> ChangePasswordWithFirebaseId(string uid, ChangeUserPasswordDto password);
-        // List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime);
+
+        /// <summary>
+        /// Get teacher work types with given parameters.
+        /// </summary>
+        /// <param name="dbTeacher"></param>
+        /// <param name="date"></param>
+        /// <param name="fromTime"></param>
+        /// <param name="toTime"></param>
+        /// <returns></returns>
+        List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime);
     }
 }

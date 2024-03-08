@@ -305,74 +305,75 @@ namespace griffined_api.Services.TeacherService
             return response;
         }
 
-        // public List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher dbTeacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
-        // {
-        //     var requestedDay = date.DayOfWeek;
+        public List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher teacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
+        {
+            var requestedDay = date.DayOfWeek;
 
-        //     var workPeriods = dbTeacher.WorkTimes
-        //         .Where(t => t.Day.ToString() == requestedDay.ToString())
-        //         .ToList();
+            var workPeriods = teacher.Mandays
+                                     .SelectMany(x => x.WorkTimes)
+                                     .Where(t => t.Day.ToString() == requestedDay.ToString())
+                                     .ToList();
 
-        //     if (workPeriods.Count == 0)
-        //     {
-        //         return new List<TeacherShiftResponseDto>
-        //         {
-        //             new() {
-        //                 TeacherWorkType = TeacherWorkType.Special,
-        //                 Hours = (toTime - fromTime).TotalHours
-        //             }
-        //         };
-        //     }
-        //     else
-        //     {
-        //         var workTypeHours = new List<TeacherShiftResponseDto>();
+            if (workPeriods.Count == 0)
+            {
+                return new List<TeacherShiftResponseDto>
+                {
+                    new() {
+                        TeacherWorkType = TeacherWorkType.Special,
+                        Hours = (toTime - fromTime).TotalHours
+                    }
+                };
+            }
+            else
+            {
+                var workTypeHours = new List<TeacherShiftResponseDto>();
 
-        //         foreach (var workPeriod in workPeriods)
-        //         {
-        //             var intersectionStart = DateTimeExtensions.Max(fromTime, workPeriod.FromTime);
-        //             var intersectionEnd = DateTimeExtensions.Min(toTime, workPeriod.ToTime);
-        //             var intersectionHours = (intersectionEnd - intersectionStart).TotalHours;
+                foreach (var workPeriod in workPeriods)
+                {
+                    var intersectionStart = DateTimeExtensions.Max(fromTime, workPeriod.FromTime);
+                    var intersectionEnd = DateTimeExtensions.Min(toTime, workPeriod.ToTime);
+                    var intersectionHours = (intersectionEnd - intersectionStart).TotalHours;
 
-        //             if (intersectionHours > 0)
-        //             {
-        //                 workTypeHours.Add(new TeacherShiftResponseDto
-        //                 {
-        //                     Hours = intersectionHours,
-        //                     TeacherWorkType = TeacherWorkType.Normal,
-        //                 });
-        //             }
+                    if (intersectionHours > 0)
+                    {
+                        workTypeHours.Add(new TeacherShiftResponseDto
+                        {
+                            Hours = intersectionHours,
+                            TeacherWorkType = TeacherWorkType.Normal,
+                        });
+                    }
 
-        //             if (fromTime < workPeriod.FromTime || toTime > workPeriod.ToTime)
-        //             {
-        //                 double beforeHours = 0;
-        //                 double afterHours = 0;
+                    if (fromTime < workPeriod.FromTime || toTime > workPeriod.ToTime)
+                    {
+                        double beforeHours = 0;
+                        double afterHours = 0;
 
-        //                 if (fromTime < workPeriod.FromTime)
-        //                 {
-        //                     beforeHours = (workPeriod.FromTime - fromTime).TotalHours;
-        //                 }
+                        if (fromTime < workPeriod.FromTime)
+                        {
+                            beforeHours = (workPeriod.FromTime - fromTime).TotalHours;
+                        }
 
-        //                 if (toTime > workPeriod.ToTime)
-        //                 {
-        //                     afterHours = (toTime - workPeriod.ToTime).TotalHours;
-        //                 }
+                        if (toTime > workPeriod.ToTime)
+                        {
+                            afterHours = (toTime - workPeriod.ToTime).TotalHours;
+                        }
 
-        //                 var overtimeHours = beforeHours + afterHours;
+                        var overtimeHours = beforeHours + afterHours;
 
-        //                 if (overtimeHours > 0)
-        //                 {
-        //                     workTypeHours.Add(new TeacherShiftResponseDto
-        //                     {
-        //                         Hours = overtimeHours,
-        //                         TeacherWorkType = TeacherWorkType.Overtime,
-        //                     });
-        //                 }
-        //             }
-        //         }
+                        if (overtimeHours > 0)
+                        {
+                            workTypeHours.Add(new TeacherShiftResponseDto
+                            {
+                                Hours = overtimeHours,
+                                TeacherWorkType = TeacherWorkType.Overtime,
+                            });
+                        }
+                    }
+                }
 
-        //         return workTypeHours;
-        //     }
-        // }
+                return workTypeHours;
+            }
+        }
 
         private static IEnumerable<Manday> MapMandayDTOToModel(
                        IEnumerable<MandayRequestDto> mandays,
