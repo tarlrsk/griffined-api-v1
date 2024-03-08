@@ -24,6 +24,7 @@ namespace griffined_api.Data
         public virtual DbSet<RegistrationRequestComment> RegistrationRequestComments { get; set; }
         public virtual DbSet<Course> Courses { get; set; }
         public virtual DbSet<Level> Levels { get; set; }
+        public virtual DbSet<Manday> Mandays { get; set; }
         public virtual DbSet<NewCourseRequest> NewCourseRequests { get; set; }
         public virtual DbSet<NewCourseSubjectRequest> NewCourseSubjectRequests { get; set; }
         public virtual DbSet<Parent> Parents { get; set; }
@@ -694,7 +695,7 @@ namespace griffined_api.Data
             {
                 entity.ToTable("Teacher");
 
-                entity.HasMany(e => e.WorkTimes)
+                entity.HasMany(e => e.Mandays)
                     .WithOne(e => e.Teacher)
                     .HasForeignKey(e => e.TeacherId);
 
@@ -761,9 +762,9 @@ namespace griffined_api.Data
             {
                 entity.ToTable("WorkTime");
 
-                entity.HasOne(e => e.Teacher)
+                entity.HasOne(e => e.Manday)
                     .WithMany(e => e.WorkTimes)
-                    .HasForeignKey(e => e.TeacherId);
+                    .HasForeignKey(e => e.MandayId);
             });
         }
     }
