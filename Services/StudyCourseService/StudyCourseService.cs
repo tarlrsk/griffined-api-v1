@@ -55,7 +55,9 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             var teachers = await _context.Teachers
-                            .Include(t => t.WorkTimes).ToListAsync();
+                            .Include(t => t.Mandays)
+                                .ThenInclude(x => x.WorkTimes)
+                            .ToListAsync();
 
             foreach (var newStudySubject in dbCourse.Subjects)
             {
@@ -83,16 +85,16 @@ namespace griffined_api.Services.StudyCourseService
                             }
                         };
 
-                        var worktypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
-                        foreach (var worktype in worktypes)
-                        {
-                            studyClass.TeacherShifts.Add(new TeacherShift
-                            {
-                                Teacher = teacher,
-                                TeacherWorkType = worktype.TeacherWorkType,
-                                Hours = worktype.Hours,
-                            });
-                        }
+                        // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
+                        // foreach (var worktype in worktypes)
+                        // {
+                        //     studyClass.TeacherShifts.Add(new TeacherShift
+                        //     {
+                        //         Teacher = teacher,
+                        //         TeacherWorkType = worktype.TeacherWorkType,
+                        //         Hours = worktype.Hours,
+                        //     });
+                        // }
 
                         classNumber = +1;
                         studySubject.StudyClasses.Add(studyClass);
@@ -262,7 +264,8 @@ namespace griffined_api.Services.StudyCourseService
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingEA) ?? throw new NotFoundException($"Pending EA Request with ID {requestId} is not found.");
 
             var dbTeachers = await _context.Teachers
-                            .Include(t => t.WorkTimes)
+                            .Include(t => t.Mandays)
+                                .ThenInclude(x => x.WorkTimes)
                             .ToListAsync();
 
             foreach (var dbNewRequestedCourse in dbRequest.NewCourseRequests)
@@ -317,21 +320,21 @@ namespace griffined_api.Services.StudyCourseService
                             }
                         };
 
-                        var worktypes = _teacherService.GetTeacherWorkTypesWithHours(
-                                        dbTeacher,
-                                        requestedStudyClass.Date.ToDateTime(),
-                                        requestedStudyClass.FromTime.ToTimeSpan(),
-                                        requestedStudyClass.ToTime.ToTimeSpan());
+                        // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(
+                        //                 dbTeacher,
+                        //                 requestedStudyClass.Date.ToDateTime(),
+                        //                 requestedStudyClass.FromTime.ToTimeSpan(),
+                        //                 requestedStudyClass.ToTime.ToTimeSpan());
 
-                        foreach (var worktype in worktypes)
-                        {
-                            studyClass.TeacherShifts.Add(new TeacherShift
-                            {
-                                Teacher = dbTeacher,
-                                TeacherWorkType = worktype.TeacherWorkType,
-                                Hours = worktype.Hours,
-                            });
-                        }
+                        // foreach (var worktype in worktypes)
+                        // {
+                        //     studyClass.TeacherShifts.Add(new TeacherShift
+                        //     {
+                        //         Teacher = dbTeacher,
+                        //         TeacherWorkType = worktype.TeacherWorkType,
+                        //         Hours = worktype.Hours,
+                        //     });
+                        // }
 
                         studySubject.StudyClasses.Add(studyClass);
                     }
@@ -568,7 +571,8 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.StudySubjects)
                                     .ThenInclude(c => c.StudyClasses)
                                         .ThenInclude(c => c.Teacher)
-                                            .ThenInclude(t => t.WorkTimes)
+                                            .ThenInclude(t => t.Mandays)
+                                                .ThenInclude(x => x.WorkTimes)
                                 .FirstOrDefaultAsync(c => c.Id == studyCourseId)
                                 ?? throw new NotFoundException($"Study Course with ID {studyCourseId} is not found.");
 

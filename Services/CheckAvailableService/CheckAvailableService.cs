@@ -353,7 +353,8 @@ namespace griffined_api.Services.CheckAvailableService
                                     && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.Deleted).ToListAsync();
 
             var dbTeachers = await _context.Teachers
-                                .Include(t => t.WorkTimes)
+                                .Include(t => t.Mandays)
+                                    .ThenInclude(x => x.WorkTimes)
                                 .Where(t => t.IsActive == true)
                                 .ToListAsync();
 

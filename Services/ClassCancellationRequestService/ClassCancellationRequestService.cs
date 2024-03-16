@@ -393,9 +393,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         ClassStatus = dbStudyClass.Status,
                     };
 
-                    foreach(var dbTeacherShift in dbStudyClass.TeacherShifts)
+                    foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                     {
-                        schedule.TeacherShifts.Add(new TeacherShiftResponseDto{
+                        schedule.TeacherShifts.Add(new TeacherShiftResponseDto
+                        {
                             Hours = dbTeacherShift.Hours,
                             TeacherWorkType = dbTeacherShift.TeacherWorkType,
                         });
@@ -501,7 +502,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .ToListAsync();
 
             var dbTeachers = await _context.Teachers
-                            .Include(t => t.WorkTimes)
+                            .Include(t => t.Mandays)
+                                .ThenInclude(x => x.WorkTimes)
                             .ToListAsync();
 
             foreach (var dbStudySubject in dbStudySubjects)
@@ -527,9 +529,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     };
 
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
-                    foreach(var worktype in worktypes)
+                    foreach (var worktype in worktypes)
                     {
-                        studyClass.TeacherShifts.Add(new TeacherShift{
+                        studyClass.TeacherShifts.Add(new TeacherShift
+                        {
                             Teacher = dbTeacher,
                             TeacherWorkType = worktype.TeacherWorkType,
                             Hours = worktype.Hours,

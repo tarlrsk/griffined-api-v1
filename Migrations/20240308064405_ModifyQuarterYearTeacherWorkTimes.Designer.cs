@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using griffined_api.Data;
 
@@ -11,9 +12,11 @@ using griffined_api.Data;
 namespace griffinedapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240308064405_ModifyQuarterYearTeacherWorkTimes")]
+    partial class ModifyQuarterYearTeacherWorkTimes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -280,27 +283,6 @@ namespace griffinedapi.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("Level", (string)null);
-                });
-
-            modelBuilder.Entity("griffined_api.Models.Manday", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("TeacherId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("Mandays");
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>
@@ -1399,18 +1381,21 @@ namespace griffinedapi.Migrations
                     b.Property<TimeSpan>("FromTime")
                         .HasColumnType("time");
 
-                    b.Property<int?>("MandayId")
+                    b.Property<int>("Quarter")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quarter")
+                    b.Property<int?>("TeacherId")
                         .HasColumnType("int");
 
                     b.Property<TimeSpan>("ToTime")
                         .HasColumnType("time");
 
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("MandayId");
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("WorkTime", (string)null);
                 });
@@ -1550,15 +1535,6 @@ namespace griffinedapi.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.Manday", b =>
-                {
-                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
-                        .WithMany("Mandays")
-                        .HasForeignKey("TeacherId");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>
@@ -1984,11 +1960,11 @@ namespace griffinedapi.Migrations
 
             modelBuilder.Entity("griffined_api.Models.WorkTime", b =>
                 {
-                    b.HasOne("griffined_api.Models.Manday", "Manday")
+                    b.HasOne("griffined_api.Models.Teacher", "Teacher")
                         .WithMany("WorkTimes")
-                        .HasForeignKey("MandayId");
+                        .HasForeignKey("TeacherId");
 
-                    b.Navigation("Manday");
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("griffined_api.Models.Appointment", b =>
@@ -2028,11 +2004,6 @@ namespace griffinedapi.Migrations
                     b.Navigation("NewCourseRequests");
 
                     b.Navigation("StudyCourses");
-                });
-
-            modelBuilder.Entity("griffined_api.Models.Manday", b =>
-                {
-                    b.Navigation("WorkTimes");
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCourseRequest", b =>
@@ -2168,8 +2139,6 @@ namespace griffinedapi.Migrations
 
                     b.Navigation("ClassCancellationRequests");
 
-                    b.Navigation("Mandays");
-
                     b.Navigation("StudentReports");
 
                     b.Navigation("StudyClasses");
@@ -2177,6 +2146,8 @@ namespace griffinedapi.Migrations
                     b.Navigation("TeacherNotifications");
 
                     b.Navigation("TeacherShifts");
+
+                    b.Navigation("WorkTimes");
                 });
 #pragma warning restore 612, 618
         }

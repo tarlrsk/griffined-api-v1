@@ -9,6 +9,8 @@ namespace griffined_api.Models
 {
     public class Teacher
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public string? FirebaseId { get; set; } = string.Empty;
@@ -23,7 +25,7 @@ namespace griffined_api.Models
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
 
-        public virtual ICollection<WorkTime> WorkTimes { get; set; } = new List<WorkTime>();
+        public virtual ICollection<Manday> Mandays { get; set; } = new List<Manday>();
         public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
         public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
         public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
