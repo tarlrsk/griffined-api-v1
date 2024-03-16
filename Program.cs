@@ -71,7 +71,7 @@ builder.Services.AddLogging();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IClassCancellationRequestService, ClassCancellationRequestService>();
-// builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
+builder.Services.AddScoped<ICheckAvailableService, CheckAvailableService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();

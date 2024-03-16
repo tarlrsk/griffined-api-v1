@@ -95,7 +95,7 @@ namespace griffined_api.Services.TeacherService
             await AddStaffFireStoreAsync(newTeacher);
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            response.Data = _mapper.Map<GetTeacherDto>(newTeacher);
+            response.Data = MapModelToDTO(newTeacher, mandays, workDays);
 
             return response;
         }
@@ -375,6 +375,41 @@ namespace griffined_api.Services.TeacherService
             }
         }
 
+        private static GetTeacherDto MapModelToDTO(Teacher model, IEnumerable<Manday> mandays, IEnumerable<WorkTime> workTimes)
+        {
+            var response = new GetTeacherDto
+            {
+                TeacherId = model.Id,
+                FirebaseId = model.FirebaseId!,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Nickname = model.Nickname,
+                Phone = model.Phone,
+                Email = model.Email,
+                Line = model.Line,
+                IsActive = model.IsActive,
+                Mandays = (from manday in mandays
+                           orderby manday.Year
+                           select new MandayResponseDto
+                           {
+                               Year = manday.Year,
+                               WorkDays = (from workDay in workTimes
+                                           orderby workDay.Quarter
+                                           select new WorkTimeResponseDto
+                                           {
+                                               Day = workDay.Day,
+                                               Quarter = workDay.Quarter,
+                                               FromTime = workDay.FromTime,
+                                               ToTime = workDay.ToTime
+                                           })
+                                           .ToList()
+                           })
+                           .ToList()
+            };
+
+            return response;
+        }
+
         private static IEnumerable<Manday> MapMandayDTOToModel(
                        IEnumerable<MandayRequestDto> mandays,
                        Teacher model)
@@ -409,6 +444,7 @@ namespace griffined_api.Services.TeacherService
                             select new WorkTime
                             {
                                 Manday = model,
+                                Day = workTime.Day,
                                 Quarter = workTime.Quarter,
                                 FromTime = workTime.FromTime,
                                 ToTime = workTime.ToTime
