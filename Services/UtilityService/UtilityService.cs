@@ -1,16 +1,19 @@
 using Firebase.Auth;
+using FirebaseAdmin;
 
-namespace griffined_api.Services.ClientFirebaseService
+namespace griffined_api.Services.UtilityService
 {
-    public class ClientFirebaseService : IClientFirebaseService
+    public class UtilityService : IUtilityService
     {
         private readonly string? API_KEY = Environment.GetEnvironmentVariable("FIREBASE_API_KEY");
         private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
+        private readonly FirebaseApp _firebaseApp;
         private readonly DataContext _context;
 
-        public ClientFirebaseService(DataContext context)
+        public UtilityService(DataContext context, FirebaseApp firebaseApp)
         {
             _context = context;
+            _firebaseApp = firebaseApp;
         }
 
         public async Task AddStudentFirebaseId(int studentId)
@@ -97,6 +100,18 @@ namespace griffined_api.Services.ClientFirebaseService
             await AddTeacherFireStoreAsync(teacher);
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteFirebaseAuthentication()
+        {
+            var auth = FirebaseAdmin.Auth.FirebaseAuth.GetAuth(_firebaseApp);
+
+            var users = auth.ListUsersAsync(null);
+
+            await foreach (var user in users)
+            {
+                await auth.DeleteUserAsync(user.Uid);
+            }
         }
 
         private async Task AddStudentFireStoreAsync(Student student)
