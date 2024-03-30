@@ -1,6 +1,6 @@
-namespace griffined_api.Services.ClientFirebaseService
+namespace griffined_api.Services.UtilityService
 {
-    public interface IClientFirebaseService
+    public interface IUtilityService
     {
         /// <summary>
         /// Add firebase id to existing student by studentId.
@@ -17,5 +17,11 @@ namespace griffined_api.Services.ClientFirebaseService
         /// Add firebase id to existing teacher by teacherId.
         /// </summary>
         Task AddTeacherFirebaseId(int teacherId);
+
+        /// <summary>
+        /// Delete firebase authentication records.
+        /// </summary>
+        /// <returns></returns>
+        Task DeleteFirebaseAuthentication();
     }
 }

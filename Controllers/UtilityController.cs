@@ -1,22 +1,22 @@
-using griffined_api.Services.ClientFirebaseService;
+using griffined_api.Services.UtilityService;
 
 namespace griffined_api.Controllers
 {
     [ApiController]
     [Route("api/v1/utilities")]
-    public class FirebaseController : ControllerBase
+    public class UtilityController : ControllerBase
     {
-        private readonly IClientFirebaseService _clientFirebaseService;
+        private readonly IUtilityService _utilityService;
 
-        public FirebaseController(IClientFirebaseService clientFirebaseService)
+        public UtilityController(IUtilityService utilityService)
         {
-            _clientFirebaseService = clientFirebaseService;
+            _utilityService = utilityService;
         }
 
         [HttpPut("firebase/students/{studentId}")]
         public async Task<IActionResult> AddStudentFirebaseId(int studentId)
         {
-            await _clientFirebaseService.AddStudentFirebaseId(studentId);
+            await _utilityService.AddStudentFirebaseId(studentId);
 
             return Ok();
         }
@@ -24,7 +24,7 @@ namespace griffined_api.Controllers
         [HttpPut("studentcode/students")]
         public async Task<IActionResult> AddStudentCode()
         {
-            await _clientFirebaseService.AddStudentCode();
+            await _utilityService.AddStudentCode();
 
             return Ok();
         }
@@ -32,7 +32,15 @@ namespace griffined_api.Controllers
         [HttpPut("firebase/teachers/{teacherId}")]
         public async Task<IActionResult> AddTeacherFirebaseId(int teacherId)
         {
-            await _clientFirebaseService.AddTeacherFirebaseId(teacherId);
+            await _utilityService.AddTeacherFirebaseId(teacherId);
+
+            return Ok();
+        }
+
+        [HttpDelete("firebase/auth")]
+        public async Task<IActionResult> DeleteFirebaseAuthentication()
+        {
+            await _utilityService.DeleteFirebaseAuthentication();
 
             return Ok();
         }
