@@ -13,10 +13,10 @@ namespace griffined_api.Controllers
             _utilityService = utilityService;
         }
 
-        [HttpPut("firebase/students/{studentId}")]
-        public async Task<IActionResult> AddStudentFirebaseId(int studentId)
+        [HttpPut("firebase/student")]
+        public async Task<IActionResult> AddStudentFirebaseId()
         {
-            await _utilityService.AddStudentFirebaseId(studentId);
+            await _utilityService.AddStudentFirebaseId();
 
             return Ok();
         }
@@ -29,10 +29,10 @@ namespace griffined_api.Controllers
             return Ok();
         }
 
-        [HttpPut("firebase/teachers/{teacherId}")]
-        public async Task<IActionResult> AddTeacherFirebaseId(int teacherId)
+        [HttpPut("firebase/teacher")]
+        public async Task<IActionResult> AddTeacherFirebaseId()
         {
-            await _utilityService.AddTeacherFirebaseId(teacherId);
+            await _utilityService.AddTeacherFirebaseId();
 
             return Ok();
         }

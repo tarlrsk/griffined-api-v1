@@ -16,12 +16,15 @@ namespace griffined_api.Services.UtilityService
             _firebaseApp = firebaseApp;
         }
 
-        public async Task AddStudentFirebaseId(int studentId)
+        public async Task AddStudentFirebaseId()
         {
-            var student = _context.Students.FirstOrDefault(x => x.Id == studentId
-                                                           && x.FirebaseId == null
-                                                           && x.Email != "-")
-                                                           ?? throw new NotFoundException($"student with id {studentId} not found.");
+            var student = _context.Students.FirstOrDefault(x => x.FirebaseId == null
+                                                           && x.Email != "-");
+
+            if (student is null)
+            {
+                return;
+            }
 
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
@@ -66,21 +69,24 @@ namespace griffined_api.Services.UtilityService
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddTeacherFirebaseId(int teacherId)
+        public async Task AddTeacherFirebaseId()
         {
-            var teacher = _context.Teachers.FirstOrDefault(x => x.Id == teacherId
-                                               && x.FirebaseId == null
-                                               && x.Email != "-")
-                                               ?? throw new NotFoundException($"student with id {teacherId} not found.");
+            var teacher = _context.Teachers.FirstOrDefault(x => x.FirebaseId == null
+                                                           && x.Email != "-");
+
+            if (teacher is null)
+            {
+                return;
+            }
 
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
 
-            var studentPassword = $"Hog{teacher.Phone}";
+            var teacherPassword = $"Hog{teacher.Phone}";
 
             try
             {
-                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(teacher.Email, studentPassword);
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(teacher.Email, teacherPassword);
             }
             catch (Exception ex)
             {

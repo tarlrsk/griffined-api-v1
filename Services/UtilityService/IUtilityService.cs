@@ -3,9 +3,9 @@ namespace griffined_api.Services.UtilityService
     public interface IUtilityService
     {
         /// <summary>
-        /// Add firebase id to existing student by studentId.
+        /// Add firebase id to existing student.
         /// </summary>
-        Task AddStudentFirebaseId(int studentId);
+        Task AddStudentFirebaseId();
 
         /// <summary>
         /// Add student code to existing students.
@@ -16,7 +16,7 @@ namespace griffined_api.Services.UtilityService
         /// <summary>
         /// Add firebase id to existing teacher by teacherId.
         /// </summary>
-        Task AddTeacherFirebaseId(int teacherId);
+        Task AddTeacherFirebaseId();
 
         /// <summary>
         /// Delete firebase authentication records.
