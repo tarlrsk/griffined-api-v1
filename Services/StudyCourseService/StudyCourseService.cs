@@ -33,18 +33,23 @@ namespace griffined_api.Services.StudyCourseService
 
             var dbCourse = await _context.Courses
                             .Include(c => c.Subjects.Where(s => newRequestedSchedule.SubjectIds.Contains(s.Id)))
-                            .Include(c => c.Levels.Where(l => l.Id == newRequestedSchedule.LevelId))
-                            .FirstOrDefaultAsync(c => c.Id == newRequestedSchedule.CourseId);
+                            .FirstOrDefaultAsync(c => c.Id == newRequestedSchedule.CourseId)
+                            ?? throw new NotFoundException($"Course is not found");
 
-            if (dbCourse == null || dbCourse.Levels == null)
+            Level? dbLevel = null;
+            if (newRequestedSchedule.LevelId != null)
             {
-                throw new NotFoundException($"Course or Level is not found");
+                var foundLevel = await _context.Levels
+                            .FirstOrDefaultAsync(l => l.Id == newRequestedSchedule.LevelId && l.CourseId == newRequestedSchedule.CourseId)
+                            ?? throw new NotFoundException($"Level is not found in course {dbCourse.course}");
+
+                dbLevel = foundLevel;
             }
 
             var studyCourse = new StudyCourse
             {
                 Course = dbCourse,
-                Level = dbCourse.Levels.First(),
+                Level = dbLevel,
                 Section = newRequestedSchedule.Section,
                 TotalHour = newRequestedSchedule.TotalHours,
                 StartDate = newRequestedSchedule.StartDate.ToDateTime(),
