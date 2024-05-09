@@ -35,7 +35,7 @@ namespace griffined_api.Controllers
             }
         }
 
-        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ec, master")]
+        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ec, master, allstaff")]
         public async Task<ActionResult> ResetPassword(string email)
         {
             await firebaseAuthProvider.SendPasswordResetEmailAsync(email);

@@ -18,25 +18,25 @@ namespace griffined_api.Controllers
             _studyCourseService = studyCourseService;
 
         }
-        [HttpPost("group"), Authorize(Roles = "ea, master")]
+        [HttpPost("group"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
         {
             return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
         }
 
-        [HttpGet(), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet(), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> GetAllStudyCourse()
         {
             return Ok(await _studyCourseService.GetAllStudyCourse());
         }
 
-        [HttpPost("new/{requestId}"), Authorize(Roles = "ea, master")]
+        [HttpPost("new/{requestId}"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> AddNewStudyCourses(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId)
         {
             return Ok(await _studyCourseService.AddNewStudyClass(newStudyClasses, requestId));
         }
 
-        [HttpPut("new/{requestId}"), Authorize(Roles = "ea, master")]
+        [HttpPut("new/{requestId}"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> EditNewStudyCourses(EditStudyClassByRegistrationRequestDto request, int requestId)
         {
             return Ok(await _studyCourseService.EditStudyClassByRegisRequest(request, requestId));
@@ -54,73 +54,73 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.ListAllStudyCourseByTeacherToken());
         }
 
-        [HttpGet("student/{studyCourseId}"), Authorize(Roles = "student, master")]
+        [HttpGet("student/{studyCourseId}"), Authorize(Roles = "student, master, allstaff")]
         public async Task<ActionResult> GetStudyCourseDetailForStudentMobile(int studyCourseId)
         {
             return Ok(await _studyCourseService.StudyCourseDetailForStudent(studyCourseId));
         }
 
-        [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "teacher, master")]
+        [HttpGet("teacher/{studyCourseId}"), Authorize(Roles = "teacher, master, allstaff")]
         public async Task<ActionResult> GetStudyCourseDetailForTeacher(int studyCourseId)
         {
             return Ok(await _studyCourseService.StudyCourseDetailForTeacher(studyCourseId));
         }
 
-        [HttpGet("all-courses/student/{studentCode}"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet("all-courses/student/{studentCode}"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> ListAllStudyCoursesByStudentId(string studentCode)
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByStudentId(studentCode));
         }
 
-        [HttpGet("all-courses/teacher/{teacherId}"), Authorize(Roles = "ea, oa, master")]
+        [HttpGet("all-courses/teacher/{teacherId}"), Authorize(Roles = "ea, oa, master, allstaff")]
         public async Task<ActionResult> ListAllStudyCoursesByTeacherId(int teacherId)
         {
             return Ok(await _studyCourseService.ListAllStudyCoursesWithReportsByTeacherId(teacherId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet("course-detail/{studyCourseId}"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> GetCourseDetail(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetCourseDetail(studyCourseId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}/members"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet("course-detail/{studyCourseId}/members"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> GetStudyCourseMember(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetStudyCourseMember(studyCourseId));
         }
 
-        [HttpGet("course-detail/{studyCourseId}/history"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet("course-detail/{studyCourseId}/history"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> GetCourseHistory(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetStudyCourseHistory(studyCourseId));
         }
 
-        [HttpPost("add/student"), Authorize(Roles = "ea, master")]
+        [HttpPost("add/student"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> EaAddStudent(EaStudentManagementRequestDto requestDto)
         {
             return Ok(await _studyCourseService.EaAddStudent(requestDto));
         }
 
-        [HttpPut("remove/student"), Authorize(Roles = "ea, master")]
+        [HttpPut("remove/student"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> EaRemoveStudent(EaStudentManagementRequestDto requestDto)
         {
             return Ok(await _studyCourseService.EaRemoveStudent(requestDto));
         }
 
-        [HttpGet("{studyCourseId}/progress"), Authorize(Roles = "ec, ea, oa, teacher, master")]
+        [HttpGet("{studyCourseId}/progress"), Authorize(Roles = "ec, ea, oa, teacher, master, allstaff")]
         public async Task<ActionResult> GetSubjectProgress(int studyCourseId)
         {
             return Ok(await _studyCourseService.GetCourseProgress(studyCourseId));
         }
 
-        [HttpPut("schedule"), Authorize(Roles = "ea, master")]
+        [HttpPut("schedule"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> UpdateScheduleWithoutRequest(UpdateStudyCourseRequestDto updateRequest)
         {
             return Ok(await _studyCourseService.UpdateScheduleWithoutCancelRequest(updateRequest));
         }
 
-        [HttpPut("cancel/{studyCourseId}"), Authorize(Roles = "ea, master")]
+        [HttpPut("cancel/{studyCourseId}"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> CancelStudyCourse(int studyCourseId)
         {
             return Ok(await _studyCourseService.CancelStudyCourse(studyCourseId));
