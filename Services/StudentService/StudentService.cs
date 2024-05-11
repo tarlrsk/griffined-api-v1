@@ -61,6 +61,8 @@ namespace griffined_api.Services.StudentService
             _student.FirebaseId = firebaseId;
             _student.CreatedBy = id;
             _student.LastUpdatedBy = id;
+            _student.ExpiryDate = DateTime.Now;
+            _student.Status = StudentStatus.Inactive;
 
             _context.Students.Add(_student);
 
