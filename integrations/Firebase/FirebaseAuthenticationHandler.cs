@@ -78,6 +78,7 @@ namespace griffined_api.Integrations.Firebase
             string customRole = string.Empty;
             string azure_id = string.Empty;
 
+            // TODO FIX SWITCH CASE
             var master = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "master");
             if (master != null)
             {
