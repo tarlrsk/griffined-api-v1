@@ -25,14 +25,30 @@ namespace griffined_api.Services.ClassCancellationRequestService
         public async Task<ServiceResponse<string>> AddClassCancellationRequest(int studyClassId)
         {
             var dbStudyClass = await _context.StudyClasses
-                            .Include(c => c.StudyCourse)
-                            .Include(c => c.StudySubject)
-                            .Include(c => c.Teacher)
-                            .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
-                            ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
+                                             .Include(x => x.Schedule)
+                                             .Include(c => c.StudyCourse)
+                                             .Include(c => c.StudySubject)
+                                             .Include(c => c.Teacher)
+                                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
+                                             ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
 
             if (dbStudyClass.StudyCourse.StudyCourseType == StudyCourseType.Group)
                 throw new BadRequestException($"Group Class cannot cancel");
+
+            // GET THE CURRENT DATE.
+            DateTime currentTime = DateTime.Now;
+
+            // COMBINE THE CURRENT DATE WITH CLASS START TIME TO GET DATETIME OBJECT.
+            DateTime classStartTime = currentTime.Date + dbStudyClass.Schedule.FromTime;
+
+            // CALCULATE THE TIME DIFFERENCE BETWEEN THE CLASS START TIME AND THE CURRENT TIME.
+            TimeSpan timeDifference = classStartTime - currentTime;
+
+            // CHECK FOR 17 HOURS LIMIT.
+            if (Math.Abs(timeDifference.TotalHours) > 17)
+            {
+                throw new ConflictException("Class cancellation can only be requested within ±17 hours of the class start time.");
+            }
 
             var classCancellationRequest = new ClassCancellationRequest
             {
