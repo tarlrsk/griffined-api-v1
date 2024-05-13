@@ -301,6 +301,9 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Date = dbRequest.StudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbRequest.StudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbRequest.StudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    TeacherFirstName = dbRequest.StudyClass.Teacher.FirstName,
+                    TeacherLastName = dbRequest.StudyClass.Teacher.LastName,
+                    TeacherNickname = dbRequest.StudyClass.Teacher.Nickname,
                 },
             };
 
