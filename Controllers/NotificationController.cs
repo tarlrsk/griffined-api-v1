@@ -15,7 +15,7 @@ namespace griffined_api.Controllers
             _notificationService = notificationService;
         }
 
-        [HttpGet("student"), Authorize(Roles = "student, master")]
+        [HttpGet("student"), Authorize(Roles = "student, master, allstaff")]
         public async Task<ActionResult> GetStudentNotifications()
         {
             var response = await _notificationService.GetStudentNotifications();
@@ -24,7 +24,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("teacher"), Authorize(Roles = "teacher, master")]
+        [HttpGet("teacher"), Authorize(Roles = "teacher, master, allstaff")]
         public async Task<ActionResult> GetTeacherNotifications()
         {
             var response = await _notificationService.GetTeacherNotifications();
@@ -33,7 +33,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("staff"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpGet("staff"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> GetStaffNotifications()
         {
             var response = await _notificationService.GetStaffNotifications();
@@ -42,14 +42,14 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{notificationId}/mark-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master")]
+        [HttpPut("{notificationId}/mark-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> MarkAsRead(int notificationId)
         {
             var response = await _notificationService.MarkAsRead(notificationId);
             return Ok(response);
         }
 
-        [HttpPut("mark-all-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master")]
+        [HttpPut("mark-all-as-read"), Authorize(Roles = "student, teacher, ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> MarkAllAsRead()
         {
             var response = await _notificationService.MarkAllAsRead();

@@ -14,6 +14,7 @@ namespace griffined_api.Enums
         Training,
         Demo,
         Prepare,
-        Observe
+        Observe,
+        Holiday,
     }
 }

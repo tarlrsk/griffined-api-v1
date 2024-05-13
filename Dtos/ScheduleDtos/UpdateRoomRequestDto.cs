@@ -11,7 +11,6 @@ namespace griffined_api.Dtos.ScheduleDtos
     {
         [Required]
         public int ScheduleId { get; set; }
-        [Required]
         public string Room { get; set; } = string.Empty;
     }
 }

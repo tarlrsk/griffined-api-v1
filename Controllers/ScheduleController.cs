@@ -26,14 +26,14 @@ namespace griffined_api.Controllers
         {
             return Ok(await _scheduleService.GetMobileTodayClass(date));
         }
-        
-        [HttpGet("staff/{date}"), Authorize(Roles = "ec, ea, oa, master")]
+
+        [HttpGet("staff/{date}"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> GetDailyCalendarForStaff(string date)
         {
             return Ok(await _scheduleService.GetDailyCalendarForStaff(date));
         }
 
-        [HttpPut("studyclass/room"), Authorize(Roles = "ec, ea, oa, master")]
+        [HttpPut("studyclass/room"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto> requestDto)
         {
             return Ok(await _scheduleService.UpdateStudyClassRoomByScheduleIds(requestDto));
