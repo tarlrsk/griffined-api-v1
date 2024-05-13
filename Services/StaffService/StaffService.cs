@@ -31,6 +31,14 @@ namespace griffined_api.Services.StaffService
             string password = "hog" + newStaff.Phone;
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
+
+            var existedStaff = await _context.Staff.FirstOrDefaultAsync(x => x.FirstName == newStaff.FirstName && newStaff.LastName == newStaff.LastName);
+
+            if (existedStaff is not null)
+            {
+                throw new ConflictException($"Staff with first name ({newStaff.FirstName}) and last name ({newStaff.LastName}) already exists.");
+            }
+
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.Email, password);
