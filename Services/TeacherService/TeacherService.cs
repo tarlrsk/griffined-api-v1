@@ -33,13 +33,6 @@ namespace griffined_api.Services.TeacherService
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
 
-            var existedTeacher = await _context.Teachers.FirstOrDefaultAsync(x => x.FirstName == request.FirstName && x.LastName == request.LastName);
-
-            if (existedTeacher is not null)
-            {
-                throw new ConflictException($"Teacher with first name ({request.FirstName}) and last name ({request.LastName}) already exists.");
-            }
-
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(request.Email, password);
