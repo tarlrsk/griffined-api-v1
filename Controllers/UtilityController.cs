@@ -37,6 +37,14 @@ namespace griffined_api.Controllers
             return Ok();
         }
 
+        [HttpPut("firebase/staff")]
+        public async Task<IActionResult> AddStaffFirebaseId()
+        {
+            await _utilityService.AddStaffFirebaseId();
+
+            return Ok();
+        }
+
         [HttpDelete("firebase/auth")]
         public async Task<IActionResult> DeleteFirebaseAuthentication()
         {

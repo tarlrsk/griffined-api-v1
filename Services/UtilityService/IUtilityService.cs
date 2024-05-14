@@ -14,9 +14,15 @@ namespace griffined_api.Services.UtilityService
         Task AddStudentCode();
 
         /// <summary>
-        /// Add firebase id to existing teacher by teacherId.
+        /// Add firebase id to existing teachers.
         /// </summary>
         Task AddTeacherFirebaseId();
+
+        /// <summary>
+        /// Add firebase id to exisitng staff.
+        /// </summary>
+        /// <returns></returns>
+        Task AddStaffFirebaseId();
 
         /// <summary>
         /// Delete firebase authentication records.

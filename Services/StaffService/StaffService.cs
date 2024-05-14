@@ -217,7 +217,7 @@ namespace griffined_api.Services.StaffService
                     { "email", staff.Email },
                     { "id", staff.Id },
                     { "role", staff.Role },
-                    { "uid", staff.FirebaseId}
+                    { "uid", staff.FirebaseId!}
                 };
             await docRef.SetAsync(staffDoc);
         }
