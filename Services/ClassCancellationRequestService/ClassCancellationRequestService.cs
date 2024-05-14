@@ -525,18 +525,21 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 // NOTIFY EVERY STUDENT IN THAT CLASS
                 foreach (var attendance in dbRemoveStudyClass.Attendances)
                 {
-                    var studentNotification = new StudentNotification
+                    if (attendance.Student != null)
                     {
-                        Student = attendance.Student!,
-                        StudyCourse = dbRemoveStudyClass.StudyCourse,
-                        Title = "Your Class Has Been Cancelled.",
-                        Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-                        DateCreated = DateTime.Now,
-                        Type = StudentNotificationType.ClassCancellation,
-                        HasRead = false
-                    };
+                        var studentNotification = new StudentNotification
+                        {
+                            Student = attendance.Student!,
+                            StudyCourse = dbRemoveStudyClass.StudyCourse,
+                            Title = "Your Class Has Been Cancelled.",
+                            Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                            DateCreated = DateTime.Now,
+                            Type = StudentNotificationType.ClassCancellation,
+                            HasRead = false
+                        };
 
-                    _context.StudentNotifications.Add(studentNotification);
+                        _context.StudentNotifications.Add(studentNotification);
+                    }
                 }
 
 
