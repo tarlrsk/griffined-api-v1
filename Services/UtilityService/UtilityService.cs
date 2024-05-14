@@ -9,18 +9,12 @@ namespace griffined_api.Services.UtilityService
         private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly FirebaseApp _firebaseApp;
         private readonly DataContext _context;
-        private readonly IUnitOfWork _uow;
-        private readonly IAsyncRepository<Staff> _staffRepo;
 
         public UtilityService(DataContext context,
-                              FirebaseApp firebaseApp,
-                              IUnitOfWork uow,
-                              IAsyncRepository<Staff> staffRepo)
+                              FirebaseApp firebaseApp)
         {
             _context = context;
             _firebaseApp = firebaseApp;
-            _uow = uow;
-            _staffRepo = staffRepo;
         }
 
         public async Task AddStudentFirebaseId()
@@ -117,9 +111,8 @@ namespace griffined_api.Services.UtilityService
 
         public async Task AddStaffFirebaseId()
         {
-            var staff = _staffRepo.Query()
-                                  .FirstOrDefault(x => x.FirebaseId == null
-                                                  && x.Email != "-");
+            var staff = _context.Staff.FirstOrDefault(x => x.FirebaseId == null
+                                                      && x.Email != "-");
 
             if (staff is null)
             {
@@ -129,11 +122,11 @@ namespace griffined_api.Services.UtilityService
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
 
-            var teacherPassword = $"hog{staff.Phone}";
+            var staffPassword = $"hog{staff.Phone}";
 
             try
             {
-                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(staff.Email, teacherPassword);
+                firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(staff.Email, staffPassword);
             }
             catch (Exception ex)
             {
@@ -150,12 +143,9 @@ namespace griffined_api.Services.UtilityService
 
             staff.FirebaseId = firebaseId;
 
-            _uow.BeginTran();
-            _staffRepo.Update(staff);
-            _uow.Complete();
-            _uow.CommitTran();
-
             await AddStaffFireStoreAsync(staff);
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteFirebaseAuthentication()
