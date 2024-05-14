@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Google.Api;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 
@@ -187,7 +186,7 @@ namespace griffined_api.Services.ScheduleService
 
             }
 
-            var data = new List<DailyCalendarResponseDto>();
+            var workingTeachers = new List<DailyCalendarResponseDto>();
             foreach (var groupedSchedule in groupedSchedules)
             {
                 var dailyCalendar = new DailyCalendarResponseDto
@@ -372,13 +371,34 @@ namespace griffined_api.Services.ScheduleService
                     }
                     dailyCalendar.HourSlots.Add(hourSlot);
                 }
-                data.Add(dailyCalendar);
+                workingTeachers.Add(dailyCalendar);
+            }
+
+            // MAP TEACHER THAT IS NOT TEACHING
+            var data = new List<DailyCalendarResponseDto>();
+            var teachers = await _context.Teachers.Where(t => t.IsActive == true).ToListAsync();
+            foreach (var teacher in teachers)
+            {
+                var workTeacher = workingTeachers.Where(t => t.Id == teacher.Id).FirstOrDefault();
+                if (workTeacher != null)
+                {
+                    data.Add(workTeacher);
+                }
+                else
+                {
+                    data.Add(new DailyCalendarResponseDto()
+                    {
+                        Id = teacher.Id,
+                        Teacher = teacher.Nickname,
+                        TeacherId = teacher.Id,
+                    });
+                }
             }
 
             return new ServiceResponse<List<DailyCalendarResponseDto>>
             {
                 StatusCode = (int)HttpStatusCode.OK,
-                Data = data,
+                Data = data.OrderBy(t => t.Teacher).ToList(),
             };
         }
 

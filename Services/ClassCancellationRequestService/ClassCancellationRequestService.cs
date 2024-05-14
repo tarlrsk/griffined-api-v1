@@ -487,6 +487,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                         .Include(c => c.Schedule)
                                         .Include(c => c.Teacher)
                                         .Include(c => c.Attendances)
+                                            .ThenInclude(a => a.Student)
                                         .Where(c => updateRequest.RemoveStudyClassId.Contains(c.Id)).ToListAsync();
 
             foreach (var dbRemoveStudyClass in dbRemoveStudyClasses)
@@ -506,6 +507,43 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
                 removeHistory.Description = removedStudyClassHistoryDescription;
                 dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
+
+                // NOTIFY TEACHER
+                var teacherNotification = new TeacherNotification
+                {
+                    Teacher = dbRemoveStudyClass.Teacher,
+                    StudyCourse = dbRemoveStudyClass.StudyCourse,
+                    Title = "Your Class Has Been Cancelled.",
+                    Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                    DateCreated = DateTime.Now,
+                    Type = TeacherNotificationType.ClassCancellation,
+                    HasRead = false
+                };
+
+                _context.TeacherNotifications.Add(teacherNotification);
+
+                // NOTIFY EVERY STUDENT IN THAT CLASS
+                foreach (var attendance in dbRemoveStudyClass.Attendances)
+                {
+                    if (attendance.Student != null)
+                    {
+                        var studentNotification = new StudentNotification
+                        {
+                            Student = attendance.Student!,
+                            StudyCourse = dbRemoveStudyClass.StudyCourse,
+                            Title = "Your Class Has Been Cancelled.",
+                            Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                            DateCreated = DateTime.Now,
+                            Type = StudentNotificationType.ClassCancellation,
+                            HasRead = false
+                        };
+
+                        _context.StudentNotifications.Add(studentNotification);
+                    }
+                }
+
+
+
             }
 
             var dbStudySubjects = await _context.StudySubjects
@@ -607,35 +645,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                 .ThenInclude(sc => sc.Schedule)
                             .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("Request is not found.");
             dbRequest.Status = ClassCancellationRequestStatus.Completed;
-
-            if (dbRequest.RequestedRole == CancellationRole.Student)
-            {
-                var studentNotification = new StudentNotification
-                {
-                    Student = dbRequest.Student!,
-                    StudyCourse = dbRequest.StudyCourse,
-                    Title = "Your Class Has Been Cancelled.",
-                    Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-                    DateCreated = DateTime.Now,
-                    Type = StudentNotificationType.ClassCancellation,
-                    HasRead = false
-                };
-
-                _context.StudentNotifications.Add(studentNotification);
-            }
-
-            var teacherNotification = new TeacherNotification
-            {
-                Teacher = dbRequest.Teacher!,
-                StudyCourse = dbRequest.StudyCourse,
-                Title = "Your Class Has Been Cancelled.",
-                Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-                DateCreated = DateTime.Now,
-                Type = TeacherNotificationType.ClassCancellation,
-                HasRead = false
-            };
-
-            _context.TeacherNotifications.Add(teacherNotification);
 
             await _context.SaveChangesAsync();
 
