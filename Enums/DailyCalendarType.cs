@@ -14,5 +14,6 @@ namespace griffined_api.Enums
         CancelledClass,
         MakeupStudyClass,
         OfficeHours,
+        Holiday
     }
 }

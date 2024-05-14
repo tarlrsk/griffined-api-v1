@@ -241,7 +241,15 @@ namespace griffined_api.Services.ScheduleService
                                 if (schedule.Type == ScheduleType.Appointment)
                                 {
                                     hourSlot.FirstHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                    hourSlot.FirstHalf.Type = DailyCalendarType.OfficeHours;
+                                    if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                    {
+                                        hourSlot.FirstHalf.Type = DailyCalendarType.Holiday;
+                                    }
+                                    else
+                                    {
+
+                                        hourSlot.FirstHalf.Type = DailyCalendarType.OfficeHours;
+                                    }
                                 }
                                 else
                                 {
@@ -274,7 +282,15 @@ namespace griffined_api.Services.ScheduleService
                                     if (schedule.Type == ScheduleType.Appointment)
                                     {
                                         hourSlot.FirstHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.OfficeHours;
+                                        if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                        {
+                                            hourSlot.FirstHalf.Type = DailyCalendarType.Holiday;
+                                        }
+                                        else
+                                        {
+
+                                            hourSlot.FirstHalf.Type = DailyCalendarType.OfficeHours;
+                                        }
                                     }
                                     else
                                     {
@@ -312,7 +328,15 @@ namespace griffined_api.Services.ScheduleService
                                 if (schedule.Type == ScheduleType.Appointment)
                                 {
                                     hourSlot.SecondHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                    hourSlot.SecondHalf.Type = DailyCalendarType.OfficeHours;
+                                    if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                    {
+                                        hourSlot.SecondHalf.Type = DailyCalendarType.Holiday;
+                                    }
+                                    else
+                                    {
+
+                                        hourSlot.SecondHalf.Type = DailyCalendarType.OfficeHours;
+                                    }
                                 }
                                 else
                                 {
@@ -345,7 +369,15 @@ namespace griffined_api.Services.ScheduleService
                                     if (schedule.Type == ScheduleType.Appointment)
                                     {
                                         hourSlot.SecondHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.OfficeHours;
+                                        if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                        {
+                                            hourSlot.SecondHalf.Type = DailyCalendarType.Holiday;
+                                        }
+                                        else
+                                        {
+
+                                            hourSlot.SecondHalf.Type = DailyCalendarType.OfficeHours;
+                                        }
                                     }
                                     else
                                     {
