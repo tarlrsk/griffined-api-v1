@@ -382,7 +382,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
             foreach (var dbStudySubject in dbRequest.StudyCourse.StudySubjects)
             {
                 if (dbRequest.RequestedRole == CancellationRole.Student
-                && dbStudySubject.StudySubjectMember.Any(s => s.StudentId != dbRequest.StudentId))
+                && !dbStudySubject.StudySubjectMember.Any(s => s.StudentId == dbRequest.StudentId))
                 {
                     continue;
                 }
