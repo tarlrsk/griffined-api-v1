@@ -40,13 +40,6 @@ namespace griffined_api.Services.StudentService
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
 
-            var existedStudent = await _context.Students.FirstOrDefaultAsync(x => x.FirstName == newStudent.FirstName && x.LastName == newStudent.LastName);
-
-            if (existedStudent is not null)
-            {
-                throw new ConflictException($"Student with first name ({newStudent.FirstName}) and last name ({newStudent.LastName}) already exists.");
-            }
-
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStudent.Email, password);
@@ -59,6 +52,14 @@ namespace griffined_api.Services.StudentService
                     throw new ConflictException("Invalid Email Format");
                 else
                     throw new InternalServerException("Something went wrong.");
+            }
+
+            var existedStudent = await _context.Students.FirstOrDefaultAsync(x => x.FirstName == newStudent.FirstName
+                                                                               && x.LastName == newStudent.LastName);
+
+            if (existedStudent is not null)
+            {
+                throw new ConflictException($"Student with first name ({newStudent.FirstName}) and last name ({newStudent.LastName}) already exists.");
             }
 
             var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
