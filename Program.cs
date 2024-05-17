@@ -56,6 +56,8 @@ using FirebaseAdmin;
 using Quartz;
 
 using griffined_api.Services.UtilityService;
+using griffined_api;
+using griffined_api.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 DotNetEnv.Env.Load();
@@ -83,6 +85,10 @@ builder.Services.AddScoped<IStudentReportService, StudentReportService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IStudyCourseService, StudyCourseService>();
 builder.Services.AddScoped<IUtilityService, UtilityService>();
+
+// Repositories
+builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 builder.Services.AddHttpContextAccessor();

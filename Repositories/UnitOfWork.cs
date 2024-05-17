@@ -2,9 +2,9 @@ namespace griffined_api.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _context;
+        private readonly DataContext _context;
 
-        public UnitOfWork(DbContext context)
+        public UnitOfWork(DataContext context)
         {
             _context = context;
         }
