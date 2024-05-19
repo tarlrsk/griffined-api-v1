@@ -260,26 +260,26 @@ namespace griffined_api.Services.ScheduleService
                                     hourSlot.FirstHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
                                     if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
                                     {
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.Holiday;
+                                        hourSlot.FirstHalf.Type = DailyCalendarType.HOLIDAY;
                                     }
                                     else
                                     {
 
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.OfficeHours;
+                                        hourSlot.FirstHalf.Type = DailyCalendarType.OFFICE_HOURS;
                                     }
                                 }
                                 else
                                 {
                                     hourSlot.FirstHalf.Type = schedule.StudyClass!.Status switch
                                     {
-                                        ClassStatus.Deleted => DailyCalendarType.CancelledClass,
-                                        ClassStatus.Cancelled => DailyCalendarType.CancelledClass,
-                                        _ => DailyCalendarType.StudyClass,
+                                        ClassStatus.Deleted => DailyCalendarType.CANCELLED_CLASS,
+                                        ClassStatus.Cancelled => DailyCalendarType.CANCELLED_CLASS,
+                                        _ => DailyCalendarType.NORMAL_CLASS,
                                     };
 
                                     if (schedule.StudyClass!.IsMakeup)
                                     {
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.MakeupStudyClass;
+                                        hourSlot.FirstHalf.Type = DailyCalendarType.MAKEUP_CLASS;
                                     }
 
                                     hourSlot.FirstHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
@@ -288,7 +288,7 @@ namespace griffined_api.Services.ScheduleService
                             }
                             else
                             {
-                                if (hourSlot.FirstHalf?.Type == DailyCalendarType.CancelledClass || hourSlot.FirstHalf == null)
+                                if (hourSlot.FirstHalf?.Type == DailyCalendarType.CANCELLED_CLASS || hourSlot.FirstHalf == null)
                                 {
                                     hourSlot.FirstHalf = new DailyCalendarSlotResponseDto
                                     {
@@ -301,26 +301,26 @@ namespace griffined_api.Services.ScheduleService
                                         hourSlot.FirstHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
                                         if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
                                         {
-                                            hourSlot.FirstHalf.Type = DailyCalendarType.Holiday;
+                                            hourSlot.FirstHalf.Type = DailyCalendarType.HOLIDAY;
                                         }
                                         else
                                         {
 
-                                            hourSlot.FirstHalf.Type = DailyCalendarType.OfficeHours;
+                                            hourSlot.FirstHalf.Type = DailyCalendarType.OFFICE_HOURS;
                                         }
                                     }
                                     else
                                     {
                                         hourSlot.FirstHalf.Type = schedule.StudyClass!.Status switch
                                         {
-                                            ClassStatus.Deleted => DailyCalendarType.CancelledClass,
-                                            ClassStatus.Cancelled => DailyCalendarType.CancelledClass,
-                                            _ => DailyCalendarType.StudyClass,
+                                            ClassStatus.Deleted => DailyCalendarType.CANCELLED_CLASS,
+                                            ClassStatus.Cancelled => DailyCalendarType.CANCELLED_CLASS,
+                                            _ => DailyCalendarType.NORMAL_CLASS,
                                         };
 
                                         if (schedule.StudyClass!.IsMakeup)
                                         {
-                                            hourSlot.FirstHalf.Type = DailyCalendarType.MakeupStudyClass;
+                                            hourSlot.FirstHalf.Type = DailyCalendarType.MAKEUP_CLASS;
                                         }
 
                                         hourSlot.FirstHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
@@ -347,26 +347,26 @@ namespace griffined_api.Services.ScheduleService
                                     hourSlot.SecondHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
                                     if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
                                     {
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.Holiday;
+                                        hourSlot.SecondHalf.Type = DailyCalendarType.HOLIDAY;
                                     }
                                     else
                                     {
 
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.OfficeHours;
+                                        hourSlot.SecondHalf.Type = DailyCalendarType.OFFICE_HOURS;
                                     }
                                 }
                                 else
                                 {
                                     hourSlot.SecondHalf.Type = schedule.StudyClass!.Status switch
                                     {
-                                        ClassStatus.Deleted => DailyCalendarType.CancelledClass,
-                                        ClassStatus.Cancelled => DailyCalendarType.CancelledClass,
-                                        _ => DailyCalendarType.StudyClass,
+                                        ClassStatus.Deleted => DailyCalendarType.CANCELLED_CLASS,
+                                        ClassStatus.Cancelled => DailyCalendarType.CANCELLED_CLASS,
+                                        _ => DailyCalendarType.NORMAL_CLASS,
                                     };
 
                                     if (schedule.StudyClass!.IsMakeup)
                                     {
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.MakeupStudyClass;
+                                        hourSlot.SecondHalf.Type = DailyCalendarType.MAKEUP_CLASS;
                                     }
 
                                     hourSlot.SecondHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
@@ -375,7 +375,7 @@ namespace griffined_api.Services.ScheduleService
                             }
                             else
                             {
-                                if (hourSlot.SecondHalf?.Type == DailyCalendarType.CancelledClass || hourSlot.SecondHalf == null)
+                                if (hourSlot.SecondHalf?.Type == DailyCalendarType.CANCELLED_CLASS || hourSlot.SecondHalf == null)
                                 {
                                     hourSlot.SecondHalf = new DailyCalendarSlotResponseDto
                                     {
@@ -388,26 +388,26 @@ namespace griffined_api.Services.ScheduleService
                                         hourSlot.SecondHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
                                         if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
                                         {
-                                            hourSlot.SecondHalf.Type = DailyCalendarType.Holiday;
+                                            hourSlot.SecondHalf.Type = DailyCalendarType.HOLIDAY;
                                         }
                                         else
                                         {
 
-                                            hourSlot.SecondHalf.Type = DailyCalendarType.OfficeHours;
+                                            hourSlot.SecondHalf.Type = DailyCalendarType.OFFICE_HOURS;
                                         }
                                     }
                                     else
                                     {
                                         hourSlot.SecondHalf.Type = schedule.StudyClass!.Status switch
                                         {
-                                            ClassStatus.Deleted => DailyCalendarType.CancelledClass,
-                                            ClassStatus.Cancelled => DailyCalendarType.CancelledClass,
-                                            _ => DailyCalendarType.StudyClass,
+                                            ClassStatus.Deleted => DailyCalendarType.CANCELLED_CLASS,
+                                            ClassStatus.Cancelled => DailyCalendarType.CANCELLED_CLASS,
+                                            _ => DailyCalendarType.NORMAL_CLASS,
                                         };
 
                                         if (schedule.StudyClass!.IsMakeup)
                                         {
-                                            hourSlot.SecondHalf.Type = DailyCalendarType.MakeupStudyClass;
+                                            hourSlot.SecondHalf.Type = DailyCalendarType.MAKEUP_CLASS;
                                         }
 
                                         hourSlot.SecondHalf.Name = schedule.StudyClass!.StudyCourse.Course.course;
