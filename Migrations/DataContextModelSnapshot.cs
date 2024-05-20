@@ -300,7 +300,7 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Mandays");
+                    b.ToTable("Mandays", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>

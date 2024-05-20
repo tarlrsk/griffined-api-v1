@@ -10,6 +10,13 @@ namespace griffined_api.Services.ScheduleService
     {
         Task<ServiceResponse<List<DailyCalendarResponseDto>>> GetDailyCalendarForStaff(string date);
         Task<ServiceResponse<List<TodayMobileResponseDto>>> GetMobileTodayClass(string date);
-        Task<ServiceResponse<string>> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto>  requestDto);
+        Task<ServiceResponse<string>> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto> requestDto);
+
+        /// <summary>
+        /// Generate available schedule by checking the given parameters.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        ServiceResponse<IEnumerable<AvailableAppointmentScheduleDTO>> GenerateAvailableSchedule(CheckAvailableAppointmentScheduleDTO request);
     }
 }

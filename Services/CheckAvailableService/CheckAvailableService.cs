@@ -74,7 +74,7 @@ namespace griffined_api.Services.CheckAvailableService
                                                 .ThenInclude(m => m.Teacher)
                                     .Where(s => listRequestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment
                                     && s.AppointmentSlot!.Appointment.AppointmentMembers.Any(m => m.TeacherId == requestedTeacher.Id)
-                                    && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.Deleted).ToListAsync();
+                                    && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.DELETED).ToListAsync();
 
             var conflictSchedule = new List<ConflictScheduleResponseDto>();
             var conflictAppointment = new List<ConflictScheduleResponseDto>();
@@ -350,7 +350,7 @@ namespace griffined_api.Services.CheckAvailableService
                                     .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Appointment
                                     && s.AppointmentSlot != null
                                     && s.AppointmentSlot.AppointmentId != appointmentId
-                                    && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.Deleted).ToListAsync();
+                                    && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.DELETED).ToListAsync();
 
             var dbTeachers = await _context.Teachers
                                 .Include(t => t.Mandays)
@@ -473,7 +473,7 @@ namespace griffined_api.Services.CheckAvailableService
                                     .Where(s => requestDto.AppointmentSchedule.Select(a => a.Date.ToDateTime()).Contains(s.Date)
                                     && s.AppointmentSlot != null
                                     && s.AppointmentSlot.AppointmentId != requestDto.AppointmentId
-                                    && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.Deleted
+                                    && s.AppointmentSlot.AppointmentSlotStatus != AppointmentSlotStatus.DELETED
                                     && s.AppointmentSlot.Appointment.AppointmentMembers.Any(m => requestDto.TeacherIds.Contains(m.Teacher.Id)))
                                     .ToListAsync();
 

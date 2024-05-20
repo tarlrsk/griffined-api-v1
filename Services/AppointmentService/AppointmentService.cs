@@ -11,78 +11,103 @@ namespace griffined_api.Services.AppointmentService
 {
     public class AppointmentService : IAppointmentService
     {
+        private readonly IUnitOfWork _uow;
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
+        private readonly IAsyncRepository<Staff> _staffRepo;
 
-        public AppointmentService(DataContext context, IFirebaseService firebaseService)
+        public AppointmentService(IUnitOfWork uow,
+                                  DataContext context,
+                                  IFirebaseService firebaseService,
+                                  IAsyncRepository<Staff> staffRepo)
         {
+            _uow = uow;
             _context = context;
             _firebaseService = firebaseService;
+            _staffRepo = staffRepo;
         }
 
-        public async Task<ServiceResponse<string>> AddNewAppointment(NewAppointmentRequestDto newAppointment)
+        public async Task<ServiceResponse<string>> AddNewAppointment(CreateAppointmentDTO request)
         {
-            var dbStaff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
-                        ?? throw new BadRequestException("Staff is not found.");
+            throw new NotImplementedException(); ;
+            // var staffId = _firebaseService.GetAzureIdWithToken();
 
-            var appointment = new Appointment()
-            {
-                Title = newAppointment.Title,
-                AppointmentType = newAppointment.AppointmentType,
-                Description = newAppointment.Description,
-                Staff = dbStaff,
-            };
+            // var staff = _staffRepo.Query()
+            //                       .FirstOrDefault(x => x.Id == staffId);
 
-            var teachers = await _context.Teachers.ToListAsync();
-            foreach (var teacherId in newAppointment.TeacherIds)
-            {
-                var teacher = teachers.FirstOrDefault(t => t.Id == teacherId) ?? throw new BadRequestException($"Teacher with ID {teacherId} is not found");
-                appointment.AppointmentMembers.Add(new AppointmentMember
-                {
-                    Teacher = teacher,
-                });
+            // if (staff is null)
+            // {
+            //     throw new NotFoundException($"Staff with id ({staffId}) is not found.");
+            // }
 
-                var teacherNotification = new TeacherNotification
-                {
-                    Teacher = teacher,
-                    Appointment = appointment,
-                    Title = "New Appointment",
-                    Message = "You have been added to a new Appointment.",
-                    Type = TeacherNotificationType.NewAppointment,
-                    HasRead = false
-                };
+            // var appointment = new Appointment
+            // {
+            //     Title = request.Title,
+            //     Description = request.Description,
+            //     AppointmentType = request.AvailableAppointmentSchedules.First().AppointmentType.Value,
+            //     Staff = staff
+            // }
+            // var dbStaff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
+            //             ?? throw new BadRequestException("Staff is not found.");
 
-                _context.TeacherNotifications.Add(teacherNotification);
-            }
+            // var appointment = new Appointment()
+            // {
+            //     Title = newAppointment.Title,
+            //     AppointmentType = newAppointment.AppointmentType,
+            //     Description = newAppointment.Description,
+            //     Staff = dbStaff,
+            // };
 
-            foreach (var newSchedule in newAppointment.Schedules)
-            {
-                appointment.AppointmentSlots.Add(new AppointmentSlot
-                {
-                    Schedule = new Schedule
-                    {
-                        Date = newSchedule.Date.ToDateTime(),
-                        FromTime = newSchedule.FromTime.ToTimeSpan(),
-                        ToTime = newSchedule.ToTime.ToTimeSpan(),
-                        Type = ScheduleType.Appointment,
-                    },
-                    AppointmentSlotStatus = AppointmentSlotStatus.None,
-                });
-            }
+            // var teachers = await _context.Teachers.ToListAsync();
+            // foreach (var teacherId in newAppointment.TeacherIds)
+            // {
+            //     var teacher = teachers.FirstOrDefault(t => t.Id == teacherId) ?? throw new BadRequestException($"Teacher with ID {teacherId} is not found");
+            //     appointment.AppointmentMembers.Add(new AppointmentMember
+            //     {
+            //         Teacher = teacher,
+            //     });
 
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            //     var teacherNotification = new TeacherNotification
+            //     {
+            //         Teacher = teacher,
+            //         Appointment = appointment,
+            //         Title = "New Appointment",
+            //         Message = "You have been added to a new Appointment.",
+            //         Type = TeacherNotificationType.NewAppointment,
+            //         HasRead = false
+            //     };
 
-            return new ServiceResponse<string>
-            {
-                StatusCode = (int)HttpStatusCode.OK,
-            };
+            //     _context.TeacherNotifications.Add(teacherNotification);
+            // }
+
+            // foreach (var newSchedule in newAppointment.Schedules)
+            // {
+            //     appointment.AppointmentSlots.Add(new AppointmentSlot
+            //     {
+            //         Schedule = new Schedule
+            //         {
+            //             Date = newSchedule.Date.ToDateTime(),
+            //             FromTime = newSchedule.FromTime.ToTimeSpan(),
+            //             ToTime = newSchedule.ToTime.ToTimeSpan(),
+            //             Type = ScheduleType.Appointment,
+            //         },
+            //         AppointmentSlotStatus = AppointmentSlotStatus.None,
+            //     });
+            // }
+
+            // _context.Appointments.Add(appointment);
+            // await _context.SaveChangesAsync();
+
+            // return new ServiceResponse<string>
+            // {
+            //     StatusCode = (int)HttpStatusCode.OK,
+            // };
         }
 
         public async Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments()
         {
             var dbAppointments = await _context.Appointments
-                            .Include(a => a.AppointmentSlots.Where(a => a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted))
+                            .Include(a => a.AppointmentSlots.Where(a => a.AppointmentSlotStatus != AppointmentSlotStatus.DELETED))
                                 .ThenInclude(a => a.Schedule)
                             .Include(a => a.Staff)
                             .ToListAsync();
@@ -124,7 +149,7 @@ namespace griffined_api.Services.AppointmentService
                                 .Include(a => a.AppointmentMembers)
                                     .ThenInclude(m => m.Teacher)
                                 .Include(a => a.AppointmentSlots
-                                    .Where(s => s.AppointmentSlotStatus != AppointmentSlotStatus.Deleted))
+                                    .Where(s => s.AppointmentSlotStatus != AppointmentSlotStatus.DELETED))
                                     .ThenInclude(s => s.Schedule)
                                 .Include(a => a.AppointmentHistories)
                                     .ThenInclude(a => a.Teacher)
@@ -244,9 +269,9 @@ namespace griffined_api.Services.AppointmentService
             foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
             {
                 var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId
-                                    && a.AppointmentSlotStatus != AppointmentSlotStatus.Deleted)
+                                    && a.AppointmentSlotStatus != AppointmentSlotStatus.DELETED)
                                     ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
-                deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.Deleted;
+                deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.DELETED;
                 dbAppointment.AppointmentHistories.Add(new AppointmentHistory
                 {
                     Method = AppointmentHistoryMethod.RemoveSchedule,
@@ -262,7 +287,7 @@ namespace griffined_api.Services.AppointmentService
             {
                 var appointmentSlot = new AppointmentSlot
                 {
-                    AppointmentSlotStatus = AppointmentSlotStatus.None,
+                    AppointmentSlotStatus = AppointmentSlotStatus.NONE,
                     Schedule = new Schedule
                     {
                         Date = addSchedule.Date.ToDateTime(),
