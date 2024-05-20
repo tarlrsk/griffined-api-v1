@@ -27,9 +27,9 @@ namespace griffined_api.Services.AppointmentService
             _staffRepo = staffRepo;
         }
 
-        public async Task<ServiceResponse<string>> AddNewAppointment(NewAppointmentRequestDto newAppointment)
+        public async Task<ServiceResponse<string>> AddNewAppointment(CreateAppointmentDTO request)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); ;
             // var staffId = _firebaseService.GetAzureIdWithToken();
 
             // var staff = _staffRepo.Query()
@@ -38,6 +38,14 @@ namespace griffined_api.Services.AppointmentService
             // if (staff is null)
             // {
             //     throw new NotFoundException($"Staff with id ({staffId}) is not found.");
+            // }
+
+            // var appointment = new Appointment
+            // {
+            //     Title = request.Title,
+            //     Description = request.Description,
+            //     AppointmentType = request.AvailableAppointmentSchedules.First().AppointmentType.Value,
+            //     Staff = staff
             // }
             // var dbStaff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
             //             ?? throw new BadRequestException("Staff is not found.");

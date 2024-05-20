@@ -1,5 +1,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace griffined_api.Dtos.ScheduleDtos
 {
@@ -18,8 +21,6 @@ namespace griffined_api.Dtos.ScheduleDtos
         public IEnumerable<DateTime> Dates { get; set; }
 
         [JsonProperty("days")]
-        [EnumDataType(typeof(System.DayOfWeek))]
-        [JsonConverter(typeof(StringEnumConverter))]
         public IEnumerable<System.DayOfWeek> Days { get; set; }
 
         [JsonProperty("fromTime")]
@@ -29,6 +30,8 @@ namespace griffined_api.Dtos.ScheduleDtos
         public TimeSpan ToTime { get; set; }
 
         [JsonProperty("appointmentType")]
+        [EnumDataType(typeof(AppointmentType))]
+        [JsonConverter(typeof(StringEnumConverter))]
         public AppointmentType AppointmentType { get; set; }
     }
 

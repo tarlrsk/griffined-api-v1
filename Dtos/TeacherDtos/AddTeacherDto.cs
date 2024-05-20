@@ -14,7 +14,7 @@ namespace griffined_api.Dtos.TeacherDtos
         public string FirstName { get; set; } = string.Empty;
 
         [Required]
-        [JsonProperty("firstName")]
+        [JsonProperty("lastName")]
         public string LastName { get; set; } = string.Empty;
 
         [JsonProperty("fullName")]

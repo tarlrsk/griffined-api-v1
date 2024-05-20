@@ -17,7 +17,7 @@ namespace griffined_api.Models
 
         public int Quarter { get; set; }
 
-        public Enums.DayOfWeek Day { get; set; }
+        public System.DayOfWeek Day { get; set; }
 
         public TimeSpan FromTime { get; set; }
 

@@ -258,7 +258,7 @@ namespace griffined_api.Services.ScheduleService
                                 if (schedule.Type == ScheduleType.Appointment)
                                 {
                                     hourSlot.FirstHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                    if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                    if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
                                     {
                                         hourSlot.FirstHalf.Type = DailyCalendarType.HOLIDAY;
                                     }
@@ -299,7 +299,7 @@ namespace griffined_api.Services.ScheduleService
                                     if (schedule.Type == ScheduleType.Appointment)
                                     {
                                         hourSlot.FirstHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                        if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                        if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
                                         {
                                             hourSlot.FirstHalf.Type = DailyCalendarType.HOLIDAY;
                                         }
@@ -345,7 +345,7 @@ namespace griffined_api.Services.ScheduleService
                                 if (schedule.Type == ScheduleType.Appointment)
                                 {
                                     hourSlot.SecondHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                    if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                    if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
                                     {
                                         hourSlot.SecondHalf.Type = DailyCalendarType.HOLIDAY;
                                     }
@@ -386,7 +386,7 @@ namespace griffined_api.Services.ScheduleService
                                     if (schedule.Type == ScheduleType.Appointment)
                                     {
                                         hourSlot.SecondHalf.Name = schedule.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                        if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.Holiday)
+                                        if (schedule.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
                                         {
                                             hourSlot.SecondHalf.Type = DailyCalendarType.HOLIDAY;
                                         }

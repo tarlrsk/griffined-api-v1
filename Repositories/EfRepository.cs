@@ -2,9 +2,9 @@ namespace griffined_api.Repositories
 {
     public class EfRepository<T> : IAsyncRepository<T> where T : class
     {
-        protected readonly DbContext _context;
+        protected readonly DataContext _context;
 
-        public EfRepository(DbContext context)
+        public EfRepository(DataContext context)
         {
             _context = context;
         }
