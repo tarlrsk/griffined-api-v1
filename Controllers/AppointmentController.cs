@@ -18,11 +18,11 @@ namespace griffined_api.Controllers
             _appointmentService = appointmentService;
         }
 
-        // [HttpPost(), Authorize(Roles = "ea, master, allstaff")]
-        // public async Task<ActionResult> NewAppointment(NewAppointmentRequestDto newAppointment)
-        // {
-        //     return Ok(await _appointmentService.AddNewAppointment(newAppointment));
-        // }
+        [HttpPost(), Authorize(Roles = "ea, master, allstaff")]
+        public IActionResult NewAppointment(CreateAppointmentDTO request)
+        {
+            return Ok(_appointmentService.AddNewAppointment(request));
+        }
 
         [HttpGet(), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> ListAllAppointments()
