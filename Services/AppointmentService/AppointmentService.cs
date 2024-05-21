@@ -1,11 +1,6 @@
 using griffined_api.Dtos.AppointentDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.AppointmentService
 {
@@ -14,94 +9,137 @@ namespace griffined_api.Services.AppointmentService
         private readonly IUnitOfWork _uow;
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
+        private readonly IAsyncRepository<Appointment> _appointmentRepo;
+        private readonly IAsyncRepository<AppointmentSlot> _appointmentSlotRepo;
+        private readonly IAsyncRepository<AppointmentMember> _appointmentMemberRepo;
+        private readonly IAsyncRepository<Schedule> _scheduleRepo;
         private readonly IAsyncRepository<Staff> _staffRepo;
+        private readonly IAsyncRepository<Teacher> _teacherRepo;
+        private readonly IAsyncRepository<TeacherNotification> _teacherNotificationRepo;
 
         public AppointmentService(IUnitOfWork uow,
                                   DataContext context,
                                   IFirebaseService firebaseService,
-                                  IAsyncRepository<Staff> staffRepo)
+                                  IAsyncRepository<Appointment> appointmentRepo,
+                                  IAsyncRepository<AppointmentSlot> appointmentSlotRepo,
+                                  IAsyncRepository<AppointmentMember> appointmentMemberRepo,
+                                  IAsyncRepository<Schedule> scheduleRepo,
+                                  IAsyncRepository<Staff> staffRepo,
+                                  IAsyncRepository<Teacher> teacherRepo,
+                                  IAsyncRepository<TeacherNotification> teacherNotificationRepo)
         {
             _uow = uow;
             _context = context;
             _firebaseService = firebaseService;
+            _appointmentRepo = appointmentRepo;
+            _appointmentSlotRepo = appointmentSlotRepo;
+            _appointmentMemberRepo = appointmentMemberRepo;
+            _scheduleRepo = scheduleRepo;
             _staffRepo = staffRepo;
+            _teacherRepo = teacherRepo;
+            _teacherNotificationRepo = teacherNotificationRepo;
         }
 
-        public async Task<ServiceResponse<string>> AddNewAppointment(CreateAppointmentDTO request)
+        public ServiceResponse<string> AddNewAppointment(CreateAppointmentDTO request)
         {
-            throw new NotImplementedException(); ;
-            // var staffId = _firebaseService.GetAzureIdWithToken();
+            var staffId = _firebaseService.GetAzureIdWithToken();
 
-            // var staff = _staffRepo.Query()
-            //                       .FirstOrDefault(x => x.Id == staffId);
+            var staff = _staffRepo.Query()
+                                  .FirstOrDefault(x => x.Id == staffId);
 
-            // if (staff is null)
-            // {
-            //     throw new NotFoundException($"Staff with id ({staffId}) is not found.");
-            // }
+            if (staff is null)
+            {
+                throw new NotFoundException($"Staff with id ({staffId}) is not found.");
+            }
 
-            // var appointment = new Appointment
-            // {
-            //     Title = request.Title,
-            //     Description = request.Description,
-            //     AppointmentType = request.AvailableAppointmentSchedules.First().AppointmentType.Value,
-            //     Staff = staff
-            // }
-            // var dbStaff = await _context.Staff.FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
-            //             ?? throw new BadRequestException("Staff is not found.");
+            var appointment = new Appointment
+            {
+                Title = request.Title,
+                Description = request.Description,
+                AppointmentType = request.AvailableAppointmentSchedules.First().AppointmentType.Value,
+                Staff = staff
+            };
 
-            // var appointment = new Appointment()
-            // {
-            //     Title = newAppointment.Title,
-            //     AppointmentType = newAppointment.AppointmentType,
-            //     Description = newAppointment.Description,
-            //     Staff = dbStaff,
-            // };
+            var teachers = _teacherRepo.Query()
+                                       .Where(x => request.TeacherIds.Contains(x.Id))
+                                       .ToList();
 
-            // var teachers = await _context.Teachers.ToListAsync();
-            // foreach (var teacherId in newAppointment.TeacherIds)
-            // {
-            //     var teacher = teachers.FirstOrDefault(t => t.Id == teacherId) ?? throw new BadRequestException($"Teacher with ID {teacherId} is not found");
-            //     appointment.AppointmentMembers.Add(new AppointmentMember
-            //     {
-            //         Teacher = teacher,
-            //     });
+            var appointmentMembers = new List<AppointmentMember>();
+            var schedules = new List<Schedule>();
+            var appointmentSlots = new List<AppointmentSlot>();
+            var teacherNotifications = new List<TeacherNotification>();
 
-            //     var teacherNotification = new TeacherNotification
-            //     {
-            //         Teacher = teacher,
-            //         Appointment = appointment,
-            //         Title = "New Appointment",
-            //         Message = "You have been added to a new Appointment.",
-            //         Type = TeacherNotificationType.NewAppointment,
-            //         HasRead = false
-            //     };
+            foreach (var teacher in teachers)
+            {
+                var appointmentMember = new AppointmentMember
+                {
+                    AppointmentId = appointment.Id,
+                    TeacherId = teacher.Id,
+                };
 
-            //     _context.TeacherNotifications.Add(teacherNotification);
-            // }
+                appointmentMembers.Add(appointmentMember);
 
-            // foreach (var newSchedule in newAppointment.Schedules)
-            // {
-            //     appointment.AppointmentSlots.Add(new AppointmentSlot
-            //     {
-            //         Schedule = new Schedule
-            //         {
-            //             Date = newSchedule.Date.ToDateTime(),
-            //             FromTime = newSchedule.FromTime.ToTimeSpan(),
-            //             ToTime = newSchedule.ToTime.ToTimeSpan(),
-            //             Type = ScheduleType.Appointment,
-            //         },
-            //         AppointmentSlotStatus = AppointmentSlotStatus.None,
-            //     });
-            // }
+                var teacherNotification = new TeacherNotification
+                {
+                    TeacherId = teacher.Id,
+                    Appointment = appointment,
+                    Title = "New Appointment",
+                    Message = "You have been added to a new Appointment.",
+                    Type = TeacherNotificationType.NewAppointment,
+                    HasRead = false
+                };
 
-            // _context.Appointments.Add(appointment);
-            // await _context.SaveChangesAsync();
+                teacherNotifications.Add(teacherNotification);
+            }
 
-            // return new ServiceResponse<string>
-            // {
-            //     StatusCode = (int)HttpStatusCode.OK,
-            // };
+            foreach (var requestedSchedule in request.AvailableAppointmentSchedules)
+            {
+                var schedule = new Schedule
+                {
+                    Date = requestedSchedule.Date.ToGregorianDateTime(),
+                    FromTime = requestedSchedule.FromTime,
+                    ToTime = requestedSchedule.ToTime,
+                    Type = ScheduleType.Appointment
+                };
+
+                schedules.Add(schedule);
+
+                var slot = new AppointmentSlot
+                {
+                    ScheduleId = schedule.Id,
+                    AppointmentSlotStatus = AppointmentSlotStatus.NONE
+                };
+
+                appointmentSlots.Add(slot);
+            }
+
+            _uow.BeginTran();
+            _appointmentRepo.Add(appointment);
+
+            if (appointmentMembers.Any())
+            {
+                _appointmentMemberRepo.AddRange(appointmentMembers);
+            }
+
+            if (schedules.Any())
+            {
+                _scheduleRepo.AddRange(schedules);
+            }
+
+            if (appointmentSlots.Any())
+            {
+                _appointmentSlotRepo.AddRange(appointmentSlots);
+            }
+
+            if (teacherNotifications.Any())
+            {
+                _teacherNotificationRepo.AddRange(teacherNotifications);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+
+            return new ServiceResponse<string>();
         }
 
         public async Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments()
