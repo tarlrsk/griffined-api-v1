@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace griffined_api.Enums
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum DayOfWeek
+    public enum CustomDayOfWeek
     {
         //
         // Summary:

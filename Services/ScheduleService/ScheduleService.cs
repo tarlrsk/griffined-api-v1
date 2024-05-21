@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Net;
-using System.Threading.Tasks;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 
@@ -477,9 +474,15 @@ namespace griffined_api.Services.ScheduleService
 
         public ServiceResponse<IEnumerable<AvailableAppointmentScheduleDTO>> GenerateAvailableSchedule(CheckAvailableAppointmentScheduleDTO request)
         {
+            // PARSE DATE FROM DD-MMMM-YYYY TO YYYY-MM-DD.
+            var dates = request.Dates.Select(x => x.ToGregorianDateTime()).ToList();
+
+            // PARSE DAYS INTO DAYOFWEEK ENUM.
+            var daysOfWeek = request.Days?.Select(day => Enum.Parse<DayOfWeek>(day, true)).ToList() ?? new List<DayOfWeek>();
+
             // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
             var conflictScheduleIds = _scheduleRepo.Query()
-                                                   .Where(x => request.Dates.Contains(x.Date))
+                                                   .Where(x => dates.Contains(x.Date))
                                                    .Select(x => x.Id)
                                                    .ToList();
 
@@ -510,8 +513,13 @@ namespace griffined_api.Services.ScheduleService
                                                     .ToList();
 
             // FILTER OUT THE CONFLICTING DATES FROM THE REQUEST DATES
-            var availableDates = request.Dates.Except(conflictDates).ToList();
+            var availableDates = dates.Except(conflictDates).ToList();
 
+            // FILTER AVAILABLE DATES BASED ON DAYS OF WEEK
+            if (daysOfWeek.Any())
+            {
+                availableDates = availableDates.Where(date => daysOfWeek.Contains(date.DayOfWeek)).ToList();
+            }
 
             // GENERATE AVAILABLE SCHEDULE FOR THE NON-CONFLICTING DATES
             var availableSchedules = new List<AvailableAppointmentScheduleDTO>();
@@ -523,8 +531,8 @@ namespace griffined_api.Services.ScheduleService
 
                 var availableSchedule = new AvailableAppointmentScheduleDTO
                 {
-                    Date = date,
-                    Day = date.DayOfWeek,
+                    Date = date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture),
+                    Day = date.DayOfWeek.ToString().ToUpper(),
                     FromTime = request.FromTime,
                     ToTime = request.ToTime,
                     Hour = hour,
