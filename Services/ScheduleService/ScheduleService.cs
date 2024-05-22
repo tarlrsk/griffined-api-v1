@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace griffined_api.Services.ScheduleService
 {
@@ -559,6 +560,23 @@ namespace griffined_api.Services.ScheduleService
                 availableSchedules.Add(availableSchedule);
             }
 
+            // CONSTRUCT ERROR MESSAGE.
+            var conflictErrorMessages = new List<string>();
+
+            foreach (var conflictingDate in conflictDates)
+            {
+                string conflictMessage = $"There is a scheduling conflict on {conflictingDate.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)}. Please choose a different date or time.";
+                conflictErrorMessages.Add(conflictMessage);
+            }
+
+            string errorMessage = string.Join(" ", conflictErrorMessages);
+
+            // THROW ERROR IF THERE ARE NO AVAILABLE SCHEDULEs.
+            if (!availableSchedules.Any() || availableSchedules.Count == 0)
+            {
+                throw new ConflictException(errorMessage);
+            }
+
             var response = new ServiceResponse<IEnumerable<AvailableAppointmentScheduleDTO>>
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -691,6 +709,23 @@ namespace griffined_api.Services.ScheduleService
                 accumulatedHours += hour; // UPDATE THE ACCUMULATED HOURS
 
                 availableSchedules.Add(availableSchedule);
+            }
+
+            // CONSTRUCT ERROR MESSAGE.
+            var conflictErrorMessages = new List<string>();
+
+            foreach (var conflictingDate in conflictDates)
+            {
+                string conflictMessage = $"There is a scheduling conflict on {conflictingDate.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)}. Please choose a different date or time.";
+                conflictErrorMessages.Add(conflictMessage);
+            }
+
+            string errorMessage = string.Join(" ", conflictErrorMessages);
+
+            // THROW ERROR IF THERE ARE NO AVAILABLE SCHEDULEs.
+            if (!availableSchedules.Any() || availableSchedules.Count == 0)
+            {
+                throw new ConflictException(errorMessage);
             }
 
             var response = new ServiceResponse<IEnumerable<AvailableClassScheduleDTO>>
