@@ -300,7 +300,7 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Mandays");
+                    b.ToTable("Mandays", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>
@@ -1283,9 +1283,6 @@ namespace griffinedapi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPartTime")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
