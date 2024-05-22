@@ -1,4 +1,5 @@
 using griffined_api.Dtos.AppointentDtos;
+using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 using System.Net;
 
@@ -16,6 +17,7 @@ namespace griffined_api.Services.AppointmentService
         private readonly IAsyncRepository<Staff> _staffRepo;
         private readonly IAsyncRepository<Teacher> _teacherRepo;
         private readonly IAsyncRepository<TeacherNotification> _teacherNotificationRepo;
+        private readonly IScheduleService _scheduleService;
 
         public AppointmentService(IUnitOfWork uow,
                                   DataContext context,
@@ -26,7 +28,8 @@ namespace griffined_api.Services.AppointmentService
                                   IAsyncRepository<Schedule> scheduleRepo,
                                   IAsyncRepository<Staff> staffRepo,
                                   IAsyncRepository<Teacher> teacherRepo,
-                                  IAsyncRepository<TeacherNotification> teacherNotificationRepo)
+                                  IAsyncRepository<TeacherNotification> teacherNotificationRepo,
+                                  IScheduleService scheduleService)
         {
             _uow = uow;
             _context = context;
@@ -38,10 +41,40 @@ namespace griffined_api.Services.AppointmentService
             _staffRepo = staffRepo;
             _teacherRepo = teacherRepo;
             _teacherNotificationRepo = teacherNotificationRepo;
+            _scheduleService = scheduleService;
         }
 
         public ServiceResponse<string> AddNewAppointment(CreateAppointmentDTO request)
         {
+            // CHECK IF THE REQUESTED SCHEDULE IS VALID.
+            IEnumerable<string> dates = new List<string>();
+            IEnumerable<string> days = new List<string>();
+
+            foreach (var schedule in request.Schedules)
+            {
+                dates.ToList().Add(schedule.Date);
+                days.ToList()
+                    .Add(schedule.Date.ToGregorianDateTime()
+                                 .DayOfWeek.ToString());
+
+                var scheduleDTO = new CheckAvailableAppointmentScheduleDTO
+                {
+                    TeacherIds = request.TeacherIds,
+                    Dates = dates,
+                    Days = days,
+                    FromTime = schedule.FromTime,
+                    ToTime = schedule.ToTime,
+                    AppointmentType = request.AppointmentType,
+                };
+
+                var verifySchedule = _scheduleService.GenerateAvailableAppointmentSchedule(scheduleDTO);
+
+                if (verifySchedule.Data is null)
+                {
+                    throw new BadHttpRequestException("No schedules.");
+                }
+            }
+
             var staffId = _firebaseService.GetAzureIdWithToken();
 
             var staff = _staffRepo.Query()
@@ -56,7 +89,7 @@ namespace griffined_api.Services.AppointmentService
             {
                 Title = request.Title,
                 Description = request.Description,
-                AppointmentType = request.AvailableAppointmentSchedules.First().AppointmentType.Value,
+                AppointmentType = request.AppointmentType,
                 Staff = staff
             };
 
@@ -92,14 +125,16 @@ namespace griffined_api.Services.AppointmentService
                 teacherNotifications.Add(teacherNotification);
             }
 
-            foreach (var requestedSchedule in request.AvailableAppointmentSchedules)
+            foreach (var requestedSchedule in request.Schedules)
             {
                 var schedule = new Schedule
                 {
                     Date = requestedSchedule.Date.ToGregorianDateTime(),
                     FromTime = requestedSchedule.FromTime,
                     ToTime = requestedSchedule.ToTime,
-                    Type = ScheduleType.Appointment
+                    Type = ScheduleType.Appointment,
+                    CalendarType = request.AppointmentType == AppointmentType.HOLIDAY ? DailyCalendarType.HOLIDAY
+                                                                                      : DailyCalendarType.EVENT
                 };
 
                 schedules.Add(schedule);

@@ -3,6 +3,18 @@ using Newtonsoft.Json.Converters;
 
 namespace griffined_api.Dtos.ScheduleDtos
 {
+    public class CreateScheduleDTO
+    {
+        [JsonProperty("date")]
+        public string Date { get; set; }
+
+        [JsonProperty("fromTime")]
+        public TimeSpan FromTime { get; set; }
+
+        [JsonProperty("toTime")]
+        public TimeSpan ToTime { get; set; }
+    }
+
     public class AppointmentScheduleDTO : AvailableAppointmentScheduleDTO
     {
         [JsonProperty("scheduleId")]

@@ -21,9 +21,10 @@ namespace griffined_api.Models
 
         public TimeSpan ToTime { get; set; }
 
+        [Column(TypeName = "nvarchar(100)")]
         public virtual ScheduleType Type { get; set; }
 
-        [Column("nvarchar(100)")]
+        [Column(TypeName = "nvarchar(100)")]
         public virtual DailyCalendarType CalendarType { get; set; }
 
         public virtual StudyClass? StudyClass { get; set; }

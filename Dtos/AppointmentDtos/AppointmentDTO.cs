@@ -20,6 +20,6 @@ namespace griffined_api.Dtos.AppointentDtos
         public AppointmentType AppointmentType { get; set; }
 
         [JsonProperty("availableSchedules")]
-        public IEnumerable<AvailableAppointmentScheduleDTO> AvailableAppointmentSchedules { get; set; }
+        public IEnumerable<CreateScheduleDTO> Schedules { get; set; }
     }
 }
