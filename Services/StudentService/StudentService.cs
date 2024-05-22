@@ -101,7 +101,7 @@ namespace griffined_api.Services.StudentService
             // GENERATE STUDENT CODE
             string studentCode = "GF" +
                                  DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
-                                 DateTime.Now.ToString("mm", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
+                                 DateTime.Now.ToString("MM", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
                                  runningNumber.ToString("D3");
 
             _student.StudentCode = studentCode;
