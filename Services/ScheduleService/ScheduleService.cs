@@ -681,7 +681,6 @@ namespace griffined_api.Services.ScheduleService
             var availableSchedules = new List<AvailableClassScheduleDTO>();
             decimal accumulatedHours = 0;
 
-
             foreach (var date in availableDates)
             {
                 var hour = (decimal)(request.ToTime - request.FromTime).TotalHours;
