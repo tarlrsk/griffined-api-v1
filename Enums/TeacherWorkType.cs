@@ -10,8 +10,8 @@ namespace griffined_api.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TeacherWorkType
     {
-        Normal,
-        Overtime,
-        Special
+        NORMAL,
+        OVERTIME,
+        SPECIAL
     }
 }

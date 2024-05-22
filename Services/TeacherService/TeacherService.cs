@@ -199,9 +199,7 @@ namespace griffined_api.Services.TeacherService
                                             select new WorkTime
                                             {
                                                 Quarter = workTime.Quarter,
-                                                Day = workTime.Day,
-                                                FromTime = workTime.FromTime,
-                                                ToTime = workTime.ToTime
+                                                Day = workTime.Day
                                             })
                                             .ToList()
                            })
@@ -307,72 +305,64 @@ namespace griffined_api.Services.TeacherService
 
         public List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher teacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
         {
-            var requestedDay = date.DayOfWeek;
+            List<TeacherShiftResponseDto> teacherShifts = new List<TeacherShiftResponseDto>();
 
-            var workPeriods = teacher.Mandays
-                                     .SelectMany(x => x.WorkTimes)
-                                     .Where(t => t.Day.ToString() == requestedDay.ToString())
-                                     .ToList();
+            // GET THE MANDAY FOR THE SPECIFIED DATE
+            var manday = teacher.Mandays.FirstOrDefault(m => m.Year == date.Year);
 
-            if (workPeriods.Count == 0)
+            if (manday is not null)
             {
-                return new List<TeacherShiftResponseDto>
+                // GET THE WORK TIMES FOR THE QUARTER AND DAY OF WEEK
+                IEnumerable<WorkTime> workTimes = manday.WorkTimes.Where(w => w.Quarter == GetQuarter(date)
+                                                                           && w.Day == date.DayOfWeek);
+
+                foreach (WorkTime workTime in workTimes)
                 {
-                    new() {
-                        TeacherWorkType = TeacherWorkType.Special,
-                        Hours = (toTime - fromTime).TotalHours
-                    }
-                };
-            }
-            else
-            {
-                var workTypeHours = new List<TeacherShiftResponseDto>();
+                    // CALCULATE THE END TIME BASED ON THE START TIME
+                    TimeSpan endTime = fromTime.Add(TimeSpan.FromHours(7));
 
-                foreach (var workPeriod in workPeriods)
-                {
-                    var intersectionStart = DateTimeExtensions.Max(fromTime, workPeriod.FromTime);
-                    var intersectionEnd = DateTimeExtensions.Min(toTime, workPeriod.ToTime);
-                    var intersectionHours = (intersectionEnd - intersectionStart).TotalHours;
-
-                    if (intersectionHours > 0)
+                    // ADJUST END TIME BASED ON START TIME
+                    if (fromTime.Hours < 10)
                     {
-                        workTypeHours.Add(new TeacherShiftResponseDto
-                        {
-                            Hours = intersectionHours,
-                            TeacherWorkType = TeacherWorkType.Normal,
-                        });
+                        endTime = endTime.Add(TimeSpan.FromHours(-1));
                     }
-
-                    if (fromTime < workPeriod.FromTime || toTime > workPeriod.ToTime)
+                    else if (fromTime.Hours > 10)
                     {
-                        double beforeHours = 0;
-                        double afterHours = 0;
-
-                        if (fromTime < workPeriod.FromTime)
-                        {
-                            beforeHours = (workPeriod.FromTime - fromTime).TotalHours;
-                        }
-
-                        if (toTime > workPeriod.ToTime)
-                        {
-                            afterHours = (toTime - workPeriod.ToTime).TotalHours;
-                        }
-
-                        var overtimeHours = beforeHours + afterHours;
-
-                        if (overtimeHours > 0)
-                        {
-                            workTypeHours.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = overtimeHours,
-                                TeacherWorkType = TeacherWorkType.Overtime,
-                            });
-                        }
+                        endTime = endTime.Add(TimeSpan.FromHours(1));
                     }
+
+                    TeacherWorkType workType;
+
+                    // CHECK IF THE TEACHER WORKS OUTSIDE THE POLICY TIME
+                    if (fromTime < TimeSpan.FromHours(10) || fromTime > TimeSpan.FromHours(11))
+                    {
+                        workType = TeacherWorkType.OVERTIME;
+                    }
+                    // CHECK IF THE TEACHER WORKS ON A DIFFERENT DAY
+                    else if (workTime.Day != date.DayOfWeek)
+                    {
+                        workType = TeacherWorkType.SPECIAL;
+                    }
+                    else
+                    {
+                        workType = TeacherWorkType.NORMAL;
+                    }
+
+                    // ADD THE SHIFT TO THE LIST
+                    teacherShifts.Add(new TeacherShiftResponseDto
+                    {
+                        Hours = (toTime - fromTime).TotalHours,
+                        TeacherWorkType = workType
+                    });
                 }
-
-                return workTypeHours;
             }
+
+            return teacherShifts;
+        }
+
+        private int GetQuarter(DateTime date)
+        {
+            return (date.Month - 1) / 3 + 1;
         }
 
         private static GetTeacherDto MapModelToDTO(Teacher model, IEnumerable<Manday> mandays, IEnumerable<WorkTime> workTimes)
@@ -399,8 +389,6 @@ namespace griffined_api.Services.TeacherService
                                            {
                                                Day = workDay.Day,
                                                Quarter = workDay.Quarter,
-                                               FromTime = workDay.FromTime,
-                                               ToTime = workDay.ToTime
                                            })
                                            .ToList()
                            })
@@ -445,9 +433,7 @@ namespace griffined_api.Services.TeacherService
                             {
                                 Manday = model,
                                 Day = workTime.Day,
-                                Quarter = workTime.Quarter,
-                                FromTime = workTime.FromTime,
-                                ToTime = workTime.ToTime
+                                Quarter = workTime.Quarter
                             })
                             .ToList();
 

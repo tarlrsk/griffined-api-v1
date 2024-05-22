@@ -17,11 +17,7 @@ namespace griffined_api.Models
 
         public int Quarter { get; set; }
 
-        public System.DayOfWeek Day { get; set; }
-
-        public TimeSpan FromTime { get; set; }
-
-        public TimeSpan ToTime { get; set; }
+        public DayOfWeek Day { get; set; }
 
         [ForeignKey(nameof(MandayId))]
         public Manday? Manday { get; set; }

@@ -231,10 +231,10 @@ namespace griffined_api.Services.ScheduleService
                         {
                             switch (teacherShift.TeacherWorkType)
                             {
-                                case TeacherWorkType.Overtime:
+                                case TeacherWorkType.OVERTIME:
                                     dailyCalendar.Ot += teacherShift.Hours;
                                     break;
-                                case TeacherWorkType.Special:
+                                case TeacherWorkType.SPECIAL:
                                     dailyCalendar.Sp += teacherShift.Hours;
                                     break;
                                 default:
