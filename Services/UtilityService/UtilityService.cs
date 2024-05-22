@@ -59,11 +59,37 @@ namespace griffined_api.Services.UtilityService
         public async Task AddStudentCode()
         {
             var students = _context.Students.Where(x => x.StudentCode == null)
-                                            .ToList();
+                                           .ToList();
+
+            // INITIALIZE CURRENT DATE, MONTH, AND RUNNING NUMBER.
+            DateTime now = DateTime.Now;
+            int currentMonth = DateTime.Now.Month;
+            int runningNumber = 0;
 
             foreach (var student in students)
             {
-                string studentCode = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (student.Id % 10000).ToString("0000");
+                // GET LAST STUDENT CODE.      
+                var latestStudentCode = _context.Students.Where(s => s.DateCreated.Year == now.Year
+                                                                  && s.DateCreated.Month == currentMonth)
+                                                         .OrderByDescending(s => s.StudentCode)
+                                                         .Select(s => s.StudentCode)
+                                                         .FirstOrDefault();
+
+                // IF A STUDENT CODE EXISTS FOR THE CURRENT MONTH, EXTRACT AND INCREMENT THE RUNNING NUMBER.
+                if (!string.IsNullOrEmpty(latestStudentCode))
+                {
+                    string runningNumberStr = latestStudentCode.Substring(6, 3);
+                    runningNumber = int.Parse(runningNumberStr);
+                }
+
+                runningNumber++;
+
+                // GENERATE STUDENT CODE
+                string studentCode = "GF" +
+                                     DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
+                                     DateTime.Now.ToString("MM", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
+                                     runningNumber.ToString("D3");
+
                 student.StudentCode = studentCode;
             }
 
