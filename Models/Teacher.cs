@@ -22,6 +22,7 @@ namespace griffined_api.Models
         public string Email { get; set; } = string.Empty;
         public string Line { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
+        public bool IsPartTime { get; set; } = false;
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
 
