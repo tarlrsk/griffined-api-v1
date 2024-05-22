@@ -110,7 +110,7 @@ namespace griffined_api.Services.AttendanceService
 
             if (allAttendancesSet)
             {
-                dbClass.Status = ClassStatus.Checked;
+                dbClass.Status = ClassStatus.CHECKED;
             }
 
             var dbStudyCourse = dbClass.StudyCourse;
@@ -131,11 +131,11 @@ namespace griffined_api.Services.AttendanceService
             {
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    if (dbStudyClass.Status == ClassStatus.CHECKED || dbStudyClass.Status == ClassStatus.UNCHECKED)
                     {
                         completedClass += 1;
                     }
-                    else if (dbStudyClass.Status == ClassStatus.None)
+                    else if (dbStudyClass.Status == ClassStatus.NONE)
                     {
                         incompleteClass += 1;
                     }

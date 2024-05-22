@@ -38,5 +38,21 @@ namespace griffined_api.Controllers
         {
             return Ok(await _scheduleService.UpdateStudyClassRoomByScheduleIds(requestDto));
         }
+
+        [HttpPost("appointments/generate"), AllowAnonymous]
+        public IActionResult GenerateAppointmentSchedule(CheckAvailableAppointmentScheduleDTO request)
+        {
+            var appointments = _scheduleService.GenerateAvailableAppointmentSchedule(request);
+
+            return Ok(appointments);
+        }
+
+        [HttpPost("classes/generate"), AllowAnonymous]
+        public IActionResult GenerateAppointmentSchedule(CheckAvailableClassScheduleDTO request)
+        {
+            var appointments = _scheduleService.GenerateAvailableClassSchedule(request);
+
+            return Ok(appointments);
+        }
     }
 }

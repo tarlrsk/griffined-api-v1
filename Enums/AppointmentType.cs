@@ -10,11 +10,11 @@ namespace griffined_api.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum AppointmentType
     {
-        Meeting,
-        Training,
-        Demo,
-        Prepare,
-        Observe,
-        Holiday,
+        MEETING,
+        TRAINING,
+        DEMO,
+        PREPARE,
+        OBSERVE,
+        HOLIDAY,
     }
 }

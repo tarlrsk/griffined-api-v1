@@ -29,7 +29,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                              .Include(c => c.StudyCourse)
                                              .Include(c => c.StudySubject)
                                              .Include(c => c.Teacher)
-                                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
+                                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.NONE)
                                              ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
 
             if (dbStudyClass.StudyCourse.StudyCourseType == StudyCourseType.Group)
@@ -78,7 +78,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 classCancellationRequest.RequestedRole = CancellationRole.Teacher;
             }
 
-            dbStudyClass.Status = ClassStatus.PendingCancellation;
+            dbStudyClass.Status = ClassStatus.PENDING_CANCELLATION;
 
             _context.ClassCancellationRequests.Add(classCancellationRequest);
 
@@ -492,7 +492,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             foreach (var dbRemoveStudyClass in dbRemoveStudyClasses)
             {
-                dbRemoveStudyClass.Status = ClassStatus.Cancelled;
+                dbRemoveStudyClass.Status = ClassStatus.CANCELLED;
 
                 var removeHistory = new StudyCourseHistory
                 {

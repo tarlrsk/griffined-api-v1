@@ -19,9 +19,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpPost(), Authorize(Roles = "ea, master, allstaff")]
-        public async Task<ActionResult> NewAppointment(NewAppointmentRequestDto newAppointment)
+        public IActionResult NewAppointment(CreateAppointmentDTO request)
         {
-            return Ok(await _appointmentService.AddNewAppointment(newAppointment));
+            return Ok(_appointmentService.AddNewAppointment(request));
         }
 
         [HttpGet(), Authorize(Roles = "ea, master, allstaff")]

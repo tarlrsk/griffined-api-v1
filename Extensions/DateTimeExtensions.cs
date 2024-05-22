@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Microsoft.SqlServer.Server;
 
 namespace griffined_api.Extensions.DateTimeExtensions
 {
@@ -65,6 +66,20 @@ namespace griffined_api.Extensions.DateTimeExtensions
         public static TimeSpan Min(TimeSpan t1, TimeSpan t2)
         {
             return t1 < t2 ? t1 : t2;
+        }
+
+        public static DateTime ToGregorianDateTime(this string dateString)
+        {
+            var cultureInfo = new CultureInfo("en-US");
+
+            if (DateTime.TryParse(dateString, cultureInfo, out DateTime result))
+            {
+                return result;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid date format or date string.", nameof(dateString));
+            }
         }
     }
 }

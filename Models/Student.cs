@@ -24,8 +24,7 @@ namespace griffined_api.Models
         {
             get
             {
-                int _age = 0;
-                _age = DateTime.Now.Subtract(DOB).Days;
+                int _age = DateTime.Now.Subtract(DOB).Days;
                 _age /= 365;
                 return _age;
             }
@@ -41,6 +40,7 @@ namespace griffined_api.Models
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+        public string? Remark { get; set; }
 
         public StudentStatus? Status { get; set; }
         public int? CreatedBy { get; set; }
