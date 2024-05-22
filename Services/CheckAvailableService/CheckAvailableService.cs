@@ -55,7 +55,7 @@ namespace griffined_api.Services.CheckAvailableService
                             !requestedSchedule.CurrentStudySubjectId.Contains(c.StudySubject.Id)
                             && (c.TeacherId == requestedSchedule.TeacherId
                             || c.StudySubject.StudySubjectMember.Any(member => requestedSchedule.StudentIds.Contains(member.StudentId)))
-                            && c.Status != ClassStatus.Cancelled && c.Status != ClassStatus.Deleted)
+                            && c.Status != ClassStatus.CANCELLED && c.Status != ClassStatus.DELETED)
                             .ToListAsync();
 
             var dbRequestedStudents = await _context.Students.Where(s => requestedSchedule.StudentIds.Contains(s.Id)).ToListAsync();
@@ -339,8 +339,8 @@ namespace griffined_api.Services.CheckAvailableService
                                             .ThenInclude(c => c.Subject)
                                     .Where(s => requestedDate.Contains(s.Date) && s.Type == ScheduleType.Class
                                         && s.StudyClass != null
-                                        && s.StudyClass.Status != ClassStatus.Cancelled
-                                        && s.StudyClass.Status != ClassStatus.Deleted).ToListAsync();
+                                        && s.StudyClass.Status != ClassStatus.CANCELLED
+                                        && s.StudyClass.Status != ClassStatus.DELETED).ToListAsync();
 
             var dbAppointmentSchedules = await _context.Schedules
                                     .Include(s => s.AppointmentSlot)
@@ -463,7 +463,7 @@ namespace griffined_api.Services.CheckAvailableService
                                     .Where(s => requestDto.AppointmentSchedule.Select(a => a.Date.ToDateTime()).Contains(s.Date)
                                     && s.StudyClass != null
                                     && requestDto.TeacherIds.Contains(s.StudyClass.Teacher.Id)
-                                    && s.StudyClass.Status != ClassStatus.Deleted && s.StudyClass.Status != ClassStatus.Cancelled).ToListAsync();
+                                    && s.StudyClass.Status != ClassStatus.DELETED && s.StudyClass.Status != ClassStatus.CANCELLED).ToListAsync();
 
             var dbAppointmentSchedules = await _context.Schedules
                                     .Include(s => s.AppointmentSlot)
@@ -687,8 +687,8 @@ namespace griffined_api.Services.CheckAvailableService
                             .Include(c => c.Teacher)
                             .Include(c => c.Schedule)
                             .Where(c => c.StudySubject.StudySubjectMember.Any(member => requestDto.StudentIds.Contains(member.StudentId))
-                            && c.Status != ClassStatus.Deleted
-                            && c.Status != ClassStatus.Cancelled)
+                            && c.Status != ClassStatus.DELETED
+                            && c.Status != ClassStatus.CANCELLED)
                             .ToListAsync();
 
             var dbStudents = await _context.Students.Where(s => requestDto.StudentIds.Contains(s.Id)).ToListAsync();

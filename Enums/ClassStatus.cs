@@ -10,11 +10,11 @@ namespace griffined_api.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ClassStatus
     {
-        None,
-        Checked,
-        Unchecked,
-        PendingCancellation,
-        Cancelled,
-        Deleted,
+        NONE,
+        CHECKED,
+        UNCHECKED,
+        PENDING_CANCELLATION,
+        CANCELLED,
+        DELETED,
     }
 }

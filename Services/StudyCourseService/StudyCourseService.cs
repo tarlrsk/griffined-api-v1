@@ -387,7 +387,7 @@ namespace griffined_api.Services.StudyCourseService
                 var dbStudyClasses = await _context.StudyClasses.Where(s => requestDto.ClassToDelete.Contains(s.Id)).ToListAsync();
                 foreach (var dbStudyClass in dbStudyClasses)
                 {
-                    dbStudyClass.Status = ClassStatus.Deleted;
+                    dbStudyClass.Status = ClassStatus.DELETED;
                 }
             }
 
@@ -622,7 +622,7 @@ namespace griffined_api.Services.StudyCourseService
                 });
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    if (dbStudyClass.Status != ClassStatus.Deleted)
+                    if (dbStudyClass.Status != ClassStatus.DELETED)
                     {
                         schedules.Add(new ScheduleResponseDto
                         {
@@ -683,7 +683,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Attendances)
                                     .ThenInclude(a => a.Student)
                                 .Include(c => c.Teacher)
-                                .Where(c => dbStudySubjects.Contains(c.StudySubject) && c.Status != ClassStatus.Deleted)
+                                .Where(c => dbStudySubjects.Contains(c.StudySubject) && c.Status != ClassStatus.DELETED)
                                 .Select(c => new
                                 {
                                     StudyClass = c,
@@ -1351,11 +1351,11 @@ namespace griffined_api.Services.StudyCourseService
             {
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    if (dbStudyClass.Status == ClassStatus.CHECKED || dbStudyClass.Status == ClassStatus.UNCHECKED)
                     {
                         completedClass += 1;
                     }
-                    else if (dbStudyClass.Status == ClassStatus.None)
+                    else if (dbStudyClass.Status == ClassStatus.NONE)
                     {
                         incompleteClass += 1;
                     }
@@ -1396,7 +1396,7 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     _context.StudentAttendances.Remove(dbAttendance);
                 }
-                dbRemoveStudyClass.Status = ClassStatus.Deleted;
+                dbRemoveStudyClass.Status = ClassStatus.DELETED;
                 var removeHistory = new StudyCourseHistory
                 {
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
@@ -1513,8 +1513,8 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Schedule)
                                 .Where(c =>
                                 c.Schedule.Date == requestDate.ToDateTime()
-                                && c.Status != ClassStatus.Cancelled
-                                && c.Status != ClassStatus.Deleted
+                                && c.Status != ClassStatus.CANCELLED
+                                && c.Status != ClassStatus.DELETED
                                 && c.TeacherId == userId
                                 && c.StudyCourse.Status != StudyCourseStatus.Pending
                                 && c.StudyCourse.Status != StudyCourseStatus.Cancelled)
@@ -1533,8 +1533,8 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Schedule)
                                 .Where(c =>
                                 c.Schedule.Date == requestDate.ToDateTime()
-                                && c.Status != ClassStatus.Cancelled
-                                && c.Status != ClassStatus.Deleted
+                                && c.Status != ClassStatus.CANCELLED
+                                && c.Status != ClassStatus.DELETED
                                 && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId && m.Status == StudySubjectMemberStatus.Success))
                                 .ToListAsync();
             }
@@ -1614,7 +1614,7 @@ namespace griffined_api.Services.StudyCourseService
             dbStudyCourse.Status = StudyCourseStatus.Cancelled;
             foreach (var dbStudyClass in dbStudyCourse.StudyClasses)
             {
-                dbStudyClass.Status = ClassStatus.Deleted;
+                dbStudyClass.Status = ClassStatus.DELETED;
             }
 
             await _context.SaveChangesAsync();
