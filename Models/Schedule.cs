@@ -25,7 +25,7 @@ namespace griffined_api.Models
         public virtual ScheduleType Type { get; set; }
 
         [Column(TypeName = "nvarchar(100)")]
-        public virtual DailyCalendarType CalendarType { get; set; }
+        public virtual DailyCalendarType? CalendarType { get; set; }
 
         public virtual StudyClass? StudyClass { get; set; }
 

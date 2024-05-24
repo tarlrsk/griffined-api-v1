@@ -28,9 +28,9 @@ namespace griffined_api.Controllers
         }
 
         [HttpGet("staff/{date}"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
-        public async Task<ActionResult> GetDailyCalendarForStaff(string date)
+        public IActionResult GetDailyCalendarForStaff(string date)
         {
-            return Ok(await _scheduleService.GetDailyCalendarForStaff(date));
+            return Ok(_scheduleService.GetDailyCalendarForStaff(date));
         }
 
         [HttpPut("studyclass/room"), Authorize(Roles = "ec, ea, oa, master, allstaff")]

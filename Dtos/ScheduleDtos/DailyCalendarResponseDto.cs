@@ -4,16 +4,31 @@ using System.Linq;
 using System.Threading.Tasks;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.StudyCourseDtos;
+using Newtonsoft.Json;
 
 namespace griffined_api.Dtos.ScheduleDtos
 {
-    public class DailyCalendarResponseDto
+    public class DailtyCalendarDTO
     {
-        public int? Id { get; set; }
+        [JsonProperty("teacherId")]
         public int? TeacherId { get; set; }
-        public string? Teacher { get; set; }
-        public double Ot { get; set; }
-        public double Sp { get; set; }
-        public List<DailyCalendarHalfSlotResponseDto?> HourSlots { get; set; } = new List<DailyCalendarHalfSlotResponseDto?>();
+
+        [JsonProperty("teacherFirstName")]
+        public string? TeacherFirstName { get; set; }
+
+        [JsonProperty("teacherLastName")]
+        public string? TeacherLastName { get; set; }
+
+        [JsonProperty("teacherNickName")]
+        public string? TeacherNickname { get; set; }
+
+        [JsonProperty("ot")]
+        public double OT { get; set; }
+
+        [JsonProperty("sp")]
+        public double SP { get; set; }
+
+        [JsonProperty("hourSlots")]
+        public List<CalendarHalfDTO?> HourSlots { get; set; } = new List<CalendarHalfDTO?>();
     }
 }
