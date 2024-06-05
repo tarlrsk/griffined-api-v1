@@ -47,14 +47,13 @@ namespace griffined_api.Services.AppointmentService
         public ServiceResponse<string> AddNewAppointment(CreateAppointmentDTO request)
         {
             // CHECK IF THE REQUESTED SCHEDULE IS VALID.
-            IEnumerable<string> dates = new List<string>();
-            IEnumerable<string> days = new List<string>();
+            List<string> dates = new List<string>();
+            List<string> days = new List<string>();
 
             foreach (var schedule in request.Schedules)
             {
-                dates.ToList().Add(schedule.Date);
-                days.ToList()
-                    .Add(schedule.Date.ToGregorianDateTime()
+                dates.Add(schedule.Date);
+                days.Add(schedule.Date.ToGregorianDateTime()
                                  .DayOfWeek.ToString());
 
                 var scheduleDTO = new CheckAvailableAppointmentScheduleDTO
@@ -90,7 +89,7 @@ namespace griffined_api.Services.AppointmentService
                 Title = request.Title,
                 Description = request.Description,
                 AppointmentType = request.AppointmentType,
-                Staff = staff
+                CreatedByStaffId = staff.Id
             };
 
             var teachers = _teacherRepo.Query()
@@ -174,7 +173,12 @@ namespace griffined_api.Services.AppointmentService
             _uow.Complete();
             _uow.CommitTran();
 
-            return new ServiceResponse<string>();
+            return new ServiceResponse<string>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = null,
+                Success = true
+            };
         }
 
         public async Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments()

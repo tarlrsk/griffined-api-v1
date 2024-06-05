@@ -554,16 +554,16 @@ namespace griffined_api.Services.ScheduleService
                                                                   && request.TeacherIds.Contains(x.TeacherId.Value))
                                                       .ToList();
 
-            // FETCH ALL CONFLICTING APPOINTMENT IDS BASED ON THE TEACHER IDS.
-            var conflictAppointmentIds = _appointmentMemberRepo.Query()
-                                                               .Where(x => request.TeacherIds.Contains(x.TeacherId.Value))
-                                                               .Select(x => x.AppointmentId)
-                                                               .ToList();
+            // FETCH ALL APPOINTMENT IDS BASED ON THE TEACHER IDS.
+            var appointmentIds = _appointmentMemberRepo.Query()
+                                                       .Where(x => request.TeacherIds.Contains(x.TeacherId.Value))
+                                                       .Select(x => x.AppointmentId)
+                                                       .ToList();
 
             // FETCH ALL CONFLICTING APPOINTMENTS BASED ON THE APPOINTMENT IDS AND SCHEDULE IDS.
             var conflictAppointments = _appointmentSlotRepo.Query()
                                                            .Include(x => x.Schedule)
-                                                           .Where(x => conflictAppointmentIds.Contains(x.AppointmentId)
+                                                           .Where(x => appointmentIds.Contains(x.AppointmentId)
                                                                        && conflictScheduleIds.Contains(x.ScheduleId.Value))
                                                            .ToList();
 
