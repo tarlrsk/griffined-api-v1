@@ -184,34 +184,31 @@ namespace griffined_api.Services.AppointmentService
         public async Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments()
         {
             var dbAppointments = await _context.Appointments
-                            .Include(a => a.AppointmentSlots.Where(a => a.AppointmentSlotStatus != AppointmentSlotStatus.DELETED))
-                                .ThenInclude(a => a.Schedule)
-                            .Include(a => a.Staff)
-                            .ToListAsync();
+                                               .Include(a => a.AppointmentSlots.Where(a => a.AppointmentSlotStatus != AppointmentSlotStatus.DELETED))
+                                                .ThenInclude(a => a.Schedule)
+                                               .Include(a => a.Staff)
+                                               .ToListAsync();
 
-            var data = new List<AppointmentResponseDto>();
-
-            foreach (var dbAppointment in dbAppointments)
-            {
-                data.Add(new AppointmentResponseDto
-                {
-                    AppointmentId = dbAppointment.Id,
-                    AppointmentType = dbAppointment.AppointmentType,
-                    Title = dbAppointment.Title,
-                    Description = dbAppointment.Description,
-                    StartDate = dbAppointment.AppointmentSlots.Min(a => a.Schedule.Date).ToDateString(),
-                    EndDate = dbAppointment.AppointmentSlots.Max(a => a.Schedule.Date).ToDateString(),
-                    CreatedBy = new StaffNameOnlyResponseDto
-                    {
-                        StaffId = dbAppointment.Staff?.Id,
-                        FirstName = dbAppointment.Staff?.FirstName,
-                        LastName = dbAppointment.Staff?.LastName,
-                        FullName = dbAppointment.Staff?.FullName,
-                        Nickname = dbAppointment.Staff?.Nickname,
-                    },
-                    Status = dbAppointment.AppointmentStatus,
-                });
-            }
+            var data = (from appointment in dbAppointments
+                        select new AppointmentResponseDto
+                        {
+                            AppointmentId = appointment.Id,
+                            AppointmentType = appointment.AppointmentType,
+                            Title = appointment.Title,
+                            Description = appointment.Description,
+                            StartDate = appointment.AppointmentSlots.Min(a => a.Schedule.Date).ToDateString(),
+                            EndDate = appointment.AppointmentSlots.Max(a => a.Schedule.Date).ToDateString(),
+                            CreatedBy = new StaffNameOnlyResponseDto
+                            {
+                                StaffId = appointment.Staff?.Id,
+                                FirstName = appointment.Staff?.FirstName,
+                                LastName = appointment.Staff?.LastName,
+                                FullName = appointment.Staff?.FullName,
+                                Nickname = appointment.Staff?.Nickname,
+                            },
+                            Status = appointment.AppointmentStatus,
+                        })
+                       .ToList();
 
             return new ServiceResponse<List<AppointmentResponseDto>>
             {
