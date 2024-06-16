@@ -69,8 +69,12 @@ namespace griffined_api.Services.StudyCourseService
                 var studySubject = new StudySubject();
                 var classNumber = 1;
                 double totalSubjectHour = 0;
+                int studyClassCount = newRequestedSchedule.Schedules.Count();
+                int c = 0;
                 foreach (var newSchedule in newRequestedSchedule.Schedules)
                 {
+                    c++;
+
                     if (newSchedule.SubjectId == newStudySubject.Id)
                     {
                         var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
@@ -78,6 +82,8 @@ namespace griffined_api.Services.StudyCourseService
                         var studyClass = new StudyClass
                         {
                             IsMakeup = false,
+                            IsFiftyPercent = false,
+                            IsHundredPercent = false,
                             ClassNumber = classNumber,
                             Teacher = teacher,
                             StudyCourse = studyCourse,
@@ -89,6 +95,18 @@ namespace griffined_api.Services.StudyCourseService
                                 Type = ScheduleType.Class,
                             }
                         };
+
+                        if (c == studyClassCount / 2)
+                        {
+                            studyClass.IsFiftyPercent = true;
+                            studyClass.IsHundredPercent = false;
+                        }
+
+                        if (c == studyClassCount)
+                        {
+                            studyClass.IsFiftyPercent = false;
+                            studyClass.IsHundredPercent = true;
+                        }
 
                         // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                         // foreach (var worktype in worktypes)
@@ -306,13 +324,21 @@ namespace griffined_api.Services.StudyCourseService
                         studySubject.StudySubjectMember.Add(member);
                     }
                     var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.SubjectId && c.CourseId == dbNewRequestedCourse.CourseId);
+
+                    int studyClassCount = requestedStudyClasses.Count();
+                    int c = 0;
+
                     foreach (var requestedStudyClass in requestedStudyClasses)
                     {
+                        c++;
+
                         var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId) ?? throw new NotFoundException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
 
-                        var studyClass = new StudyClass()
+                        var studyClass = new StudyClass
                         {
                             IsMakeup = false,
+                            IsFiftyPercent = false,
+                            IsHundredPercent = false,
                             ClassNumber = requestedStudyClass.ClassNo,
                             Teacher = dbTeacher,
                             StudyCourse = studyCourse,
@@ -324,6 +350,18 @@ namespace griffined_api.Services.StudyCourseService
                                 Type = ScheduleType.Class,
                             }
                         };
+
+                        if (c == studyClassCount / 2)
+                        {
+                            studyClass.IsFiftyPercent = true;
+                            studyClass.IsHundredPercent = false;
+                        }
+
+                        if (c == studyClassCount)
+                        {
+                            studyClass.IsFiftyPercent = false;
+                            studyClass.IsHundredPercent = true;
+                        }
 
                         // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(
                         //                 dbTeacher,
@@ -419,10 +457,15 @@ namespace griffined_api.Services.StudyCourseService
                                             .Where(c => c.CourseId == dbNewCourseRequest.CourseId
                                             && c.SubjectId == dbStudySubject.SubjectId);
 
+                        int studyClassCount = newStudyClasses.Count();
+                        int c = 0;
+
                         foreach (var newStudyClass in newStudyClasses)
                         {
                             var studyClass = new StudyClass
                             {
+                                IsFiftyPercent = false,
+                                IsHundredPercent = false,
                                 ClassNumber = newStudyClass.ClassNo,
                                 Teacher = dbTeachers.FirstOrDefault(t => t.Id == newStudyClass.TeacherId) ?? throw new Exception($"Cannot Find Teacher ID {newStudyClass.TeacherId}"),
                                 StudyCourse = dbNewCourseRequest.StudyCourse,
@@ -434,6 +477,19 @@ namespace griffined_api.Services.StudyCourseService
                                     Type = ScheduleType.Class,
                                 }
                             };
+
+                            if (c == studyClassCount / 2)
+                            {
+                                studyClass.IsFiftyPercent = true;
+                                studyClass.IsHundredPercent = false;
+                            }
+
+                            if (c == studyClassCount)
+                            {
+                                studyClass.IsFiftyPercent = false;
+                                studyClass.IsHundredPercent = true;
+                            }
+
                             dbStudySubject.StudyClasses.Add(studyClass);
                         }
                     }
@@ -1433,6 +1489,10 @@ namespace griffined_api.Services.StudyCourseService
                     var classCount = dbStudySubject.StudyClasses.Count;
                     var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
                                 ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found.");
+
+                    int studyClassCount = updateRequest.NewSchedule.Where(x => x.StudySubjectId == dbStudySubject.Id).Count();
+                    int c = 0;
+
                     var studyClass = new StudyClass
                     {
                         //TODO Class Count
@@ -1446,6 +1506,18 @@ namespace griffined_api.Services.StudyCourseService
                             Type = ScheduleType.Class,
                         },
                     };
+
+                    if (c == studyClassCount / 2)
+                    {
+                        studyClass.IsFiftyPercent = true;
+                        studyClass.IsHundredPercent = false;
+                    }
+
+                    if (c == studyClassCount)
+                    {
+                        studyClass.IsFiftyPercent = false;
+                        studyClass.IsHundredPercent = true;
+                    }
 
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)

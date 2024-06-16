@@ -565,6 +565,9 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
+                int studyClassCount = updateRequest.NewSchedule.Where(x => x.StudySubjectId == dbStudySubject.Id).Count();
+                int c = 0;
+
                 foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == dbStudySubject.Id))
                 {
                     var classCount = dbStudySubject.StudyClasses.Count;
@@ -584,6 +587,18 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Type = ScheduleType.Class,
                         },
                     };
+
+                    if (c == studyClassCount / 2)
+                    {
+                        studyClass.IsFiftyPercent = true;
+                        studyClass.IsHundredPercent = false;
+                    }
+
+                    if (c == studyClassCount)
+                    {
+                        studyClass.IsFiftyPercent = false;
+                        studyClass.IsHundredPercent = true;
+                    }
 
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)
