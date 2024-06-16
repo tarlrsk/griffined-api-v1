@@ -125,7 +125,7 @@ namespace griffined_api.Dtos.ScheduleDtos
         public int? LevelId { get; set; }
 
         [JsonProperty("levelName")]
-        public string LevelName { get; set; }
+        public string? LevelName { get; set; }
 
         [JsonProperty("date")]
         public string Date { get; set; }
