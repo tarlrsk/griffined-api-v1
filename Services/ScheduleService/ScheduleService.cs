@@ -694,7 +694,18 @@ namespace griffined_api.Services.ScheduleService
 
                 accumulatedHours += hour; // UPDATE THE ACCUMULATED HOURS
 
-                availableSchedules.Add(availableSchedule);
+                // CHECK IF THIS SCHEDULE ALREADY EXISTS IN THE CURRENT SCHEDULES.
+                bool alreadyExists = request.CurrentSchedules?.Any(x => x.Date == availableSchedule.Date &&
+                                                                        x.Day == availableSchedule.Day &&
+                                                                        x.FromTime == availableSchedule.FromTime &&
+                                                                        x.ToTime == availableSchedule.ToTime &&
+                                                                        x.AppointmentType == availableSchedule.AppointmentType)
+                                                                        ?? false;
+
+                if (!alreadyExists)
+                {
+                    availableSchedules.Add(availableSchedule);
+                }
             }
 
             var response = new ServiceResponse<IEnumerable<AvailableAppointmentScheduleDTO>>
@@ -789,8 +800,18 @@ namespace griffined_api.Services.ScheduleService
                                                     .Distinct()
                                                     .ToList();
 
-            // FILTER OUT THE CONFLICTING DATES FROM THE REQUEST DATES
-            var availableDates = dates.Except(conflictDates).ToList();
+            // CHECK FOR EXISTING SCHEDULES TO AVOID DUPLICATES
+            var currentSchedules = request.CurrentSchedules ?? new List<AvailableClassScheduleDTO>();
+
+            // FILTER OUT REQUESTED DATES THAT ALREADY EXIST IN THE CURRENT SCHEDULES.
+            var nonConflictingDates = dates.Except(conflictDates).ToList();
+
+            var availableDates = nonConflictingDates.Where(x =>
+                !currentSchedules.Any(y =>
+                    y.Date == x.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture) &&
+                    y.FromTime == request.FromTime &&
+                    y.ToTime == request.ToTime
+                )).ToList();
 
             // FILTER AVAILABLE DATES BASED ON DAYS OF WEEK
             if (daysOfWeek.Any())
