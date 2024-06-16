@@ -43,6 +43,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? HealthInformation { get; set; }
         public StudentStatus status { get; set; } = StudentStatus.Inactive;
 
+        public string? Remark { get; set; }
+
         public FilesResponseDto? ProfilePicture { get; set; }
         public ParentResponseDto? Parent { get; set; }
         public AddressResponseDto? Address { get; set; }

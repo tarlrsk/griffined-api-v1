@@ -34,9 +34,11 @@ namespace griffined_api.Dtos.StudentDtos
         public string? Program { get; set; }
 
         public string? TargetScore { get; set; }
-        public string? TargetUniversity {get; set;}
+        public string? TargetUniversity { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+
+        public string? Remark { get; set; }
 
         public AddProfilePictureRequestDto? ProfilePicture { get; set; }
         public ParentRequestDto? Parent { get; set; }

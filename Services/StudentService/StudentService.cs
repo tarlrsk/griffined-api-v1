@@ -411,6 +411,7 @@ namespace griffined_api.Services.StudentService
             student.TargetScore = updatedStudent.TargetScore;
             student.HogInformation = updatedStudent.HogInformation;
             student.HealthInformation = updatedStudent.HealthInformation;
+            student.Remark = updatedStudent.Remark;
             student.LastUpdatedBy = id;
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
