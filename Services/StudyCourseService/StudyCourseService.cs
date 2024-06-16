@@ -701,6 +701,8 @@ namespace griffined_api.Services.StudyCourseService
                             TeacherFirstName = dbStudyClass.Teacher.FirstName,
                             TeacherLastName = dbStudyClass.Teacher.LastName,
                             TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                            IsHundredPercent = dbStudyClass.IsHundredPercent
                         });
                     }
 
@@ -746,6 +748,8 @@ namespace griffined_api.Services.StudyCourseService
                                     c.StudySubject,
                                     c.Schedule,
                                     Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
+                                    c.IsFiftyPercent,
+                                    c.IsHundredPercent
                                 })
                                 .ToListAsync();
 
@@ -803,6 +807,8 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherLastName = dbStudyClass.StudyClass.Teacher.LastName,
                     TeacherNickname = dbStudyClass.StudyClass.Teacher.Nickname,
                     Attendance = dbStudyClass.Attendance.Attendance,
+                    IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                    IsHundredPercent = dbStudyClass.IsHundredPercent
                 });
             }
 
@@ -1149,6 +1155,8 @@ namespace griffined_api.Services.StudyCourseService
                     Date = dbStudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                    IsHundredPercent = dbStudyClass.IsHundredPercent,
                     TeacherNickname = dbStudyClass.Teacher.Nickname,
                     ClassStatus = dbStudyClass.Status,
                     TeacherShifts = dbStudyClass.TeacherShifts.Select(shift => new TeacherShiftResponseDto

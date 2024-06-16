@@ -21,6 +21,8 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public string ToTime { get; set; } = string.Empty;
         public ClassStatus ClassStatus { get; set; }
         public Attendance Attendance { get; set; }
+        public bool IsFiftyPercent { get; set; }
+        public bool IsHundredPercent { get; set; }
         public int TeacherId { get; set; }
         public string TeacherFirstName { get; set; } = string.Empty;
         public string TeacherLastName { get; set; } = string.Empty;
