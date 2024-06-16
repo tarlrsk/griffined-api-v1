@@ -41,6 +41,9 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("appointmentType")]
         [JsonConverter(typeof(StringEnumConverter))]
         public AppointmentType AppointmentType { get; set; }
+
+        [JsonProperty("currentSchedules")]
+        public IEnumerable<AvailableAppointmentScheduleDTO>? CurrentSchedules { get; set; }
     }
 
     public class AvailableAppointmentScheduleDTO
@@ -99,6 +102,9 @@ namespace griffined_api.Dtos.ScheduleDtos
 
         [JsonProperty("toTime")]
         public TimeSpan ToTime { get; set; }
+
+        [JsonProperty("currentSchedules")]
+        public IEnumerable<AvailableClassScheduleDTO>? CurrentSchedules { get; set; }
     }
 
     public class AvailableClassScheduleDTO
