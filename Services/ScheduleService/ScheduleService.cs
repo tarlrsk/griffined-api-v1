@@ -192,8 +192,8 @@ namespace griffined_api.Services.ScheduleService
                                                          .ToList();
 
             var appointments = _appointmentRepo.Query()
-                                                     .Where(x => appointmentSlotIds.Contains(x.Id))
-                                                     .ToList();
+                                               .Where(x => appointmentSlotIds.Contains(x.Id))
+                                               .ToList();
 
             var appointmentIds = appointments.Select(x => x.Id).ToList();
 
@@ -208,6 +208,7 @@ namespace griffined_api.Services.ScheduleService
 
             // CREATE TEACHER DICT
             var teacherDict = new Dictionary<int, Teacher>();
+
             foreach (var teacher in teachers)
             {
                 teacherDict[teacher.Id] = teacher;
@@ -237,6 +238,7 @@ namespace griffined_api.Services.ScheduleService
                     if (classSchedule.AppointmentSlot != null)
                     {
                         var appoint = appointments.FirstOrDefault(x => x.Id == classSchedule.AppointmentSlot?.AppointmentId);
+
                         if (appoint != null)
                         {
                             // MAP APPOINTMENT INTO SCHEDULE DATA
@@ -245,7 +247,6 @@ namespace griffined_api.Services.ScheduleService
                     }
 
                 }
-
 
                 schedules.AddRange(appointmentSchedules);
             }
@@ -404,8 +405,6 @@ namespace griffined_api.Services.ScheduleService
                 workingTeachers.Add(dailyCalendar);
             }
 
-
-
             // MAP TEACHER THAT IS NOT TEACHING
             var data = new List<DailtyCalendarDTO>();
 
@@ -472,9 +471,9 @@ namespace griffined_api.Services.ScheduleService
                     break;
 
                 case DailyCalendarType.MAKEUP_CLASS or
-                                        DailyCalendarType.NORMAL_CLASS or
-                                        DailyCalendarType.CANCELLED_CLASS or
-                                        DailyCalendarType.SUBSTITUTE:
+                     DailyCalendarType.NORMAL_CLASS or
+                     DailyCalendarType.CANCELLED_CLASS or
+                     DailyCalendarType.SUBSTITUTE:
 
                     hourSlot = new CalendarSlotDTO
                     {
