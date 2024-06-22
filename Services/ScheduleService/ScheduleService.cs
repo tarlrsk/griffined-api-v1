@@ -61,6 +61,7 @@ namespace griffined_api.Services.ScheduleService
             var role = _firebaseService.GetRoleWithToken();
             List<StudyClass> dbStudyClasses = new();
             List<AppointmentSlot> dbAppointmentSlots = new();
+
             if (role == "teacher")
             {
                 dbStudyClasses = await _context.StudyClasses
@@ -112,8 +113,8 @@ namespace griffined_api.Services.ScheduleService
                 throw new InternalServerException("Something went wrong with User.");
             }
 
-
             var data = new List<TodayMobileResponseDto>();
+
             foreach (var dbStudyClass in dbStudyClasses)
             {
                 data.Add(new TodayMobileResponseDto
@@ -170,6 +171,7 @@ namespace griffined_api.Services.ScheduleService
             };
             return response;
         }
+
         public ServiceResponse<List<DailtyCalendarDTO>> GetDailyCalendarForStaff(string requestedDate)
         {
             // GET THE LIST OF SCHEDULEIDS BASED ON THE REQUESTED DATE
@@ -204,7 +206,6 @@ namespace griffined_api.Services.ScheduleService
 
 
             var teachers = _teacherRepo.Query().ToList();
-
 
             // CREATE TEACHER DICT
             var teacherDict = new Dictionary<int, Teacher>();
@@ -325,7 +326,8 @@ namespace griffined_api.Services.ScheduleService
                 {
                     foreach (var teacherShift in sch?.StudyClass?.TeacherShifts ?? new List<TeacherShift>())
                     {
-                        if (sch?.StudyClass is not null && sch.StudyClass.Status != ClassStatus.CANCELLED && sch.StudyClass.Status != ClassStatus.DELETED)
+                        if (sch?.StudyClass is not null && sch.StudyClass.Status != ClassStatus.CANCELLED
+                                                        && sch.StudyClass.Status != ClassStatus.DELETED)
                         {
                             switch (teacherShift.TeacherWorkType)
                             {
@@ -400,8 +402,10 @@ namespace griffined_api.Services.ScheduleService
                             }
                         }
                     }
+
                     dailyCalendar.HourSlots.Add(hourSlot);
                 }
+
                 workingTeachers.Add(dailyCalendar);
             }
 
@@ -414,7 +418,10 @@ namespace griffined_api.Services.ScheduleService
                 {
                     continue;
                 }
-                var workTeacher = workingTeachers.Where(t => t.TeacherId == teacher.Id).FirstOrDefault();
+
+                var workTeacher = workingTeachers.Where(t => t.TeacherId == teacher.Id)
+                                                 .FirstOrDefault();
+
                 if (workTeacher != null)
                 {
                     data.Add(workTeacher);
@@ -438,13 +445,13 @@ namespace griffined_api.Services.ScheduleService
             };
         }
 
-        private static CalendarSlotDTO? MapHalf(
-            Schedule sch,
-            List<StudyCourse> studyCourses,
-            List<StudySubject> studySubjects
+        private static CalendarSlotDTO? MapHalf(Schedule sch,
+                                                List<StudyCourse> studyCourses,
+                                                List<StudySubject> studySubjects
         )
         {
             CalendarSlotDTO? hourSlot = null;
+
             switch (sch.CalendarType)
             {
                 case DailyCalendarType.HOLIDAY:
@@ -456,7 +463,6 @@ namespace griffined_api.Services.ScheduleService
                         Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
                         Name = sch.AppointmentSlot?.Appointment.AppointmentType.ToString() ?? "HOLIDAY",
                     };
-
                     break;
 
                 case DailyCalendarType.EVENT:
@@ -485,6 +491,7 @@ namespace griffined_api.Services.ScheduleService
 
                     // Concat course name
                     var slotName = "";
+
                     if (sch.StudyClass != null)
                     {
                         var name = new List<string>();
@@ -506,6 +513,7 @@ namespace griffined_api.Services.ScheduleService
                         }
                         slotName = string.Join(" ", name);
                     }
+
                     hourSlot.Name = slotName;
                     break;
 
@@ -517,15 +525,16 @@ namespace griffined_api.Services.ScheduleService
 
         public async Task<ServiceResponse<string>> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto> requestDto)
         {
-            var dbStudyClasses = await _context.StudyClasses
-                            .Include(c => c.Schedule)
-                            .Where(c => requestDto.Select(r => r.ScheduleId).Contains(c.Schedule.Id))
-                            .ToListAsync();
+            var dbStudyClasses = await _context.StudyClasses.Include(c => c.Schedule)
+                                                            .Where(c => requestDto.Select(r => r.ScheduleId)
+                                                                                  .Contains(c.Schedule.Id))
+                                                            .ToListAsync();
 
             foreach (var newRoom in requestDto)
             {
                 var dbStudyClass = dbStudyClasses.FirstOrDefault(s => s.Schedule.Id == newRoom.ScheduleId)
-                                    ?? throw new NotFoundException($"Schedule With ID {newRoom.ScheduleId} is not found.");
+                                                  ?? throw new NotFoundException($"Schedule With ID {newRoom.ScheduleId} is not found.");
+
                 dbStudyClass.Schedule.Room = newRoom.Room;
             }
 
@@ -927,9 +936,8 @@ namespace griffined_api.Services.ScheduleService
 
                 var teacherDetails = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
 
-                return !string.IsNullOrEmpty(teacherDetails)
-                    ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({teacherDetails})"
-                    : date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
+                return !string.IsNullOrEmpty(teacherDetails) ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({teacherDetails})"
+                                                             : date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
             })
             .ToList();
 
