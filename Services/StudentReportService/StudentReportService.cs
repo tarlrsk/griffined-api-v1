@@ -35,7 +35,8 @@ namespace griffined_api.Services.StudentReportService
 
             int teacherId = _firebaseService.GetAzureIdWithToken();
 
-            var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
+            var dbTeacher = await _context.Teachers.Include(x => x.Mandays).ThenInclude(x => x.WorkTimes)
+                                                   .FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
 
             var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
 
@@ -355,7 +356,8 @@ namespace griffined_api.Services.StudentReportService
                                     .FirstOrDefaultAsync(m => m.Student.StudentCode == detailRequestDto.StudentCode && m.StudySubjectId == detailRequestDto.StudySubjectId) ?? throw new NotFoundException("No student found.");
 
             var teacherId = _firebaseService.GetAzureIdWithToken();
-            var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No teacher found.");
+            var dbTeacher = await _context.Teachers.Include(x => x.Mandays).ThenInclude(x => x.WorkTimes)
+                                      .FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No teacher found.");
 
             var reportRequestDto = new AddStudentReportRequestDto
             {

@@ -120,7 +120,8 @@ namespace griffined_api.Integrations.Firebase
                             }
                             else
                             {
-                                var teacher = await _context.Teachers.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
+                                var teacher = await _context.Teachers.Include(x => x.Mandays).ThenInclude(x => x.WorkTimes)
+                                                                     .FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
                                 if (teacher != null)
                                 {
                                     azure_id = teacher.Id.ToString();
