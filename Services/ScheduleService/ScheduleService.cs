@@ -3,6 +3,7 @@ using System.Net;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Quartz.Impl.Calendar;
 
 namespace griffined_api.Services.ScheduleService
 {
@@ -17,6 +18,8 @@ namespace griffined_api.Services.ScheduleService
         private readonly IAsyncRepository<Teacher> _teacherRepo;
         private readonly IAsyncRepository<Schedule> _scheduleRepo;
         private readonly IAsyncRepository<StudyClass> _studyClassRepo;
+        private readonly IAsyncRepository<StudyCourse> _studyCourseRepo;
+        private readonly IAsyncRepository<StudySubject> _studySubjectRepo;
         private readonly IAsyncRepository<Appointment> _appointmentRepo;
         private readonly IAsyncRepository<AppointmentSlot> _appointmentSlotRepo;
         private readonly IAsyncRepository<AppointmentMember> _appointmentMemberRepo;
@@ -30,6 +33,8 @@ namespace griffined_api.Services.ScheduleService
                                IAsyncRepository<Teacher> teacherRepo,
                                IAsyncRepository<Schedule> scheduleRepo,
                                IAsyncRepository<StudyClass> studyClassRepo,
+                               IAsyncRepository<StudyCourse> studyCourseRepo,
+                               IAsyncRepository<StudySubject> studySubjectRepo,
                                IAsyncRepository<Appointment> appointmentRepo,
                                IAsyncRepository<AppointmentSlot> appointmentSlotRepo,
                                IAsyncRepository<AppointmentMember> appointmentMemberRepo)
@@ -43,6 +48,8 @@ namespace griffined_api.Services.ScheduleService
             _teacherRepo = teacherRepo;
             _scheduleRepo = scheduleRepo;
             _studyClassRepo = studyClassRepo;
+            _studyCourseRepo = studyCourseRepo;
+            _studySubjectRepo = studySubjectRepo;
             _appointmentRepo = appointmentRepo;
             _appointmentSlotRepo = appointmentSlotRepo;
             _appointmentMemberRepo = appointmentMemberRepo;
@@ -172,28 +179,47 @@ namespace griffined_api.Services.ScheduleService
                                            .ToList();
 
             // GET THE STUDY CLASSES LINKED TO THE SCHEDULES
-            var studyClassIds = _studyClassRepo.Query()
-                                               .Where(x => scheduleIds.Contains(x.ScheduleId.Value))
-                                               .Select(x => x.Id)
-                                               .ToList();
+            var studyClasses = _studyClassRepo.Query()
+                                              .Where(x => x.ScheduleId != null && scheduleIds.Contains(x.ScheduleId.Value))
+                                              .ToList();
+
+            var studyClassIds = studyClasses.Select(x => x.Id);
 
             // GET THE APPOINTMENT SLOTS LINKED TO THE SCHEDULES
             var appointmentSlotIds = _appointmentSlotRepo.Query()
-                                                         .Where(x => scheduleIds.Contains(x.ScheduleId.Value))
+                                                         .Where(x => x.ScheduleId != null && scheduleIds.Contains(x.ScheduleId.Value))
                                                          .Select(x => x.Id)
                                                          .ToList();
 
-            var appointmentIds = _appointmentSlotRepo.Query()
+            var appointments = _appointmentRepo.Query()
                                                      .Where(x => appointmentSlotIds.Contains(x.Id))
-                                                     .Select(x => x.AppointmentId)
                                                      .ToList();
+
+            var appointmentIds = appointments.Select(x => x.Id).ToList();
+
+            var appointmentMember = _appointmentMemberRepo.Query()
+                                                          .Include(x => x.Teacher)
+                                                          .Where(x => appointmentIds.Contains(x.Id))
+                                                          .ToList();
+
+
+            var teachers = _teacherRepo.Query().ToList();
+
+
+            // CREATE TEACHER DICT
+            var teacherDict = new Dictionary<int, Teacher>();
+            foreach (var teacher in teachers)
+            {
+                teacherDict[teacher.Id] = teacher;
+            }
 
             var schedules = new List<Schedule>();
 
             if (studyClassIds.Any())
             {
                 var classSchedules = _scheduleRepo.Query()
-                                                  .Where(x => studyClassIds.Contains(x.StudyClass!.Id))
+                                                  .Include(x => x.StudyClass)
+                                                  .Where(x => x.StudyClass != null && studyClassIds.Contains(x.StudyClass.Id))
                                                   .ToList();
 
                 schedules.AddRange(classSchedules);
@@ -202,8 +228,24 @@ namespace griffined_api.Services.ScheduleService
             if (appointmentSlotIds.Any())
             {
                 var appointmentSchedules = _scheduleRepo.Query()
-                                                        .Where(x => appointmentSlotIds.Contains(x.AppointmentSlot!.Id))
+                                                        .Include(x => x.AppointmentSlot)
+                                                        .Where(x => x.AppointmentSlot != null && appointmentSlotIds.Contains(x.AppointmentSlot.Id))
                                                         .ToList();
+
+                foreach (var classSchedule in schedules)
+                {
+                    if (classSchedule.AppointmentSlot != null)
+                    {
+                        var appoint = appointments.FirstOrDefault(x => x.Id == classSchedule.AppointmentSlot?.AppointmentId);
+                        if (appoint != null)
+                        {
+                            // MAP APPOINTMENT INTO SCHEDULE DATA
+                            classSchedule.AppointmentSlot.Appointment = appoint;
+                        }
+                    }
+
+                }
+
 
                 schedules.AddRange(appointmentSchedules);
             }
@@ -214,16 +256,16 @@ namespace griffined_api.Services.ScheduleService
             {
                 List<Teacher> teacherList = new();
 
-                var studyClassTeacher = schedule.StudyClass?.Teacher;
+                var studyClassTeacherIds = schedule.StudyClass?.TeacherId;
 
-                if (studyClassTeacher is not null)
+                if (studyClassTeacherIds is int teacherId)
                 {
-                    teacherList.Add(studyClassTeacher);
+                    teacherList.Add(teacherDict[teacherId]);
                 }
 
-                var appointmentTeacher = schedule.AppointmentSlot?.Appointment.AppointmentMembers.Select(m => m.Teacher)
-                                                                                                 .ToList()
-                                                                                                 ?? new List<Teacher>();
+                var appointmentTeacher = appointmentMember.Where(x => appointmentIds.Contains((int)x.AppointmentId))
+                                                          .Select(a => a.Teacher)
+                                                          .ToList();
 
                 teacherList.AddRange(appointmentTeacher);
 
@@ -252,6 +294,21 @@ namespace griffined_api.Services.ScheduleService
             }
 
             var workingTeachers = new List<DailtyCalendarDTO>();
+
+            var studySubjectIds = studyClasses.Select(x => x.StudySubjectId);
+
+            var studyCourseIds = studyClasses.Select(x => x.StudyCourseId);
+
+            var studyCourses = _studyCourseRepo.Query()
+                                               .Include(x => x.Course)
+                                               .Include(x => x.Level)
+                                               .Where(x => studyCourseIds.Contains(x.Id))
+                                               .ToList();
+
+            var studySubjects = _studySubjectRepo.Query()
+                                               .Include(x => x.Subject)
+                                               .Where(x => studySubjectIds.Contains(x.Id))
+                                               .ToList();
 
             foreach (var schedule in groupedSchedules)
             {
@@ -286,6 +343,8 @@ namespace griffined_api.Services.ScheduleService
                     }
                 };
 
+
+                // Time in timetable - 9:00 to 20:00
                 for (int i = 9; i < 20; i++)
                 {
                     var firstHalf = TimeSpan.FromHours(i);
@@ -293,8 +352,11 @@ namespace griffined_api.Services.ScheduleService
                     var endHour = secondHalf.Add(TimeSpan.FromMinutes(30));
                     CalendarHalfDTO? hourSlot = null;
 
+                    // IF EMPTY HOUR SLOT THEN ADD WHAT EVER IT IS
+                    // IF IT IS NOT EMPTY THEN COMPARE WEIGHT
                     foreach (var sch in schedule.Schedules)
                     {
+                        // MAP FIRST HALF OF HOUR
                         if (sch.FromTime < secondHalf
                         && firstHalf < sch.ToTime)
                         {
@@ -302,171 +364,37 @@ namespace griffined_api.Services.ScheduleService
                             {
                                 hourSlot = new CalendarHalfDTO
                                 {
-                                    FirstHalf = new CalendarSlotDTO
-                                    {
-                                        ScheduleId = sch.Id,
-                                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
-                                    },
+                                    FirstHalf = MapHalf(sch, studyCourses, studySubjects)
                                 };
-                                if (sch.Type == ScheduleType.Appointment)
-                                {
-                                    hourSlot.FirstHalf.Name = sch.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                    if (sch.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
-                                    {
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.HOLIDAY;
-                                    }
-                                    else
-                                    {
-
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.OFFICE_HOURS;
-                                    }
-                                }
-                                else
-                                {
-                                    hourSlot.FirstHalf.Type = sch.StudyClass!.Status switch
-                                    {
-                                        ClassStatus.DELETED => DailyCalendarType.CANCELLED_CLASS,
-                                        ClassStatus.CANCELLED => DailyCalendarType.CANCELLED_CLASS,
-                                        _ => DailyCalendarType.NORMAL_CLASS,
-                                    };
-
-                                    if (sch.StudyClass!.IsMakeup)
-                                    {
-                                        hourSlot.FirstHalf.Type = DailyCalendarType.MAKEUP_CLASS;
-                                    }
-
-                                    hourSlot.FirstHalf.Name = sch.StudyClass!.StudyCourse.Course.course;
-                                    hourSlot.FirstHalf.Room = sch.StudyClass.Schedule.Room;
-                                }
                             }
                             else
                             {
-                                if (hourSlot.FirstHalf?.Type == DailyCalendarType.CANCELLED_CLASS || hourSlot.FirstHalf == null)
+                                hourSlot.FirstHalf ??= new CalendarSlotDTO();
+                                if (hourSlot.FirstHalf.Type < sch.CalendarType || hourSlot.FirstHalf.Type == null)
                                 {
-                                    hourSlot.FirstHalf = new CalendarSlotDTO
-                                    {
-                                        ScheduleId = sch.Id,
-                                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
-                                    };
-
-                                    if (sch.Type == ScheduleType.Appointment)
-                                    {
-                                        hourSlot.FirstHalf.Name = sch.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                        if (sch.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
-                                        {
-                                            hourSlot.FirstHalf.Type = DailyCalendarType.HOLIDAY;
-                                        }
-                                        else
-                                        {
-
-                                            hourSlot.FirstHalf.Type = DailyCalendarType.OFFICE_HOURS;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        hourSlot.FirstHalf.Type = sch.StudyClass!.Status switch
-                                        {
-                                            ClassStatus.DELETED => DailyCalendarType.CANCELLED_CLASS,
-                                            ClassStatus.CANCELLED => DailyCalendarType.CANCELLED_CLASS,
-                                            _ => DailyCalendarType.NORMAL_CLASS,
-                                        };
-
-                                        if (sch.StudyClass!.IsMakeup)
-                                        {
-                                            hourSlot.FirstHalf.Type = DailyCalendarType.MAKEUP_CLASS;
-                                        }
-
-                                        hourSlot.FirstHalf.Name = sch.StudyClass!.StudyCourse.Course.course;
-                                        hourSlot.FirstHalf.Room = sch.StudyClass.Schedule.Room;
-                                    }
+                                    hourSlot.FirstHalf = MapHalf(sch, studyCourses, studySubjects);
                                 }
                             }
                         }
+
+                        // MAP SECOND HALF OF HOUR
                         if (sch.FromTime < endHour
                         && secondHalf < sch.ToTime)
                         {
+                            // IF EMPTY HOUR SLOT
                             if (hourSlot == null)
                             {
                                 hourSlot = new CalendarHalfDTO
                                 {
-                                    SecondHalf = new CalendarSlotDTO
-                                    {
-                                        ScheduleId = sch.Id,
-                                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
-                                    },
+                                    SecondHalf = MapHalf(sch, studyCourses, studySubjects)
                                 };
-                                if (sch.Type == ScheduleType.Appointment)
-                                {
-                                    hourSlot.SecondHalf.Name = sch.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                    if (sch.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
-                                    {
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.HOLIDAY;
-                                    }
-                                    else
-                                    {
-
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.OFFICE_HOURS;
-                                    }
-                                }
-                                else
-                                {
-                                    hourSlot.SecondHalf.Type = sch.StudyClass!.Status switch
-                                    {
-                                        ClassStatus.DELETED => DailyCalendarType.CANCELLED_CLASS,
-                                        ClassStatus.CANCELLED => DailyCalendarType.CANCELLED_CLASS,
-                                        _ => DailyCalendarType.NORMAL_CLASS,
-                                    };
-
-                                    if (sch.StudyClass!.IsMakeup)
-                                    {
-                                        hourSlot.SecondHalf.Type = DailyCalendarType.MAKEUP_CLASS;
-                                    }
-
-                                    hourSlot.SecondHalf.Name = sch.StudyClass!.StudyCourse.Course.course;
-                                    hourSlot.SecondHalf.Room = sch.StudyClass.Schedule.Room;
-                                }
                             }
                             else
                             {
-                                if (hourSlot.SecondHalf?.Type == DailyCalendarType.CANCELLED_CLASS || hourSlot.SecondHalf == null)
+                                hourSlot.SecondHalf ??= new CalendarSlotDTO();
+                                if (hourSlot.SecondHalf.Type < sch.CalendarType || hourSlot.SecondHalf.Type == null)
                                 {
-                                    hourSlot.SecondHalf = new CalendarSlotDTO
-                                    {
-                                        ScheduleId = sch.Id,
-                                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
-                                    };
-
-                                    if (sch.Type == ScheduleType.Appointment)
-                                    {
-                                        hourSlot.SecondHalf.Name = sch.AppointmentSlot!.Appointment.AppointmentType.ToString();
-                                        if (sch.AppointmentSlot.Appointment.AppointmentType == AppointmentType.HOLIDAY)
-                                        {
-                                            hourSlot.SecondHalf.Type = DailyCalendarType.HOLIDAY;
-                                        }
-                                        else
-                                        {
-
-                                            hourSlot.SecondHalf.Type = DailyCalendarType.OFFICE_HOURS;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        hourSlot.SecondHalf.Type = sch.StudyClass!.Status switch
-                                        {
-                                            ClassStatus.DELETED => DailyCalendarType.CANCELLED_CLASS,
-                                            ClassStatus.CANCELLED => DailyCalendarType.CANCELLED_CLASS,
-                                            _ => DailyCalendarType.NORMAL_CLASS,
-                                        };
-
-                                        if (sch.StudyClass!.IsMakeup)
-                                        {
-                                            hourSlot.SecondHalf.Type = DailyCalendarType.MAKEUP_CLASS;
-                                        }
-
-                                        hourSlot.SecondHalf.Name = sch.StudyClass!.StudyCourse.Course.course;
-                                        hourSlot.SecondHalf.Room = sch.StudyClass.Schedule.Room;
-
-                                    }
+                                    hourSlot.SecondHalf = MapHalf(sch, studyCourses, studySubjects);
                                 }
                             }
                         }
@@ -481,10 +409,12 @@ namespace griffined_api.Services.ScheduleService
             // MAP TEACHER THAT IS NOT TEACHING
             var data = new List<DailtyCalendarDTO>();
 
-            var teachers = _context.Teachers.Where(t => t.IsActive == true).ToList();
-
             foreach (var teacher in teachers)
             {
+                if (!teacher.IsActive)
+                {
+                    continue;
+                }
                 var workTeacher = workingTeachers.Where(t => t.TeacherId == teacher.Id).FirstOrDefault();
                 if (workTeacher != null)
                 {
@@ -507,6 +437,83 @@ namespace griffined_api.Services.ScheduleService
                 StatusCode = (int)HttpStatusCode.OK,
                 Data = data.ToList(),
             };
+        }
+
+        private static CalendarSlotDTO? MapHalf(
+            Schedule sch,
+            List<StudyCourse> studyCourses,
+            List<StudySubject> studySubjects
+        )
+        {
+            CalendarSlotDTO? hourSlot = null;
+            switch (sch.CalendarType)
+            {
+                case DailyCalendarType.HOLIDAY:
+                    hourSlot = new CalendarSlotDTO
+                    {
+                        ScheduleId = sch.Id,
+                        Type = sch.CalendarType,
+                        Room = sch.Room,
+                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
+                        Name = sch.AppointmentSlot?.Appointment.AppointmentType.ToString() ?? "HOLIDAY",
+                    };
+
+                    break;
+
+                case DailyCalendarType.EVENT:
+                    hourSlot = new CalendarSlotDTO
+                    {
+                        ScheduleId = sch.Id,
+                        Type = sch.CalendarType,
+                        Room = sch.Room,
+                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
+                        Name = sch.AppointmentSlot?.Appointment.AppointmentType.ToString() ?? "EVENT",
+                    };
+                    break;
+
+                case DailyCalendarType.MAKEUP_CLASS or
+                                        DailyCalendarType.NORMAL_CLASS or
+                                        DailyCalendarType.CANCELLED_CLASS or
+                                        DailyCalendarType.SUBSTITUTE:
+
+                    hourSlot = new CalendarSlotDTO
+                    {
+                        ScheduleId = sch.Id,
+                        Type = sch.CalendarType,
+                        Room = sch.Room,
+                        Time = $"{sch.FromTime.ToTimeSpanString()}-{sch.ToTime.ToTimeSpanString()}",
+                    };
+
+                    // Concat course name
+                    var slotName = "";
+                    if (sch.StudyClass != null)
+                    {
+                        var name = new List<string>();
+                        var studyCourse = studyCourses.FirstOrDefault(x => x.Id == sch.StudyClass.StudyCourseId);
+                        if (studyCourse != null)
+                        {
+                            name.Add(studyCourse.Course.course);
+                        }
+
+                        var studySubject = studySubjects.FirstOrDefault(x => x.Id == sch.StudyClass.StudySubjectId);
+                        if (studySubject != null)
+                        {
+                            name.Add(studySubject.Subject.subject);
+                        }
+
+                        if (studyCourse != null && studyCourse.Level != null)
+                        {
+                            name.Add(studyCourse.Level.level);
+                        }
+                        slotName = string.Join(" ", name);
+                    }
+                    hourSlot.Name = slotName;
+                    break;
+
+                default:
+                    break;
+            }
+            return hourSlot;
         }
 
         public async Task<ServiceResponse<string>> UpdateStudyClassRoomByScheduleIds(List<UpdateRoomRequestDto> requestDto)

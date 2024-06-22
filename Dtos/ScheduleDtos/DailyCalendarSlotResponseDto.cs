@@ -20,7 +20,7 @@ namespace griffined_api.Dtos.ScheduleDtos
         public string? Room { get; set; }
 
         [JsonProperty("type")]
-        public DailyCalendarType Type { get; set; }
+        public DailyCalendarType? Type { get; set; }
 
         [JsonProperty("time")]
         public string Time { get; set; } = string.Empty;

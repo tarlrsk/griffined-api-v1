@@ -9,9 +9,9 @@ namespace griffined_api.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum DailyCalendarType
     {
-        OFFICE_HOURS = 1,
+        OFFICE_HOURS = 0,
         NORMAL_CLASS = 2,
-        EVENT = 2,
+        EVENT = 1,
         CANCELLED_CLASS = 4,
         MAKEUP_CLASS = 8,
         SUBSTITUTE = 16,
