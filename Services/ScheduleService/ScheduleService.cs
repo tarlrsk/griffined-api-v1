@@ -11,6 +11,7 @@ namespace griffined_api.Services.ScheduleService
     {
         private readonly DataContext _context;
         private readonly IFirebaseService _firebaseService;
+        private readonly ITeacherService _teacherService;
         private readonly IUnitOfWork _uow;
         private readonly IAsyncRepository<Course> _courseRepo;
         private readonly IAsyncRepository<Subject> _subjectRepo;
@@ -26,6 +27,7 @@ namespace griffined_api.Services.ScheduleService
 
         public ScheduleService(DataContext context,
                                IFirebaseService firebaseService,
+                               ITeacherService teacherService,
                                IUnitOfWork uow,
                                IAsyncRepository<Course> courseRepo,
                                IAsyncRepository<Subject> subjectRepo,
@@ -41,6 +43,7 @@ namespace griffined_api.Services.ScheduleService
         {
             _context = context;
             _firebaseService = firebaseService;
+            _teacherService = teacherService;
             _uow = uow;
             _courseRepo = courseRepo;
             _subjectRepo = subjectRepo;
@@ -737,6 +740,8 @@ namespace griffined_api.Services.ScheduleService
         {
             // QUERY FOR TEACHER TO SEE IF REQUEST IS VALID.
             var teacher = _teacherRepo.Query()
+                                      .Include(x => x.Mandays)
+                                        .ThenInclude(x => x.WorkTimes)
                                       .FirstOrDefault(x => x.Id == request.TeacherId);
 
             if (teacher is null)
@@ -843,6 +848,14 @@ namespace griffined_api.Services.ScheduleService
 
                 var availableSchedule = new AvailableClassScheduleDTO
                 {
+                    Teacher = new TeacherNameResponseDto
+                    {
+                        TeacherId = teacher.Id,
+                        FirstName = teacher.FirstName,
+                        LastName = teacher.LastName,
+                        FullName = teacher.FullName,
+                        Nickname = teacher.Nickname,
+                    },
                     CourseId = request.CourseId,
                     CourseName = course.course,
                     SubjectId = request.SubjectId,
@@ -862,6 +875,20 @@ namespace griffined_api.Services.ScheduleService
                 };
 
                 accumulatedHours += hour; // UPDATE THE ACCUMULATED HOURS
+
+                var workTypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, date, request.FromTime, request.ToTime);
+
+                foreach (var workType in workTypes)
+                {
+                    if (workType.TeacherWorkType != TeacherWorkType.NORMAL)
+                    {
+                        availableSchedule.AdditionalHours = new AdditionalHours
+                        {
+                            TeacherWorkType = workType.TeacherWorkType,
+                            Hours = workType.Hours
+                        };
+                    }
+                }
 
                 availableSchedules.Add(availableSchedule);
             }

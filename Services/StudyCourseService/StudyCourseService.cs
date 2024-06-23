@@ -1488,7 +1488,10 @@ namespace griffined_api.Services.StudyCourseService
                             .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
                             .ToListAsync();
 
-            var dbTeachers = await _context.Teachers.ToListAsync();
+            var dbTeachers = await _context.Teachers
+                                           .Include(x => x.Mandays)
+                                                .ThenInclude(x => x.WorkTimes)
+                                           .ToListAsync();
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
