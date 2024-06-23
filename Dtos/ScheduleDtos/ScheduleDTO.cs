@@ -111,6 +111,7 @@ namespace griffined_api.Dtos.ScheduleDtos
     {
         [JsonProperty("teacher")]
         public TeacherNameResponseDto Teacher { get; set; }
+
         [JsonProperty("additionalHours")]
         public AdditionalHours AdditionalHours { get; set; }
 
@@ -162,6 +163,7 @@ namespace griffined_api.Dtos.ScheduleDtos
     {
         [JsonProperty("type")]
         public TeacherWorkType TeacherWorkType { get; set; }
+
         [JsonProperty("hours")]
         public double Hours { get; set; }
     }

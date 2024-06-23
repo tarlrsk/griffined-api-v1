@@ -740,7 +740,8 @@ namespace griffined_api.Services.ScheduleService
         {
             // QUERY FOR TEACHER TO SEE IF REQUEST IS VALID.
             var teacher = _teacherRepo.Query()
-                                      .Include(x => x.Mandays).ThenInclude(x => x.WorkTimes)
+                                      .Include(x => x.Mandays)
+                                        .ThenInclude(x => x.WorkTimes)
                                       .FirstOrDefault(x => x.Id == request.TeacherId);
 
             if (teacher is null)
@@ -876,6 +877,7 @@ namespace griffined_api.Services.ScheduleService
                 accumulatedHours += hour; // UPDATE THE ACCUMULATED HOURS
 
                 var workTypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, date, request.FromTime, request.ToTime);
+
                 foreach (var workType in workTypes)
                 {
                     if (workType.TeacherWorkType != TeacherWorkType.NORMAL)

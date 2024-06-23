@@ -71,9 +71,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
             }
             else
             {
-                var dbTeacher = await _context.Teachers.Include(x => x.Mandays).ThenInclude(x => x.WorkTimes)
-                                      .FirstOrDefaultAsync(s => s.Id == userId)
-                                    ?? throw new NotFoundException($"Teacher with ID {userId} is not found.");
+                var dbTeacher = await _context.Teachers.Include(x => x.Mandays)
+                                                        .ThenInclude(x => x.WorkTimes)
+                                                       .FirstOrDefaultAsync(s => s.Id == userId)
+                                                       ?? throw new NotFoundException($"Teacher with ID {userId} is not found.");
 
                 classCancellationRequest.Teacher = dbTeacher;
                 classCancellationRequest.RequestedRole = CancellationRole.Teacher;

@@ -64,9 +64,10 @@ namespace griffined_api.Services.CheckAvailableService
 
             var requestedStudySubject = dbAllStudySubjects.FirstOrDefault(s => s.Id == requestedSchedule.RequestedStudySubjectId);
 
-            var requestedTeacher = await _context.Teachers.Include(x => x.Mandays).ThenInclude(x => x.WorkTimes)
+            var requestedTeacher = await _context.Teachers.Include(x => x.Mandays)
+                                                            .ThenInclude(x => x.WorkTimes)
                                                           .FirstOrDefaultAsync(t => t.Id == requestedSchedule.TeacherId)
-                                ?? throw new NotFoundException($"Teacher with ID {requestedSchedule.TeacherId} is not found.");
+                                                          ?? throw new NotFoundException($"Teacher with ID {requestedSchedule.TeacherId} is not found.");
 
             var dbAppointmentSchedules = await _context.Schedules
                                     .Include(s => s.AppointmentSlot)
