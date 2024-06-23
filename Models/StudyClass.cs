@@ -21,6 +21,7 @@ namespace griffined_api.Models
         public bool IsMakeup { get; set; } = false;
         public bool IsFiftyPercent { get; set; }
         public bool IsHundredPercent { get; set; }
+        public bool IsSubstitute { get; set; } = false;
 
         [ForeignKey(nameof(ScheduleId))]
         public virtual Schedule Schedule { get; set; } = new Schedule();

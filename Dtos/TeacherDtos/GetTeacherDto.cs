@@ -26,5 +26,6 @@ namespace griffined_api.Dtos.TeacherDtos
         public string Line { get; set; } = string.Empty;
         public List<MandayResponseDto> Mandays { get; set; } = new List<MandayResponseDto>();
         public bool IsActive { get; set; } = true;
+        public bool IsPartTime { get; set; }
     }
 }
