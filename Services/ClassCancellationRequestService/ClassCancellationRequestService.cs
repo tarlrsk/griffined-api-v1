@@ -520,6 +520,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var newTeacher = dbTeachers.FirstOrDefault(x => x.Id == duplicateClassTime.TeacherId)
                                                         ?? throw new NotFoundException("Teacher not found");
                     dbRemoveStudyClass.IsSubstitute = true;
+                    dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.SUBSTITUTE;
                     removeHistory.Description = $"Update teacher {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) from Teacher {dbRemoveStudyClass.Teacher.Nickname} to {newTeacher.Nickname}.";
                     updateRequest.NewSchedule.Remove(duplicateClassTime);
                     // NOTIFY SUBSTITUTE TEACHER
