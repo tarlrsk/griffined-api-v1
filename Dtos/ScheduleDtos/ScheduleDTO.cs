@@ -109,6 +109,12 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     public class AvailableClassScheduleDTO
     {
+        [JsonProperty("teacher")]
+        public TeacherNameResponseDto Teacher { get; set; }
+
+        [JsonProperty("additionalHours")]
+        public AdditionalHours AdditionalHours { get; set; }
+
         [JsonProperty("courseId")]
         public int CourseId { get; set; }
 
@@ -151,5 +157,14 @@ namespace griffined_api.Dtos.ScheduleDtos
 
         [JsonProperty("scheduleStatus")]
         public ClassStatus ScheduleStatus { get; set; }
+    }
+
+    public class AdditionalHours
+    {
+        [JsonProperty("type")]
+        public TeacherWorkType TeacherWorkType { get; set; }
+
+        [JsonProperty("hours")]
+        public double Hours { get; set; }
     }
 }
