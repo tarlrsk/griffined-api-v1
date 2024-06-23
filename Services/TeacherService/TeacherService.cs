@@ -309,6 +309,16 @@ namespace griffined_api.Services.TeacherService
         {
             List<TeacherShiftResponseDto> teacherShifts = new List<TeacherShiftResponseDto>();
 
+            if (teacher.IsPartTime)
+            {
+                teacherShifts.Add(new TeacherShiftResponseDto
+                {
+                    TeacherWorkType = TeacherWorkType.NORMAL,
+                    Hours = (toTime - fromTime).TotalHours,
+                });
+                return teacherShifts;
+            }
+
             // GET THE MANDAY FOR THE SPECIFIED DATE
             var manday = teacher.Mandays.FirstOrDefault(m => m.Year == date.Year);
 
