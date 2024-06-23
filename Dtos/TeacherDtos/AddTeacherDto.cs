@@ -42,5 +42,8 @@ namespace griffined_api.Dtos.TeacherDtos
         [JsonProperty("isActive")]
         public bool IsActive { get; set; } = true;
 
+        [JsonProperty("isPartTime")]
+        public bool IsPartTime { get; set; } = false;
+
     }
 }

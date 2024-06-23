@@ -41,5 +41,8 @@ namespace griffined_api.Dtos.TeacherDtos
 
         [JsonProperty("mandays")]
         public List<MandayRequestDto> Mandays { get; set; } = new List<MandayRequestDto>();
+
+        [JsonProperty("isPartTime")]
+        public bool IsPartTime { get; set; }
     }
 }
