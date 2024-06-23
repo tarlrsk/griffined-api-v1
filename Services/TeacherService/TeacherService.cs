@@ -67,6 +67,7 @@ namespace griffined_api.Services.TeacherService
                 Line = request.Line,
                 CreatedBy = id,
                 LastUpdatedBy = id,
+                IsPartTime = request.IsPartTime,
             };
 
             var mandays = MapMandayDTOToModel(request.Mandays, newTeacher).ToList();
@@ -213,6 +214,7 @@ namespace griffined_api.Services.TeacherService
                 teacher.Phone = request.Phone;
                 teacher.Email = request.Email;
                 teacher.Line = request.Line;
+                teacher.IsPartTime = request.IsPartTime;
 
                 _context.WorkTimes.RemoveRange(teacher.Mandays.SelectMany(x => x.WorkTimes));
                 _context.Mandays.RemoveRange(teacher.Mandays);
