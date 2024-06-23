@@ -499,7 +499,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             foreach (var dbRemoveStudyClass in dbRemoveStudyClasses)
             {
-                // FIND IS IT SUBSTITUTE TEACHER OR NOT
+                // FIND IF IT IS SUBSTITUTE CLASS OR NOT
                 var duplicateClassTime = updateRequest.NewSchedule.FirstOrDefault(x =>
                                                                     x.StudySubjectId == dbRemoveStudyClass.StudySubjectId &&
                                                                     x.Date.ToDateTime() == dbRemoveStudyClass.Schedule.Date &&
@@ -515,14 +515,40 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Type = StudyCourseHistoryType.Schedule,
                     StudyClass = dbRemoveStudyClass,
                 };
+
+                // IF IS SUBSTITUTE CLASS
                 if (duplicateClassTime != null)
                 {
+                    dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.SUBSTITUTE;
+                    dbRemoveStudyClass.IsSubstitute = true;
+
                     var newTeacher = dbTeachers.FirstOrDefault(x => x.Id == duplicateClassTime.TeacherId)
                                                         ?? throw new NotFoundException("Teacher not found");
-                    dbRemoveStudyClass.IsSubstitute = true;
-                    dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.SUBSTITUTE;
+
+                    // UPDATE SUBSTITUTED TEACHER IN HISTORY DESCRIPTION
                     removeHistory.Description = $"Update teacher {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) from Teacher {dbRemoveStudyClass.Teacher.Nickname} to {newTeacher.Nickname}.";
+
+                    // REMOVE PREVIOUS TEACHER SHIFT
+                    foreach (var shift in dbRemoveStudyClass.TeacherShifts)
+                    {
+                        dbRemoveStudyClass.TeacherShifts.Remove(shift);
+                    }
+
+                    // ADD NEW TEACHER SHIFT
+                    var worktypes = _teacherService.GetTeacherWorkTypesWithHours(newTeacher, dbRemoveStudyClass.Schedule.Date, dbRemoveStudyClass.Schedule.FromTime, dbRemoveStudyClass.Schedule.ToTime);
+                    foreach (var worktype in worktypes)
+                    {
+                        dbRemoveStudyClass.TeacherShifts.Add(new TeacherShift
+                        {
+                            Teacher = newTeacher,
+                            TeacherWorkType = worktype.TeacherWorkType,
+                            Hours = worktype.Hours,
+                        });
+                    }
+
+                    // REMOVE SUBSTITUTE CLASS FROM NEW SCHEDULE
                     updateRequest.NewSchedule.Remove(duplicateClassTime);
+
                     // NOTIFY SUBSTITUTE TEACHER
                     var notification = new TeacherNotification
                     {
@@ -535,17 +561,62 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         HasRead = false
                     };
                     _context.TeacherNotifications.Add(notification);
+
+                    // NOTIFY EVERY STUDENT IN THAT CLASS
+                    foreach (var attendance in dbRemoveStudyClass.Attendances)
+                    {
+                        if (attendance.Student != null)
+                        {
+                            var studentNotification = new StudentNotification
+                            {
+                                Student = attendance.Student!,
+                                StudyCourse = dbRemoveStudyClass.StudyCourse,
+                                Title = "Your Teacher Has Been Updated.",
+                                Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been substituted by {newTeacher.Nickname}.",
+                                DateCreated = DateTime.Now,
+                                Type = StudentNotificationType.ClassCancellation,
+                                HasRead = false
+                            };
+
+                            _context.StudentNotifications.Add(studentNotification);
+                        }
+                    }
+
                 }
+                // IF IT IS NOT SUBSTITUTE CLASS
                 else
                 {
-
+                    dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.CANCELLED_CLASS;
                     dbRemoveStudyClass.Status = ClassStatus.CANCELLED;
+
+                    // UPDATE CANCELLED CLASS HISTORY
                     removeHistory.Description = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+
+                    // NOTIFY EVERY STUDENT IN THAT CLASS
+                    foreach (var attendance in dbRemoveStudyClass.Attendances)
+                    {
+                        if (attendance.Student != null)
+                        {
+                            var studentNotification = new StudentNotification
+                            {
+                                Student = attendance.Student!,
+                                StudyCourse = dbRemoveStudyClass.StudyCourse,
+                                Title = "Your Class Has Been Cancelled.",
+                                Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                                DateCreated = DateTime.Now,
+                                Type = StudentNotificationType.ClassCancellation,
+                                HasRead = false
+                            };
+
+                            _context.StudentNotifications.Add(studentNotification);
+                        }
+                    }
                 }
 
+                // INSERT REMOVE HISTORY TO DB
                 dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
 
-                // NOTIFY TEACHER
+                // NOTIFY OLD TEACHER
                 var teacherNotification = new TeacherNotification
                 {
                     Teacher = dbRemoveStudyClass.Teacher,
@@ -558,28 +629,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 };
 
                 _context.TeacherNotifications.Add(teacherNotification);
-
-                // NOTIFY EVERY STUDENT IN THAT CLASS
-                foreach (var attendance in dbRemoveStudyClass.Attendances)
-                {
-                    if (attendance.Student != null)
-                    {
-                        var studentNotification = new StudentNotification
-                        {
-                            Student = attendance.Student!,
-                            StudyCourse = dbRemoveStudyClass.StudyCourse,
-                            Title = "Your Class Has Been Cancelled.",
-                            Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-                            DateCreated = DateTime.Now,
-                            Type = StudentNotificationType.ClassCancellation,
-                            HasRead = false
-                        };
-
-                        _context.StudentNotifications.Add(studentNotification);
-                    }
-                }
-
-
 
             }
 
