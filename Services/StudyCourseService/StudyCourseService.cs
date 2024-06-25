@@ -233,11 +233,12 @@ namespace griffined_api.Services.StudyCourseService
                         var schedule = new ScheduleResponseDto()
                         {
                             StudyCourseId = dbStudyCourse.Id,
+                            Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                             CourseId = dbStudyCourse.Course.Id,
-                            Course = dbStudyCourse.Course.course,
+                            CourseName = dbStudyCourse.Course.course,
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
+                            SubjectName = dbStudySubject.Subject.subject,
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
@@ -251,6 +252,7 @@ namespace griffined_api.Services.StudyCourseService
                                 FirstName = dbStudyClass.Teacher.FirstName,
                                 LastName = dbStudyClass.Teacher.LastName,
                                 Nickname = dbStudyClass.Teacher.Nickname,
+                                FullName = dbStudyClass.Teacher.FullName,
                             },
                             ClassStatus = dbStudyClass.Status,
                         };
@@ -686,6 +688,7 @@ namespace griffined_api.Services.StudyCourseService
                     {
                         schedules.Add(new ScheduleResponseDto
                         {
+                            Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
@@ -693,10 +696,10 @@ namespace griffined_api.Services.StudyCourseService
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                             StudyCourseId = dbStudyCourse.Id,
                             CourseId = dbStudyCourse.Course.Id,
-                            Course = dbStudyCourse.Course.course,
+                            CourseName = dbStudyCourse.Course.course,
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
+                            SubjectName = dbStudySubject.Subject.subject,
                             CourseSubject = dbStudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudyCourse.Level?.level ?? ""),
@@ -707,6 +710,7 @@ namespace griffined_api.Services.StudyCourseService
                                 FirstName = dbStudyClass.Teacher.FirstName,
                                 LastName = dbStudyClass.Teacher.LastName,
                                 Nickname = dbStudyClass.Teacher.Nickname,
+                                FullName = dbStudyClass.Teacher.FullName,
                             },
                             IsFiftyPercent = dbStudyClass.IsFiftyPercent,
                             IsHundredPercent = dbStudyClass.IsHundredPercent
@@ -1152,10 +1156,10 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     StudyCourseId = dbStudyCourse.Id,
                     CourseId = dbStudyCourse.Course.Id,
-                    Course = dbStudyCourse.Course.course,
+                    CourseName = dbStudyCourse.Course.course,
                     StudySubjectId = dbStudySubject.Id,
                     SubjectId = dbStudySubject.Subject.Id,
-                    Subject = dbStudySubject.Subject.subject,
+                    SubjectName = dbStudySubject.Subject.subject,
                     CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                     StudyClassId = dbStudyClass.Id,
                     ClassNo = dbStudyClass.ClassNumber,
@@ -1170,6 +1174,7 @@ namespace griffined_api.Services.StudyCourseService
                         FirstName = dbStudyClass.Teacher.FirstName,
                         LastName = dbStudyClass.Teacher.LastName,
                         Nickname = dbStudyClass.Teacher.Nickname,
+                        FullName = dbStudyClass.Teacher.FullName,
                     },
                     ClassStatus = dbStudyClass.Status,
                     AdditionalHours = dbStudyClass.TeacherShifts
