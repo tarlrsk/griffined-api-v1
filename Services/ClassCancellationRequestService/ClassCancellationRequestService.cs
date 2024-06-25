@@ -395,6 +395,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var schedule = new ScheduleResponseDto
                     {
                         StudyCourseId = dbStudySubject.StudyCourse.Id,
+                        Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                         StudyClassId = dbStudyClass.Id,
                         ClassNo = dbStudyClass.ClassNumber,
                         Room = dbStudyClass.Schedule.Room,
@@ -405,10 +406,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbRequest.StudyCourse.Level?.level ?? ""),
                         CourseId = dbRequest.StudyCourse.Course.Id,
-                        Course = dbRequest.StudyCourse.Course.course,
+                        CourseName = dbRequest.StudyCourse.Course.course,
                         StudySubjectId = dbStudySubject.Subject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
-                        Subject = dbStudySubject.Subject.subject,
+                        SubjectName = dbStudySubject.Subject.subject,
                         Teacher = new TeacherNameResponseDto
                         {
                             TeacherId = dbStudyClass.Teacher.Id,
