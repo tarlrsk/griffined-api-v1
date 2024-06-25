@@ -3,6 +3,7 @@ using Google.Cloud.Storage.V1;
 using Google.Rpc;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
+using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Enums;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -3181,19 +3182,23 @@ namespace griffined_api.Services.RegistrationRequestService
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                            },
                             ClassStatus = dbStudyClass.Status,
                         };
                         foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                         {
-                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = dbTeacherShift.Hours,
-                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                            });
+                            if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                                schedule.AdditionalHours = new AdditionalHours
+                                {
+                                    Hours = dbTeacherShift.Hours,
+                                    TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                                };
                         }
                         rawSchedules.Add(schedule);
                     }
@@ -3231,19 +3236,23 @@ namespace griffined_api.Services.RegistrationRequestService
                             StudySubjectId = dbStudySubject.Subject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             Subject = dbStudySubject.Subject.subject,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                            },
                             ClassStatus = dbStudyClass.Status,
                         };
                         foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                         {
-                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = dbTeacherShift.Hours,
-                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                            });
+                            if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                                schedule.AdditionalHours = new AdditionalHours
+                                {
+                                    Hours = dbTeacherShift.Hours,
+                                    TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                                };
                         }
                         rawSchedules.Add(schedule);
                     }

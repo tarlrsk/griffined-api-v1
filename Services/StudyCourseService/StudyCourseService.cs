@@ -245,19 +245,23 @@ namespace griffined_api.Services.StudyCourseService
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
                             ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                            },
                             ClassStatus = dbStudyClass.Status,
                         };
                         foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                         {
-                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = dbTeacherShift.Hours,
-                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                            });
+                            if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                                schedule.AdditionalHours = new AdditionalHours
+                                {
+                                    Hours = dbTeacherShift.Hours,
+                                    TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                                };
                         }
                         studyCourse.Schedules.Add(schedule);
                     }
@@ -697,10 +701,13 @@ namespace griffined_api.Services.StudyCourseService
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudyCourse.Level?.level ?? ""),
                             ClassStatus = dbStudyClass.Status,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                            },
                             IsFiftyPercent = dbStudyClass.IsFiftyPercent,
                             IsHundredPercent = dbStudyClass.IsHundredPercent
                         });
@@ -1157,13 +1164,22 @@ namespace griffined_api.Services.StudyCourseService
                     ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
                     IsFiftyPercent = dbStudyClass.IsFiftyPercent,
                     IsHundredPercent = dbStudyClass.IsHundredPercent,
-                    TeacherNickname = dbStudyClass.Teacher.Nickname,
-                    ClassStatus = dbStudyClass.Status,
-                    TeacherShifts = dbStudyClass.TeacherShifts.Select(shift => new TeacherShiftResponseDto
+                    Teacher = new TeacherNameResponseDto
                     {
-                        Hours = shift.Hours,
-                        TeacherWorkType = shift.TeacherWorkType,
-                    }).ToList(),
+                        TeacherId = dbStudyClass.Teacher.Id,
+                        FirstName = dbStudyClass.Teacher.FirstName,
+                        LastName = dbStudyClass.Teacher.LastName,
+                        Nickname = dbStudyClass.Teacher.Nickname,
+                    },
+                    ClassStatus = dbStudyClass.Status,
+                    AdditionalHours = dbStudyClass.TeacherShifts
+                                                .Where(x => x.TeacherWorkType != TeacherWorkType.NORMAL)
+                                                .Select(shift => new AdditionalHours
+                                                {
+                                                    Hours = shift.Hours,
+                                                    TeacherWorkType = shift.TeacherWorkType,
+                                                })
+                                                .FirstOrDefault()
                 }))
                 .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
                 .ToList()

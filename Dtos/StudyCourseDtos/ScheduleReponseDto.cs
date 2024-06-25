@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Dtos.StudyCourseDtos
 {
@@ -23,11 +24,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
         public ClassStatus ClassStatus { get; set; }
         public bool IsFiftyPercent { get; set; }
         public bool IsHundredPercent { get; set; }
-        public int TeacherId { get; set; }
-        public string TeacherFirstName { get; set; } = string.Empty;
-        public string TeacherLastName { get; set; } = string.Empty;
-        public string TeacherNickname { get; set; } = string.Empty;
-        public TeacherWorkType? TeacherWorkType { get; set; }
-        public List<TeacherShiftResponseDto> TeacherShifts { get; set; } = new List<TeacherShiftResponseDto>();
+        public TeacherNameResponseDto Teacher { get; set; }
+        public AdditionalHours? AdditionalHours { get; set; }
     }
 }
