@@ -1154,6 +1154,7 @@ namespace griffined_api.Services.StudyCourseService
                 Status = dbStudyCourse.Status,
                 Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
                 {
+                    Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                     StudyCourseId = dbStudyCourse.Id,
                     CourseId = dbStudyCourse.Course.Id,
                     CourseName = dbStudyCourse.Course.course,
