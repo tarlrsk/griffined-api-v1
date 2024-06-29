@@ -781,6 +781,7 @@ namespace griffined_api.Services.ScheduleService
                                                                        && conflictScheduleIds.Contains(x.ScheduleId.Value))
                                                            .ToList();
 
+            // IF STUDENT IDs CONTAINS ITEM, CHECK STUDENT IN CONFLICT CLASSES.
             if (request.StudentIds.Any())
             {
                 conflictStudyClasses = conflictStudyClasses.Where(x => x.StudySubject.StudySubjectMember
