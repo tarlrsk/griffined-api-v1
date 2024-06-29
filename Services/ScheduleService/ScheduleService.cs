@@ -2,8 +2,6 @@ using System.Globalization;
 using System.Net;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Quartz.Impl.Calendar;
 
 namespace griffined_api.Services.ScheduleService
 {
@@ -764,6 +762,8 @@ namespace griffined_api.Services.ScheduleService
             // FETCH ALL CONFLICTING STUDY CLASSES BASED ON THE SCHEDULE IDS AND TEACHER IDS.
             var conflictStudyClasses = _studyClassRepo.Query()
                                                       .Include(x => x.Schedule)
+                                                      .Include(x => x.StudySubject)
+                                                        .ThenInclude(x => x.StudySubjectMember)
                                                       .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
                                                                   && x.TeacherId == request.TeacherId)
                                                       .ToList();
@@ -780,6 +780,13 @@ namespace griffined_api.Services.ScheduleService
                                                            .Where(x => conflictAppointmentIds.Contains(x.AppointmentId)
                                                                        && conflictScheduleIds.Contains(x.ScheduleId.Value))
                                                            .ToList();
+
+            if (request.StudentIds.Any())
+            {
+                conflictStudyClasses = conflictStudyClasses.Where(x => x.StudySubject.StudySubjectMember
+                                                           .Any(x => request.StudentIds.Contains(x.StudentId)))
+                                                           .ToList();
+            }
 
             // QUERY FOR COURSE, SUBJECT, AND LEVEL.
             var course = _courseRepo.Query()
