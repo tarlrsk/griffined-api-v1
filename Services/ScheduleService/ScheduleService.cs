@@ -14,6 +14,7 @@ namespace griffined_api.Services.ScheduleService
         private readonly IAsyncRepository<Course> _courseRepo;
         private readonly IAsyncRepository<Subject> _subjectRepo;
         private readonly IAsyncRepository<Level> _levelRepo;
+        private readonly IAsyncRepository<Student> _studentRepo;
         private readonly IAsyncRepository<Teacher> _teacherRepo;
         private readonly IAsyncRepository<Schedule> _scheduleRepo;
         private readonly IAsyncRepository<StudyClass> _studyClassRepo;
@@ -30,6 +31,7 @@ namespace griffined_api.Services.ScheduleService
                                IAsyncRepository<Course> courseRepo,
                                IAsyncRepository<Subject> subjectRepo,
                                IAsyncRepository<Level> levelRepo,
+                               IAsyncRepository<Student> studentRepo,
                                IAsyncRepository<Teacher> teacherRepo,
                                IAsyncRepository<Schedule> scheduleRepo,
                                IAsyncRepository<StudyClass> studyClassRepo,
@@ -46,6 +48,7 @@ namespace griffined_api.Services.ScheduleService
             _courseRepo = courseRepo;
             _subjectRepo = subjectRepo;
             _levelRepo = levelRepo;
+            _studentRepo = studentRepo;
             _teacherRepo = teacherRepo;
             _scheduleRepo = scheduleRepo;
             _studyClassRepo = studyClassRepo;
@@ -926,8 +929,32 @@ namespace griffined_api.Services.ScheduleService
                                             .Select(x => x.Date)
                                             .ToList();
 
-            // PREPARE A DICTIONARY TO HOLD CONFLICT DATES AND ASSOCIATED TEACHERS.
+            // PREPARE A DICTIONARY TO HOLD CONFLICT DATES AND ASSOCIATED TEACHERS AND STUDENTS.
             var conflictDetails = new Dictionary<DateTime, List<string>>();
+
+            // ADD CONFLICTING STUDY CLASSES' STUDENT DETAILS.
+            foreach (var studyClass in conflictStudentStudyClasses)
+            {
+                var date = studyClass.Schedule.Date;
+
+                // FETCH STUDENT NAMES INVOLVED IN THE CONFLICT.
+                var studentNames = _studentRepo.Query()
+                                               .Where(student => studyClass.StudySubject.StudySubjectMember.Any(member => member.StudentId == student.Id))
+                                               .Select(student => student.FullName)
+                                               .ToList();
+
+                var classDetails = $"Class: {studyClass.StudySubject.Subject.subject}";
+
+                if (!conflictDetails.ContainsKey(date))
+                {
+                    conflictDetails[date] = new List<string>();
+                }
+
+                foreach (var studentName in studentNames)
+                {
+                    conflictDetails[date].Add($"Student: {studentName}, {classDetails}");
+                }
+            }
 
             // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
             foreach (var studyClass in conflictStudyClasses)
@@ -987,9 +1014,9 @@ namespace griffined_api.Services.ScheduleService
                     return $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} (holiday)";
                 }
 
-                var teacherDetails = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
+                var conflictInfo = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
 
-                return !string.IsNullOrEmpty(teacherDetails) ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({teacherDetails})"
+                return !string.IsNullOrEmpty(conflictInfo) ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({conflictInfo})"
                                                              : date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
             })
             .ToList();
