@@ -759,14 +759,40 @@ namespace griffined_api.Services.ScheduleService
                                                    .Select(x => x.Id)
                                                    .ToList();
 
-            // FETCH ALL CONFLICTING STUDY CLASSES BASED ON THE SCHEDULE IDS AND TEACHER IDS.
-            var conflictStudyClasses = _studyClassRepo.Query()
-                                                      .Include(x => x.Schedule)
-                                                      .Include(x => x.StudySubject)
+            // IF STUDENT IDs IN REQUEST HAS ITEMS, CHECK CONFLICT CLASS FOR STUDENTS.
+            List<StudyClass> conflictStudentStudyClasses = new();
+
+            if (request.StudentIds.Any())
+            {
+                var studentStudyClass = _studyClassRepo.Query()
+                                                       .Include(x => x.Schedule)
+                                                       .Include(x => x.StudySubject)
                                                         .ThenInclude(x => x.StudySubjectMember)
-                                                      .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
-                                                                  && x.TeacherId == request.TeacherId)
-                                                      .ToList();
+                                                       .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                && x.StudySubject.StudySubjectMember.Any(x => request.StudentIds.Contains(x.StudentId)))
+                                                       .ToList();
+
+                conflictStudentStudyClasses.AddRange(studentStudyClass);
+            }
+
+            // FETCH ALL CONFLICTING STUDY CLASSES BASED ON THE SCHEDULE IDS AND TEACHER IDS.
+            var conflictTeacherStudyClasses = _studyClassRepo.Query()
+                                                             .Include(x => x.Schedule)
+                                                             .Include(x => x.StudySubject)
+                                                                .ThenInclude(x => x.StudySubjectMember)
+                                                             .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                      && x.TeacherId == request.TeacherId)
+                                                             .ToList();
+
+            // GET CONFLICT STUDY CLASSES.
+            List<StudyClass> conflictStudyClasses = new();
+            conflictStudyClasses.AddRange(conflictTeacherStudyClasses);
+
+            // JOIN STUDENT'S CONFLICT CLASSES WITH TEACHER'S IF THERE ARE ANY.
+            if (conflictStudentStudyClasses.Any())
+            {
+                conflictStudyClasses.AddRange(conflictStudentStudyClasses);
+            }
 
             // FETCH ALL CONFLICTING APPOINTMENT IDS BASED ON THE TEACHER IDS.
             var conflictAppointmentIds = _appointmentMemberRepo.Query()
@@ -780,14 +806,6 @@ namespace griffined_api.Services.ScheduleService
                                                            .Where(x => conflictAppointmentIds.Contains(x.AppointmentId)
                                                                        && conflictScheduleIds.Contains(x.ScheduleId.Value))
                                                            .ToList();
-
-            // IF STUDENT IDs CONTAINS ITEM, CHECK STUDENT IN CONFLICT CLASSES.
-            if (request.StudentIds.Any())
-            {
-                conflictStudyClasses = conflictStudyClasses.Where(x => x.StudySubject.StudySubjectMember
-                                                           .Any(x => request.StudentIds.Contains(x.StudentId)))
-                                                           .ToList();
-            }
 
             // QUERY FOR COURSE, SUBJECT, AND LEVEL.
             var course = _courseRepo.Query()
