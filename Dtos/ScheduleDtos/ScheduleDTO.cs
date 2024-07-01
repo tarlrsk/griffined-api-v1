@@ -79,6 +79,9 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     public class CheckAvailableClassScheduleDTO
     {
+        [JsonProperty("studentIds")]
+        public IEnumerable<int> StudentIds { get; set; }
+
         [JsonProperty("courseId")]
         public int CourseId { get; set; }
 

@@ -2,8 +2,6 @@ using System.Globalization;
 using System.Net;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Quartz.Impl.Calendar;
 
 namespace griffined_api.Services.ScheduleService
 {
@@ -16,6 +14,7 @@ namespace griffined_api.Services.ScheduleService
         private readonly IAsyncRepository<Course> _courseRepo;
         private readonly IAsyncRepository<Subject> _subjectRepo;
         private readonly IAsyncRepository<Level> _levelRepo;
+        private readonly IAsyncRepository<Student> _studentRepo;
         private readonly IAsyncRepository<Teacher> _teacherRepo;
         private readonly IAsyncRepository<Schedule> _scheduleRepo;
         private readonly IAsyncRepository<StudyClass> _studyClassRepo;
@@ -32,6 +31,7 @@ namespace griffined_api.Services.ScheduleService
                                IAsyncRepository<Course> courseRepo,
                                IAsyncRepository<Subject> subjectRepo,
                                IAsyncRepository<Level> levelRepo,
+                               IAsyncRepository<Student> studentRepo,
                                IAsyncRepository<Teacher> teacherRepo,
                                IAsyncRepository<Schedule> scheduleRepo,
                                IAsyncRepository<StudyClass> studyClassRepo,
@@ -48,6 +48,7 @@ namespace griffined_api.Services.ScheduleService
             _courseRepo = courseRepo;
             _subjectRepo = subjectRepo;
             _levelRepo = levelRepo;
+            _studentRepo = studentRepo;
             _teacherRepo = teacherRepo;
             _scheduleRepo = scheduleRepo;
             _studyClassRepo = studyClassRepo;
@@ -761,12 +762,40 @@ namespace griffined_api.Services.ScheduleService
                                                    .Select(x => x.Id)
                                                    .ToList();
 
+            // IF STUDENT IDs IN REQUEST HAS ITEMS, CHECK CONFLICT CLASS FOR STUDENTS.
+            List<StudyClass> conflictStudentStudyClasses = new();
+
+            if (request.StudentIds.Any())
+            {
+                var studentStudyClass = _studyClassRepo.Query()
+                                                       .Include(x => x.Schedule)
+                                                       .Include(x => x.StudySubject)
+                                                        .ThenInclude(x => x.StudySubjectMember)
+                                                       .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                && x.StudySubject.StudySubjectMember.Any(x => request.StudentIds.Contains(x.StudentId)))
+                                                       .ToList();
+
+                conflictStudentStudyClasses.AddRange(studentStudyClass);
+            }
+
             // FETCH ALL CONFLICTING STUDY CLASSES BASED ON THE SCHEDULE IDS AND TEACHER IDS.
-            var conflictStudyClasses = _studyClassRepo.Query()
-                                                      .Include(x => x.Schedule)
-                                                      .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
-                                                                  && x.TeacherId == request.TeacherId)
-                                                      .ToList();
+            var conflictTeacherStudyClasses = _studyClassRepo.Query()
+                                                             .Include(x => x.Schedule)
+                                                             .Include(x => x.StudySubject)
+                                                                .ThenInclude(x => x.StudySubjectMember)
+                                                             .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                      && x.TeacherId == request.TeacherId)
+                                                             .ToList();
+
+            // GET CONFLICT STUDY CLASSES.
+            List<StudyClass> conflictStudyClasses = new();
+            conflictStudyClasses.AddRange(conflictTeacherStudyClasses);
+
+            // JOIN STUDENT'S CONFLICT CLASSES WITH TEACHER'S IF THERE ARE ANY.
+            if (conflictStudentStudyClasses.Any())
+            {
+                conflictStudyClasses.AddRange(conflictStudentStudyClasses);
+            }
 
             // FETCH ALL CONFLICTING APPOINTMENT IDS BASED ON THE TEACHER IDS.
             var conflictAppointmentIds = _appointmentMemberRepo.Query()
@@ -900,8 +929,32 @@ namespace griffined_api.Services.ScheduleService
                                             .Select(x => x.Date)
                                             .ToList();
 
-            // PREPARE A DICTIONARY TO HOLD CONFLICT DATES AND ASSOCIATED TEACHERS.
+            // PREPARE A DICTIONARY TO HOLD CONFLICT DATES AND ASSOCIATED TEACHERS AND STUDENTS.
             var conflictDetails = new Dictionary<DateTime, List<string>>();
+
+            // ADD CONFLICTING STUDY CLASSES' STUDENT DETAILS.
+            foreach (var studyClass in conflictStudentStudyClasses)
+            {
+                var date = studyClass.Schedule.Date;
+
+                // FETCH STUDENT NAMES INVOLVED IN THE CONFLICT.
+                var studentNames = _studentRepo.Query()
+                                               .Where(student => studyClass.StudySubject.StudySubjectMember.Any(member => member.StudentId == student.Id))
+                                               .Select(student => student.FullName)
+                                               .ToList();
+
+                var classDetails = $"Class: {studyClass.StudySubject.Subject.subject}";
+
+                if (!conflictDetails.ContainsKey(date))
+                {
+                    conflictDetails[date] = new List<string>();
+                }
+
+                foreach (var studentName in studentNames)
+                {
+                    conflictDetails[date].Add($"Student: {studentName}, {classDetails}");
+                }
+            }
 
             // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
             foreach (var studyClass in conflictStudyClasses)
@@ -961,9 +1014,9 @@ namespace griffined_api.Services.ScheduleService
                     return $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} (holiday)";
                 }
 
-                var teacherDetails = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
+                var conflictInfo = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
 
-                return !string.IsNullOrEmpty(teacherDetails) ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({teacherDetails})"
+                return !string.IsNullOrEmpty(conflictInfo) ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({conflictInfo})"
                                                              : date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
             })
             .ToList();
