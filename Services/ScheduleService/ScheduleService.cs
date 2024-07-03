@@ -363,6 +363,12 @@ namespace griffined_api.Services.ScheduleService
                     // IF IT IS NOT EMPTY THEN COMPARE WEIGHT
                     foreach (var sch in schedule.Schedules)
                     {
+                        // IF SCHEDULE IS DELETE
+                        if (sch.CalendarType == DailyCalendarType.DELETED)
+                        {
+                            continue;
+                        }
+
                         // MAP FIRST HALF OF HOUR
                         if (sch.FromTime < secondHalf
                         && firstHalf < sch.ToTime)
