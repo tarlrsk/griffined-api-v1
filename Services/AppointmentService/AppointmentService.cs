@@ -346,6 +346,7 @@ namespace griffined_api.Services.AppointmentService
                                     && a.AppointmentSlotStatus != AppointmentSlotStatus.DELETED)
                                     ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
                 deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.DELETED;
+                deleteSchedule.Schedule.CalendarType = DailyCalendarType.DELETED;
                 dbAppointment.AppointmentHistories.Add(new AppointmentHistory
                 {
                     Method = AppointmentHistoryMethod.RemoveSchedule,
@@ -355,6 +356,12 @@ namespace griffined_api.Services.AppointmentService
                     UpdatedDate = DateTime.Now,
                     Appointment = dbAppointment,
                 });
+            }
+
+            var dailyCalendarType = DailyCalendarType.EVENT;
+            if (dbAppointment.AppointmentType == AppointmentType.HOLIDAY)
+            {
+                dailyCalendarType = DailyCalendarType.HOLIDAY;
             }
 
             foreach (var addSchedule in updateAppointmentRequestDto.ScheduleToAdd)
@@ -368,6 +375,7 @@ namespace griffined_api.Services.AppointmentService
                         FromTime = addSchedule.FromTime.ToTimeSpan(),
                         ToTime = addSchedule.ToTime.ToTimeSpan(),
                         Type = ScheduleType.Appointment,
+                        CalendarType = dailyCalendarType,
                     },
                 };
 

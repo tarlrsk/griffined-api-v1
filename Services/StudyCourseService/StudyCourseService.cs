@@ -93,6 +93,7 @@ namespace griffined_api.Services.StudyCourseService
                                 FromTime = newSchedule.FromTime.ToTimeSpan(),
                                 ToTime = newSchedule.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
+                                CalendarType = DailyCalendarType.NORMAL_CLASS,
                             }
                         };
 
@@ -354,6 +355,7 @@ namespace griffined_api.Services.StudyCourseService
                                 FromTime = requestedStudyClass.FromTime.ToTimeSpan(),
                                 ToTime = requestedStudyClass.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
+                                CalendarType = DailyCalendarType.NORMAL_CLASS,
                             }
                         };
 
@@ -481,6 +483,7 @@ namespace griffined_api.Services.StudyCourseService
                                     FromTime = newStudyClass.FromTime.ToTimeSpan(),
                                     ToTime = newStudyClass.ToTime.ToTimeSpan(),
                                     Type = ScheduleType.Class,
+                                    CalendarType = DailyCalendarType.NORMAL_CLASS,
                                 }
                             };
 
@@ -1483,6 +1486,8 @@ namespace griffined_api.Services.StudyCourseService
                     _context.StudentAttendances.Remove(dbAttendance);
                 }
                 dbRemoveStudyClass.Status = ClassStatus.DELETED;
+                dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.DELETED;
+
                 var removeHistory = new StudyCourseHistory
                 {
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
@@ -1713,6 +1718,7 @@ namespace griffined_api.Services.StudyCourseService
         {
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(c => c.StudyClasses)
+                                    .ThenInclude(c => c.Schedule)
                                 .FirstOrDefaultAsync(c => c.Id == studyCourseId)
                                 ?? throw new NotFoundException($"StudyCourse with ID {studyCourseId} is not found.");
 
@@ -1720,6 +1726,7 @@ namespace griffined_api.Services.StudyCourseService
             foreach (var dbStudyClass in dbStudyCourse.StudyClasses)
             {
                 dbStudyClass.Status = ClassStatus.DELETED;
+                dbStudyClass.Schedule.CalendarType = DailyCalendarType.DELETED;
             }
 
             await _context.SaveChangesAsync();

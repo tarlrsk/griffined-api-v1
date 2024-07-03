@@ -674,6 +674,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             FromTime = newSchedule.FromTime.ToTimeSpan(),
                             ToTime = newSchedule.ToTime.ToTimeSpan(),
                             Type = ScheduleType.Class,
+                            CalendarType = DailyCalendarType.MAKEUP_CLASS,
                         },
                     };
 
