@@ -116,7 +116,7 @@ namespace griffined_api.Dtos.ScheduleDtos
         public TeacherNameResponseDto Teacher { get; set; }
 
         [JsonProperty("additionalHours")]
-        public AdditionalHours AdditionalHours { get; set; }
+        public AdditionalHours? AdditionalHours { get; set; }
 
         [JsonProperty("courseId")]
         public int CourseId { get; set; }
