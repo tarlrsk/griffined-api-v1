@@ -47,7 +47,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
             TimeSpan timeDifference = classStartTime - currentTime;
 
             // CHECK FOR 17 HOURS LIMIT.
-            if (Math.Abs(timeDifference.TotalHours) <= 17)
+            if (Math.Abs(timeDifference.TotalHours) > 17)
             {
                 throw new ConflictException("Class cancellation can only be requested outside ±17 hours period of the class start time.");
             }
