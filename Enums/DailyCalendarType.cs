@@ -11,11 +11,11 @@ namespace griffined_api.Enums
     {
         DELETED = 0,
         OFFICE_HOURS = 1,
-        NORMAL_CLASS = 3,
         EVENT = 2,
-        CANCELLED_CLASS = 4,
-        MAKEUP_CLASS = 8,
-        SUBSTITUTE = 16,
-        HOLIDAY = 32,
+        NORMAL_CLASS = 4,
+        CANCELLED_CLASS = 8,
+        MAKEUP_CLASS = 16,
+        SUBSTITUTE = 32,
+        HOLIDAY = 64,
     }
 }
