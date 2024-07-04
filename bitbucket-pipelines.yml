@@ -124,7 +124,6 @@ pipelines:
           - step:
               name: Deploy Azure App Service Staging
               deployment: staging
-              trigger: manual
               script:
                 - pipe: atlassian/azure-web-apps-deploy:1.1.0
                   variables:
