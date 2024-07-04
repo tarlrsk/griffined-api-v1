@@ -117,7 +117,7 @@ namespace griffined_api.Services.StudentReportService
                                         .Include(sm => sm.StudentReports)
                                             .ThenInclude(sp => sp.Teacher)
                                         .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
-                                        .ToListAsync() ?? throw new NotFoundException("No Members Found.");
+                                        .ToListAsync();
 
             dbStudySubjectMembers = dbStudySubjectMembers
                                     .GroupBy(sm => sm.Student.Id)
@@ -221,7 +221,7 @@ namespace griffined_api.Services.StudentReportService
                 data.Students.Add(studentDto);
             }
 
-            data.Course = dbStudySubjectMembers.First().StudySubject.StudyCourse.Course.course;
+            data.Course = dbStudySubjectMembers.FirstOrDefault().StudySubject.StudyCourse.Course.course;
 
             response.Data = data;
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -248,11 +248,6 @@ namespace griffined_api.Services.StudentReportService
                                             .ThenInclude(sp => sp.Teacher)
                                         .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
                                         .ToListAsync();
-
-            if (!dbStudySubjectMembers.Any() || dbStudySubjectMembers.Count == 0)
-            {
-                throw new NotFoundException("No Members Found.");
-            }
 
             dbStudySubjectMembers = dbStudySubjectMembers
                                     .GroupBy(sm => sm.Student.Id)
