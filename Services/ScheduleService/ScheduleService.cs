@@ -208,7 +208,6 @@ namespace griffined_api.Services.ScheduleService
                                                           .Where(x => appointmentIds.Contains(x.Id))
                                                           .ToList();
 
-
             var teachers = _teacherRepo.Query().ToList();
 
             // CREATE TEACHER DICT
@@ -250,7 +249,6 @@ namespace griffined_api.Services.ScheduleService
                             classSchedule.AppointmentSlot.Appointment = appoint;
                         }
                     }
-
                 }
 
                 schedules.AddRange(appointmentSchedules);
@@ -285,9 +283,9 @@ namespace griffined_api.Services.ScheduleService
                         {
                             Teacher = teacher,
                             Schedules = new List<Schedule>
-                            {
-                                schedule
-                            }
+                    {
+                        schedule
+                    }
                         };
 
                         groupedSchedules.Add(teacherGroup);
@@ -312,9 +310,9 @@ namespace griffined_api.Services.ScheduleService
                                                .ToList();
 
             var studySubjects = _studySubjectRepo.Query()
-                                               .Include(x => x.Subject)
-                                               .Where(x => studySubjectIds.Contains(x.Id))
-                                               .ToList();
+                                                 .Include(x => x.Subject)
+                                                 .Where(x => studySubjectIds.Contains(x.Id))
+                                                 .ToList();
 
             foreach (var schedule in groupedSchedules)
             {
@@ -348,8 +346,7 @@ namespace griffined_api.Services.ScheduleService
                             }
                         }
                     }
-                };
-
+                }
 
                 // Time in timetable - 9:00 to 20:00
                 for (int i = 9; i < 20; i++)
@@ -357,13 +354,13 @@ namespace griffined_api.Services.ScheduleService
                     var firstHalf = TimeSpan.FromHours(i);
                     var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
                     var endHour = secondHalf.Add(TimeSpan.FromMinutes(30));
-                    CalendarHalfDTO? hourSlot = null;
+                    CalendarHalfDTO hourSlot = new CalendarHalfDTO();
 
-                    // IF EMPTY HOUR SLOT THEN ADD WHAT EVER IT IS
+                    // IF EMPTY HOUR SLOT THEN ADD WHATEVER IT IS
                     // IF IT IS NOT EMPTY THEN COMPARE WEIGHT
                     foreach (var sch in schedule.Schedules)
                     {
-                        // IF SCHEDULE IS DELETE
+                        // IF SCHEDULE IS DELETED
                         if (sch.CalendarType == DailyCalendarType.DELETED)
                         {
                             continue;
@@ -371,46 +368,44 @@ namespace griffined_api.Services.ScheduleService
 
                         // MAP FIRST HALF OF HOUR
                         if (sch.FromTime < secondHalf
-                        && firstHalf < sch.ToTime)
+                            && firstHalf < sch.ToTime)
                         {
-                            if (hourSlot == null)
+                            if (hourSlot.FirstHalf == null || hourSlot.FirstHalf.Type < sch.CalendarType)
                             {
-                                hourSlot = new CalendarHalfDTO
-                                {
-                                    FirstHalf = MapHalf(sch, studyCourses, studySubjects)
-                                };
-                            }
-                            else
-                            {
-                                hourSlot.FirstHalf ??= new CalendarSlotDTO();
-                                if (hourSlot.FirstHalf.Type < sch.CalendarType || hourSlot.FirstHalf.Type == null)
-                                {
-                                    hourSlot.FirstHalf = MapHalf(sch, studyCourses, studySubjects);
-                                }
+                                hourSlot.FirstHalf = MapHalf(sch, studyCourses, studySubjects);
                             }
                         }
 
                         // MAP SECOND HALF OF HOUR
                         if (sch.FromTime < endHour
-                        && secondHalf < sch.ToTime)
+                            && secondHalf < sch.ToTime)
                         {
-                            // IF EMPTY HOUR SLOT
-                            if (hourSlot == null)
+                            if (hourSlot.SecondHalf == null || hourSlot.SecondHalf.Type < sch.CalendarType)
                             {
-                                hourSlot = new CalendarHalfDTO
-                                {
-                                    SecondHalf = MapHalf(sch, studyCourses, studySubjects)
-                                };
-                            }
-                            else
-                            {
-                                hourSlot.SecondHalf ??= new CalendarSlotDTO();
-                                if (hourSlot.SecondHalf.Type < sch.CalendarType || hourSlot.SecondHalf.Type == null)
-                                {
-                                    hourSlot.SecondHalf = MapHalf(sch, studyCourses, studySubjects);
-                                }
+                                hourSlot.SecondHalf = MapHalf(sch, studyCourses, studySubjects);
                             }
                         }
+                    }
+
+                    // If hourSlot is still null, set it to OFFICE_HOURS
+                    if (hourSlot.FirstHalf == null)
+                    {
+                        hourSlot.FirstHalf = new CalendarSlotDTO
+                        {
+                            Type = DailyCalendarType.OFFICE_HOURS,
+                            Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
+                            Name = "Office Hours"
+                        };
+                    }
+
+                    if (hourSlot.SecondHalf == null)
+                    {
+                        hourSlot.SecondHalf = new CalendarSlotDTO
+                        {
+                            Type = DailyCalendarType.OFFICE_HOURS,
+                            Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
+                            Name = "Office Hours"
+                        };
                     }
 
                     dailyCalendar.HourSlots.Add(hourSlot);
@@ -429,8 +424,7 @@ namespace griffined_api.Services.ScheduleService
                     continue;
                 }
 
-                var workTeacher = workingTeachers.Where(t => t.TeacherId == teacher.Id)
-                                                 .FirstOrDefault();
+                var workTeacher = workingTeachers.FirstOrDefault(t => t.TeacherId == teacher.Id);
 
                 if (workTeacher != null)
                 {
@@ -438,13 +432,41 @@ namespace griffined_api.Services.ScheduleService
                 }
                 else
                 {
-                    data.Add(new DailtyCalendarDTO()
+                    // Add OFFICE_HOURS for teachers without schedules
+                    var dailyCalendar = new DailtyCalendarDTO()
                     {
                         TeacherId = teacher.Id,
                         TeacherFirstName = teacher.FirstName,
                         TeacherLastName = teacher.LastName,
                         TeacherNickname = teacher.Nickname,
-                    });
+                    };
+
+                    // Time in timetable - 9:00 to 20:00
+                    for (int i = 9; i < 20; i++)
+                    {
+                        var firstHalf = TimeSpan.FromHours(i);
+                        var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
+                        var endHour = secondHalf.Add(TimeSpan.FromMinutes(30));
+                        CalendarHalfDTO hourSlot = new CalendarHalfDTO
+                        {
+                            FirstHalf = new CalendarSlotDTO
+                            {
+                                Type = DailyCalendarType.OFFICE_HOURS,
+                                Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
+                                Name = "Office Hours"
+                            },
+                            SecondHalf = new CalendarSlotDTO
+                            {
+                                Type = DailyCalendarType.OFFICE_HOURS,
+                                Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
+                                Name = "Office Hours"
+                            }
+                        };
+
+                        dailyCalendar.HourSlots.Add(hourSlot);
+                    }
+
+                    data.Add(dailyCalendar);
                 }
             }
 
@@ -457,8 +479,7 @@ namespace griffined_api.Services.ScheduleService
 
         private static CalendarSlotDTO? MapHalf(Schedule sch,
                                                 List<StudyCourse> studyCourses,
-                                                List<StudySubject> studySubjects
-        )
+                                                List<StudySubject> studySubjects)
         {
             CalendarSlotDTO? hourSlot = null;
 
@@ -490,7 +511,6 @@ namespace griffined_api.Services.ScheduleService
                      DailyCalendarType.NORMAL_CLASS or
                      DailyCalendarType.CANCELLED_CLASS or
                      DailyCalendarType.SUBSTITUTE:
-
                     hourSlot = new CalendarSlotDTO
                     {
                         ScheduleId = sch.Id,
