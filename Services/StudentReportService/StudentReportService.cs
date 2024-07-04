@@ -247,7 +247,7 @@ namespace griffined_api.Services.StudentReportService
                                         .Include(sm => sm.StudentReports)
                                             .ThenInclude(sp => sp.Teacher)
                                         .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
-                                        .ToListAsync() ?? throw new NotFoundException("No Members Found.");
+                                        .ToListAsync();
 
             if (!dbStudySubjectMembers.Any() || dbStudySubjectMembers.Count == 0)
             {
