@@ -388,27 +388,34 @@ namespace griffined_api.Services.ScheduleService
                     }
 
                     // If hourSlot is still null, set it to OFFICE_HOURS
-                    if (hourSlot.FirstHalf == null)
-                    {
-                        hourSlot.FirstHalf = new CalendarSlotDTO
-                        {
-                            Type = DailyCalendarType.OFFICE_HOURS,
-                            Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
-                            Name = "Office Hours"
-                        };
-                    }
+                    // if (hourSlot.FirstHalf == null)
+                    // {
+                    //     hourSlot.FirstHalf = new CalendarSlotDTO
+                    //     {
+                    //         Type = DailyCalendarType.OFFICE_HOURS,
+                    //         Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
+                    //         Name = "Office Hours"
+                    //     };
+                    // }
 
-                    if (hourSlot.SecondHalf == null)
-                    {
-                        hourSlot.SecondHalf = new CalendarSlotDTO
-                        {
-                            Type = DailyCalendarType.OFFICE_HOURS,
-                            Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
-                            Name = "Office Hours"
-                        };
-                    }
+                    // if (hourSlot.SecondHalf == null)
+                    // {
+                    //     hourSlot.SecondHalf = new CalendarSlotDTO
+                    //     {
+                    //         Type = DailyCalendarType.OFFICE_HOURS,
+                    //         Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
+                    //         Name = "Office Hours"
+                    //     };
+                    // }
 
-                    dailyCalendar.HourSlots.Add(hourSlot);
+                    if ((hourSlot.FirstHalf == null) && (hourSlot.SecondHalf == null))
+                    {
+                        dailyCalendar.HourSlots.Add(null);
+                    }
+                    else
+                    {
+                        dailyCalendar.HourSlots.Add(hourSlot);
+                    }
                 }
 
                 workingTeachers.Add(dailyCalendar);
@@ -447,27 +454,135 @@ namespace griffined_api.Services.ScheduleService
                         var firstHalf = TimeSpan.FromHours(i);
                         var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
                         var endHour = secondHalf.Add(TimeSpan.FromMinutes(30));
-                        CalendarHalfDTO hourSlot = new CalendarHalfDTO
-                        {
-                            FirstHalf = new CalendarSlotDTO
-                            {
-                                Type = DailyCalendarType.OFFICE_HOURS,
-                                Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
-                                Name = "Office Hours"
-                            },
-                            SecondHalf = new CalendarSlotDTO
-                            {
-                                Type = DailyCalendarType.OFFICE_HOURS,
-                                Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
-                                Name = "Office Hours"
-                            }
-                        };
+                        // CalendarHalfDTO hourSlot = new()
+                        // {
+                        //     FirstHalf = null,
+                        //     SecondHalf = null,
+                        // };
+                        // CalendarHalfDTO hourSlot = new CalendarHalfDTO
+                        // {
+                        //     FirstHalf = new CalendarSlotDTO
+                        //     {
+                        //         Type = DailyCalendarType.OFFICE_HOURS,
+                        //         Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
+                        //         Name = "Office Hours"
+                        //     },
+                        //     SecondHalf = new CalendarSlotDTO
+                        //     {
+                        //         Type = DailyCalendarType.OFFICE_HOURS,
+                        //         Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
+                        //         Name = "Office Hours"
+                        //     }
+                        // };
 
-                        dailyCalendar.HourSlots.Add(hourSlot);
+                        dailyCalendar.HourSlots.Add(null);
                     }
 
                     data.Add(dailyCalendar);
                 }
+            }
+
+            // MAP OFFICE HOURS
+            var idx = -1;
+            foreach (var teacher in data)
+            {
+                idx++;
+                var officeHour = new CalendarHalfDTO
+                {
+                    FirstHalf = new CalendarSlotDTO
+                    {
+                        Type = DailyCalendarType.OFFICE_HOURS,
+                        Name = "Office Hours"
+                    },
+                    SecondHalf = new CalendarSlotDTO
+                    {
+                        Type = DailyCalendarType.OFFICE_HOURS,
+                        Name = "Office Hours"
+                    }
+                };
+
+                if (teacher.HourSlots[5] == null)
+                {
+                    data[idx].HourSlots[5] = officeHour;
+                }
+                if (teacher.HourSlots[6] == null)
+                {
+                    data[idx].HourSlots[6] = officeHour;
+                }
+                if (teacher.HourSlots[7] == null)
+                {
+                    data[idx].HourSlots[7] = officeHour;
+                }
+                if (teacher.HourSlots[8] == null)
+                {
+                    data[idx].HourSlots[8] = officeHour;
+                }
+
+                if (teacher.HourSlots[10] != null)
+                {
+                    if (teacher.HourSlots[0] == null)
+                    {
+                        data[idx].HourSlots[0] = officeHour;
+                    }
+                    if (teacher.HourSlots[1] == null)
+                    {
+                        data[idx].HourSlots[1] = officeHour;
+                    }
+                    if (teacher.HourSlots[2] == null)
+                    {
+                        data[idx].HourSlots[2] = officeHour;
+                    }
+
+                    if (teacher.HourSlots[3] != null)
+                    {
+                        if (teacher.HourSlots[4] == null)
+                        {
+                            data[idx].HourSlots[4] = officeHour;
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (teacher.HourSlots[9] != null)
+                {
+                    if (teacher.HourSlots[1] == null)
+                    {
+                        data[idx].HourSlots[1] = officeHour;
+                    }
+                    if (teacher.HourSlots[2] == null)
+                    {
+                        data[idx].HourSlots[2] = officeHour;
+                    }
+
+                    if (teacher.HourSlots[3] != null)
+                    {
+                        if (teacher.HourSlots[4] == null)
+                        {
+                            data[idx].HourSlots[4] = officeHour;
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (teacher.HourSlots[1] == null)
+                {
+                    data[idx].HourSlots[1] = officeHour;
+                }
+                if (teacher.HourSlots[2] == null)
+                {
+                    data[idx].HourSlots[2] = officeHour;
+                }
+                if (teacher.HourSlots[4] == null)
+                {
+                    data[idx].HourSlots[4] = officeHour;
+                }
+                if (teacher.HourSlots[9] == null)
+                {
+                    data[idx].HourSlots[9] = officeHour;
+                }
+
             }
 
             return new ServiceResponse<List<DailtyCalendarDTO>>
