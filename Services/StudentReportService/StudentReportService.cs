@@ -249,6 +249,11 @@ namespace griffined_api.Services.StudentReportService
                                         .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
                                         .ToListAsync() ?? throw new NotFoundException("No Members Found.");
 
+            if (!dbStudySubjectMembers.Any() || dbStudySubjectMembers.Count == 0)
+            {
+                throw new NotFoundException("No Members Found.");
+            }
+
             dbStudySubjectMembers = dbStudySubjectMembers
                                     .GroupBy(sm => sm.Student.Id)
                                     .Select(group => group.First())
@@ -341,7 +346,7 @@ namespace griffined_api.Services.StudentReportService
                 data.Students.Add(studentDto);
             }
 
-            data.Course = dbStudySubjectMembers.First().StudySubject.StudyCourse.Course.course;
+            data.Course = dbStudySubjectMembers.FirstOrDefault()?.StudySubject.StudyCourse.Course.course;
 
             response.Data = data;
             response.StatusCode = (int)HttpStatusCode.OK;
