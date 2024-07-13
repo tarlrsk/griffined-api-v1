@@ -823,8 +823,8 @@ namespace griffined_api.Services.ScheduleService
                 {
                     Date = date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture),
                     Day = date.DayOfWeek.ToString().ToUpper(),
-                    FromTime = request.FromTime,
-                    ToTime = request.ToTime,
+                    FromTime = request.FromTime.ToString(@"hh\:mm\:ss"),
+                    ToTime = request.ToTime.ToString(@"hh\:mm\:ss"),
                     Hour = hour,
                     ScheduleType = ScheduleType.Appointment,
                     AppointmentType = request.AppointmentType,
@@ -979,8 +979,8 @@ namespace griffined_api.Services.ScheduleService
             var availableDates = nonConflictingDates.Where(x =>
                 !currentSchedules.Any(y =>
                     y.Date == x.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture) &&
-                    y.FromTime == request.FromTime &&
-                    y.ToTime == request.ToTime
+                    y.FromTime == request.FromTime.ToTimeSpanString() &&
+                    y.ToTime == request.ToTime.ToTimeSpanString()
                 )).ToList();
 
             // FILTER AVAILABLE DATES BASED ON DAYS OF WEEK
@@ -1016,8 +1016,8 @@ namespace griffined_api.Services.ScheduleService
                                               : level.level,
                     Date = date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture),
                     Day = date.DayOfWeek.ToString().ToUpper(),
-                    FromTime = request.FromTime,
-                    ToTime = request.ToTime,
+                    FromTime = request.FromTime.ToString(@"hh\:mm\:ss"),
+                    ToTime = request.ToTime.ToString(@"hh\:mm\:ss"),
                     Hour = hour,
                     ScheduleType = ScheduleType.Class,
                     ScheduleStatus = ClassStatus.NONE,
