@@ -56,10 +56,10 @@ namespace griffined_api.Dtos.ScheduleDtos
         public string Day { get; set; }
 
         [JsonProperty("fromTime")]
-        public string FromTime { get; set; }
+        public TimeSpan FromTime { get; set; }
 
         [JsonProperty("toTime")]
-        public string ToTime { get; set; }
+        public TimeSpan ToTime { get; set; }
 
         [JsonProperty("hour")]
         public decimal Hour { get; set; }
@@ -144,10 +144,10 @@ namespace griffined_api.Dtos.ScheduleDtos
         public string Day { get; set; }
 
         [JsonProperty("fromTime")]
-        public string FromTime { get; set; }
+        public TimeSpan FromTime { get; set; }
 
         [JsonProperty("toTime")]
-        public string ToTime { get; set; }
+        public TimeSpan ToTime { get; set; }
 
         [JsonProperty("hour")]
         public decimal Hour { get; set; }
