@@ -245,8 +245,8 @@ namespace griffined_api.Services.StudyCourseService
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             Teacher = new TeacherNameResponseDto
                             {
                                 TeacherId = dbStudyClass.Teacher.Id,
@@ -695,8 +695,8 @@ namespace griffined_api.Services.StudyCourseService
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             StudyCourseId = dbStudyCourse.Id,
                             CourseId = dbStudyCourse.Course.Id,
                             CourseName = dbStudyCourse.Course.course,
@@ -1168,8 +1168,8 @@ namespace griffined_api.Services.StudyCourseService
                     StudyClassId = dbStudyClass.Id,
                     ClassNo = dbStudyClass.ClassNumber,
                     Date = dbStudyClass.Schedule.Date.ToDateString(),
-                    FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                    ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    FromTime = dbStudyClass.Schedule.FromTime,
+                    ToTime = dbStudyClass.Schedule.ToTime,
                     IsFiftyPercent = dbStudyClass.IsFiftyPercent,
                     IsHundredPercent = dbStudyClass.IsHundredPercent,
                     Teacher = new TeacherNameResponseDto

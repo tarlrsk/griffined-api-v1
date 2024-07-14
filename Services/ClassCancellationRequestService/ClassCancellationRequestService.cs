@@ -400,8 +400,8 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         ClassNo = dbStudyClass.ClassNumber,
                         Room = dbStudyClass.Schedule.Room,
                         Date = dbStudyClass.Schedule.Date.ToDateString(),
-                        FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                        ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                        FromTime = dbStudyClass.Schedule.FromTime,
+                        ToTime = dbStudyClass.Schedule.ToTime,
                         CourseSubject = dbRequest.StudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbRequest.StudyCourse.Level?.level ?? ""),

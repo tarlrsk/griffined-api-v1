@@ -681,6 +681,12 @@ namespace griffined_api.Services.ScheduleService
             // PARSE DAYS INTO DAYOFWEEK ENUM.
             var daysOfWeek = request.Days?.Select(day => Enum.Parse<DayOfWeek>(day, true)).ToList() ?? new List<DayOfWeek>();
 
+            // FILTER AVAILABLE DATES BASED ON DAYS OF WEEK
+            if (daysOfWeek.Any())
+            {
+                dates = dates.Where(date => daysOfWeek.Contains(date.DayOfWeek)).ToList();
+            }
+
             // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
             var conflictScheduleIds = _scheduleRepo.Query()
                                                    .Where(x => dates.Contains(x.Date))
@@ -789,7 +795,6 @@ namespace griffined_api.Services.ScheduleService
             })
             .ToList();
 
-
             // JOIN ALL THE DATES USING COMMAS.
             string formattedDateString = string.Join(", ", formattedDates);
 
@@ -798,18 +803,11 @@ namespace griffined_api.Services.ScheduleService
 
             if (conflictDates.Any())
             {
-
                 throw new ConflictException(errorMessage);
             }
 
             // FILTER OUT THE CONFLICTING DATES FROM THE REQUEST DATES
             var availableDates = dates.Except(conflictDates).ToList();
-
-            // FILTER AVAILABLE DATES BASED ON DAYS OF WEEK
-            if (daysOfWeek.Any())
-            {
-                availableDates = availableDates.Where(date => daysOfWeek.Contains(date.DayOfWeek)).ToList();
-            }
 
             // GENERATE AVAILABLE SCHEDULE FOR THE NON-CONFLICTING DATES
             var availableSchedules = new List<AvailableAppointmentScheduleDTO>();
@@ -857,6 +855,7 @@ namespace griffined_api.Services.ScheduleService
 
             return response;
         }
+
 
         public ServiceResponse<IEnumerable<AvailableClassScheduleDTO>> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request)
         {

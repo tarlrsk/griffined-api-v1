@@ -3173,8 +3173,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             CourseSubject = dbRequestedCourse.Course.course + " "
                                             + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
                                             + " " + (dbRequestedCourse.Level?.level ?? ""),
@@ -3229,8 +3229,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             CourseSubject = dbStudentAddingRequest.StudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
