@@ -272,6 +272,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                 .ThenInclude(s => s.Subject)
                             .Include(r => r.Student)
                             .Include(r => r.Teacher)
+                            .Where(x => x.StudyCourse.StudySubjects.Any(y => y.StudyClasses.Any(z => z.Status != ClassStatus.DELETED)))
                             .FirstOrDefaultAsync(r => r.Id == requestId)
                             ?? throw new NotFoundException($"Class Cancellation Request with ID {requestId} is not found.");
 
@@ -390,7 +391,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 {
                     continue;
                 }
-                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses.Where(sc => sc.Status != ClassStatus.DELETED))
                 {
                     var schedule = new ScheduleResponseDto
                     {
