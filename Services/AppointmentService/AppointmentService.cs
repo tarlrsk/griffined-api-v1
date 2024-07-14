@@ -289,7 +289,7 @@ namespace griffined_api.Services.AppointmentService
                 data.Schedules.Add(new AppointmentScheduleResponseDto
                 {
                     ScheduleId = dbSlot.Schedule.Id,
-                    Day = dbSlot.Schedule.Date.DayOfWeek.ToString(),
+                    Day = dbSlot.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                     Date = dbSlot.Schedule.Date.ToDateString(),
                     FromTime = dbSlot.Schedule.FromTime,
                     ToTime = dbSlot.Schedule.ToTime,
