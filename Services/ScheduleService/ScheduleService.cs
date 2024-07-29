@@ -541,29 +541,51 @@ namespace griffined_api.Services.ScheduleService
 
             void AssignSlots(dynamic teacher, dynamic data, int idx, List<int> slots)
             {
-                foreach (var slot in slots)
+                slots.Sort();
+                for (int i = 0; i < slots.Count; i++)
                 {
+                    var slot = slots[i];
                     if (teacher.HourSlots[slot] == null)
                     {
+                        var startSlot = slot;
+                        var endSlot = slot;
+
+                        // Check for consecutive office hour slots
+                        while (i + 1 < slots.Count && slots[i + 1] == endSlot + 1 && teacher.HourSlots[endSlot + 1] == null)
+                        {
+                            endSlot++;
+                            i++;
+                        }
+
+                        var startTime = timeSlots[startSlot].firstHalf.Split('-')[0].Trim();
+                        var endTime = timeSlots[endSlot].secondHalf.Split('-')[1].Trim();
+                        var mergedTime = $"{startTime} - {endTime}";
+
                         var officeHour = new CalendarHalfDTO
                         {
                             FirstHalf = new CalendarSlotDTO
                             {
                                 Type = DailyCalendarType.OFFICE_HOURS,
                                 Name = "Office Hours",
-                                Time = timeSlots[slot].firstHalf
+                                Time = mergedTime
                             },
                             SecondHalf = new CalendarSlotDTO
                             {
                                 Type = DailyCalendarType.OFFICE_HOURS,
                                 Name = "Office Hours",
-                                Time = timeSlots[slot].secondHalf
+                                Time = mergedTime
                             }
                         };
-                        data[idx].HourSlots[slot] = officeHour;
+
+                        // Assign office hours to all slots in the range
+                        for (int j = startSlot; j <= endSlot; j++)
+                        {
+                            data[idx].HourSlots[j] = officeHour;
+                        }
                     }
                 }
             }
+
 
             return new ServiceResponse<List<DailtyCalendarDTO>>
             {
