@@ -1057,11 +1057,14 @@ namespace griffined_api.Services.ScheduleService
             {
                 var date = studyClass.Schedule.Date;
 
+                var conflictStudentIds = studyClass.StudySubject.StudySubjectMember.Select(x => x.StudentId);
+
                 // FETCH STUDENT NAMES INVOLVED IN THE CONFLICT.
-                var studentNames = _studentRepo.Query()
-                                               .Where(student => studyClass.StudySubject.StudySubjectMember.Any(member => member.StudentId == student.Id))
-                                               .Select(student => student.FullName)
-                                               .ToList();
+                var conflictStudents = _studentRepo.Query()
+                                                   .Where(x => conflictStudentIds.Contains(x.Id))
+                                                   .ToList();
+
+                var studentNames = conflictStudents.Select(x => x.FullName);
 
                 var classDetails = $"Class: {studyClass.StudySubject.Subject.subject}";
 
