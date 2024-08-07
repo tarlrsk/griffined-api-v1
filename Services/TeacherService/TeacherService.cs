@@ -1,4 +1,5 @@
 using Firebase.Auth;
+using Google.Api;
 using System.Net;
 
 namespace griffined_api.Services.TeacherService
@@ -11,12 +12,27 @@ namespace griffined_api.Services.TeacherService
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseService _firebaseService;
-        public TeacherService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
+        private readonly IUnitOfWork _uow;
+        private readonly IAsyncRepository<Teacher> _teacherRepo;
+        private readonly IAsyncRepository<WorkTime> _workTimeRepo;
+        private readonly IAsyncRepository<Manday> _mandayRepo;
+        public TeacherService(DataContext context,
+                              IMapper mapper,
+                              IHttpContextAccessor httpContextAccessor,
+                              IFirebaseService firebaseService,
+                              IUnitOfWork uow,
+                              IAsyncRepository<Teacher> teacherRepo,
+                              IAsyncRepository<WorkTime> workTimeRepo,
+                              IAsyncRepository<Manday> mandayRepo)
         {
             _httpContextAccessor = httpContextAccessor;
             _firebaseService = firebaseService;
             _mapper = mapper;
             _context = context;
+            _uow = uow;
+            _teacherRepo = teacherRepo;
+            _workTimeRepo = workTimeRepo;
+            _mandayRepo = mandayRepo;
         }
 
         public async Task<ServiceResponse<GetTeacherDto>> AddTeacher(AddTeacherDto request)
@@ -179,11 +195,11 @@ namespace griffined_api.Services.TeacherService
             var response = new ServiceResponse<GetTeacherDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var teacher = await _context.Teachers.AsNoTracking()
-                                                 .Include(x => x.Mandays)
-                                                    .ThenInclude(x => x.WorkTimes)
-                                                 .FirstOrDefaultAsync(x => x.Id == request.Id)
-                                                 ?? throw new NotFoundException($"Teacher with ID {request.Id} not found.");
+            var teacher = await _teacherRepo.Query()
+                                            .Include(x => x.Mandays)
+                                                .ThenInclude(x => x.WorkTimes)
+                                            .FirstOrDefaultAsync(x => x.Id == request.Id)
+                                            ?? throw new NotFoundException($"Teacher with ID {request.Id} not found.");
 
             var mandays = (from data in request.Mandays
                            select new Manday
@@ -200,33 +216,31 @@ namespace griffined_api.Services.TeacherService
                            })
                            .ToList();
 
-            using (var transaction = _context.Database.BeginTransaction())
+            teacher.FirstName = request.FirstName;
+            teacher.LastName = request.LastName;
+            teacher.Nickname = request.Nickname;
+            teacher.Phone = request.Phone;
+            teacher.Email = request.Email;
+            teacher.Line = request.Line;
+            teacher.IsPartTime = request.IsPartTime;
+
+            _uow.BeginTran();
+            _teacherRepo.Update(teacher);
+            _workTimeRepo.DeleteRange(teacher.Mandays.SelectMany(x => x.WorkTimes).ToList());
+            _mandayRepo.DeleteRange(teacher.Mandays);
+
+            if (mandays.Any())
             {
-                teacher.FirstName = request.FirstName;
-                teacher.LastName = request.LastName;
-                teacher.Nickname = request.Nickname;
-                teacher.Phone = request.Phone;
-                teacher.Email = request.Email;
-                teacher.Line = request.Line;
-                teacher.IsPartTime = request.IsPartTime;
+                _mandayRepo.AddRange(mandays);
 
-                _context.WorkTimes.RemoveRange(teacher.Mandays.SelectMany(x => x.WorkTimes));
-                _context.Mandays.RemoveRange(teacher.Mandays);
-
-                if (mandays!.Any())
+                if (mandays.SelectMany(x => x.WorkTimes).Any())
                 {
-                    _context.Mandays.AddRange(mandays!);
-
-                    if (mandays.SelectMany(x => x.WorkTimes).Any())
-                    {
-                        _context.WorkTimes.AddRange(mandays.SelectMany(x => x.WorkTimes));
-                    }
+                    _workTimeRepo.AddRange(mandays.SelectMany(x => x.WorkTimes));
                 }
-
-                transaction.Commit();
             }
 
-            _context.SaveChanges();
+            _uow.Complete();
+            _uow.CommitTran();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
