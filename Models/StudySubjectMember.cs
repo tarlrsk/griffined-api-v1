@@ -17,11 +17,11 @@ namespace griffined_api.Models
         public DateTime CourseJoinedDate { get; set; }
 
         [ForeignKey(nameof(StudentId))]
-        public virtual Student Student { get; set; } = new Student();
+        public virtual Student Student { get; set; }
 
         [ForeignKey(nameof(StudySubjectId))]
-        public virtual StudySubject StudySubject { get; set; } = new StudySubject();
+        public virtual StudySubject StudySubject { get; set; }
 
-        public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
+        public virtual ICollection<StudentReport> StudentReports { get; set; }
     }
 }

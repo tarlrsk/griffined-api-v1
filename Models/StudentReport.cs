@@ -21,9 +21,9 @@ namespace griffined_api.Models
         public virtual Progression Progression { get; set; }
 
         [ForeignKey(nameof(StudySubjectMemberId))]
-        public virtual StudySubjectMember StudySubjectMember { get; set; } = new StudySubjectMember();
+        public virtual StudySubjectMember StudySubjectMember { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
-        public virtual Teacher Teacher { get; set; } = new Teacher();
+        public virtual Teacher Teacher { get; set; }
     }
 }

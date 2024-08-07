@@ -21,7 +21,7 @@ namespace griffined_api.Models
         public bool HasRead { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
-        public virtual Teacher Teacher { get; set; } = new Teacher();
+        public virtual Teacher Teacher { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
         public virtual StudyCourse? StudyCourse { get; set; }

@@ -23,14 +23,14 @@ namespace griffined_api.Models
 
         [ForeignKey(nameof(StudyClassId))]
         public StudyClass? StudyClass { get; set; }
-        
+
         [ForeignKey(nameof(StudentId))]
         public Student? Student { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
-        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
+        public virtual StudyCourse StudyCourse { get; set; }
 
         [ForeignKey(nameof(StaffId))]
-        public virtual Staff Staff { get; set; } = new Staff();
+        public virtual Staff Staff { get; set; }
     }
 }

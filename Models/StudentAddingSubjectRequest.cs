@@ -14,9 +14,9 @@ namespace griffined_api.Models
         public int? StudySubjectId { get; set; }
 
         [ForeignKey(nameof(StudentAddingRequestId))]
-        public StudentAddingRequest StudentAddingRequest { get; set; } = new StudentAddingRequest();
+        public StudentAddingRequest StudentAddingRequest { get; set; }
 
         [ForeignKey(nameof(StudySubjectId))]
-        public StudySubject StudySubject { get; set; } = new StudySubject();
+        public StudySubject StudySubject { get; set; }
     }
 }

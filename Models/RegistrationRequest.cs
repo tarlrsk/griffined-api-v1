@@ -29,12 +29,12 @@ namespace griffined_api.Models
         public virtual PaymentType? PaymentType { get; set; }
         public virtual PaymentStatus? PaymentStatus { get; set; }
 
-        public virtual ICollection<StudentAddingRequest> StudentAddingRequest { get; set; } = new List<StudentAddingRequest>();
-        public virtual ICollection<NewCourseRequest> NewCourseRequests { get; set; } = new List<NewCourseRequest>();
-        public virtual ICollection<RegistrationRequestPaymentFile> RegistrationRequestPaymentFiles { get; set; } = new List<RegistrationRequestPaymentFile>();
-        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
-        public virtual ICollection<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; } = new List<NewCoursePreferredDayRequest>();
-        public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; } = new List<RegistrationRequestComment>();
-        public virtual ICollection<StaffNotification> StaffNotifications { get; set; } = new List<StaffNotification>();
+        public virtual ICollection<StudentAddingRequest> StudentAddingRequest { get; set; }
+        public virtual ICollection<NewCourseRequest> NewCourseRequests { get; set; }
+        public virtual ICollection<RegistrationRequestPaymentFile> RegistrationRequestPaymentFiles { get; set; }
+        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; }
+        public virtual ICollection<NewCoursePreferredDayRequest> NewCoursePreferredDayRequests { get; set; }
+        public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; }
+        public virtual ICollection<StaffNotification> StaffNotifications { get; set; }
     }
 }

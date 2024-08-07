@@ -16,10 +16,10 @@ namespace griffined_api.Models
         public double Hour { get; set; }
 
         [ForeignKey(nameof(SubjectId))]
-        public virtual Subject Subject { get; set; } = new Subject();
+        public virtual Subject Subject { get; set; }
 
         [ForeignKey(nameof(NewCourseRequestId))]
-        public virtual NewCourseRequest NewCourseRequest { get; set; } = new NewCourseRequest();
+        public virtual NewCourseRequest NewCourseRequest { get; set; }
 
     }
 }

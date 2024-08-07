@@ -26,13 +26,13 @@ namespace griffined_api.Models
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
 
-        public virtual ICollection<Manday> Mandays { get; set; } = new List<Manday>();
-        public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
-        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
-        public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
-        public virtual ICollection<StudentReport> StudentReports { get; set; } = new List<StudentReport>();
-        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
-        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
-        public virtual ICollection<TeacherShift> TeacherShifts { get; set; } = new List<TeacherShift>();
+        public virtual ICollection<Manday> Mandays { get; set; }
+        public virtual ICollection<StudyClass> StudyClasses { get; set; }
+        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; }
+        public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; }
+        public virtual ICollection<StudentReport> StudentReports { get; set; }
+        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; }
+        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; }
+        public virtual ICollection<TeacherShift> TeacherShifts { get; set; }
     }
 }

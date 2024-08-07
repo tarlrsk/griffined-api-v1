@@ -18,6 +18,6 @@ namespace griffined_api.Models
         public TimeSpan ToTime { get; set; }
 
         [ForeignKey(nameof(RegistrationRequestId))]
-        public RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
+        public RegistrationRequest RegistrationRequest { get; set; }
     }
 }

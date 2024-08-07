@@ -26,10 +26,10 @@ namespace griffined_api.Models
         public int? CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
 
-        public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
-        public virtual ICollection<StaffNotification> StaffNotifications { get; set; } = new List<StaffNotification>();
-        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; } = new List<StudyCourseHistory>();
-        public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; } = new List<RegistrationRequestComment>();
+        public virtual ICollection<Appointment> Appointments { get; set; }
+        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; }
+        public virtual ICollection<StaffNotification> StaffNotifications { get; set; }
+        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; }
+        public virtual ICollection<RegistrationRequestComment> RegistrationRequestComments { get; set; }
     }
 }
