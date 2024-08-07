@@ -1,4 +1,3 @@
-using Google.Api;
 using griffined_api.Dtos.AppointentDtos;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;

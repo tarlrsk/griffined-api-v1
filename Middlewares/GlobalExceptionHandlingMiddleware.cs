@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using griffined_api.Models;
 
 namespace griffined_api.Middlewares
 {

@@ -1,13 +1,7 @@
 using Firebase.Auth;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using griffined_api.Extensions.DateTimeExtensions;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.StudentService
 {

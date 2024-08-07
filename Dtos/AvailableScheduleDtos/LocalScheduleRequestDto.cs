@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Google.Type;
 using Newtonsoft.Json;
 
 namespace griffined_api.Dtos.AvailableScheduleDtos

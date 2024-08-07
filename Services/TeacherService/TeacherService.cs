@@ -1,11 +1,5 @@
 using Firebase.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using griffined_api.Extensions.DateTimeExtensions;
-using System.Xml.Linq;
 
 namespace griffined_api.Services.TeacherService
 {
