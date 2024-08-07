@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Google.Type;
-using Newtonsoft.Json;
-
 namespace griffined_api.Dtos.AvailableScheduleDtos
 {
     public class AvailableScheduleResponseDto
@@ -29,6 +22,6 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         public string TeacherLastName { get; set; } = string.Empty;
         public string TeacherNickname { get; set; } = string.Empty;
         public TeacherWorkType TeacherWorkType { get; set; }
-        public List<TeacherShiftResponseDto> TeacherShifts { get; set;} = new List<TeacherShiftResponseDto>();
+        public List<TeacherShiftResponseDto> TeacherShifts { get; set; } = new List<TeacherShiftResponseDto>();
     }
 }

@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using griffined_api.Dtos.StudentReportDtos;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace griffined_api.Services.StudentReportService
 {

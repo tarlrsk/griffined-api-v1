@@ -1,17 +1,8 @@
-using AutoMapper.Execution;
-using Azure;
-using Google.Api;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.StudyCourseService
 {

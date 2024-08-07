@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace griffined_api.Integrations.Firebase
 {

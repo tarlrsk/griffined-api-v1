@@ -1,6 +1,4 @@
-using System;
 using System.Globalization;
-using Microsoft.SqlServer.Server;
 
 namespace griffined_api.Extensions.DateTimeExtensions
 {

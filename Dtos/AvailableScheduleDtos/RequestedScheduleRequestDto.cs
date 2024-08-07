@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Google.Type;
 using Newtonsoft.Json;
 
 namespace griffined_api.Dtos.AvailableScheduleDtos
@@ -27,7 +22,7 @@ namespace griffined_api.Dtos.AvailableScheduleDtos
         public int RequestedCourseId { get; set; }
         [Required]
         public int RequestedSubjectId { get; set; }
-        public int? RequestedLevelId { get; set;}
+        public int? RequestedLevelId { get; set; }
         public List<LocalScheduleRequestDto> LocalSchedule { get; set; } = new List<LocalScheduleRequestDto>();
     }
 }
