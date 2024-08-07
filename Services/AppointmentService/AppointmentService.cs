@@ -48,32 +48,32 @@ namespace griffined_api.Services.AppointmentService
         public Appointment CreateAppointment(CreateAppointmentDTO request)
         {
             // CHECK IF THE REQUESTED SCHEDULE IS VALID.
-            // List<string> dates = new List<string>();
-            // List<string> days = new List<string>();
+            List<string> dates = new List<string>();
+            List<string> days = new List<string>();
 
-            // foreach (var schedule in request.Schedules)
-            // {
-            //     dates.Add(schedule.Date);
-            //     days.Add(schedule.Date.ToGregorianDateTime()
-            //                      .DayOfWeek.ToString());
+            foreach (var schedule in request.Schedules)
+            {
+                dates.Add(schedule.Date);
+                days.Add(schedule.Date.ToGregorianDateTime()
+                                 .DayOfWeek.ToString());
 
-            //     var scheduleDTO = new CheckAvailableAppointmentScheduleDTO
-            //     {
-            //         TeacherIds = request.TeacherIds,
-            //         Dates = dates,
-            //         Days = days,
-            //         FromTime = schedule.FromTime,
-            //         ToTime = schedule.ToTime,
-            //         AppointmentType = request.AppointmentType,
-            //     };
+                var scheduleDTO = new CheckAvailableAppointmentScheduleDTO
+                {
+                    TeacherIds = request.TeacherIds,
+                    Dates = dates,
+                    Days = days,
+                    FromTime = schedule.FromTime,
+                    ToTime = schedule.ToTime,
+                    AppointmentType = request.AppointmentType,
+                };
 
-            //     var verifySchedule = _scheduleService.GenerateAvailableAppointmentSchedule(scheduleDTO);
+                var verifySchedule = _scheduleService.GenerateAvailableAppointmentSchedule(scheduleDTO);
 
-            //     if (verifySchedule.Data is null)
-            //     {
-            //         throw new BadHttpRequestException("No schedules.");
-            //     }
-            // }
+                if (verifySchedule.Data is null)
+                {
+                    throw new BadHttpRequestException("No schedules.");
+                }
+            }
 
             var staffId = _firebaseService.GetAzureIdWithToken();
 
