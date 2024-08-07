@@ -1128,61 +1128,65 @@ namespace griffined_api.Services.StudyCourseService
                 StudyCourseId = dbStudyCourse.Id,
                 CourseId = dbStudyCourse.Course.Id,
                 Course = dbStudyCourse.Course.course,
-                Subjects = dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
-                {
-                    StudySubjectId = dbStudySubject.Id,
-                    SubjectId = dbStudySubject.Subject.Id,
-                    Subject = dbStudySubject.Subject.subject,
-                    Hour = dbStudySubject.Hour,
-                }).ToList(),
-                Level = new Dtos.LevelDtos.LevelResponseDto
-                {
-                    LevelId = dbStudyCourse.Level!.Id,
-                    Level = dbStudyCourse.Level.level
-                },
+                Subjects = !dbStudyCourse.StudySubjects.Any() ? Enumerable.Empty<StudySubjectResponseDto>()
+                                                              : dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
+                                                              {
+                                                                  StudySubjectId = dbStudySubject.Id,
+                                                                  SubjectId = dbStudySubject.Subject.Id,
+                                                                  Subject = dbStudySubject.Subject.subject,
+                                                                  Hour = dbStudySubject.Hour,
+                                                              })
+                                                            .ToList(),
+                Level = dbStudyCourse.Level is null ? null
+                                                    : new Dtos.LevelDtos.LevelResponseDto
+                                                    {
+                                                        LevelId = dbStudyCourse.Level.Id,
+                                                        Level = dbStudyCourse.Level.level
+                                                    },
                 Section = dbStudyCourse.Section,
                 Method = dbStudyCourse.Method,
                 StartDate = dbStudyCourse.StartDate.ToDateString(),
                 EndDate = dbStudyCourse.EndDate.ToDateString(),
                 TotalHour = dbStudyCourse.TotalHour,
                 Status = dbStudyCourse.Status,
-                Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
-                {
-                    Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
-                    StudyCourseId = dbStudyCourse.Id,
-                    CourseId = dbStudyCourse.Course.Id,
-                    CourseName = dbStudyCourse.Course.course,
-                    StudySubjectId = dbStudySubject.Id,
-                    SubjectId = dbStudySubject.Subject.Id,
-                    SubjectName = dbStudySubject.Subject.subject,
-                    CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
-                    StudyClassId = dbStudyClass.Id,
-                    ClassNo = dbStudyClass.ClassNumber,
-                    Date = dbStudyClass.Schedule.Date.ToDateString(),
-                    FromTime = dbStudyClass.Schedule.FromTime,
-                    ToTime = dbStudyClass.Schedule.ToTime,
-                    IsFiftyPercent = dbStudyClass.IsFiftyPercent,
-                    IsHundredPercent = dbStudyClass.IsHundredPercent,
-                    Teacher = new TeacherNameResponseDto
-                    {
-                        TeacherId = dbStudyClass.Teacher.Id,
-                        FirstName = dbStudyClass.Teacher.FirstName,
-                        LastName = dbStudyClass.Teacher.LastName,
-                        Nickname = dbStudyClass.Teacher.Nickname,
-                        FullName = dbStudyClass.Teacher.FullName,
-                    },
-                    ClassStatus = dbStudyClass.Status,
-                    AdditionalHours = dbStudyClass.TeacherShifts
-                                                .Where(x => x.TeacherWorkType != TeacherWorkType.NORMAL)
-                                                .Select(shift => new AdditionalHours
-                                                {
-                                                    Hours = shift.Hours,
-                                                    TeacherWorkType = shift.TeacherWorkType,
-                                                })
-                                                .FirstOrDefault()
-                }))
-                .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
-                .ToList()
+                Schedules = !dbStudyCourse.StudySubjects.Any() ? Enumerable.Empty<ScheduleResponseDto>()
+                                                               : dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
+                                                               {
+                                                                   Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
+                                                                   StudyCourseId = dbStudyCourse.Id,
+                                                                   CourseId = dbStudyCourse.Course.Id,
+                                                                   CourseName = dbStudyCourse.Course.course,
+                                                                   StudySubjectId = dbStudySubject.Id,
+                                                                   SubjectId = dbStudySubject.Subject.Id,
+                                                                   SubjectName = dbStudySubject.Subject.subject,
+                                                                   CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                                                                   StudyClassId = dbStudyClass.Id,
+                                                                   ClassNo = dbStudyClass.ClassNumber,
+                                                                   Date = dbStudyClass.Schedule.Date.ToDateString(),
+                                                                   FromTime = dbStudyClass.Schedule.FromTime,
+                                                                   ToTime = dbStudyClass.Schedule.ToTime,
+                                                                   IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                                                                   IsHundredPercent = dbStudyClass.IsHundredPercent,
+                                                                   Teacher = new TeacherNameResponseDto
+                                                                   {
+                                                                       TeacherId = dbStudyClass.Teacher.Id,
+                                                                       FirstName = dbStudyClass.Teacher.FirstName,
+                                                                       LastName = dbStudyClass.Teacher.LastName,
+                                                                       Nickname = dbStudyClass.Teacher.Nickname,
+                                                                       FullName = dbStudyClass.Teacher.FullName,
+                                                                   },
+                                                                   ClassStatus = dbStudyClass.Status,
+                                                                   AdditionalHours = dbStudyClass.TeacherShifts
+                                                                                                 .Where(x => x.TeacherWorkType != TeacherWorkType.NORMAL)
+                                                                                                 .Select(shift => new AdditionalHours
+                                                                                                 {
+                                                                                                     Hours = shift.Hours,
+                                                                                                     TeacherWorkType = shift.TeacherWorkType,
+                                                                                                 })
+                                                                                                .FirstOrDefault()
+                                                               }))
+                                                              .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
+                                                              .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
