@@ -486,16 +486,17 @@ namespace griffined_api.Services.ScheduleService
             var timeSlots = new Dictionary<int, (string firstHalf, string secondHalf)>
             {
                 { 0, ("9:00 - 9:30", "9:30 - 10:00") },
-                { 1, ("10:00 - 10:30", "10:30 - 11:00") },
-                { 2, ("11:00 - 11:30", "11:30 - 12:00") },
-                { 3, ("12:00 - 12:30", "12:30 - 13:00") },
-                { 4, ("13:00 - 13:30", "13:30 - 14:00") },
-                { 5, ("14:00 - 14:30", "14:30 - 15:00") },
-                { 6, ("15:00 - 15:30", "15:30 - 16:00") },
-                { 7, ("16:00 - 16:30", "16:30 - 17:00") },
-                { 8, ("17:00 - 17:30", "17:30 - 18:00") },
-                { 9, ("18:00 - 18:30", "18:30 - 19:00") },
-                { 10, ("19:00 - 19:30", "19:30 - 20:00") }
+                { 1, ("9:00 - 9:30", "9:30 - 10:00") },
+                { 2, ("10:00 - 10:30", "10:30 - 11:00") },
+                { 3, ("11:00 - 11:30", "11:30 - 12:00") },
+                { 4, ("12:00 - 12:30", "12:30 - 13:00") },
+                { 5, ("13:00 - 13:30", "13:30 - 14:00") },
+                { 6, ("14:00 - 14:30", "14:30 - 15:00") },
+                { 7, ("15:00 - 15:30", "15:30 - 16:00") },
+                { 8, ("16:00 - 16:30", "16:30 - 17:00") },
+                { 9, ("17:00 - 17:30", "17:30 - 18:00") },
+                { 10, ("18:00 - 18:30", "18:30 - 19:00") },
+                { 11, ("19:00 - 19:30", "19:30 - 20:00") }
             };
 
 
@@ -506,36 +507,36 @@ namespace griffined_api.Services.ScheduleService
 
                 idx++;
 
-                var officeHourSlot = new List<int> { 2, 5, 6, 7, 8 }; // Add absolute office hour 
-                if (teacher.HourSlots[3] == null) // IF 12:00 - 13:00 there is no class then add office to 13:00 - 14:00
+                var officeHourSlot = new List<int> { 3, 6, 7, 8, 9 }; // Add absolute office hour 
+                if (teacher.HourSlots[4] == null) // IF 12:00 - 13:00 there is no class then add office to 13:00 - 14:00
                 {
-                    officeHourSlot.Add(4);
+                    officeHourSlot.Add(5);
                 }
 
-                if (teacher.HourSlots[10] != null) //IF 19:00 - 20:00 is not null
+                if (teacher.HourSlots[11] != null) //IF 19:00 - 20:00 is not null
                 {
-                    officeHourSlot.Add(9);
+                    officeHourSlot.Add(10);
                     AssignSlots(teacher, data, idx, officeHourSlot);
                     continue;
                 }
 
-                if (teacher.HourSlots[9] != null) //IF 18:00 - 19:00 is not null
+                if (teacher.HourSlots[10] != null) //IF 18:00 - 19:00 is not null
                 {
-                    officeHourSlot.Add(1);
+                    officeHourSlot.Add(2);
                     AssignSlots(teacher, data, idx, officeHourSlot);
                     continue;
                 }
 
-                if (teacher.HourSlots[0] != null) //IF 9:00 - 10:00 is not null
+                if (teacher.HourSlots[1] != null) //IF 9:00 - 10:00 is not null
                 {
                     AssignSlots(teacher, data, idx, officeHourSlot);
                     continue;
                 }
 
                 // DEFAULT CASE 
-                officeHourSlot.Add(1); // ADD 10:00 - 11:00 Slot
+                officeHourSlot.Add(2); // ADD 10:00 - 11:00 Slot
 
-                officeHourSlot.Add(9); // ADD 18:00 - 19:00 Slot
+                officeHourSlot.Add(10); // ADD 18:00 - 19:00 Slot
                 AssignSlots(teacher, data, idx, officeHourSlot);
             }
 
