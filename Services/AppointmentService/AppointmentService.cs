@@ -1,3 +1,4 @@
+using Google.Api;
 using griffined_api.Dtos.AppointentDtos;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -44,35 +45,35 @@ namespace griffined_api.Services.AppointmentService
             _scheduleService = scheduleService;
         }
 
-        public ServiceResponse<string> AddNewAppointment(CreateAppointmentDTO request)
+        public Appointment CreateAppointment(CreateAppointmentDTO request)
         {
             // CHECK IF THE REQUESTED SCHEDULE IS VALID.
-            List<string> dates = new List<string>();
-            List<string> days = new List<string>();
+            // List<string> dates = new List<string>();
+            // List<string> days = new List<string>();
 
-            foreach (var schedule in request.Schedules)
-            {
-                dates.Add(schedule.Date);
-                days.Add(schedule.Date.ToGregorianDateTime()
-                                 .DayOfWeek.ToString());
+            // foreach (var schedule in request.Schedules)
+            // {
+            //     dates.Add(schedule.Date);
+            //     days.Add(schedule.Date.ToGregorianDateTime()
+            //                      .DayOfWeek.ToString());
 
-                var scheduleDTO = new CheckAvailableAppointmentScheduleDTO
-                {
-                    TeacherIds = request.TeacherIds,
-                    Dates = dates,
-                    Days = days,
-                    FromTime = schedule.FromTime,
-                    ToTime = schedule.ToTime,
-                    AppointmentType = request.AppointmentType,
-                };
+            //     var scheduleDTO = new CheckAvailableAppointmentScheduleDTO
+            //     {
+            //         TeacherIds = request.TeacherIds,
+            //         Dates = dates,
+            //         Days = days,
+            //         FromTime = schedule.FromTime,
+            //         ToTime = schedule.ToTime,
+            //         AppointmentType = request.AppointmentType,
+            //     };
 
-                var verifySchedule = _scheduleService.GenerateAvailableAppointmentSchedule(scheduleDTO);
+            //     var verifySchedule = _scheduleService.GenerateAvailableAppointmentSchedule(scheduleDTO);
 
-                if (verifySchedule.Data is null)
-                {
-                    throw new BadHttpRequestException("No schedules.");
-                }
-            }
+            //     if (verifySchedule.Data is null)
+            //     {
+            //         throw new BadHttpRequestException("No schedules.");
+            //     }
+            // }
 
             var staffId = _firebaseService.GetAzureIdWithToken();
 
@@ -92,93 +93,105 @@ namespace griffined_api.Services.AppointmentService
                 CreatedByStaffId = staff.Id
             };
 
-            var teachers = _teacherRepo.Query()
-                                       .Where(x => request.TeacherIds.Contains(x.Id))
-                                       .ToList();
-
-            var appointmentMembers = new List<AppointmentMember>();
-            var schedules = new List<Schedule>();
-            var appointmentSlots = new List<AppointmentSlot>();
-            var teacherNotifications = new List<TeacherNotification>();
-
-            foreach (var teacher in teachers)
-            {
-                var appointmentMember = new AppointmentMember
-                {
-                    AppointmentId = appointment.Id,
-                    TeacherId = teacher.Id,
-                };
-
-                appointmentMembers.Add(appointmentMember);
-
-                var teacherNotification = new TeacherNotification
-                {
-                    TeacherId = teacher.Id,
-                    Appointment = appointment,
-                    Title = "New Appointment",
-                    Message = "You have been added to a new Appointment.",
-                    Type = TeacherNotificationType.NewAppointment,
-                    HasRead = false
-                };
-
-                teacherNotifications.Add(teacherNotification);
-            }
-
-            foreach (var requestedSchedule in request.Schedules)
-            {
-                var schedule = new Schedule
-                {
-                    Date = requestedSchedule.Date.ToGregorianDateTime(),
-                    FromTime = requestedSchedule.FromTime,
-                    ToTime = requestedSchedule.ToTime,
-                    Type = ScheduleType.Appointment,
-                    CalendarType = request.AppointmentType == AppointmentType.HOLIDAY ? DailyCalendarType.HOLIDAY
-                                                                                      : DailyCalendarType.EVENT
-                };
-
-                schedules.Add(schedule);
-
-                var slot = new AppointmentSlot
-                {
-                    ScheduleId = schedule.Id,
-                    AppointmentSlotStatus = AppointmentSlotStatus.NONE
-                };
-
-                appointmentSlots.Add(slot);
-            }
-
             _uow.BeginTran();
             _appointmentRepo.Add(appointment);
-
-            if (appointmentMembers.Any())
-            {
-                _appointmentMemberRepo.AddRange(appointmentMembers);
-            }
-
-            if (schedules.Any())
-            {
-                _scheduleRepo.AddRange(schedules);
-            }
-
-            if (appointmentSlots.Any())
-            {
-                _appointmentSlotRepo.AddRange(appointmentSlots);
-            }
-
-            if (teacherNotifications.Any())
-            {
-                _teacherNotificationRepo.AddRange(teacherNotifications);
-            }
-
             _uow.Complete();
             _uow.CommitTran();
 
-            return new ServiceResponse<string>
+            return appointment;
+        }
+
+        public void CreateAppointmentMember(IEnumerable<int> teacherIds, Appointment appointment)
+        {
+            var teachers = _teacherRepo.Query()
+                                       .Where(x => teacherIds.Contains(x.Id))
+                                       .ToList();
+
+            if (!teachers.Any())
             {
-                StatusCode = (int)HttpStatusCode.OK,
-                Data = null,
-                Success = true
-            };
+                return;
+            }
+
+            var members = (from teacher in teachers
+                           select new AppointmentMember
+                           {
+                               AppointmentId = appointment.Id,
+                               TeacherId = teacher.Id,
+                           })
+                          .ToList();
+
+            _uow.BeginTran();
+            _appointmentMemberRepo.AddRange(members);
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public void CreateAppointmentNotification(IEnumerable<int> teacherIds, Appointment appointment)
+        {
+            var teachers = _teacherRepo.Query()
+                                       .Where(x => teacherIds.Contains(x.Id))
+                                       .ToList();
+
+            if (!teachers.Any())
+            {
+                return;
+            }
+
+            var notifications = (from teacher in teachers
+                                 select new TeacherNotification
+                                 {
+                                     TeacherId = teacher.Id,
+                                     AppointmentId = appointment.Id,
+                                     Title = "New Appointment",
+                                     Message = "You have been added to a new Appointment.",
+                                     Type = TeacherNotificationType.NewAppointment,
+                                     HasRead = false
+                                 })
+                                .ToList();
+
+            _uow.BeginTran();
+            _teacherNotificationRepo.AddRange(notifications);
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public IEnumerable<Schedule> CreateAppointmentSchedule(CreateAppointmentDTO request, Appointment appointment)
+        {
+            var schedules = (from schedule in request.Schedules
+                             select new Schedule
+                             {
+                                 Date = schedule.Date.ToGregorianDateTime(),
+                                 FromTime = schedule.FromTime,
+                                 ToTime = schedule.ToTime,
+                                 Type = ScheduleType.Appointment,
+                                 CalendarType = request.AppointmentType == AppointmentType.HOLIDAY ? DailyCalendarType.HOLIDAY
+                                                                                                   : DailyCalendarType.EVENT
+                             })
+                            .ToList();
+
+            _uow.BeginTran();
+            _scheduleRepo.AddRange(schedules);
+            _uow.Complete();
+            _uow.CommitTran();
+
+            return schedules;
+        }
+
+        public void CreateAppointmentSlot(IEnumerable<Schedule> schedules, Appointment appointment)
+        {
+            var slots = (from schedule in schedules
+                         select new AppointmentSlot
+                         {
+                             ScheduleId = schedule.Id,
+                             AppointmentId = appointment.Id,
+                             AppointmentSlotStatus = AppointmentSlotStatus.NONE
+                         })
+                        .ToList();
+
+            _uow.BeginTran();
+            _appointmentSlotRepo.AddRange(slots);
+            _uow.Complete();
+            _uow.CommitTran();
         }
 
         public async Task<ServiceResponse<List<AppointmentResponseDto>>> ListAllAppointments()
