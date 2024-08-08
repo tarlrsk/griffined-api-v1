@@ -530,6 +530,48 @@ namespace griffined_api.Services.StudentService
                     data.ProfilePicture = pictureResponseDto;
                 }
             }
+            else
+            {
+                if (updatedProfilePicture != null)
+                {
+                    var incomingFileName = updatedProfilePicture.FileName;
+
+                    var pictureRequestDto = new AddProfilePictureRequestDto
+                    {
+                        PictureData = updatedProfilePicture
+                    };
+
+                    var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
+                    var fileName = updatedProfilePicture.FileName;
+                    var objectName = $"students/{student.StudentCode}/profile/{fileName}";
+
+                    using (var stream = pictureRequestDto.PictureData.OpenReadStream())
+                    {
+                        var storageObject = await _storageClient.UploadObjectAsync(
+                            FIREBASE_BUCKET,
+                            objectName,
+                            updatedProfilePicture.ContentType,
+                            stream
+                        );
+
+                        pictureEntity.FileName = fileName;
+                        pictureEntity.ObjectName = objectName;
+                    }
+
+                    string url = await _firebaseService.GetUrlByObjectName(objectName);
+
+                    var pictureResponseDto = new FilesResponseDto
+                    {
+                        FileName = pictureEntity.FileName,
+                        ContentType = updatedProfilePicture.ContentType,
+                        URL = url
+                    };
+
+                    student.ProfilePicture = pictureEntity;
+
+                    data.ProfilePicture = pictureResponseDto;
+                }
+            }
 
             // Update student additional files
             if (student.AdditionalFiles != null)
