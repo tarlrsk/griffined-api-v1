@@ -542,6 +542,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(newTeacher, dbRemoveStudyClass.Schedule.Date, dbRemoveStudyClass.Schedule.FromTime, dbRemoveStudyClass.Schedule.ToTime);
                     foreach (var worktype in worktypes)
                     {
+                        dbRemoveStudyClass.TeacherShifts ??= new List<TeacherShift>();
                         dbRemoveStudyClass.TeacherShifts.Add(new TeacherShift
                         {
                             Teacher = newTeacher,
@@ -618,6 +619,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 }
 
                 // INSERT REMOVE HISTORY TO DB
+                dbRemoveStudyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                 dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
 
                 // NOTIFY OLD TEACHER
@@ -689,6 +691,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)
                     {
+                        studyClass.TeacherShifts ??= new List<TeacherShift>();
                         studyClass.TeacherShifts.Add(new TeacherShift
                         {
                             Teacher = dbTeacher,
@@ -699,6 +702,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
+                        studyClass.Attendances ??= new List<StudentAttendance>();
                         studyClass.Attendances.Add(new StudentAttendance
                         {
                             Attendance = Attendance.None,
@@ -719,7 +723,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
                         _context.StudentNotifications.Add(makeupClassStudentNotification);
                     }
-
+                    dbStudySubject.StudyClasses ??= new List<StudyClass>();
                     dbStudySubject.StudyClasses.Add(studyClass);
 
                     var addHistory = new StudyCourseHistory
@@ -734,6 +738,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
 
                     addHistory.Description = addedStudyClassHistoryDescription;
+                    studyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
                 }
             }
