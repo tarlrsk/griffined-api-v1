@@ -87,7 +87,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudyCourseType = newRequestedCourses.Type,
                 };
-                var course = existedCourses.FirstOrDefault(c => c.course == newRequestedCourse.Course);
+                var course = existedCourses.FirstOrDefault(c => c.course.ToLower() == newRequestedCourse.Course.ToLower());
                 if (course == null)
                 {
                     var newCourse = new Course
@@ -126,14 +126,14 @@ namespace griffined_api.Services.RegistrationRequestService
 
                     course = existedCourses.First(c => c.course == newRequestedCourse.Course);
 
-                    var level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
+                    var level = course.Levels.FirstOrDefault(c => c.level.ToLower() == newRequestedCourse.Level?.ToLower());
                     newRequestedCourseRequest.Level = level;
 
                     var requestedSubjects = newRequestedCourse.Subjects.Select(s => s.Subject).ToList();
                     var existedSubjects = course.Subjects.Where(s => requestedSubjects.Contains(s.subject));
                     foreach (var requestedSubject in newRequestedCourse.Subjects)
                     {
-                        var subject = existedSubjects.First(s => s.subject == requestedSubject.Subject);
+                        var subject = existedSubjects.First(s => s.subject.ToLower() == requestedSubject.Subject.ToLower());
                         var newRequestedSubject = new NewCourseSubjectRequest
                         {
                             Subject = subject,
