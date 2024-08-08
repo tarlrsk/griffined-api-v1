@@ -2254,7 +2254,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     ?? throw new NotFoundException("EC not found.");
 
             var oa = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy)
+                    .FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
                     ?? throw new NotFoundException("OA not found.");
 
             var ecNotification = new StaffNotification
