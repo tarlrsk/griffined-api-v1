@@ -345,9 +345,9 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var newPaymentFile in filesToUpload)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
+                request.RegistrationRequestPaymentFiles ??= new List<RegistrationRequestPaymentFile>();
                 if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
                 {
-                    request.RegistrationRequestPaymentFiles ??= new List<RegistrationRequestPaymentFile>();
                     request.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
                     {
                         FileName = newPaymentFile.FileName,
