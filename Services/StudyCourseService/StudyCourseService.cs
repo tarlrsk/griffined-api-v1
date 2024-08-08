@@ -2,6 +2,7 @@ using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
 
 namespace griffined_api.Services.StudyCourseService
@@ -1164,64 +1165,69 @@ namespace griffined_api.Services.StudyCourseService
             var response = new ServiceResponse<StudySubjectMemberResponseDto>();
 
             var dbStudyCourse = await _context.StudyCourses
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.Subject)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.Student)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudyClasses)
-                                        .ThenInclude(sc => sc.Teacher)
-                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("No course found.");
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.Subject)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudySubjectMember)
+                        .ThenInclude(sm => sm.Student)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudyClasses)
+                        .ThenInclude(sc => sc.Teacher)
+                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId)
+                ?? throw new NotFoundException("No course found.");
+
+            var studentGroups = dbStudyCourse.StudySubjects?
+                .SelectMany(ss => ss.StudySubjectMember)
+                .Where(sm => sm.Student != null)
+                .GroupBy(sm => sm.Student.Id)
+                .Select(group => new StudentStudySubjectMemberResponseDto
+                {
+                    StudentId = group.Key,
+                    StudentCode = group.First().Student?.StudentCode,
+                    StudentFirstName = group.First().Student?.FirstName,
+                    StudentLastName = group.First().Student?.LastName,
+                    StudentNickname = group.First().Student?.Nickname,
+                    Phone = group.First().Student?.Phone,
+                    CourseJoinedDate = group.First().CourseJoinedDate.ToDateTimeString(),
+                    Subjects = group.Select(member => new StudySubjectResponseDto
+                    {
+                        StudySubjectId = member.StudySubject?.Id ?? 0,
+                        SubjectId = member.StudySubject?.Subject?.Id ?? 0,
+                        Subject = member.StudySubject?.Subject?.subject,
+                        Hour = member.StudySubject?.Hour ?? 0,
+                    }).ToList()
+                }).ToList() ?? new List<StudentStudySubjectMemberResponseDto>();
+
+            var teacherGroups = dbStudyCourse.StudySubjects?
+                .SelectMany(ss => ss.StudyClasses)
+                .Where(sc => sc.Teacher != null)
+                .GroupBy(sc => sc.Teacher.Id)
+                .Select(group => new TeacherStudySubjectMemberResponseDto
+                {
+                    TeacherId = group.Key,
+                    TeacherFirstName = group.First().Teacher?.FirstName,
+                    TeacherLastName = group.First().Teacher?.LastName,
+                    TeacherNickname = group.First().Teacher?.Nickname,
+                    Phone = group.First().Teacher?.Phone,
+                    CourseJoinedDate = group.First().Schedule?.Date.ToDateTimeString(),
+                    Subjects = group.Select(cls => new StudySubjectResponseDto
+                    {
+                        StudySubjectId = cls.StudySubject?.Id ?? 0,
+                        SubjectId = cls.StudySubject?.Subject?.Id ?? 0,
+                        Subject = cls.StudySubject?.Subject?.subject,
+                        Hour = cls.StudySubject?.Hour ?? 0,
+                    }).ToList()
+                }).ToList() ?? new List<TeacherStudySubjectMemberResponseDto>();
 
             var data = new StudySubjectMemberResponseDto
             {
-                Students = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sc => sc.Student != null)
-                            .GroupBy(sm => sm.Student.Id)
-                            .Select(group => new StudentStudySubjectMemberResponseDto
-                            {
-                                StudentId = group.First().Student.Id,
-                                StudentCode = group.First().Student.StudentCode!,
-                                StudentFirstName = group.First().Student.FirstName,
-                                StudentLastName = group.First().Student.LastName,
-                                StudentNickname = group.First().Student.Nickname,
-                                Phone = group.First().Student.Phone, // Corrected phone retrieval
-                                CourseJoinedDate = group.First().CourseJoinedDate.ToDateTimeString(),
-                                Subjects = group.Select(member => new StudySubjectResponseDto
-                                {
-                                    StudySubjectId = member.StudySubject.Id,
-                                    SubjectId = member.StudySubject.Subject.Id,
-                                    Subject = member.StudySubject.Subject.subject,
-                                    Hour = member.StudySubject.Hour,
-                                }).ToList()
-                            }).ToList(),
-
-                Teachers = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudyClasses)
-                            .Where(sc => sc.Teacher != null)
-                            .GroupBy(sc => sc.Teacher)
-                            .Select(group => new TeacherStudySubjectMemberResponseDto
-                            {
-                                TeacherId = group.Key.Id,
-                                TeacherFirstName = group.Key.FirstName,
-                                TeacherLastName = group.Key.LastName,
-                                TeacherNickname = group.Key.Nickname,
-                                Phone = group.Key.Phone,
-                                CourseJoinedDate = group.First().Schedule.Date.ToDateTimeString(),
-                                Subjects = group.Select(cls => new StudySubjectResponseDto
-                                {
-                                    StudySubjectId = cls.StudySubject.Id,
-                                    SubjectId = cls.StudySubject.Subject.Id,
-                                    Subject = cls.StudySubject.Subject.subject,
-                                    Hour = cls.StudySubject.Hour,
-                                }).ToList()
-                            }).ToList()
+                Students = studentGroups,
+                Teachers = teacherGroups
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
+
             return response;
         }
 
