@@ -254,7 +254,10 @@ namespace griffined_api.Services.RegistrationRequestService
         public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> filesToUpload)
         {
             var response = new ServiceResponse<string>();
-            var request = new RegistrationRequest();
+            var request = new RegistrationRequest
+            {
+                PaymentByStaffId = _firebaseService.GetAzureIdWithToken()
+            };
 
             if (newRequest.MemberIds == null || newRequest.MemberIds.Count == 0)
             {
