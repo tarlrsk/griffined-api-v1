@@ -348,8 +348,8 @@ namespace griffined_api.Services.ScheduleService
                     }
                 }
 
-                // Time in timetable - 9:00 to 20:00
-                for (int i = 9; i < 20; i++)
+                // Time in timetable - 8:00 to 20:00
+                for (int i = 8; i < 20; i++)
                 {
                     var firstHalf = TimeSpan.FromHours(i);
                     var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
@@ -440,43 +440,43 @@ namespace griffined_api.Services.ScheduleService
                 else
                 {
                     // Add OFFICE_HOURS for teachers without schedules
-                    var dailyCalendar = new DailtyCalendarDTO()
+                    var dailyCalendar = new DailtyCalendarDTO
                     {
                         TeacherId = teacher.Id,
                         TeacherFirstName = teacher.FirstName,
                         TeacherLastName = teacher.LastName,
                         TeacherNickname = teacher.Nickname,
+                        // Time in timetable - 8:00 to 20:00
+                        HourSlots = Enumerable.Repeat<CalendarHalfDTO?>(null, 12).ToList()
                     };
+                    // for (int i = 8; i < 20; i++)
+                    // {
+                    //     var firstHalf = TimeSpan.FromHours(i);
+                    //     var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
+                    //     var endHour = secondHalf.Add(TimeSpan.FromMinutes(30));
+                    //     // CalendarHalfDTO hourSlot = new()
+                    //     // {
+                    //     //     FirstHalf = null,
+                    //     //     SecondHalf = null,
+                    //     // };
+                    //     // CalendarHalfDTO hourSlot = new CalendarHalfDTO
+                    //     // {
+                    //     //     FirstHalf = new CalendarSlotDTO
+                    //     //     {
+                    //     //         Type = DailyCalendarType.OFFICE_HOURS,
+                    //     //         Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
+                    //     //         Name = "Office Hours"
+                    //     //     },
+                    //     //     SecondHalf = new CalendarSlotDTO
+                    //     //     {
+                    //     //         Type = DailyCalendarType.OFFICE_HOURS,
+                    //     //         Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
+                    //     //         Name = "Office Hours"
+                    //     //     }
+                    //     // };
 
-                    // Time in timetable - 9:00 to 20:00
-                    for (int i = 9; i < 20; i++)
-                    {
-                        var firstHalf = TimeSpan.FromHours(i);
-                        var secondHalf = firstHalf.Add(TimeSpan.FromMinutes(30));
-                        var endHour = secondHalf.Add(TimeSpan.FromMinutes(30));
-                        // CalendarHalfDTO hourSlot = new()
-                        // {
-                        //     FirstHalf = null,
-                        //     SecondHalf = null,
-                        // };
-                        // CalendarHalfDTO hourSlot = new CalendarHalfDTO
-                        // {
-                        //     FirstHalf = new CalendarSlotDTO
-                        //     {
-                        //         Type = DailyCalendarType.OFFICE_HOURS,
-                        //         Time = $"{firstHalf:hh\\:mm}-{secondHalf:hh\\:mm}",
-                        //         Name = "Office Hours"
-                        //     },
-                        //     SecondHalf = new CalendarSlotDTO
-                        //     {
-                        //         Type = DailyCalendarType.OFFICE_HOURS,
-                        //         Time = $"{secondHalf:hh\\:mm}-{endHour:hh\\:mm}",
-                        //         Name = "Office Hours"
-                        //     }
-                        // };
-
-                        dailyCalendar.HourSlots.Add(null);
-                    }
+                    //     dailyCalendar.HourSlots.Add(null);
+                    // }
 
                     data.Add(dailyCalendar);
                 }
@@ -485,18 +485,18 @@ namespace griffined_api.Services.ScheduleService
             // Define the time slots
             var timeSlots = new Dictionary<int, (string firstHalf, string secondHalf)>
             {
-                { 0, ("9:00 - 9:30", "9:30 - 10:00") },
-                { 1, ("9:00 - 9:30", "9:30 - 10:00") },
-                { 2, ("10:00 - 10:30", "10:30 - 11:00") },
-                { 3, ("11:00 - 11:30", "11:30 - 12:00") },
-                { 4, ("12:00 - 12:30", "12:30 - 13:00") },
-                { 5, ("13:00 - 13:30", "13:30 - 14:00") },
-                { 6, ("14:00 - 14:30", "14:30 - 15:00") },
-                { 7, ("15:00 - 15:30", "15:30 - 16:00") },
-                { 8, ("16:00 - 16:30", "16:30 - 17:00") },
-                { 9, ("17:00 - 17:30", "17:30 - 18:00") },
-                { 10, ("18:00 - 18:30", "18:30 - 19:00") },
-                { 11, ("19:00 - 19:30", "19:30 - 20:00") }
+                { 0, ("8:00-8:30", "8:30-9:00") },
+                { 1, ("9:00-9:30", "9:30-10:00") },
+                { 2, ("10:00-10:30", "10:30-11:00") },
+                { 3, ("11:00-11:30", "11:30-12:00") },
+                { 4, ("12:00-12:30", "12:30-13:00") },
+                { 5, ("13:00-13:30", "13:30-14:00") },
+                { 6, ("14:00-14:30", "14:30-15:00") },
+                { 7, ("15:00-15:30", "15:30-16:00") },
+                { 8, ("16:00-16:30", "16:30-17:00") },
+                { 9, ("17:00-17:30", "17:30-18:00") },
+                { 10, ("18:00-18:30", "18:30-19:00") },
+                { 11, ("19:00-19:30", "19:30-20:00") }
             };
 
 
@@ -560,7 +560,7 @@ namespace griffined_api.Services.ScheduleService
 
                         var startTime = timeSlots[startSlot].firstHalf.Split('-')[0].Trim();
                         var endTime = timeSlots[endSlot].secondHalf.Split('-')[1].Trim();
-                        var mergedTime = $"{startTime} - {endTime}";
+                        var mergedTime = $"{startTime}-{endTime}";
 
                         var officeHour = new CalendarHalfDTO
                         {
