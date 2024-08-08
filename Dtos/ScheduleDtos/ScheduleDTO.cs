@@ -15,6 +15,8 @@ namespace griffined_api.Dtos.ScheduleDtos
         public TimeSpan ToTime { get; set; }
     }
 
+    #region Appointment
+
     public class AppointmentScheduleDTO : AvailableAppointmentScheduleDTO
     {
         [JsonProperty("scheduleId")]
@@ -76,6 +78,27 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("scheduleStatus")]
         public AppointmentSlotStatus ScheduleStatus { get; set; }
     }
+
+    public class CheckAvailableTeacherAppointmentDTO
+    {
+        [JsonProperty("appointmentId")]
+        public int AppointmentId { get; set; }
+
+        [JsonProperty("teacherIds")]
+        public IEnumerable<int> TeacherIds { get; set; }
+
+        [JsonProperty("currentSchedules")]
+        public IEnumerable<AvailableAppointmentScheduleDTO> CurrentSchedules { get; set; }
+    }
+
+    public class AvailableDTO
+    {
+        [JsonProperty("isAvailabled")]
+        public bool IsAvailabled { get; set; }
+    }
+
+    #endregion
+    #region Class
 
     public class CheckAvailableClassScheduleDTO
     {
@@ -170,4 +193,6 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("hours")]
         public double Hours { get; set; }
     }
+
+    #endregion
 }
