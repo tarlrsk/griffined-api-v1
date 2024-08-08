@@ -1,3 +1,4 @@
+using System.Net;
 using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Controllers
@@ -46,6 +47,14 @@ namespace griffined_api.Controllers
             var appointments = _scheduleService.GenerateAvailableClassSchedule(request);
 
             return Ok(appointments);
+        }
+
+        [HttpPost("appointments/{id}/teachers"), AllowAnonymous]
+        public IActionResult CheckAvailableTeacherAppointment(int id, CheckAvailableTeacherAppointmentDTO request)
+        {
+            var availability = _scheduleService.CheckAvailableTeacherAppointment(id, request);
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK, availability));
         }
     }
 }
