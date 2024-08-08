@@ -44,5 +44,15 @@ namespace griffined_api.Controllers
             return Ok(await _appointmentService.UpdateApoointmentById(appointmentId, updateAppointmentRequestDto));
         }
 
+        [HttpDelete("{id}"), Authorize(Roles = "ea, master, allstaff")]
+        public IActionResult DeleteAppointment(int id)
+        {
+            _appointmentService.DeleteAppointment(id);
+            _appointmentService.DeleteAppointmentMember(id);
+            _appointmentService.DeleteAppointmentSchedule(id);
+            _appointmentService.DeleteAppointmentSlot(id);
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
+        }
     }
 }
