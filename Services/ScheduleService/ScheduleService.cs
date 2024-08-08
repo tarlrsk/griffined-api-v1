@@ -1190,6 +1190,145 @@ namespace griffined_api.Services.ScheduleService
             return response;
         }
 
+        public ServiceResponse<AvailableDTO> CheckAvailableTeacherAppointment(int appointmentId, CheckAvailableTeacherAppointmentDTO request)
+        {
+            var scheduleDates = request.CurrentSchedules.Select(x => x.Date).Distinct();
+
+            var dates = scheduleDates.Select(x => x.ToGregorianDateTime()).ToList();
+
+
+            // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
+            var conflictScheduleIds = _scheduleRepo.Query()
+                                                   .Where(x => dates.Contains(x.Date))
+                                                   .Select(x => x.Id)
+                                                   .ToList();
+
+            // FETCH ALL CONFLICTING STUDY CLASSES BASED ON THE SCHEDULE IDS AND TEACHER IDS.
+            var conflictStudyClasses = _studyClassRepo.Query()
+                                                      .Include(x => x.Schedule)
+                                                      .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                  && request.TeacherIds.Contains(x.TeacherId.Value))
+                                                      .ToList();
+
+            // FETCH ALL APPOINTMENT IDS BASED ON THE TEACHER IDS.
+            var appointmentIds = _appointmentMemberRepo.Query()
+                                                       .Where(x => request.TeacherIds.Contains(x.TeacherId.Value))
+                                                       .Select(x => x.AppointmentId)
+                                                       .ToList();
+
+            // FETCH ALL CONFLICTING APPOINTMENTS BASED ON THE APPOINTMENT IDS AND SCHEDULE IDS.
+            var conflictAppointments = _appointmentSlotRepo.Query()
+                                                           .Include(x => x.Schedule)
+                                                           .Where(x => appointmentIds.Contains(x.AppointmentId)
+                                                                       && conflictScheduleIds.Contains(x.ScheduleId.Value))
+                                                           .ToList();
+
+            // GET THE DATES OF CONFLICTING STUDY CLASSES AND APPOINTMENTS.
+            var conflictDates = conflictStudyClasses.Select(x => x.Schedule.Date)
+                                                    .Union(conflictAppointments.Select(x => x.Schedule.Date))
+                                                    .Distinct()
+                                                    .ToList();
+
+            // GET ALL HOLIDAYS
+            var holidayDates = _scheduleRepo.Query()
+                                            .Where(x => x.CalendarType == DailyCalendarType.HOLIDAY
+                                                        && conflictDates.Contains(x.Date))
+                                            .Select(x => x.Date)
+                                            .ToList();
+
+            // PREPARE A DICTIONARY TO HOLD CONFLICT DATES AND ASSOCIATED TEACHERS.
+            var conflictDetails = new Dictionary<DateTime, List<string>>();
+
+            // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
+            foreach (var studyClass in conflictStudyClasses)
+            {
+                var date = studyClass.Schedule.Date;
+
+                var teacherNickname = _teacherRepo.Query()
+                                                  .Where(x => x.Id == studyClass.TeacherId)
+                                                  .Select(x => x.Nickname)
+                                                  .FirstOrDefault();
+
+                if (!conflictDetails.ContainsKey(date))
+                {
+                    conflictDetails[date] = new List<string>();
+                }
+
+                if (!string.IsNullOrEmpty(teacherNickname))
+                {
+                    conflictDetails[date].Add($"T. {teacherNickname}");
+                }
+            }
+
+            // ADD CONFLICTING APPOINTMENTS' TEACHER DETAILS.
+            foreach (var appointment in conflictAppointments)
+            {
+                var date = appointment.Schedule.Date;
+
+                var teacherIds = _appointmentMemberRepo.Query()
+                                                       .Where(x => x.AppointmentId == appointment.AppointmentId)
+                                                       .Select(x => x.TeacherId)
+                                                       .ToList();
+
+                foreach (var teacherId in teacherIds)
+                {
+                    var teacherNickname = _teacherRepo.Query()
+                                                      .Where(x => x.Id == teacherId)
+                                                      .Select(x => x.Nickname)
+                                                      .FirstOrDefault();
+
+                    if (!conflictDetails.ContainsKey(date))
+                    {
+                        conflictDetails[date] = new List<string>();
+                    }
+
+                    if (!string.IsNullOrEmpty(teacherNickname))
+                    {
+                        conflictDetails[date].Add($"T. {teacherNickname}");
+                    }
+                }
+            }
+
+            // CONSTRUCT THE FINAL FORMATTED DATES FOR THE ERROR MESSAGE.
+            var formattedDates = conflictDates.Select(date =>
+            {
+                if (holidayDates.Contains(date))
+                {
+                    return $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} (holiday)";
+                }
+
+                var teacherDetails = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
+
+                return !string.IsNullOrEmpty(teacherDetails)
+                    ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({teacherDetails})"
+                    : date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
+            })
+            .ToList();
+
+            // JOIN ALL THE DATES USING COMMAS.
+            string formattedDateString = string.Join(", ", formattedDates);
+
+            // CONSTRUCT THE ERROR MESSAGE.
+            string errorMessage = $"There is a scheduling conflict on {formattedDateString}. Please choose a different date or time.";
+
+            if (conflictDates.Any())
+            {
+                throw new ConflictException(errorMessage);
+            }
+
+            var response = new ServiceResponse<AvailableDTO>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Data = new AvailableDTO
+                {
+                    IsAvailabled = true
+                },
+                Success = true
+            };
+
+            return response;
+        }
+
         #endregion
     }
 }

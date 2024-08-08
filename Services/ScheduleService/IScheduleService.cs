@@ -1,3 +1,4 @@
+using Google.Api;
 using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Services.ScheduleService
@@ -21,5 +22,12 @@ namespace griffined_api.Services.ScheduleService
         /// <param name="request"></param>
         /// <returns></returns>
         ServiceResponse<IEnumerable<AvailableClassScheduleDTO>> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request);
+
+        /// <summary>
+        /// Check if the teacher is availabled to be added to existing appointment.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        ServiceResponse<AvailableDTO> CheckAvailableTeacherAppointment(int appointmentId, CheckAvailableTeacherAppointmentDTO request);
     }
 }
