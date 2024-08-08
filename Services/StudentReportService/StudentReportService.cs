@@ -215,7 +215,7 @@ namespace griffined_api.Services.StudentReportService
                 data.Students.Add(studentDto);
             }
 
-            data.Course = dbStudySubjectMembers.FirstOrDefault().StudySubject.StudyCourse.Course.course;
+            data.Course = dbStudySubjectMembers.FirstOrDefault()?.StudySubject.StudyCourse.Course.course;
 
             response.Data = data;
             response.StatusCode = (int)HttpStatusCode.OK;

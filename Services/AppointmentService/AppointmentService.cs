@@ -481,5 +481,68 @@ namespace griffined_api.Services.AppointmentService
                 StatusCode = (int)HttpStatusCode.OK,
             };
         }
+
+        public void DeleteAppointment(int id)
+        {
+            var appointment = _context.Appointments.FirstOrDefault(x => x.Id == id);
+
+            if (appointment is null)
+            {
+                return;
+            }
+
+            _uow.BeginTran();
+            _context.Appointments.Remove(appointment);
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public void DeleteAppointmentMember(int id)
+        {
+            var appointmentMembers = _context.AppointmentMembers.Where(x => x.AppointmentId == id);
+
+            _uow.BeginTran();
+
+            if (appointmentMembers.Any())
+            {
+                _context.AppointmentMembers.RemoveRange(appointmentMembers);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public void DeleteAppointmentSchedule(int id)
+        {
+            var appointmentSlotIds = _context.AppointmentSlots.Where(x => x.AppointmentId == id)
+                                                              .Select(x => x.Id)
+                                                              .ToList();
+
+            var schedules = _context.Schedules.Include(x => x.AppointmentSlot)
+                                              .Where(x => x.AppointmentSlot != null
+                                                       && appointmentSlotIds.Contains(x.AppointmentSlot.Id))
+                                              .ToList();
+
+            _uow.BeginTran();
+            _context.Schedules.RemoveRange(schedules);
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public void DeleteAppointmentSlot(int id)
+        {
+            var appointmentSlots = _context.AppointmentSlots.Where(x => x.AppointmentId == id)
+                                                            .ToList();
+
+            _uow.BeginTran();
+
+            if (appointmentSlots.Any())
+            {
+                _context.AppointmentSlots.RemoveRange(appointmentSlots);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+        }
     }
 }
