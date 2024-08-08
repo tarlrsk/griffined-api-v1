@@ -560,7 +560,7 @@ namespace griffined_api.Services.ScheduleService
 
                         var startTime = timeSlots[startSlot].firstHalf.Split('-')[0].Trim();
                         var endTime = timeSlots[endSlot].secondHalf.Split('-')[1].Trim();
-                        var mergedTime = $"{startTime} - {endTime}";
+                        var mergedTime = $"{startTime}-{endTime}";
 
                         var officeHour = new CalendarHalfDTO
                         {
