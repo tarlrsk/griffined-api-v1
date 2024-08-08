@@ -42,6 +42,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     Student = dbStudent
                 };
+
+                request.RegistrationRequestMembers ??= new List<RegistrationRequestMember>();
                 request.RegistrationRequestMembers.Add(member);
             }
 
@@ -63,6 +65,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     FromTime = newPreferredDay.FromTime.ToTimeSpan(),
                     ToTime = newPreferredDay.ToTime.ToTimeSpan()
                 };
+
+                request.NewCoursePreferredDayRequests ??= new List<NewCoursePreferredDayRequest>();
                 request.NewCoursePreferredDayRequests.Add(requestedPreferredDay);
             }
 
@@ -100,6 +104,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             subject = subject.Subject
                         };
+                        newCourse.Subjects ??= new List<Subject>();
                         newCourse.Subjects.Add(newSubject);
                     }
 
@@ -109,6 +114,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             level = newRequestedCourse.Level
                         };
+                        newCourse.Levels ??= new List<Level>();
                         newCourse.Levels.Add(newLevel);
                     }
 
@@ -133,6 +139,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Subject = subject,
                             Hour = requestedSubject.Hour
                         };
+
+                        newRequestedCourseRequest.NewCourseSubjectRequests ??= new List<NewCourseSubjectRequest>();
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
                 }
@@ -166,6 +174,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             newRequestedSubject.Subject = subject;
                         }
                         newRequestedSubject.Hour = requestedSubject.Hour;
+                        newRequestedCourseRequest.NewCourseSubjectRequests ??= new List<NewCourseSubjectRequest>();
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
 
@@ -193,6 +202,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 newRequestedCourseRequest.Method = newRequestedCourse.Method;
                 newRequestedCourseRequest.StartDate = DateTime.Parse(newRequestedCourse.StartDate);
                 newRequestedCourseRequest.EndDate = DateTime.Parse(newRequestedCourse.EndDate);
+                request.NewCourseRequests ??= new List<NewCourseRequest>();
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
 
@@ -210,6 +220,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     Staff = staff,
                     Comment = comment
                 };
+                request.RegistrationRequestComments ??= new List<RegistrationRequestComment>();
                 request.RegistrationRequestComments.Add(newComment);
             }
 
@@ -266,6 +277,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     Student = dbStudent
                 };
+                request.RegistrationRequestMembers ??= new List<RegistrationRequestMember>();
                 request.RegistrationRequestMembers.Add(member);
             }
 
@@ -286,6 +298,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var dbStudySubject = dbStudyCourse.StudySubjects.FirstOrDefault(s => s.Id == studySubjectId) ?? throw new NotFoundException($"Study Subject with ID {studySubjectId} not found");
 
+                    newStudentAddingRequest.StudentAddingSubjectRequests ??= new List<StudentAddingSubjectRequest>();
                     newStudentAddingRequest.StudentAddingSubjectRequests.Add(new StudentAddingSubjectRequest()
                     {
                         StudySubject = dbStudySubject
@@ -296,6 +309,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         if (dbStudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
                             throw new BadRequestException($"Student with code {dbStudent.StudentCode} is already enrolled this subject.");
 
+                        dbStudySubject.StudySubjectMember ??= new List<StudySubjectMember>();
                         dbStudySubject.StudySubjectMember.Add(new StudySubjectMember()
                         {
                             Student = dbStudent,
@@ -303,6 +317,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         });
                     }
                 }
+                request.StudentAddingRequest ??= new List<StudentAddingRequest>();
                 request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
@@ -316,6 +331,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     Staff = staff,
                     Comment = comment
                 };
+                request.RegistrationRequestComments ??= new List<RegistrationRequestComment>();
                 request.RegistrationRequestComments.Add(newComment);
             }
 
@@ -331,6 +347,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
                 if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
                 {
+                    request.RegistrationRequestPaymentFiles ??= new List<RegistrationRequestPaymentFile>();
                     request.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
                     {
                         FileName = newPaymentFile.FileName,
