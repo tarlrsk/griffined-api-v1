@@ -1191,6 +1191,8 @@ namespace griffined_api.Services.StudyCourseService
                 .Include(sc => sc.StudySubjects)
                     .ThenInclude(ss => ss.StudyClasses)
                         .ThenInclude(sc => sc.Teacher)
+                            .ThenInclude(x => x.StudyClasses)
+                                .ThenInclude(x => x.Schedule)
                 .FirstOrDefaultAsync(sc => sc.Id == studyCourseId)
                 ?? throw new NotFoundException("No course found.");
 
