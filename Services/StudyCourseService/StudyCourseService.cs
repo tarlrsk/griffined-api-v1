@@ -937,6 +937,13 @@ namespace griffined_api.Services.StudyCourseService
 
         public async Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId)
         {
+            var teacher = _context.Teachers.FirstOrDefault(x => x.Id == teacherId);
+
+            if (teacher is null)
+            {
+                throw new NotFoundException("No teacher found.");
+            }
+
             var response = new ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>()
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -944,48 +951,60 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             var dbStudyCourses = await _context.StudyCourses
-                                .Include(sc => sc.Course)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.Subject)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudyClasses)
-                                        .ThenInclude(sc => sc.Teacher)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.Student)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.StudentReports)
-                                .Where(sc => sc.StudySubjects.Any(ss => ss.StudyClasses.Any(sm => sm.Teacher.Id == teacherId)))
-                                .ToListAsync() ?? throw new NotFoundException("No courses containing teacher with ID {teacherId} found.");
+                .Include(sc => sc.Course)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.Subject)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudyClasses)
+                        .ThenInclude(sc => sc.Teacher)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudySubjectMember)
+                        .ThenInclude(sm => sm.Student)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudySubjectMember)
+                        .ThenInclude(sm => sm.StudentReports)
+                .Where(sc => sc.StudySubjects.Any(ss => ss.StudyClasses.Any(sm => sm.Teacher.Id == teacherId)))
+                .ToListAsync();
 
+            if (dbStudyCourses == null || !dbStudyCourses.Any())
+            {
+                throw new NotFoundException($"No courses containing teacher with ID {teacherId} found.");
+            }
 
             foreach (var dbStudyCourse in dbStudyCourses)
             {
                 var studentCount = 0;
-                var student = new List<int>();
+                var studentIds = new List<int>();
                 foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
                 {
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
-                        if (!student.Exists(s => s == dbMember.StudentId))
+                        if (!studentIds.Exists(s => s == dbMember.StudentId))
                         {
                             studentCount += 1;
-                            student.Add(dbMember.StudentId);
+                            studentIds.Add(dbMember.StudentId);
                         }
                     }
                 }
 
+                var firstStudyClass = dbStudyCourse.StudySubjects
+                    .FirstOrDefault()?.StudyClasses.FirstOrDefault();
+
+                if (firstStudyClass?.Teacher == null)
+                {
+                    throw new NotFoundException("Teacher information missing in study class.");
+                }
+
                 var studyCourseDto = new StudyCourseByTeacherIdResponseDto
                 {
-                    TeacherId = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.Id,
-                    TeacherFirstName = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.FirstName,
-                    TeacherLastName = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.LastName,
-                    TeacherNickname = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.Nickname,
+                    TeacherId = firstStudyClass.Teacher.Id,
+                    TeacherFirstName = firstStudyClass.Teacher.FirstName,
+                    TeacherLastName = firstStudyClass.Teacher.LastName,
+                    TeacherNickname = firstStudyClass.Teacher.Nickname,
 
                     StudyCourseId = dbStudyCourse.Id,
-                    Course = dbStudyCourse.Course.course,
-                    Level = dbStudyCourse.Level!.level,
+                    Course = dbStudyCourse.Course?.course,
+                    Level = dbStudyCourse.Level?.level,
                     Section = dbStudyCourse.Section,
                     StudentCount = studentCount,
                     TotalHour = dbStudyCourse.TotalHour,
@@ -999,16 +1018,13 @@ namespace griffined_api.Services.StudyCourseService
                     var studySubjectDto = new StudySubjectWithMembersResponseDto
                     {
                         StudySubjectId = dbStudySubject.Id,
-                        SubjectId = dbStudySubject.Subject.Id,
-                        Subject = dbStudySubject.Subject.subject
+                        SubjectId = dbStudySubject.Subject?.Id ?? 0,
+                        Subject = dbStudySubject.Subject?.subject
                     };
 
                     foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                     {
-                        var studentReport = dbStudySubject.StudySubjectMember
-                                            .FirstOrDefault(sm => sm.Student.StudentCode == dbStudySubjectMember.Student.StudentCode)?
-                                            .StudentReports?
-                                            .FirstOrDefault();
+                        var studentReport = dbStudySubjectMember.StudentReports?.FirstOrDefault();
 
                         var reportDto = new StudySubjectMemberWithReportsResponseDto
                         {
@@ -1066,8 +1082,10 @@ namespace griffined_api.Services.StudyCourseService
 
                 response.Data.Add(studyCourseDto);
             }
+
             return response;
         }
+
 
         public async Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId)
         {
