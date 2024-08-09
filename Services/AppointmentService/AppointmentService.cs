@@ -544,5 +544,22 @@ namespace griffined_api.Services.AppointmentService
             _uow.Complete();
             _uow.CommitTran();
         }
+
+        public void DeleteTeacherAppointmentNotification(int id)
+        {
+            var notifications = _context.TeacherNotifications.Where(x => x.AppointmentId != null
+                                                                      && x.AppointmentId == id)
+                                                             .ToList();
+
+            _uow.BeginTran();
+
+            if (notifications.Any())
+            {
+                _context.TeacherNotifications.RemoveRange(notifications);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+        }
     }
 }

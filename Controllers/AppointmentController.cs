@@ -47,10 +47,11 @@ namespace griffined_api.Controllers
         [HttpDelete("{id}"), Authorize(Roles = "ea, master, allstaff")]
         public IActionResult DeleteAppointment(int id)
         {
-            _appointmentService.DeleteAppointment(id);
-            _appointmentService.DeleteAppointmentMember(id);
+            _appointmentService.DeleteTeacherAppointmentNotification(id);
             _appointmentService.DeleteAppointmentSchedule(id);
             _appointmentService.DeleteAppointmentSlot(id);
+            _appointmentService.DeleteAppointmentMember(id);
+            _appointmentService.DeleteAppointment(id);
 
             return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
