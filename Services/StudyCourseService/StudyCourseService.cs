@@ -1556,7 +1556,7 @@ namespace griffined_api.Services.StudyCourseService
                 }
             }
 
-            double progressRatio = completedClass != 0 ? incompleteClass / (double)completedClass : 0;
+            double progressRatio = completedClass != 0 ? (double)completedClass / incompleteClass : 0;
             double progress = Math.Round(progressRatio * 100);
 
             data.StudyCourseId = dbStudyCourse.Id;

@@ -268,7 +268,7 @@ namespace griffined_api.Services.StudentReportService
                     }
                 }
 
-                double progressRatio = completedClass != 0 ? incompleteClass / (double)completedClass : 0;
+                double progressRatio = completedClass != 0 ? (double)completedClass / incompleteClass : 0;
                 progress = Math.Round(progressRatio * 100);
             }
 

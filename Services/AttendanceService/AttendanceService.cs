@@ -88,8 +88,10 @@ namespace griffined_api.Services.AttendanceService
             var response = new ServiceResponse<string>();
 
             var dbClass = await _context.StudyClasses
+                                    .Include(x => x.StudyCourse)
                                     .Include(c => c.Attendances)
                                         .ThenInclude(a => a.Student)
+                                    .Include(x => x.Teacher)
                                     .FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"Class with ID {studyClassId} not found.");
 
             foreach (var updateAttendanceRequest in updateAttendanceRequests)
@@ -136,13 +138,13 @@ namespace griffined_api.Services.AttendanceService
                 }
             }
 
-            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+            double progressRatio = completedClass != 0 ? (double)completedClass / incompleteClass : 0;
             double progress = Math.Round(progressRatio * 100);
 
             var teacherNotification = new TeacherNotification
             {
-                Teacher = dbClass.Teacher,
-                StudyCourse = dbStudyCourse,
+                TeacherId = dbClass.Teacher.Id,
+                StudyCourseId = dbStudyCourse.Id,
                 DateCreated = DateTime.Now,
                 Type = TeacherNotificationType.StudentReport,
                 HasRead = false
