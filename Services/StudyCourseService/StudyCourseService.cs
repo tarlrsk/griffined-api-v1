@@ -2,7 +2,8 @@ using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
+using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 
 namespace griffined_api.Services.StudyCourseService
@@ -10,39 +11,59 @@ namespace griffined_api.Services.StudyCourseService
     public class StudyCourseService : IStudyCourseService
     {
         private readonly DataContext _context;
+        private readonly IUnitOfWork _uow;
+        private readonly IAsyncRepository<Course> _courseRepository;
+        private readonly IAsyncRepository<Subject> _subjectRepository;
+        private readonly IAsyncRepository<Level> _levelRepository;
+        private readonly IAsyncRepository<StudyCourse> _studyCourseRepository;
+        private readonly IAsyncRepository<StudySubject> _studySubjectRepository;
+        private readonly IAsyncRepository<StudyClass> _studyClassRepository;
+        private readonly IAsyncRepository<Teacher> _teacherRepository;
+        private readonly IAsyncRepository<TeacherNotification> _teacherNotificationRepository;
         private readonly IFirebaseService _firebaseService;
         private readonly ITeacherService _teacherService;
 
-        public StudyCourseService(DataContext context, IFirebaseService firebaseService, ITeacherService teacherService)
+        public StudyCourseService(DataContext context,
+                                  IUnitOfWork uow,
+                                  IAsyncRepository<StudyCourse> studyCourseRepository,
+                                  IAsyncRepository<StudySubject> studySubjectRepository,
+                                  IAsyncRepository<StudyClass> studyClassRepository,
+                                  IAsyncRepository<Teacher> teacherRepository,
+                                  IAsyncRepository<Course> courseRepository,
+                                  IAsyncRepository<Subject> subjectRepository,
+                                  IAsyncRepository<Level> levelRepository,
+                                  IAsyncRepository<TeacherNotification> teacherNotificationRepository,
+                                  IFirebaseService firebaseService,
+                                  ITeacherService teacherService)
         {
             _context = context;
             _firebaseService = firebaseService;
             _teacherService = teacherService;
+            _uow = uow;
+            _courseRepository = courseRepository;
+            _subjectRepository = subjectRepository;
+            _levelRepository = levelRepository;
+            _studyCourseRepository = studyCourseRepository;
+            _studySubjectRepository = studySubjectRepository;
+            _studyClassRepository = studyClassRepository;
+            _teacherRepository = teacherRepository;
+            _teacherNotificationRepository = teacherNotificationRepository;
         }
-        public async Task<ServiceResponse<string>> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
+
+        public StudyCourse CreateStudyCourse(GroupScheduleRequestDto newRequestedSchedule)
         {
-            var response = new ServiceResponse<string>();
+            var course = _courseRepository.Query()
+                                          .FirstOrDefault(x => x.Id == newRequestedSchedule.CourseId)
+                                          ?? throw new NotFoundException("Course is not found.");
 
-            var dbCourse = await _context.Courses
-                            .Include(c => c.Subjects.Where(s => newRequestedSchedule.SubjectIds.Contains(s.Id)))
-                            .FirstOrDefaultAsync(c => c.Id == newRequestedSchedule.CourseId)
-                            ?? throw new NotFoundException($"Course is not found");
-
-            Level? dbLevel = null;
-            if (newRequestedSchedule.LevelId != null)
-            {
-                var foundLevel = await _context.Levels
-                            .FirstOrDefaultAsync(l => l.Id == newRequestedSchedule.LevelId && l.CourseId == newRequestedSchedule.CourseId)
-                            ?? throw new NotFoundException($"Level is not found in course {dbCourse.course}");
-
-                dbLevel = foundLevel;
-            }
+            var level = _levelRepository.Query()
+                                        .FirstOrDefault(x => x.Id == newRequestedSchedule.LevelId
+                                                          && x.CourseId == newRequestedSchedule.CourseId);
 
             var studyCourse = new StudyCourse
             {
-                Course = dbCourse,
-                Level = dbLevel,
-                Section = newRequestedSchedule.Section,
+                CourseId = newRequestedSchedule.CourseId,
+                LevelId = level is null ? null : level.Id,
                 TotalHour = newRequestedSchedule.TotalHours,
                 StartDate = newRequestedSchedule.StartDate.ToDateTime(),
                 EndDate = newRequestedSchedule.EndDate.ToDateTime(),
@@ -51,39 +72,113 @@ namespace griffined_api.Services.StudyCourseService
                 Status = StudyCourseStatus.NotStarted
             };
 
-            var teachers = await _context.Teachers
-                            .Include(t => t.Mandays)
-                                .ThenInclude(x => x.WorkTimes)
-                            .ToListAsync();
+            _uow.BeginTran();
+            _studyCourseRepository.Add(studyCourse);
+            _uow.Complete();
+            _uow.CommitTran();
 
-            foreach (var newStudySubject in dbCourse.Subjects)
+            return studyCourse;
+        }
+
+        public IEnumerable<StudySubject> CreateStudySubject(StudyCourse studyCourse, GroupScheduleRequestDto newRequestedSchedule)
+        {
+            var subjects = _subjectRepository.Query()
+                                             .Where(x => newRequestedSchedule.SubjectIds.Contains(x.Id)
+                                                      && x.CourseId == newRequestedSchedule.CourseId)
+                                             .ToList();
+
+            List<StudySubject> studySubjects = new();
+            double totalSubjectHour = CalculateTotalHours(newRequestedSchedule.Schedules);
+
+            foreach (var subject in subjects)
             {
-                var studySubject = new StudySubject();
+                int c = 0;
+
+                var studySubject = new StudySubject
+                {
+                    SubjectId = subject.Id,
+                    StudyCourse = studyCourse,
+                    Hour = totalSubjectHour,
+                };
+
+                foreach (var schedule in newRequestedSchedule.Schedules)
+                {
+                    c++;
+                }
+
+                studySubject.Hour = totalSubjectHour;
+                studySubjects.Add(studySubject);
+            }
+
+            _uow.BeginTran();
+
+            if (studySubjects.Any())
+            {
+                _studySubjectRepository.AddRange(studySubjects);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+
+            return studySubjects;
+        }
+
+        private static double CalculateTotalHours(List<NewScheduleRequestDto> schedules)
+        {
+            double totalHours = 0;
+
+            foreach (var schedule in schedules)
+            {
+                if (TimeSpan.TryParseExact(schedule.FromTime, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out TimeSpan fromTime) &&
+                    TimeSpan.TryParseExact(schedule.ToTime, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out TimeSpan toTime))
+                {
+                    TimeSpan duration = toTime - fromTime;
+                    totalHours += duration.TotalHours;
+                }
+                else
+                {
+                    throw new FormatException("Invalid time format. Expected format is hh:mm.");
+                }
+            }
+
+            return totalHours;
+        }
+
+        public void CreateStudyClass(int studyCourseId, IEnumerable<StudySubject> studySubjects, GroupScheduleRequestDto newRequestedSchedule)
+        {
+            var teachers = _teacherRepository.Query()
+                                             .ToList();
+
+            List<StudyClass> studyClasses = new();
+
+            foreach (var subject in studySubjects)
+            {
                 var classNumber = 1;
-                double totalSubjectHour = 0;
                 int studyClassCount = newRequestedSchedule.Schedules.Count();
                 int c = 0;
-                foreach (var newSchedule in newRequestedSchedule.Schedules)
+
+                foreach (var schedule in newRequestedSchedule.Schedules)
                 {
                     c++;
 
-                    if (newSchedule.SubjectId == newStudySubject.Id)
+                    if (schedule.SubjectId == subject.SubjectId)
                     {
-                        var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
+                        var teacher = teachers.FirstOrDefault(t => t.Id == schedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {schedule.TeacherId} is not found.");
 
                         var studyClass = new StudyClass
                         {
+                            StudySubjectId = subject.Id,
                             IsMakeup = false,
                             IsFiftyPercent = false,
                             IsHundredPercent = false,
                             ClassNumber = classNumber,
-                            Teacher = teacher,
-                            StudyCourse = studyCourse,
+                            TeacherId = teacher.Id,
+                            StudyCourseId = studyCourseId,
                             Schedule = new Schedule
                             {
-                                Date = newSchedule.Date.ToDateTime(),
-                                FromTime = newSchedule.FromTime.ToTimeSpan(),
-                                ToTime = newSchedule.ToTime.ToTimeSpan(),
+                                Date = schedule.Date.ToDateTime(),
+                                FromTime = schedule.FromTime.ToTimeSpan(),
+                                ToTime = schedule.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
                                 CalendarType = DailyCalendarType.NORMAL_CLASS,
                             }
@@ -101,42 +196,47 @@ namespace griffined_api.Services.StudyCourseService
                             studyClass.IsHundredPercent = true;
                         }
 
-                        // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
-                        // foreach (var worktype in worktypes)
-                        // {
-                        //     studyClass.TeacherShifts.Add(new TeacherShift
-                        //     {
-                        //         Teacher = teacher,
-                        //         TeacherWorkType = worktype.TeacherWorkType,
-                        //         Hours = worktype.Hours,
-                        //     });
-                        // }
-
                         classNumber = +1;
-                        studySubject.StudyClasses.Add(studyClass);
-                        totalSubjectHour += studyClass.Schedule.FromTime.Subtract(studyClass.Schedule.ToTime).TotalHours;
+                        studyClasses.Add(studyClass);
                     }
                 }
-
-                studySubject.Subject = newStudySubject;
-                studySubject.Hour = totalSubjectHour;
-                studyCourse.StudySubjects.Add(studySubject);
             }
 
-            var studySubjects = studyCourse.StudySubjects.ToList();
+            _uow.BeginTran();
 
-            var teachersInCourse = studySubjects
-                .SelectMany(ss => ss.StudyClasses)
-                .Select(sc => sc.Teacher)
-                .Distinct()
-                .ToList();
+            if (studyClasses.Any())
+            {
+                _studyClassRepository.AddRange(studyClasses);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public void CreateTeacherNotificationForStudySubject(int studyCourseId)
+        {
+            var studyCourse = _studyCourseRepository.Query()
+                                                    .Include(x => x.StudySubjects)
+                                                        .ThenInclude(x => x.StudyClasses)
+                                                            .ThenInclude(x => x.Teacher)
+                                                    .FirstOrDefault(x => x.Id == studyCourseId);
+
+            if (studyCourse is null)
+            {
+                throw new NotFoundException("No study course found.");
+            }
+
+            var teachersInCourse = studyCourse.StudySubjects.SelectMany(ss => ss.StudyClasses)
+                                                            .Select(sc => sc.Teacher)
+                                                            .Distinct()
+                                                            .ToList();
 
             foreach (var teacher in teachersInCourse)
             {
                 var teacherNotification = new TeacherNotification
                 {
-                    Teacher = teacher,
-                    StudyCourse = studyCourse,
+                    TeacherId = teacher.Id,
+                    StudyCourseId = studyCourseId,
                     Title = "New Course Assigned",
                     Message = "You have been assigned to a new course. Click here for more details.",
                     DateCreated = DateTime.Now,
@@ -146,12 +246,6 @@ namespace griffined_api.Services.StudyCourseService
 
                 _context.TeacherNotifications.Add(teacherNotification);
             }
-
-            _context.StudyCourses.Add(studyCourse);
-
-            await _context.SaveChangesAsync();
-            response.StatusCode = (int)HttpStatusCode.OK; ;
-            return response;
         }
 
         public async Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse()

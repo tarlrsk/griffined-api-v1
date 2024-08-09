@@ -1,3 +1,4 @@
+using System.Net;
 using griffined_api.Dtos.StudyCourseDtos;
 
 namespace griffined_api.Controllers
@@ -14,9 +15,14 @@ namespace griffined_api.Controllers
 
         }
         [HttpPost("group"), Authorize(Roles = "ea, master, allstaff")]
-        public async Task<ActionResult> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
+        public IActionResult AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
         {
-            return Ok(await _studyCourseService.AddGroupSchedule(newRequestedSchedule));
+            var studyCourse = _studyCourseService.CreateStudyCourse(newRequestedSchedule);
+            var studySubjects = _studyCourseService.CreateStudySubject(studyCourse, newRequestedSchedule);
+            _studyCourseService.CreateStudyClass(studyCourse.Id, studySubjects, newRequestedSchedule);
+            _studyCourseService.CreateTeacherNotificationForStudySubject(studyCourse.Id);
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
 
         [HttpGet(), Authorize(Roles = "ec, ea, oa, master, allstaff")]
