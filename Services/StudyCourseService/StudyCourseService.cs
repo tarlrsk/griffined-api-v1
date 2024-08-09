@@ -62,6 +62,7 @@ namespace griffined_api.Services.StudyCourseService
 
             var studyCourse = new StudyCourse
             {
+                Section = newRequestedSchedule.Section,
                 CourseId = newRequestedSchedule.CourseId,
                 LevelId = level is null ? null : level.Id,
                 TotalHour = newRequestedSchedule.TotalHours,
