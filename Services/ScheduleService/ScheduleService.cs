@@ -250,6 +250,12 @@ namespace griffined_api.Services.ScheduleService
                         {
                             // MAP APPOINTMENT INTO SCHEDULE DATA
                             classSchedule.AppointmentSlot.Appointment = appoint;
+
+                            if (appoint.AppointmentType == AppointmentType.HOLIDAY)
+                            {
+                                classSchedule.FromTime = new TimeSpan(8, 0, 0);  // 8 hours, 0 minutes, 0 seconds
+                                classSchedule.ToTime = new TimeSpan(20, 0, 0);  // 20 hours, 0 minutes, 0 seconds
+                            }
                         }
                     }
                 }
