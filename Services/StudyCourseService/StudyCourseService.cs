@@ -1574,6 +1574,7 @@ namespace griffined_api.Services.StudyCourseService
                 string removedStudyClassHistoryDescription = $"Removed {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
 
                 removeHistory.Description = removedStudyClassHistoryDescription;
+                dbRemoveStudyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                 dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
             }
 
@@ -1633,6 +1634,7 @@ namespace griffined_api.Services.StudyCourseService
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)
                     {
+                        studyClass.TeacherShifts ??= new List<TeacherShift>();
                         studyClass.TeacherShifts.Add(new TeacherShift
                         {
                             Teacher = dbTeacher,
@@ -1643,6 +1645,7 @@ namespace griffined_api.Services.StudyCourseService
 
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
+                        studyClass.Attendances ??= new List<StudentAttendance>();
                         studyClass.Attendances.Add(new StudentAttendance
                         {
                             Attendance = Attendance.None,
@@ -1650,6 +1653,7 @@ namespace griffined_api.Services.StudyCourseService
                         });
                     }
 
+                    dbStudySubject.StudyClasses ??= new List<StudyClass>();
                     dbStudySubject.StudyClasses.Add(studyClass);
 
                     var addHistory = new StudyCourseHistory
@@ -1665,6 +1669,7 @@ namespace griffined_api.Services.StudyCourseService
                     string addedStudyClassHistoryDescription = $"Added {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
 
                     addHistory.Description = addedStudyClassHistoryDescription;
+                    studyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
                 }
             }
