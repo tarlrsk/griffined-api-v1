@@ -14,6 +14,3 @@ dotnet_diagnostic.CS8601.severity = suggestion
 
 # CS8629: Nullable value type may be null.
 dotnet_diagnostic.CS8629.severity = suggestion
-
-# CS8602: Dereference of a possibly null reference.
-dotnet_diagnostic.CS8602.severity = suggestion
