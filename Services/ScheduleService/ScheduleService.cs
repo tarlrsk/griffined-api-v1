@@ -879,7 +879,6 @@ namespace griffined_api.Services.ScheduleService
             return response;
         }
 
-
         public ServiceResponse<IEnumerable<AvailableClassScheduleDTO>> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request)
         {
             // QUERY FOR TEACHER TO SEE IF REQUEST IS VALID.
@@ -912,6 +911,8 @@ namespace griffined_api.Services.ScheduleService
             {
                 var studentStudyClass = _studyClassRepo.Query()
                                                        .Include(x => x.Schedule)
+                                                       .Include(x => x.StudySubject)
+                                                        .ThenInclude(x => x.Subject)
                                                        .Include(x => x.StudySubject)
                                                         .ThenInclude(x => x.StudySubjectMember)
                                                        .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
