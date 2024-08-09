@@ -226,10 +226,9 @@ namespace griffined_api.Services.StudentReportService
         {
             var response = new ServiceResponse<StudentReportResponseDto>();
 
-            var data = new StudentReportResponseDto
-            {
-                StudyCourseId = studyCourseId
-            };
+            var studySubjects = _context.StudySubjects.Include(x => x.StudyClasses)
+                                                      .Where(x => x.StudyCourseId == studyCourseId)
+                                                      .ToList();
 
             var dbStudySubjectMembers = await _context.StudySubjectMember
                                         .Include(sm => sm.StudySubject)
@@ -247,6 +246,37 @@ namespace griffined_api.Services.StudentReportService
                                     .GroupBy(sm => sm.Student.Id)
                                     .Select(group => group.First())
                                     .ToList();
+
+            int completedClass = 0;
+            int incompleteClass = 0;
+            double progress = 0;
+
+            if (studySubjects.Any())
+            {
+                foreach (var studySubject in studySubjects)
+                {
+                    foreach (var studyClass in studySubject.StudyClasses)
+                    {
+                        if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                        {
+                            completedClass += 1;
+                        }
+                        else if (studyClass.Status == ClassStatus.NONE)
+                        {
+                            incompleteClass += 1;
+                        }
+                    }
+                }
+
+                double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+                progress = Math.Round(progressRatio * 100);
+            }
+
+            var data = new StudentReportResponseDto
+            {
+                StudyCourseId = studyCourseId,
+                Progress = progress
+            };
 
             foreach (var dbStudySubjectMember in dbStudySubjectMembers)
             {

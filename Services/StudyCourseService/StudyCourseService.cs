@@ -960,8 +960,38 @@ namespace griffined_api.Services.StudyCourseService
                                                     .ToList()
                                                     ?? throw new NotFoundException($"No courses containing student with code {studentCode} found.");
 
+            var studySubjects = _context.StudySubjects.Include(x => x.StudyClasses)
+                                                      .Where(x => studyCourseIds.Contains(x.StudyCourseId))
+                                                      .ToList();
+
             var studySubjectMember = _context.StudySubjectMember.Include(x => x.StudentReports)
                                                                 .FirstOrDefault(x => x.StudentId == student.Id);
+
+
+            int completedClass = 0;
+            int incompleteClass = 0;
+            double progress = 0;
+
+            if (studySubjects.Any())
+            {
+                foreach (var studySubject in studySubjects)
+                {
+                    foreach (var studyClass in studySubject.StudyClasses)
+                    {
+                        if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                        {
+                            completedClass += 1;
+                        }
+                        else if (studyClass.Status == ClassStatus.NONE)
+                        {
+                            incompleteClass += 1;
+                        }
+                    }
+                }
+
+                double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+                progress = Math.Round(progressRatio * 100);
+            }
 
             foreach (var studyCourse in studyCourses)
             {
@@ -976,10 +1006,9 @@ namespace griffined_api.Services.StudyCourseService
                     Course = studyCourse.Course.course,
                     Level = studyCourse.Level is null ? null : studyCourse.Level.level,
                     Status = studyCourse.Status,
+                    Progress = progress,
                     Reports = new List<StudySubjectReportResponseDto>()
                 };
-
-
 
                 foreach (var subject in studyCourse.StudySubjects)
                 {
