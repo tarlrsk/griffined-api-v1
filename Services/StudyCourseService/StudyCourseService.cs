@@ -386,10 +386,10 @@ namespace griffined_api.Services.StudyCourseService
 
             foreach (var dbNewRequestedCourse in dbRequest.NewCourseRequests)
             {
-                var studyCourse = new StudyCourse()
+                var studyCourse = new StudyCourse
                 {
                     Course = dbNewRequestedCourse.Course,
-                    Level = dbNewRequestedCourse.Level,
+                    Level = dbNewRequestedCourse.Level is null ? null : dbNewRequestedCourse.Level,
                     Section = dbRequest.Section,
                     TotalHour = dbNewRequestedCourse.TotalHours,
                     StartDate = dbNewRequestedCourse.StartDate,
@@ -399,6 +399,7 @@ namespace griffined_api.Services.StudyCourseService
                     Status = StudyCourseStatus.Pending,
                     NewCourseRequest = dbNewRequestedCourse,
                 };
+
                 foreach (var dbNewRequestedSubject in dbNewRequestedCourse.NewCourseSubjectRequests)
                 {
                     var studySubject = new StudySubject()
@@ -414,6 +415,8 @@ namespace griffined_api.Services.StudyCourseService
                             CourseJoinedDate = DateTime.Now,
                             Status = StudySubjectMemberStatus.Pending,
                         };
+
+                        studySubject.StudySubjectMember ??= new List<StudySubjectMember>();
                         studySubject.StudySubjectMember.Add(member);
                     }
                     var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.SubjectId && c.CourseId == dbNewRequestedCourse.CourseId);
@@ -457,24 +460,11 @@ namespace griffined_api.Services.StudyCourseService
                             studyClass.IsHundredPercent = true;
                         }
 
-                        // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(
-                        //                 dbTeacher,
-                        //                 requestedStudyClass.Date.ToDateTime(),
-                        //                 requestedStudyClass.FromTime.ToTimeSpan(),
-                        //                 requestedStudyClass.ToTime.ToTimeSpan());
-
-                        // foreach (var worktype in worktypes)
-                        // {
-                        //     studyClass.TeacherShifts.Add(new TeacherShift
-                        //     {
-                        //         Teacher = dbTeacher,
-                        //         TeacherWorkType = worktype.TeacherWorkType,
-                        //         Hours = worktype.Hours,
-                        //     });
-                        // }
-
+                        studySubject.StudyClasses ??= new List<StudyClass>();
                         studySubject.StudyClasses.Add(studyClass);
                     }
+
+                    studyCourse.StudySubjects ??= new List<StudySubject>();
                     studyCourse.StudySubjects.Add(studySubject);
                 }
                 _context.StudyCourses.Add(studyCourse);
