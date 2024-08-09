@@ -625,6 +625,9 @@ namespace griffined_api.Services.StudyCourseService
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(c => c.Course)
                                 .Include(c => c.Level)
+                                .Include(x => x.StudySubjects)
+                                    .ThenInclude(x => x.StudySubjectMember)
+                                        .ThenInclude(x => x.Student)
                                 .Include(c => c.StudySubjects)
                                     .ThenInclude(c => c.Subject)
                                 .Include(c => c.StudySubjects)
