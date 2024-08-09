@@ -49,7 +49,6 @@ namespace griffined_api.Controllers
         {
             _appointmentService.DeleteTeacherAppointmentNotification(id);
             _appointmentService.DeleteAppointmentSchedule(id);
-            _appointmentService.DeleteAppointmentSlot(id);
             _appointmentService.DeleteAppointmentMember(id);
             _appointmentService.DeleteAppointment(id);
 

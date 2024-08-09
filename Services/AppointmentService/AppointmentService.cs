@@ -1,3 +1,4 @@
+using Google.Api;
 using griffined_api.Dtos.AppointentDtos;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Extensions.DateTimeExtensions;
@@ -514,6 +515,9 @@ namespace griffined_api.Services.AppointmentService
 
         public void DeleteAppointmentSchedule(int id)
         {
+            var appointmentSlots = _context.AppointmentSlots.Where(x => x.AppointmentId == id)
+                                                            .ToList();
+
             var appointmentSlotIds = _context.AppointmentSlots.Where(x => x.AppointmentId == id)
                                                               .Select(x => x.Id)
                                                               .ToList();
@@ -524,21 +528,15 @@ namespace griffined_api.Services.AppointmentService
                                               .ToList();
 
             _uow.BeginTran();
-            _context.Schedules.RemoveRange(schedules);
-            _uow.Complete();
-            _uow.CommitTran();
-        }
-
-        public void DeleteAppointmentSlot(int id)
-        {
-            var appointmentSlots = _context.AppointmentSlots.Where(x => x.AppointmentId == id)
-                                                            .ToList();
-
-            _uow.BeginTran();
 
             if (appointmentSlots.Any())
             {
                 _context.AppointmentSlots.RemoveRange(appointmentSlots);
+            }
+
+            if (schedules.Any())
+            {
+                _context.Schedules.RemoveRange(schedules);
             }
 
             _uow.Complete();
