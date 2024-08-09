@@ -956,6 +956,8 @@ namespace griffined_api.Services.StudyCourseService
                                                     .Include(x => x.Level)
                                                     .Include(x => x.StudySubjects)
                                                         .ThenInclude(x => x.StudySubjectMember)
+                                                    .Include(x => x.StudySubjects)
+                                                        .ThenInclude(x => x.StudyClasses)
                                                     .Where(x => studyCourseIds.Contains(x.Id))
                                                     .ToList()
                                                     ?? throw new NotFoundException($"No courses containing student with code {studentCode} found.");
@@ -968,33 +970,33 @@ namespace griffined_api.Services.StudyCourseService
                                                                 .FirstOrDefault(x => x.StudentId == student.Id);
 
 
-            int completedClass = 0;
-            int incompleteClass = 0;
-            double progress = 0;
-
-            if (studySubjects.Any())
-            {
-                foreach (var studySubject in studySubjects)
-                {
-                    foreach (var studyClass in studySubject.StudyClasses)
-                    {
-                        if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
-                        {
-                            completedClass += 1;
-                        }
-                        else if (studyClass.Status == ClassStatus.NONE)
-                        {
-                            incompleteClass += 1;
-                        }
-                    }
-                }
-
-                double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
-                progress = Math.Round(progressRatio * 100);
-            }
-
             foreach (var studyCourse in studyCourses)
             {
+                int completedClass = 0;
+                int incompleteClass = 0;
+                double progress = 0;
+
+                if (studyCourse.StudySubjects.Any())
+                {
+                    foreach (var studySubject in studyCourse.StudySubjects)
+                    {
+                        foreach (var studyClass in studySubject.StudyClasses)
+                        {
+                            if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                            {
+                                completedClass += 1;
+                            }
+                            else if (studyClass.Status == ClassStatus.NONE)
+                            {
+                                incompleteClass += 1;
+                            }
+                        }
+                    }
+
+                    double progressRatio = completedClass != 0 ? incompleteClass / (double)completedClass : 0;
+                    progress = Math.Round(progressRatio * 100);
+                }
+
                 var studyCourseDTO = new StudyCourseByStudentIdResponseDto
                 {
                     StudentId = student.Id,
@@ -1554,7 +1556,7 @@ namespace griffined_api.Services.StudyCourseService
                 }
             }
 
-            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+            double progressRatio = completedClass != 0 ? incompleteClass / (double)completedClass : 0;
             double progress = Math.Round(progressRatio * 100);
 
             data.StudyCourseId = dbStudyCourse.Id;
