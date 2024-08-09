@@ -712,7 +712,7 @@ namespace griffined_api.Services.ScheduleService
 
             List<DateTime> conflictDates = new();
 
-            if (request.AppointmentType == AppointmentType.HOLIDAY)
+            if (request.AppointmentType != AppointmentType.HOLIDAY)
             {
                 // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
                 var conflictScheduleIds = _scheduleRepo.Query()
