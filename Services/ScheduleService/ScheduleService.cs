@@ -192,20 +192,23 @@ namespace griffined_api.Services.ScheduleService
             var studyClassIds = studyClasses.Select(x => x.Id);
 
             // GET THE APPOINTMENT SLOTS LINKED TO THE SCHEDULES
-            var appointmentSlotIds = _appointmentSlotRepo.Query()
+            var appointmentSlots = _appointmentSlotRepo.Query()
                                                          .Where(x => x.ScheduleId != null && scheduleIds.Contains(x.ScheduleId.Value))
-                                                         .Select(x => x.Id)
                                                          .ToList();
+            var appointmentIds = appointmentSlots.Select(x => x.AppointmentId)
+                                                    .ToList();
+
+            var appointmentSlotIds = appointmentSlots.Select(x => x.Id)
+                                                    .ToList();
 
             var appointments = _appointmentRepo.Query()
-                                               .Where(x => appointmentSlotIds.Contains(x.Id))
+                                               .Where(x => appointmentIds.Contains(x.Id))
                                                .ToList();
 
-            var appointmentIds = appointments.Select(x => x.Id).ToList();
 
             var appointmentMember = _appointmentMemberRepo.Query()
                                                           .Include(x => x.Teacher)
-                                                          .Where(x => appointmentIds.Contains(x.Id))
+                                                          .Where(x => appointmentIds.Contains(x.AppointmentId))
                                                           .ToList();
 
             var teachers = _teacherRepo.Query().ToList();
@@ -237,7 +240,7 @@ namespace griffined_api.Services.ScheduleService
                                                         .Where(x => x.AppointmentSlot != null && appointmentSlotIds.Contains(x.AppointmentSlot.Id))
                                                         .ToList();
 
-                foreach (var classSchedule in schedules)
+                foreach (var classSchedule in appointmentSchedules)
                 {
                     if (classSchedule.AppointmentSlot != null)
                     {
@@ -247,6 +250,12 @@ namespace griffined_api.Services.ScheduleService
                         {
                             // MAP APPOINTMENT INTO SCHEDULE DATA
                             classSchedule.AppointmentSlot.Appointment = appoint;
+
+                            if (appoint.AppointmentType == AppointmentType.HOLIDAY)
+                            {
+                                classSchedule.FromTime = new TimeSpan(8, 0, 0);  // 8 hours, 0 minutes, 0 seconds
+                                classSchedule.ToTime = new TimeSpan(20, 0, 0);  // 20 hours, 0 minutes, 0 seconds
+                            }
                         }
                     }
                 }
