@@ -973,12 +973,12 @@ namespace griffined_api.Services.StudyCourseService
             foreach (var studyCourse in studyCourses)
             {
                 int completedClass = 0;
-                int incompleteClass = 0;
+                int totalClass = studySubjects.SelectMany(x => x.StudyClasses).Count();
                 double progress = 0;
 
-                if (studyCourse.StudySubjects.Any())
+                if (studySubjects.Any())
                 {
-                    foreach (var studySubject in studyCourse.StudySubjects)
+                    foreach (var studySubject in studySubjects)
                     {
                         foreach (var studyClass in studySubject.StudyClasses)
                         {
@@ -986,14 +986,10 @@ namespace griffined_api.Services.StudyCourseService
                             {
                                 completedClass += 1;
                             }
-                            else if (studyClass.Status == ClassStatus.NONE)
-                            {
-                                incompleteClass += 1;
-                            }
                         }
                     }
 
-                    double progressRatio = completedClass != 0 ? incompleteClass / (double)completedClass : 0;
+                    double progressRatio = totalClass != 0 ? (double)completedClass / totalClass : 0;
                     progress = Math.Round(progressRatio * 100);
                 }
 
@@ -1539,25 +1535,25 @@ namespace griffined_api.Services.StudyCourseService
                                 ?? throw new NotFoundException("No Subject Found.");
 
             int completedClass = 0;
-            int incompleteClass = 0;
+            int totalClass = dbStudySubjects.SelectMany(x => x.StudyClasses).Count();
+            double progress = 0;
 
-            foreach (var dbStudySubject in dbStudySubjects)
+            if (dbStudySubjects.Any())
             {
-                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                foreach (var studySubject in dbStudySubjects)
                 {
-                    if (dbStudyClass.Status == ClassStatus.CHECKED || dbStudyClass.Status == ClassStatus.UNCHECKED)
+                    foreach (var studyClass in studySubject.StudyClasses)
                     {
-                        completedClass += 1;
-                    }
-                    else if (dbStudyClass.Status == ClassStatus.NONE)
-                    {
-                        incompleteClass += 1;
+                        if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                        {
+                            completedClass += 1;
+                        }
                     }
                 }
-            }
 
-            double progressRatio = completedClass != 0 ? (double)completedClass / incompleteClass : 0;
-            double progress = Math.Round(progressRatio * 100);
+                double progressRatio = totalClass != 0 ? (double)completedClass / totalClass : 0;
+                progress = Math.Round(progressRatio * 100);
+            }
 
             data.StudyCourseId = dbStudyCourse.Id;
             data.CourseId = dbStudyCourse.Course.Id;
