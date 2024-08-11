@@ -248,7 +248,7 @@ namespace griffined_api.Services.StudentReportService
                                     .ToList();
 
             int completedClass = 0;
-            int incompleteClass = 0;
+            int totalClass = studySubjects.SelectMany(x => x.StudyClasses).Count();
             double progress = 0;
 
             if (studySubjects.Any())
@@ -261,14 +261,10 @@ namespace griffined_api.Services.StudentReportService
                         {
                             completedClass += 1;
                         }
-                        else if (studyClass.Status == ClassStatus.NONE)
-                        {
-                            incompleteClass += 1;
-                        }
                     }
                 }
 
-                double progressRatio = completedClass != 0 ? (double)completedClass / incompleteClass : 0;
+                double progressRatio = totalClass != 0 ? (double)completedClass / totalClass : 0;
                 progress = Math.Round(progressRatio * 100);
             }
 

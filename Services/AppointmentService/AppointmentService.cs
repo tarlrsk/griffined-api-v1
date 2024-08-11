@@ -382,7 +382,6 @@ namespace griffined_api.Services.AppointmentService
 
             var dbTeachers = await _context.Teachers.ToListAsync();
 
-
             foreach (var deleteScheduleId in updateAppointmentRequestDto.ScheduleToDelete)
             {
                 var deleteSchedule = dbAppointment.AppointmentSlots.FirstOrDefault(a => a.ScheduleId == deleteScheduleId
@@ -390,6 +389,8 @@ namespace griffined_api.Services.AppointmentService
                                     ?? throw new NotFoundException($"Schedule ID {deleteScheduleId} is not found.");
                 deleteSchedule.AppointmentSlotStatus = AppointmentSlotStatus.DELETED;
                 deleteSchedule.Schedule.CalendarType = DailyCalendarType.DELETED;
+
+                dbAppointment.AppointmentHistories ??= new List<AppointmentHistory>();
                 dbAppointment.AppointmentHistories.Add(new AppointmentHistory
                 {
                     Method = AppointmentHistoryMethod.RemoveSchedule,
@@ -422,7 +423,10 @@ namespace griffined_api.Services.AppointmentService
                     },
                 };
 
+                dbAppointment.AppointmentSlots ??= new List<AppointmentSlot>();
                 dbAppointment.AppointmentSlots.Add(appointmentSlot);
+
+                dbAppointment.AppointmentHistories ??= new List<AppointmentHistory>();
                 dbAppointment.AppointmentHistories.Add(new AppointmentHistory
                 {
                     Method = AppointmentHistoryMethod.AddSchedule,
@@ -438,6 +442,7 @@ namespace griffined_api.Services.AppointmentService
 
             foreach (var deleteMember in deleteMembers)
             {
+                dbAppointment.AppointmentHistories ??= new List<AppointmentHistory>();
                 dbAppointment.AppointmentHistories.Add(new AppointmentHistory
                 {
                     Teacher = deleteMember.Teacher,
@@ -459,10 +464,12 @@ namespace griffined_api.Services.AppointmentService
                 }
                 else
                 {
+                    dbAppointment.AppointmentMembers ??= new List<AppointmentMember>();
                     dbAppointment.AppointmentMembers.Add(new AppointmentMember
                     {
                         Teacher = dbTeacher,
                     });
+                    dbAppointment.AppointmentHistories ??= new List<AppointmentHistory>();
                     dbAppointment.AppointmentHistories.Add(new AppointmentHistory
                     {
                         Teacher = dbTeacher,
