@@ -9,12 +9,21 @@ namespace griffined_api.Services.UtilityService
         private readonly string? PROJECT_ID = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
         private readonly FirebaseApp _firebaseApp;
         private readonly DataContext _context;
+        private readonly IUnitOfWork _uow;
+        private readonly IAsyncRepository<StudySubject> _studySubjectRepo;
+        private readonly IAsyncRepository<StudyClass> _studyClassRepo;
 
         public UtilityService(DataContext context,
-                              FirebaseApp firebaseApp)
+                              FirebaseApp firebaseApp,
+                              IUnitOfWork uow,
+                              IAsyncRepository<StudySubject> studySubjectRepo,
+                              IAsyncRepository<StudyClass> studyClassRepo)
         {
             _context = context;
             _firebaseApp = firebaseApp;
+            _uow = uow;
+            _studySubjectRepo = studySubjectRepo;
+            _studyClassRepo = studyClassRepo;
         }
 
         public async Task AddStudentFirebaseId()
@@ -230,6 +239,39 @@ namespace griffined_api.Services.UtilityService
                     { "uid", staff.FirebaseId!}
                 };
             await docRef.SetAsync(staffDoc);
+        }
+
+        public void UpdateStudyClassNumber()
+        {
+            var studySubjects = _studySubjectRepo.Query()
+                                                 .Include(x => x.StudyClasses)
+                                                 .ToList();
+
+            if (!studySubjects.Any())
+            {
+                return;
+            }
+
+            _uow.BeginTran();
+
+            int classNo = 0;
+
+            foreach (var studySubject in studySubjects)
+            {
+                classNo = 0;
+
+                var studyClasses = studySubject.StudyClasses;
+
+                foreach (var studyClass in studyClasses)
+                {
+                    classNo++;
+                    studyClass.ClassNumber = classNo;
+                    _studyClassRepo.Update(studyClass);
+                }
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
         }
     }
 }

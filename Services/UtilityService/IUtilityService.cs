@@ -29,5 +29,11 @@ namespace griffined_api.Services.UtilityService
         /// </summary>
         /// <returns></returns>
         Task DeleteFirebaseAuthentication();
+
+        /// <summary>
+        /// Update study class number.
+        /// </summary>
+        /// <returns></returns>
+        void UpdateStudyClassNumber();
     }
 }

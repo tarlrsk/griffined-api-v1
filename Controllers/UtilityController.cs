@@ -1,3 +1,4 @@
+using System.Net;
 using griffined_api.Services.UtilityService;
 
 namespace griffined_api.Controllers
@@ -51,6 +52,14 @@ namespace griffined_api.Controllers
             await _utilityService.DeleteFirebaseAuthentication();
 
             return Ok();
+        }
+
+        [HttpPut("update/study-classes/number")]
+        public IActionResult UpdateStudyClassNumberByStudySubjectId()
+        {
+            _utilityService.UpdateStudyClassNumber();
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
     }
 }
