@@ -1,4 +1,6 @@
 using griffined_api.Extensions.DateTimeExtensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace griffined_api.Dtos.StudentDtos
 {
@@ -37,6 +39,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public StudentStatus status { get; set; } = StudentStatus.Inactive;
 
         public string? Remark { get; set; }
