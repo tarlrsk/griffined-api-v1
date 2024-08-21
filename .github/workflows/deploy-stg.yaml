@@ -1,4 +1,4 @@
-name: Build and deploy to an Azure Web App
+name: Build and deploy to staging
 
 env:
   AZURE_WEBAPP_NAME: ${{ secrets.STG_WEBAPP_NAME }}
@@ -31,11 +31,13 @@ jobs:
           APP_EMAIL="${{ secrets.STG_APP_EMAIL }}"
           APP_PASSWORD="${{ secrets.STG_APP_PASSWORD }}"
           EOF
-      - name: Upload env files as artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: env-files
-          path: .env
+          path: |
+            .env
+            .firebase-config.json
 
   build:
     runs-on: ubuntu-latest
@@ -44,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download env files from setup-env job
+      - name: Download artifacts from setup-env job
         uses: actions/download-artifact@v3
         with:
           name: env-files
@@ -85,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download env files from setup-env job
+      - name: Download artifacts from setup-env job
         uses: actions/download-artifact@v3
         with:
           name: env-files
