@@ -31,6 +31,11 @@ jobs:
           APP_EMAIL="${{ secrets.STG_APP_EMAIL }}"
           APP_PASSWORD="${{ secrets.STG_APP_PASSWORD }}"
           EOF
+      - name: Upload env files as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: env-files
+          path: .env
 
   build:
     runs-on: ubuntu-latest
@@ -38,6 +43,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download env files from setup-env job
+        uses: actions/download-artifact@v3
+        with:
+          name: env-files
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -73,6 +83,13 @@ jobs:
     needs: [setup-environment, build]
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Download env files from setup-env job
+        uses: actions/download-artifact@v3
+        with:
+          name: env-files
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
