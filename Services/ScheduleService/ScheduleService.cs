@@ -776,11 +776,10 @@ namespace griffined_api.Services.ScheduleService
                                                 .ToList();
 
                 // GROUP STUDY CLASSES BY SCHEDULE ID AND TEACHER ID.
-                var groupedStudyClasses = conflictStudyClasses.GroupBy(sc => new { sc.StudyCourseId, sc.StudySubjectId })
+                var groupedStudyClasses = conflictStudyClasses.GroupBy(sc => new { sc.StudyCourseId })
                                                               .Select(group => new
                                                               {
                                                                   group.Key.StudyCourseId,
-                                                                  group.Key.StudySubjectId,
                                                                   Teachers = group.Select(sc => new TeacherNameResponseDto
                                                                   {
                                                                       TeacherId = sc.TeacherId.Value,
@@ -793,7 +792,11 @@ namespace griffined_api.Services.ScheduleService
                                                                   group.First().Schedule.FromTime,
                                                                   group.First().Schedule.ToTime,
                                                                   CourseName = group.First().StudyCourse.Course?.course,
-                                                                  SubjectName = group.First().StudySubject.Subject?.subject,
+                                                                  StudySubjects = group.Select(x => new ConflictedStudySubjectDTO
+                                                                  {
+                                                                      StudySubjectId = group.First().StudySubjectId.Value,
+                                                                      StudySubjectName = group.First().StudySubject.Subject.subject
+                                                                  })
                                                               })
                                                             .ToList();
 
@@ -807,9 +810,8 @@ namespace griffined_api.Services.ScheduleService
                         FromTime = group.FromTime,
                         ToTime = group.ToTime,
                         StudyCourseId = group.StudyCourseId,
-                        StudySubjectId = group.StudySubjectId,
+                        StudySubjects = group.StudySubjects,
                         CourseName = group.CourseName,
-                        SubjectName = group.SubjectName,
                         ConflictedScheduleIds = group.ConflictedScheduleIds,
                     };
 

@@ -134,17 +134,20 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("studyCourseId")]
         public int? StudyCourseId { get; set; }
 
-        [JsonProperty("studySubjectId")]
-        public int? StudySubjectId { get; set; }
-
-        [JsonProperty("studyClassId")]
-        public int? StudyClassId { get; set; }
+        [JsonProperty("studySubjects")]
+        public IEnumerable<ConflictedStudySubjectDTO> StudySubjects { get; set; }
 
         [JsonProperty("courseName")]
         public string? CourseName { get; set; }
+    }
 
-        [JsonProperty("subjectName")]
-        public string? SubjectName { get; set; }
+    public class ConflictedStudySubjectDTO
+    {
+        [JsonProperty("studySubjectId")]
+        public int StudySubjectId { get; set; }
+
+        [JsonProperty("studySubjectName")]
+        public string StudySubjectName { get; set; }
     }
 
     #region Class
