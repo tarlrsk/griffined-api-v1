@@ -14,14 +14,14 @@ namespace griffined_api.Services.ScheduleService
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        ServiceResponse<IEnumerable<AvailableAppointmentScheduleDTO>> GenerateAvailableAppointmentSchedule(CheckAvailableAppointmentScheduleDTO request);
+        ServiceResponse<AvailableAppointmentDTO> GenerateAvailableAppointmentSchedule(CheckAvailableAppointmentScheduleDTO request);
 
         /// <summary>
         /// Generate available class schedule by checking the given parameters.
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        ServiceResponse<IEnumerable<AvailableClassScheduleDTO>> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request);
+        ServiceResponse<AvailableClassScheduleDTO> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request);
 
         /// <summary>
         /// Check if the teacher is availabled to be added to existing appointment.
