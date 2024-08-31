@@ -14,7 +14,7 @@ namespace griffined_api.Services.ScheduleService
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        ServiceResponse<IEnumerable<AvailableAppointmentScheduleDTO>> GenerateAvailableAppointmentSchedule(CheckAvailableAppointmentScheduleDTO request);
+        ServiceResponse<AvailableAppointmentDTO> GenerateAvailableAppointmentSchedule(CheckAvailableAppointmentScheduleDTO request);
 
         /// <summary>
         /// Generate available class schedule by checking the given parameters.

@@ -17,7 +17,7 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     #region Appointment
 
-    public class AppointmentScheduleDTO : AvailableAppointmentScheduleDTO
+    public class AppointmentScheduleDTO : GeneratedAppointmentScheduleDTO
     {
         [JsonProperty("scheduleId")]
         public int ScheduleId { get; set; }
@@ -45,10 +45,10 @@ namespace griffined_api.Dtos.ScheduleDtos
         public AppointmentType AppointmentType { get; set; }
 
         [JsonProperty("currentSchedules")]
-        public IEnumerable<AvailableAppointmentScheduleDTO>? CurrentSchedules { get; set; }
+        public IEnumerable<GeneratedAppointmentScheduleDTO>? CurrentSchedules { get; set; }
     }
 
-    public class AvailableAppointmentScheduleDTO
+    public class GeneratedAppointmentScheduleDTO
     {
         [JsonProperty("date")]
         public string Date { get; set; }
@@ -79,6 +79,15 @@ namespace griffined_api.Dtos.ScheduleDtos
         public AppointmentSlotStatus ScheduleStatus { get; set; }
     }
 
+    public class AvailableAppointmentDTO
+    {
+        [JsonProperty("generatedSchedules")]
+        public IEnumerable<GeneratedAppointmentScheduleDTO> GeneratedSchedules { get; set; }
+
+        [JsonProperty("conflictedSchedules")]
+        public IEnumerable<ConflictScheduleDTO> ConflictedSchedules { get; set; }
+    }
+
     public class CheckAvailableTeacherAppointmentDTO
     {
         [JsonProperty("appointmentId")]
@@ -88,7 +97,7 @@ namespace griffined_api.Dtos.ScheduleDtos
         public IEnumerable<int> TeacherIds { get; set; }
 
         [JsonProperty("currentSchedules")]
-        public IEnumerable<AvailableAppointmentScheduleDTO> CurrentSchedules { get; set; }
+        public IEnumerable<GeneratedAppointmentScheduleDTO> CurrentSchedules { get; set; }
     }
 
     public class AvailableDTO
@@ -98,6 +107,46 @@ namespace griffined_api.Dtos.ScheduleDtos
     }
 
     #endregion
+
+    public class ConflictScheduleDTO
+    {
+        [JsonProperty("conflictedStudents")]
+        public IEnumerable<StudentNameResponseDto> ConflictedStudents { get; set; }
+
+        [JsonProperty("conflictedTeachers")]
+        public IEnumerable<TeacherNameResponseDto> ConflictedTeachers { get; set; }
+
+        [JsonProperty("conflictedScheduleIds")]
+        public IEnumerable<int> ConflictedScheduleIds { get; set; }
+
+        [JsonProperty("dates")]
+        public IEnumerable<string> Dates { get; set; }
+
+        [JsonProperty("fromTime")]
+        public TimeSpan FromTime { get; set; }
+
+        [JsonProperty("toTime")]
+        public TimeSpan ToTime { get; set; }
+
+        [JsonProperty("appointmentId")]
+        public int? AppointmentId { get; set; }
+
+        [JsonProperty("studyCourseId")]
+        public int? StudyCourseId { get; set; }
+
+        [JsonProperty("studySubjectId")]
+        public int? StudySubjectId { get; set; }
+
+        [JsonProperty("studyClassId")]
+        public int? StudyClassId { get; set; }
+
+        [JsonProperty("courseName")]
+        public string? CourseName { get; set; }
+
+        [JsonProperty("subjectName")]
+        public string? SubjectName { get; set; }
+    }
+
     #region Class
 
     public class CheckAvailableClassScheduleDTO
