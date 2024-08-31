@@ -182,10 +182,19 @@ namespace griffined_api.Dtos.ScheduleDtos
         public TimeSpan ToTime { get; set; }
 
         [JsonProperty("currentSchedules")]
-        public IEnumerable<AvailableClassScheduleDTO>? CurrentSchedules { get; set; }
+        public IEnumerable<GeneratedAvailableClassScheduleDTO>? CurrentSchedules { get; set; }
     }
 
     public class AvailableClassScheduleDTO
+    {
+        [JsonProperty("generatedSchedules")]
+        public IEnumerable<GeneratedAvailableClassScheduleDTO> GeneratedSchedules { get; set; }
+
+        [JsonProperty("conflictedSchedules")]
+        public IEnumerable<ConflictScheduleDTO> ConflictedSchedules { get; set; }
+    }
+
+    public class GeneratedAvailableClassScheduleDTO
     {
         [JsonProperty("teacher")]
         public TeacherNameResponseDto Teacher { get; set; }

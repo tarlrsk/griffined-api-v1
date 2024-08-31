@@ -910,7 +910,7 @@ namespace griffined_api.Services.ScheduleService
             return response;
         }
 
-        public ServiceResponse<IEnumerable<AvailableClassScheduleDTO>> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request)
+        public ServiceResponse<AvailableClassScheduleDTO> GenerateAvailableClassSchedule(CheckAvailableClassScheduleDTO request)
         {
             // QUERY FOR TEACHER TO SEE IF REQUEST IS VALID.
             var teacher = _teacherRepo.Query()
@@ -931,7 +931,8 @@ namespace griffined_api.Services.ScheduleService
 
             // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
             var conflictScheduleIds = _scheduleRepo.Query()
-                                                   .Where(x => dates.Contains(x.Date))
+                                                   .Where(x => dates.Contains(x.Date)
+                                                            && x.FromTime < request.ToTime && x.ToTime > request.FromTime)
                                                    .Select(x => x.Id)
                                                    .ToList();
 
@@ -946,6 +947,7 @@ namespace griffined_api.Services.ScheduleService
                                                         .ThenInclude(x => x.Subject)
                                                        .Include(x => x.StudySubject)
                                                         .ThenInclude(x => x.StudySubjectMember)
+                                                            .ThenInclude(x => x.Student)
                                                        .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
                                                                 && x.StudySubject.StudySubjectMember.Any(x => request.StudentIds.Contains(x.StudentId)))
                                                        .ToList();
@@ -958,6 +960,7 @@ namespace griffined_api.Services.ScheduleService
                                                              .Include(x => x.Schedule)
                                                              .Include(x => x.StudySubject)
                                                                 .ThenInclude(x => x.StudySubjectMember)
+                                                                    .ThenInclude(x => x.Student)
                                                              .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
                                                                       && x.TeacherId == request.TeacherId)
                                                              .ToList();
@@ -1025,7 +1028,7 @@ namespace griffined_api.Services.ScheduleService
                                                     .ToList();
 
             // CHECK FOR EXISTING SCHEDULES TO AVOID DUPLICATES
-            var currentSchedules = request.CurrentSchedules ?? new List<AvailableClassScheduleDTO>();
+            var currentSchedules = request.CurrentSchedules ?? new List<GeneratedAvailableClassScheduleDTO>();
 
             // FILTER OUT REQUESTED DATES THAT ALREADY EXIST IN THE CURRENT SCHEDULES.
             var nonConflictingDates = dates.Except(conflictDates).ToList();
@@ -1043,14 +1046,14 @@ namespace griffined_api.Services.ScheduleService
                 availableDates = availableDates.Where(date => daysOfWeek.Contains(date.DayOfWeek)).ToList();
             }
 
-            var availableSchedules = new List<AvailableClassScheduleDTO>();
+            var availableSchedules = new List<GeneratedAvailableClassScheduleDTO>();
             decimal accumulatedHours = 0;
 
             foreach (var date in availableDates)
             {
                 var hour = (decimal)(request.ToTime - request.FromTime).TotalHours;
 
-                var availableSchedule = new AvailableClassScheduleDTO
+                var availableSchedule = new GeneratedAvailableClassScheduleDTO
                 {
                     Teacher = new TeacherNameResponseDto
                     {
@@ -1104,118 +1107,76 @@ namespace griffined_api.Services.ScheduleService
                                             .Select(x => x.Date)
                                             .ToList();
 
-            // PREPARE A DICTIONARY TO HOLD CONFLICT DATES AND ASSOCIATED TEACHERS AND STUDENTS.
-            var conflictDetails = new Dictionary<DateTime, List<string>>();
+            var conflictedSchedules = new List<ConflictScheduleDTO>();
 
-            // ADD CONFLICTING STUDY CLASSES' STUDENT DETAILS.
-            foreach (var studyClass in conflictStudentStudyClasses)
-            {
-                var date = studyClass.Schedule.Date;
-
-                var conflictStudentIds = studyClass.StudySubject.StudySubjectMember.Select(x => x.StudentId);
-
-                // FETCH STUDENT NAMES INVOLVED IN THE CONFLICT.
-                var conflictStudents = _studentRepo.Query()
-                                                   .Where(x => conflictStudentIds.Contains(x.Id))
-                                                   .ToList();
-
-                var studentNames = conflictStudents.Select(x => x.FullName);
-
-                var classDetails = $"Class: {studyClass.StudySubject.Subject.subject}";
-
-                if (!conflictDetails.ContainsKey(date))
+            // GROUP STUDY CLASSES BY SCHEDULE ID AND TEACHER ID.
+            var groupedStudyClasses = conflictStudyClasses
+                .GroupBy(sc => new { sc.StudyCourseId })
+                .Select(group => new
                 {
-                    conflictDetails[date] = new List<string>();
-                }
+                    group.Key.StudyCourseId,
+                    Teachers = group.Select(sc => new TeacherNameResponseDto
+                    {
+                        TeacherId = sc.TeacherId.Value,
+                        FirstName = sc.Teacher.FirstName,
+                        LastName = sc.Teacher.LastName,
+                        Nickname = sc.Teacher.Nickname,
+                    }).Distinct().ToList(),
+                    Students = group.SelectMany(sc => sc.StudySubject.StudySubjectMember)
+                                    .Select(ssm => ssm.Student)
+                                    .Distinct() // Ensure unique students
+                                    .Select(student => new StudentNameResponseDto
+                                    {
+                                        StudentId = student.Id,
+                                        FirstName = student.FirstName,
+                                        LastName = student.LastName,
+                                        FullName = student.FullName,
+                                        Nickname = student.Nickname
+                                    })
+                                    .ToList(),
+                    ConflictedScheduleIds = group.Select(sc => sc.ScheduleId.Value).ToList(),
+                    Dates = group.Select(sc => sc.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
+                    group.First().Schedule.FromTime,
+                    group.First().Schedule.ToTime,
+                    CourseName = group.First().StudyCourse.Course?.course,
+                    StudySubjects = group.Select(x => new ConflictedStudySubjectDTO
+                    {
+                        StudySubjectId = group.First().StudySubjectId.Value,
+                        StudySubjectName = group.First().StudySubject.Subject.subject
+                    })
+                })
+                .ToList();
 
-                foreach (var studentName in studentNames)
-                {
-                    conflictDetails[date].Add($"Student: {studentName}, {classDetails}");
-                }
-            }
 
             // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
-            foreach (var studyClass in conflictStudyClasses)
+            foreach (var group in groupedStudyClasses)
             {
-                var date = studyClass.Schedule.Date;
-
-                var teacherNickname = _teacherRepo.Query()
-                                                  .Where(x => x.Id == studyClass.TeacherId)
-                                                  .Select(x => x.Nickname)
-                                                  .FirstOrDefault();
-
-                if (!conflictDetails.ContainsKey(date))
+                var conflictedClass = new ConflictScheduleDTO
                 {
-                    conflictDetails[date] = new List<string>();
-                }
+                    ConflictedTeachers = group.Teachers,
+                    ConflictedStudents = group.Students, // Include students
+                    Dates = group.Dates,
+                    FromTime = group.FromTime,
+                    ToTime = group.ToTime,
+                    StudyCourseId = group.StudyCourseId,
+                    StudySubjects = group.StudySubjects,
+                    CourseName = group.CourseName,
+                    ConflictedScheduleIds = group.ConflictedScheduleIds,
+                };
 
-                if (!string.IsNullOrEmpty(teacherNickname))
-                {
-                    conflictDetails[date].Add($"T. {teacherNickname}");
-                }
+                conflictedSchedules.Add(conflictedClass);
             }
 
-            // ADD CONFLICTING APPOINTMENTS' TEACHER DETAILS.
-            foreach (var appointment in conflictAppointments)
-            {
-                var date = appointment.Schedule.Date;
-
-                var teacherIds = _appointmentMemberRepo.Query()
-                                                       .Where(x => x.AppointmentId == appointment.AppointmentId)
-                                                       .Select(x => x.TeacherId)
-                                                       .ToList();
-
-                foreach (var teacherId in teacherIds)
-                {
-                    var teacherNickname = _teacherRepo.Query()
-                                                      .Where(x => x.Id == teacherId)
-                                                      .Select(x => x.Nickname)
-                                                      .FirstOrDefault();
-
-                    if (!conflictDetails.ContainsKey(date))
-                    {
-                        conflictDetails[date] = new List<string>();
-                    }
-
-                    if (!string.IsNullOrEmpty(teacherNickname))
-                    {
-                        conflictDetails[date].Add($"T. {teacherNickname}");
-                    }
-                }
-            }
-
-            // CONSTRUCT THE FINAL FORMATTED DATES FOR THE ERROR MESSAGE.
-            var formattedDates = conflictDates.Select(date =>
-            {
-                if (holidayDates.Contains(date))
-                {
-                    return $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} (holiday)";
-                }
-
-                var conflictInfo = conflictDetails.ContainsKey(date) ? string.Join(", ", conflictDetails[date]) : "";
-
-                return !string.IsNullOrEmpty(conflictInfo) ? $"{date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)} ({conflictInfo})"
-                                                             : date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
-            })
-            .ToList();
 
 
-            // JOIN ALL THE DATES USING COMMAS.
-            string formattedDateString = string.Join(", ", formattedDates);
-
-            // CONSTRUCT THE ERROR MESSAGE.
-            string errorMessage = $"There is a scheduling conflict on {formattedDateString}. Please choose a different date or time.";
-
-            // THROW ERROR IF THERE ARE NO AVAILABLE SCHEDULEs.
-            if (!availableSchedules.Any() || availableSchedules.Count == 0)
-            {
-                throw new ConflictException(errorMessage);
-            }
-
-            var response = new ServiceResponse<IEnumerable<AvailableClassScheduleDTO>>
+            var response = new ServiceResponse<AvailableClassScheduleDTO>
             {
                 StatusCode = (int)HttpStatusCode.OK,
-                Data = availableSchedules,
+                Data = new AvailableClassScheduleDTO
+                {
+                    GeneratedSchedules = availableSchedules,
+                    ConflictedSchedules = conflictedSchedules
+                },
                 Success = true
             };
 
