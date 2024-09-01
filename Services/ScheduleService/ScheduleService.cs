@@ -809,6 +809,7 @@ namespace griffined_api.Services.ScheduleService
                         Dates = group.Dates,
                         FromTime = group.FromTime,
                         ToTime = group.ToTime,
+                        Hour = group.ToTime.Hours - group.FromTime.Hours,
                         StudyCourseId = group.StudyCourseId,
                         StudySubjects = group.StudySubjects,
                         CourseName = group.CourseName,
@@ -848,6 +849,7 @@ namespace griffined_api.Services.ScheduleService
                         Dates = group.Dates,
                         FromTime = group.FromTime,
                         ToTime = group.ToTime,
+                        Hour = group.ToTime.Hours - group.FromTime.Hours,
                         AppointmentId = group.AppointmentId,
                         ConflictedScheduleIds = group.ConflictedScheduleIds
                     };
@@ -869,6 +871,7 @@ namespace griffined_api.Services.ScheduleService
 
                 var availableSchedule = new GeneratedAppointmentScheduleDTO
                 {
+                    Id = Guid.NewGuid(),
                     Date = date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture),
                     Day = date.DayOfWeek.ToString().ToUpper(),
                     FromTime = request.FromTime,
@@ -943,12 +946,15 @@ namespace griffined_api.Services.ScheduleService
             {
                 var studentStudyClass = _studyClassRepo.Query()
                                                        .Include(x => x.Schedule)
+                                                       .Include(x => x.StudyCourse)
+                                                        .ThenInclude(x => x.Course)
                                                        .Include(x => x.StudySubject)
                                                         .ThenInclude(x => x.Subject)
                                                        .Include(x => x.StudySubject)
                                                         .ThenInclude(x => x.StudySubjectMember)
                                                             .ThenInclude(x => x.Student)
-                                                       .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                       .Where(x => x.ScheduleId.HasValue
+                                                                && conflictScheduleIds.Contains(x.ScheduleId.Value)
                                                                 && x.StudySubject.StudySubjectMember.Any(x => request.StudentIds.Contains(x.StudentId)))
                                                        .ToList();
 
@@ -958,10 +964,16 @@ namespace griffined_api.Services.ScheduleService
             // FETCH ALL CONFLICTING STUDY CLASSES BASED ON THE SCHEDULE IDS AND TEACHER IDS.
             var conflictTeacherStudyClasses = _studyClassRepo.Query()
                                                              .Include(x => x.Schedule)
+                                                             .Include(x => x.Teacher)
+                                                             .Include(x => x.StudyCourse)
+                                                                .ThenInclude(x => x.Course)
                                                              .Include(x => x.StudySubject)
-                                                                .ThenInclude(x => x.StudySubjectMember)
-                                                                    .ThenInclude(x => x.Student)
-                                                             .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                              .ThenInclude(x => x.Subject)
+                                                             .Include(x => x.StudySubject)
+                                                              .ThenInclude(x => x.StudySubjectMember)
+                                                                  .ThenInclude(x => x.Student)
+                                                             .Where(x => x.ScheduleId.HasValue
+                                                                      && conflictScheduleIds.Contains(x.ScheduleId.Value)
                                                                       && x.TeacherId == request.TeacherId)
                                                              .ToList();
 
@@ -975,6 +987,11 @@ namespace griffined_api.Services.ScheduleService
                 conflictStudyClasses.AddRange(conflictStudentStudyClasses);
             }
 
+            if (conflictTeacherStudyClasses.Any())
+            {
+                conflictStudyClasses.AddRange(conflictTeacherStudyClasses);
+            }
+
             // FETCH ALL CONFLICTING APPOINTMENT IDS BASED ON THE TEACHER IDS.
             var conflictAppointmentIds = _appointmentMemberRepo.Query()
                                                                .Where(x => x.TeacherId == request.TeacherId)
@@ -984,7 +1001,8 @@ namespace griffined_api.Services.ScheduleService
             // FETCH ALL CONFLICTING APPOINTMENTS BASED ON THE APPOINTMENT IDS AND SCHEDULE IDS.
             var conflictAppointments = _appointmentSlotRepo.Query()
                                                            .Include(x => x.Schedule)
-                                                           .Where(x => conflictAppointmentIds.Contains(x.AppointmentId)
+                                                           .Where(x => x.ScheduleId.HasValue
+                                                                       && conflictAppointmentIds.Contains(x.AppointmentId)
                                                                        && conflictScheduleIds.Contains(x.ScheduleId.Value))
                                                            .ToList();
 
@@ -1055,6 +1073,7 @@ namespace griffined_api.Services.ScheduleService
 
                 var availableSchedule = new GeneratedAvailableClassScheduleDTO
                 {
+                    Id = Guid.NewGuid(),
                     Teacher = new TeacherNameResponseDto
                     {
                         TeacherId = teacher.Id,
@@ -1115,14 +1134,17 @@ namespace griffined_api.Services.ScheduleService
                 .Select(group => new
                 {
                     group.Key.StudyCourseId,
-                    Teachers = group.Select(sc => new TeacherNameResponseDto
-                    {
-                        TeacherId = sc.TeacherId.Value,
-                        FirstName = sc.Teacher.FirstName,
-                        LastName = sc.Teacher.LastName,
-                        Nickname = sc.Teacher.Nickname,
-                    }).Distinct().ToList(),
-                    Students = group.SelectMany(sc => sc.StudySubject.StudySubjectMember)
+                    Teachers = group.Where(sc => sc.TeacherId.HasValue || sc.StudySubject.StudySubjectMember.Any(ssm => ssm.Student != null))
+                                    .Select(sc => new TeacherNameResponseDto
+                                    {
+                                        TeacherId = sc.TeacherId.Value,
+                                        FirstName = sc.Teacher.FirstName,
+                                        LastName = sc.Teacher.LastName,
+                                        Nickname = sc.Teacher.Nickname,
+                                    }).Distinct().ToList(),
+                    Students = group.Where(sc => sc.StudySubject.StudySubjectMember.Any(ssm => ssm.Student != null) || sc.TeacherId.HasValue)
+                                    .SelectMany(sc => sc.StudySubject.StudySubjectMember)
+                                    .Where(ssm => ssm.Student != null)
                                     .Select(ssm => ssm.Student)
                                     .Distinct() // Ensure unique students
                                     .Select(student => new StudentNameResponseDto
@@ -1133,7 +1155,7 @@ namespace griffined_api.Services.ScheduleService
                                         FullName = student.FullName,
                                         Nickname = student.Nickname
                                     })
-                                    .ToList(),
+                                   .ToList(),
                     ConflictedScheduleIds = group.Select(sc => sc.ScheduleId.Value).ToList(),
                     Dates = group.Select(sc => sc.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                     group.First().Schedule.FromTime,
@@ -1147,7 +1169,6 @@ namespace griffined_api.Services.ScheduleService
                 })
                 .ToList();
 
-
             // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
             foreach (var group in groupedStudyClasses)
             {
@@ -1158,6 +1179,7 @@ namespace griffined_api.Services.ScheduleService
                     Dates = group.Dates,
                     FromTime = group.FromTime,
                     ToTime = group.ToTime,
+                    Hour = group.ToTime.Hours - group.FromTime.Hours,
                     StudyCourseId = group.StudyCourseId,
                     StudySubjects = group.StudySubjects,
                     CourseName = group.CourseName,
@@ -1167,7 +1189,43 @@ namespace griffined_api.Services.ScheduleService
                 conflictedSchedules.Add(conflictedClass);
             }
 
+            // GROUP CONFLICTING APPOINTMENTS BY SCHEDULE AND TEACHER
+            var groupedAppointments = conflictAppointments
+                .GroupBy(x => new { x.AppointmentId })
+                .Select(x => new
+                {
+                    x.Key.AppointmentId,
+                    Dates = x.Select(ap => ap.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
+                    Teachers = x.SelectMany(ap => _appointmentMemberRepo.Query()
+                                      .Where(am => am.AppointmentId == ap.AppointmentId)
+                                      .Select(am => new TeacherNameResponseDto
+                                      {
+                                          TeacherId = am.TeacherId.Value,
+                                          FirstName = am.Teacher.FirstName,
+                                          LastName = am.Teacher.LastName,
+                                          Nickname = am.Teacher.Nickname
+                                      })).Distinct().ToList(),
+                    x.First().Schedule.FromTime,
+                    x.First().Schedule.ToTime,
+                    ConflictedScheduleIds = x.Select(sc => sc.ScheduleId.Value).ToList(),
 
+                }).ToList();
+
+            foreach (var group in groupedAppointments)
+            {
+                var conflictAppointment = new ConflictScheduleDTO
+                {
+                    ConflictedTeachers = group.Teachers,
+                    Dates = group.Dates,
+                    FromTime = group.FromTime,
+                    ToTime = group.ToTime,
+                    Hour = group.ToTime.Hours - group.FromTime.Hours,
+                    AppointmentId = group.AppointmentId,
+                    ConflictedScheduleIds = group.ConflictedScheduleIds
+                };
+
+                conflictedSchedules.Add(conflictAppointment);
+            }
 
             var response = new ServiceResponse<AvailableClassScheduleDTO>
             {
