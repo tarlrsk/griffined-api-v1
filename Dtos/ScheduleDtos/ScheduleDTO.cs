@@ -50,6 +50,9 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     public class GeneratedAppointmentScheduleDTO
     {
+        [JsonProperty("id")]
+        public Guid Id { get; set; }
+
         [JsonProperty("date")]
         public string Date { get; set; }
 
@@ -128,6 +131,9 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("toTime")]
         public TimeSpan ToTime { get; set; }
 
+        [JsonProperty("hour")]
+        public decimal Hour { get; set; }
+
         [JsonProperty("appointmentId")]
         public int? AppointmentId { get; set; }
 
@@ -196,6 +202,9 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     public class GeneratedAvailableClassScheduleDTO
     {
+        [JsonProperty("id")]
+        public Guid Id { get; set; }
+
         [JsonProperty("teacher")]
         public TeacherNameResponseDto Teacher { get; set; }
 
