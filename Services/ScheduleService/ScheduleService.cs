@@ -780,25 +780,29 @@ namespace griffined_api.Services.ScheduleService
                                                               .Select(group => new
                                                               {
                                                                   group.Key.StudyCourseId,
-                                                                  Teachers = group.Select(sc => new TeacherNameResponseDto
-                                                                  {
-                                                                      TeacherId = sc.TeacherId.Value,
-                                                                      FirstName = sc.Teacher.FirstName,
-                                                                      LastName = sc.Teacher.LastName,
-                                                                      Nickname = sc.Teacher.Nickname,
-                                                                  }).Distinct().ToList(),
-                                                                  ConflictedScheduleIds = group.Select(sc => sc.ScheduleId.Value).ToList(),
+                                                                  Teachers = group.Distinct()
+                                                                                  .Select(sc => new TeacherNameResponseDto
+                                                                                  {
+                                                                                      TeacherId = sc.TeacherId.Value,
+                                                                                      FirstName = sc.Teacher.FirstName,
+                                                                                      LastName = sc.Teacher.LastName,
+                                                                                      Nickname = sc.Teacher.Nickname,
+                                                                                  })
+                                                                                 .ToList(),
+                                                                  ConflictedScheduleIds = group.Distinct().Select(sc => sc.ScheduleId.Value).ToList(),
                                                                   Dates = group.Select(sc => sc.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                                                                   group.First().Schedule.FromTime,
                                                                   group.First().Schedule.ToTime,
                                                                   CourseName = group.First().StudyCourse.Course?.course,
-                                                                  StudySubjects = group.Select(x => new ConflictedStudySubjectDTO
-                                                                  {
-                                                                      StudySubjectId = group.First().StudySubjectId.Value,
-                                                                      StudySubjectName = group.First().StudySubject.Subject.subject
-                                                                  })
+                                                                  StudySubjects = group.Distinct()
+                                                                                       .Select(x => new ConflictedStudySubjectDTO
+                                                                                       {
+                                                                                           StudySubjectId = group.First().StudySubjectId.Value,
+                                                                                           StudySubjectName = group.First().StudySubject.Subject.subject
+                                                                                       })
+                                                                                      .ToList()
                                                               })
-                                                            .ToList();
+                                                             .ToList();
 
                 // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
                 foreach (var group in groupedStudyClasses)
@@ -828,16 +832,17 @@ namespace griffined_api.Services.ScheduleService
                         Dates = x.Select(ap => ap.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                         Teachers = x.SelectMany(ap => _appointmentMemberRepo.Query()
                                           .Where(am => am.AppointmentId == ap.AppointmentId)
+                                          .Distinct()
                                           .Select(am => new TeacherNameResponseDto
                                           {
                                               TeacherId = am.TeacherId.Value,
                                               FirstName = am.Teacher.FirstName,
                                               LastName = am.Teacher.LastName,
                                               Nickname = am.Teacher.Nickname
-                                          })).Distinct().ToList(),
+                                          })).ToList(),
                         x.First().Schedule.FromTime,
                         x.First().Schedule.ToTime,
-                        ConflictedScheduleIds = x.Select(sc => sc.ScheduleId.Value).ToList(),
+                        ConflictedScheduleIds = x.Distinct().Select(sc => sc.ScheduleId.Value).ToList(),
 
                     }).ToList();
 
@@ -1135,13 +1140,14 @@ namespace griffined_api.Services.ScheduleService
                 {
                     group.Key.StudyCourseId,
                     Teachers = group.Where(sc => sc.TeacherId.HasValue || sc.StudySubject.StudySubjectMember.Any(ssm => ssm.Student != null))
+                                    .Distinct()
                                     .Select(sc => new TeacherNameResponseDto
                                     {
                                         TeacherId = sc.TeacherId.Value,
                                         FirstName = sc.Teacher.FirstName,
                                         LastName = sc.Teacher.LastName,
                                         Nickname = sc.Teacher.Nickname,
-                                    }).Distinct().ToList(),
+                                    }).ToList(),
                     Students = group.Where(sc => sc.StudySubject.StudySubjectMember.Any(ssm => ssm.Student != null) || sc.TeacherId.HasValue)
                                     .SelectMany(sc => sc.StudySubject.StudySubjectMember)
                                     .Where(ssm => ssm.Student != null)
@@ -1156,18 +1162,20 @@ namespace griffined_api.Services.ScheduleService
                                         Nickname = student.Nickname
                                     })
                                    .ToList(),
-                    ConflictedScheduleIds = group.Select(sc => sc.ScheduleId.Value).ToList(),
+                    ConflictedScheduleIds = group.Distinct().Select(sc => sc.ScheduleId.Value).ToList(),
                     Dates = group.Select(sc => sc.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                     group.First().Schedule.FromTime,
                     group.First().Schedule.ToTime,
                     CourseName = group.First().StudyCourse.Course?.course,
-                    StudySubjects = group.Select(x => new ConflictedStudySubjectDTO
-                    {
-                        StudySubjectId = group.First().StudySubjectId.Value,
-                        StudySubjectName = group.First().StudySubject.Subject.subject
-                    })
+                    StudySubjects = group.Distinct()
+                                         .Select(x => new ConflictedStudySubjectDTO
+                                         {
+                                             StudySubjectId = group.First().StudySubjectId.Value,
+                                             StudySubjectName = group.First().StudySubject.Subject.subject
+                                         })
+                                        .ToList()
                 })
-                .ToList();
+               .ToList();
 
             // ADD CONFLICTING STUDY CLASSES' TEACHER DETAILS.
             foreach (var group in groupedStudyClasses)
@@ -1198,13 +1206,14 @@ namespace griffined_api.Services.ScheduleService
                     Dates = x.Select(ap => ap.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                     Teachers = x.SelectMany(ap => _appointmentMemberRepo.Query()
                                       .Where(am => am.AppointmentId == ap.AppointmentId)
+                                      .Distinct()
                                       .Select(am => new TeacherNameResponseDto
                                       {
                                           TeacherId = am.TeacherId.Value,
                                           FirstName = am.Teacher.FirstName,
                                           LastName = am.Teacher.LastName,
                                           Nickname = am.Teacher.Nickname
-                                      })).Distinct().ToList(),
+                                      })).ToList(),
                     x.First().Schedule.FromTime,
                     x.First().Schedule.ToTime,
                     ConflictedScheduleIds = x.Select(sc => sc.ScheduleId.Value).ToList(),
