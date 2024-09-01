@@ -780,7 +780,8 @@ namespace griffined_api.Services.ScheduleService
                                                               .Select(group => new
                                                               {
                                                                   group.Key.StudyCourseId,
-                                                                  Teachers = group.Distinct()
+                                                                  Teachers = group.GroupBy(sc => sc.TeacherId) // Ensure distinct by TeacherId
+                                                                                  .Select(g => g.First())
                                                                                   .Select(sc => new TeacherNameResponseDto
                                                                                   {
                                                                                       TeacherId = sc.TeacherId.Value,
@@ -832,7 +833,8 @@ namespace griffined_api.Services.ScheduleService
                         Dates = x.Select(ap => ap.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                         Teachers = x.SelectMany(ap => _appointmentMemberRepo.Query()
                                           .Where(am => am.AppointmentId == ap.AppointmentId)
-                                          .Distinct()
+                                          .GroupBy(sc => sc.TeacherId) // Ensure distinct by TeacherId
+                                          .Select(g => g.First())
                                           .Select(am => new TeacherNameResponseDto
                                           {
                                               TeacherId = am.TeacherId.Value,
@@ -1209,7 +1211,8 @@ namespace griffined_api.Services.ScheduleService
                     Dates = x.Select(ap => ap.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
                     Teachers = x.SelectMany(ap => _appointmentMemberRepo.Query()
                                       .Where(am => am.AppointmentId == ap.AppointmentId)
-                                      .Distinct()
+                                      .GroupBy(am => am.TeacherId) // Ensure distinct by TeacherId
+                                      .Select(g => g.First())
                                       .Select(am => new TeacherNameResponseDto
                                       {
                                           TeacherId = am.TeacherId.Value,
