@@ -2,7 +2,6 @@ using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 
@@ -1251,6 +1250,7 @@ namespace griffined_api.Services.StudyCourseService
                 Schedules = !dbStudyCourse.StudySubjects.Any() ? Enumerable.Empty<ScheduleResponseDto>()
                                                                : dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
                                                                {
+                                                                   ScheduleId = dbStudyClass.ScheduleId.HasValue ? dbStudyClass.ScheduleId.Value : 0,
                                                                    Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                                                                    StudyCourseId = dbStudyCourse.Id,
                                                                    CourseId = dbStudyCourse.Course.Id,

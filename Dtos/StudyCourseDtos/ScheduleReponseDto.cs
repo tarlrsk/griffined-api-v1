@@ -6,6 +6,7 @@ namespace griffined_api.Dtos.StudyCourseDtos
 {
     public class ScheduleResponseDto
     {
+        public int ScheduleId { get; set; }
         public int StudyCourseId { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
