@@ -951,6 +951,7 @@ namespace griffined_api.Services.ScheduleService
             {
                 var studentStudyClass = _studyClassRepo.Query()
                                                        .Include(x => x.Schedule)
+                                                       .Include(x => x.Teacher)
                                                        .Include(x => x.StudyCourse)
                                                         .ThenInclude(x => x.Course)
                                                        .Include(x => x.StudySubject)
@@ -1140,19 +1141,21 @@ namespace griffined_api.Services.ScheduleService
                 {
                     group.Key.StudyCourseId,
                     Teachers = group.Where(sc => sc.TeacherId.HasValue || sc.StudySubject.StudySubjectMember.Any(ssm => ssm.Student != null))
-                                    .Distinct()
+                                    .GroupBy(sc => sc.TeacherId) // Ensure distinct by TeacherId
+                                    .Select(g => g.First())
                                     .Select(sc => new TeacherNameResponseDto
                                     {
                                         TeacherId = sc.TeacherId.Value,
                                         FirstName = sc.Teacher.FirstName,
                                         LastName = sc.Teacher.LastName,
                                         Nickname = sc.Teacher.Nickname,
-                                    }).ToList(),
+                                    })
+                                   .ToList(),
                     Students = group.Where(sc => sc.StudySubject.StudySubjectMember.Any(ssm => ssm.Student != null) || sc.TeacherId.HasValue)
                                     .SelectMany(sc => sc.StudySubject.StudySubjectMember)
                                     .Where(ssm => ssm.Student != null)
-                                    .Select(ssm => ssm.Student)
-                                    .Distinct() // Ensure unique students
+                                    .GroupBy(ssm => ssm.Student.Id) // Group by StudentId to ensure uniqueness
+                                    .Select(g => g.First().Student)
                                     .Select(student => new StudentNameResponseDto
                                     {
                                         StudentId = student.Id,
