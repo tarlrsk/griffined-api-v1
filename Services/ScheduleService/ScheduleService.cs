@@ -795,7 +795,8 @@ namespace griffined_api.Services.ScheduleService
                                                                   group.First().Schedule.FromTime,
                                                                   group.First().Schedule.ToTime,
                                                                   CourseName = group.First().StudyCourse.Course?.course,
-                                                                  StudySubjects = group.Distinct()
+                                                                  StudySubjects = group.GroupBy(x => x.StudySubjectId)
+                                                                                       .Select(x => x.First())
                                                                                        .Select(x => new ConflictedStudySubjectDTO
                                                                                        {
                                                                                            StudySubjectId = group.First().StudySubjectId.Value,
@@ -1172,7 +1173,8 @@ namespace griffined_api.Services.ScheduleService
                     group.First().Schedule.FromTime,
                     group.First().Schedule.ToTime,
                     CourseName = group.First().StudyCourse.Course?.course,
-                    StudySubjects = group.Distinct()
+                    StudySubjects = group.GroupBy(x => x.StudySubjectId)
+                                         .Select(x => x.First())
                                          .Select(x => new ConflictedStudySubjectDTO
                                          {
                                              StudySubjectId = group.First().StudySubjectId.Value,
