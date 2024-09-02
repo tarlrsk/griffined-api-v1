@@ -826,23 +826,27 @@ namespace griffined_api.Services.ScheduleService
                 }
 
                 // GROUP CONFLICTING APPOINTMENTS BY SCHEDULE AND TEACHER
+                var appointmentMembers = _appointmentMemberRepo.Query()
+                                                               .Include(x => x.Teacher)
+                                                               .Where(am => conflictAppointments.Select(ca => ca.AppointmentId).Contains(am.AppointmentId))
+                                                               .ToList();
+
                 var groupedAppointments = conflictAppointments
                     .GroupBy(x => new { x.AppointmentId })
                     .Select(x => new
                     {
                         x.Key.AppointmentId,
                         Dates = x.Select(ap => ap.Schedule.Date.ToString("dd MMM yyyy")).Distinct(),
-                        Teachers = x.SelectMany(ap => _appointmentMemberRepo.Query()
-                                          .Where(am => am.AppointmentId == ap.AppointmentId)
-                                          .GroupBy(sc => sc.TeacherId) // Ensure distinct by TeacherId
-                                          .Select(g => g.First())
-                                          .Select(am => new TeacherNameResponseDto
-                                          {
-                                              TeacherId = am.TeacherId.Value,
-                                              FirstName = am.Teacher.FirstName,
-                                              LastName = am.Teacher.LastName,
-                                              Nickname = am.Teacher.Nickname
-                                          })).ToList(),
+                        Teachers = appointmentMembers.Where(am => am.AppointmentId == x.Key.AppointmentId)
+                                     .GroupBy(am => am.TeacherId)
+                                     .Select(g => g.First())
+                                     .Select(am => new TeacherNameResponseDto
+                                     {
+                                         TeacherId = am.TeacherId.Value,
+                                         FirstName = am.Teacher.FirstName,
+                                         LastName = am.Teacher.LastName,
+                                         Nickname = am.Teacher.Nickname
+                                     }).ToList(),
                         x.First().Schedule.FromTime,
                         x.First().Schedule.ToTime,
                         ConflictedScheduleIds = x.Distinct().Select(sc => sc.ScheduleId.Value).ToList(),
