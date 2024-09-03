@@ -79,6 +79,7 @@ jobs:
         with:
           name: .net-app-${{ github.run_number }}
           path: ${{env.DOTNET_ROOT}}/myapp
+          include-hidden-files: true
 
   migrate:
     runs-on: ubuntu-latest
