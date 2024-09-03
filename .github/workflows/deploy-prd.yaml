@@ -1,7 +1,7 @@
 name: Build and deploy to production
 
 env:
-  AZURE_WEBAPP_NAME: ${{ secrets.STG_WEBAPP_NAME }}
+  AZURE_WEBAPP_NAME: ${{ secrets.PRD_WEBAPP_NAME }}
   AZURE_WEBAPP_PACKAGE_PATH: "."
   DOTNET_VERSION: "7"
 
@@ -19,17 +19,17 @@ jobs:
       - name: Add Environment files
         run: |
           cat << EOF > ./firebase-config.json
-          ${{ secrets.STG_FIREBASE_CREDENTIAL }}
+          ${{ secrets.PRD_FIREBASE_CREDENTIAL }}
           EOF
 
           cat << EOF > ./.env
-          REMOTE_DB="${{ secrets.STG_REMOTE_DB }}"
-          FIREBASE_API_KEY="${{ secrets.STG_FIREBASE_API_KEY }}"
-          FIREBASE_PROJECT_ID="${{ secrets.STG_FIREBASE_PROJECT_ID }}"
+          REMOTE_DB="${{ secrets.PRD_REMOTE_DB }}"
+          FIREBASE_API_KEY="${{ secrets.PRD_FIREBASE_API_KEY }}"
+          FIREBASE_PROJECT_ID="${{ secrets.PRD_FIREBASE_PROJECT_ID }}"
           GOOGLE_APPLICATION_CREDENTIALS="${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
-          FIREBASE_BUCKET="${{ secrets.STG_FIREBASE_BUCKET }}"
-          APP_EMAIL="${{ secrets.STG_APP_EMAIL }}"
-          APP_PASSWORD="${{ secrets.STG_APP_PASSWORD }}"
+          FIREBASE_BUCKET="${{ secrets.PRD_FIREBASE_BUCKET }}"
+          APP_EMAIL="${{ secrets.PRD_APP_EMAIL }}"
+          APP_PASSWORD="${{ secrets.PRD_APP_PASSWORD }}"
           EOF
 
       - name: Upload artifacts
@@ -114,7 +114,7 @@ jobs:
     needs: [setup-environment, build]
 
     environment:
-      name: "Staging"
+      name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -128,5 +128,5 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.STG_AZURE_WEBAPP_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.PRD_AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
