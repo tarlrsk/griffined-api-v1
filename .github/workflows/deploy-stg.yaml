@@ -1,4 +1,4 @@
-name: Build and deploy to production
+name: Build and deploy to staging
 
 env:
   AZURE_WEBAPP_NAME: ${{ secrets.PRD_WEBAPP_NAME }}
