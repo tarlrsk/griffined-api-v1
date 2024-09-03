@@ -44,7 +44,9 @@ jobs:
           APP_PASSWORD="${{ secrets.STG_APP_PASSWORD }}"
           EOF
       - name: check
-        run: ls -l
+        run: |
+          cat .env
+          ls
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
