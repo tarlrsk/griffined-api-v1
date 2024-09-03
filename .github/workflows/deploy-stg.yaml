@@ -53,8 +53,8 @@ jobs:
         with:
           name: env-files
           path: |
-            .env
-            firebase-config.json
+            ./.env
+            ./firebase-config.json
 
   build:
     runs-on: ubuntu-latest
