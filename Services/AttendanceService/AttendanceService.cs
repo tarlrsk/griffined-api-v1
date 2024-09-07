@@ -162,6 +162,11 @@ namespace griffined_api.Services.AttendanceService
                     break;
             }
 
+            if (progress >= 100)
+            {
+                dbStudyCourse.Status = StudyCourseStatus.Finished;
+            }
+
             _context.TeacherNotifications.Add(teacherNotification);
 
             await _context.SaveChangesAsync();
