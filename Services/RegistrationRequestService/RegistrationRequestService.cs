@@ -379,6 +379,21 @@ namespace griffined_api.Services.RegistrationRequestService
                 _context.StaffNotifications.Add(notification);
             }
 
+            foreach (var dbStudent in dbStudents)
+            {
+                var allStudyClasses = await _context.StudyClasses
+                                            .Include(x => x.Schedule)
+                                            .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbStudent.Id)
+                                                      && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                            .ToListAsync();
+
+                var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+                var expiryDate = lastClassEndDate.AddDays(14);
+
+                dbStudent.ExpiryDate = expiryDate;
+            }
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK; ;

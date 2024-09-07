@@ -722,6 +722,18 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         };
 
                         _context.StudentNotifications.Add(makeupClassStudentNotification);
+
+                        var allStudyClasses = await _context.StudyClasses
+                            .Include(sc => sc.Schedule)
+                            .Where(sc => sc.Attendances.Any(a => a.StudentId == dbMember.Student.Id) &&
+                                         sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                            .ToListAsync();
+
+                        var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                        var expiryDate = lastClassEndDate.AddDays(14);
+
+                        dbMember.Student.ExpiryDate = expiryDate;
+
                     }
                     dbStudySubject.StudyClasses ??= new List<StudyClass>();
                     dbStudySubject.StudyClasses.Add(studyClass);
