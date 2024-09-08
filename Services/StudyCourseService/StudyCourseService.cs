@@ -1386,6 +1386,7 @@ namespace griffined_api.Services.StudyCourseService
 
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(sc => sc.Course)
+                                .Include(x => x.StudyCourseHistories)
                                 .FirstOrDefaultAsync(sc => sc.Id == requestDto.StudyCourseId) ?? throw new NotFoundException("No Course Found.");
 
             var dbStudySubjects = await _context.StudySubjects
