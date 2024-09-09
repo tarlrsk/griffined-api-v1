@@ -317,6 +317,18 @@ namespace griffined_api.Services.StudyCourseService
                     });
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
+                        if (!studyCourse.Teachers.Any(t => t.TeacherId == dbStudyClass.Teacher.Id))
+                        {
+                            studyCourse.Teachers.Add(new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                FullName = dbStudyClass.Teacher.FullName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                            });
+                        }
+
                         var schedule = new ScheduleResponseDto()
                         {
                             StudyCourseId = dbStudyCourse.Id,
