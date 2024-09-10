@@ -631,6 +631,9 @@ namespace griffinedapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CalendarType")
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
@@ -643,8 +646,9 @@ namespace griffinedapi.Migrations
                     b.Property<TimeSpan>("ToTime")
                         .HasColumnType("time");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -669,7 +673,6 @@ namespace griffinedapi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirebaseId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
@@ -821,6 +824,9 @@ namespace griffinedapi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Program")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Remark")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("School")
@@ -1046,7 +1052,16 @@ namespace griffinedapi.Migrations
                     b.Property<int>("ClassNumber")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsFiftyPercent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHundredPercent")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsMakeup")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSubstitute")
                         .HasColumnType("bit");
 
                     b.Property<int?>("ScheduleId")
@@ -1286,6 +1301,9 @@ namespace griffinedapi.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPartTime")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1396,17 +1414,11 @@ namespace griffinedapi.Migrations
                     b.Property<int>("Day")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("FromTime")
-                        .HasColumnType("time");
-
                     b.Property<int?>("MandayId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quarter")
                         .HasColumnType("int");
-
-                    b.Property<TimeSpan>("ToTime")
-                        .HasColumnType("time");
 
                     b.HasKey("Id");
 

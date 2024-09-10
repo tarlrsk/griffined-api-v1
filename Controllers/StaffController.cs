@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace griffined_api.Controllers
 {
     [ApiController]
@@ -15,14 +10,14 @@ namespace griffined_api.Controllers
         {
             _staffService = staffService;
         }
-        // [HttpGet, Authorize(Roles = "oa, master")]
+        // [HttpGet, Authorize(Roles = "oa, master, allstaff")]
         [HttpGet, AllowAnonymous]
         public async Task<ActionResult> Get()
         {
             return Ok(await _staffService.GetStaff());
         }
 
-        // [HttpGet("{id}"), Authorize(Roles = "ec, ea, oa, master")]
+        // [HttpGet("{id}"), Authorize(Roles = "ec, ea, oa, master, allstaff")]
         [HttpGet("{id}"), AllowAnonymous]
         public async Task<ActionResult> GetStaffById(int id)
         {
@@ -32,7 +27,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        // [HttpPost, Authorize(Roles = "oa, master")]
+        // [HttpPost, Authorize(Roles = "oa, master, allstaff")]
         [HttpPost, AllowAnonymous]
         public async Task<ActionResult> AddStaff(AddStaffRequestDto newStaff)
         {
@@ -42,7 +37,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        // [HttpPut, Authorize(Roles = "oa, master")]
+        // [HttpPut, Authorize(Roles = "oa, master, allstaff")]
         [HttpPut, AllowAnonymous]
         public async Task<ActionResult> UpdateStaff(UpdateStaffRequestDto updatedStaff)
         {
@@ -52,7 +47,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        // [HttpDelete("{id}"), Authorize(Roles = "oa, master")]
+        // [HttpDelete("{id}"), Authorize(Roles = "oa, master, allstaff")]
         [HttpDelete("{id}"), AllowAnonymous]
         public async Task<ActionResult> DeleteECById(int id)
         {
@@ -63,7 +58,7 @@ namespace griffined_api.Controllers
         }
 
 
-        // [HttpPut("activate/{id}"), Authorize(Roles = "oa, master")]
+        // [HttpPut("activate/{id}"), Authorize(Roles = "oa, master, allstaff")]
         [HttpPut("activate/{id}"), AllowAnonymous]
         public async Task<ActionResult> EnableStudent(int id)
         {
@@ -74,7 +69,7 @@ namespace griffined_api.Controllers
         }
 
 
-        // [HttpPut("deactivate/{id}"), Authorize(Roles = "oa, master")]
+        // [HttpPut("deactivate/{id}"), Authorize(Roles = "oa, master, allstaff")]
         [HttpPut("deactivate/{id}"), AllowAnonymous]
         public async Task<ActionResult> DisableStudent(int id)
         {

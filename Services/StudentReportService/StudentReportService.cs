@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using griffined_api.Dtos.StudentReportDtos;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace griffined_api.Services.StudentReportService
 {
@@ -35,7 +29,9 @@ namespace griffined_api.Services.StudentReportService
 
             int teacherId = _firebaseService.GetAzureIdWithToken();
 
-            var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
+            var dbTeacher = await _context.Teachers.Include(x => x.Mandays)
+                                                    .ThenInclude(x => x.WorkTimes)
+                                                   .FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No Teacher found.");
 
             var existingReport = dbMember.StudentReports.FirstOrDefault(sr => sr.Progression == detailRequestDto.Progression);
 
@@ -115,7 +111,7 @@ namespace griffined_api.Services.StudentReportService
                                         .Include(sm => sm.StudentReports)
                                             .ThenInclude(sp => sp.Teacher)
                                         .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
-                                        .ToListAsync() ?? throw new NotFoundException("No Members Found.");
+                                        .ToListAsync();
 
             dbStudySubjectMembers = dbStudySubjectMembers
                                     .GroupBy(sm => sm.Student.Id)
@@ -219,7 +215,7 @@ namespace griffined_api.Services.StudentReportService
                 data.Students.Add(studentDto);
             }
 
-            data.Course = dbStudySubjectMembers.First().StudySubject.StudyCourse.Course.course;
+            data.Course = dbStudySubjectMembers.FirstOrDefault()?.StudySubject.StudyCourse.Course.course;
 
             response.Data = data;
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -230,10 +226,9 @@ namespace griffined_api.Services.StudentReportService
         {
             var response = new ServiceResponse<StudentReportResponseDto>();
 
-            var data = new StudentReportResponseDto
-            {
-                StudyCourseId = studyCourseId
-            };
+            var studySubjects = _context.StudySubjects.Include(x => x.StudyClasses)
+                                                      .Where(x => x.StudyCourseId == studyCourseId)
+                                                      .ToList();
 
             var dbStudySubjectMembers = await _context.StudySubjectMember
                                         .Include(sm => sm.StudySubject)
@@ -245,12 +240,39 @@ namespace griffined_api.Services.StudentReportService
                                         .Include(sm => sm.StudentReports)
                                             .ThenInclude(sp => sp.Teacher)
                                         .Where(sm => sm.StudySubject.StudyCourse.Id == studyCourseId)
-                                        .ToListAsync() ?? throw new NotFoundException("No Members Found.");
+                                        .ToListAsync();
 
             dbStudySubjectMembers = dbStudySubjectMembers
                                     .GroupBy(sm => sm.Student.Id)
                                     .Select(group => group.First())
                                     .ToList();
+
+            int completedClass = 0;
+            int totalClass = studySubjects.SelectMany(x => x.StudyClasses).Count();
+            double progress = 0;
+
+            if (studySubjects.Any())
+            {
+                foreach (var studySubject in studySubjects)
+                {
+                    foreach (var studyClass in studySubject.StudyClasses)
+                    {
+                        if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                        {
+                            completedClass += 1;
+                        }
+                    }
+                }
+
+                double progressRatio = totalClass != 0 ? (double)completedClass / totalClass : 0;
+                progress = Math.Round(progressRatio * 100);
+            }
+
+            var data = new StudentReportResponseDto
+            {
+                StudyCourseId = studyCourseId,
+                Progress = progress
+            };
 
             foreach (var dbStudySubjectMember in dbStudySubjectMembers)
             {
@@ -339,7 +361,7 @@ namespace griffined_api.Services.StudentReportService
                 data.Students.Add(studentDto);
             }
 
-            data.Course = dbStudySubjectMembers.First().StudySubject.StudyCourse.Course.course;
+            data.Course = dbStudySubjectMembers.FirstOrDefault()?.StudySubject.StudyCourse.Course.course;
 
             response.Data = data;
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -352,10 +374,14 @@ namespace griffined_api.Services.StudentReportService
 
             var dbMember = await _context.StudySubjectMember
                                     .Include(m => m.StudentReports)
-                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == detailRequestDto.StudentCode && m.StudySubjectId == detailRequestDto.StudySubjectId) ?? throw new NotFoundException("No student found.");
+                                    .FirstOrDefaultAsync(m => m.Student.StudentCode == detailRequestDto.StudentCode
+                                                           && m.StudySubjectId == detailRequestDto.StudySubjectId)
+                                    ?? throw new NotFoundException("No student found.");
 
             var teacherId = _firebaseService.GetAzureIdWithToken();
-            var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No teacher found.");
+            var dbTeacher = await _context.Teachers.Include(x => x.Mandays)
+                                                    .ThenInclude(x => x.WorkTimes)
+                                                   .FirstOrDefaultAsync(t => t.Id == teacherId) ?? throw new NotFoundException("No teacher found.");
 
             var reportRequestDto = new AddStudentReportRequestDto
             {

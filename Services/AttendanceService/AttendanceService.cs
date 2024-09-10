@@ -1,12 +1,6 @@
 using griffined_api.Dtos.StudyCourseDtos;
-using griffined_api.Dtos.SubjectDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.AttendanceService
 {
@@ -94,8 +88,10 @@ namespace griffined_api.Services.AttendanceService
             var response = new ServiceResponse<string>();
 
             var dbClass = await _context.StudyClasses
+                                    .Include(x => x.StudyCourse)
                                     .Include(c => c.Attendances)
                                         .ThenInclude(a => a.Student)
+                                    .Include(x => x.Teacher)
                                     .FirstOrDefaultAsync(c => c.Id == studyClassId) ?? throw new NotFoundException($"Class with ID {studyClassId} not found.");
 
             foreach (var updateAttendanceRequest in updateAttendanceRequests)
@@ -110,7 +106,7 @@ namespace griffined_api.Services.AttendanceService
 
             if (allAttendancesSet)
             {
-                dbClass.Status = ClassStatus.Checked;
+                dbClass.Status = ClassStatus.CHECKED;
             }
 
             var dbStudyCourse = dbClass.StudyCourse;
@@ -131,24 +127,24 @@ namespace griffined_api.Services.AttendanceService
             {
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    if (dbStudyClass.Status == ClassStatus.CHECKED || dbStudyClass.Status == ClassStatus.UNCHECKED)
                     {
                         completedClass += 1;
                     }
-                    else if (dbStudyClass.Status == ClassStatus.None)
+                    else if (dbStudyClass.Status == ClassStatus.NONE)
                     {
                         incompleteClass += 1;
                     }
                 }
             }
 
-            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
+            double progressRatio = completedClass != 0 ? (double)completedClass / incompleteClass : 0;
             double progress = Math.Round(progressRatio * 100);
 
             var teacherNotification = new TeacherNotification
             {
-                Teacher = dbClass.Teacher,
-                StudyCourse = dbStudyCourse,
+                TeacherId = dbClass.Teacher.Id,
+                StudyCourseId = dbStudyCourse.Id,
                 DateCreated = DateTime.Now,
                 Type = TeacherNotificationType.StudentReport,
                 HasRead = false
@@ -164,6 +160,11 @@ namespace griffined_api.Services.AttendanceService
                     teacherNotification.Title = "Course Progress Report";
                     teacherNotification.Message = "The course has been completed. Please upload the student report. Click for more details.";
                     break;
+            }
+
+            if (progress >= 100)
+            {
+                dbStudyCourse.Status = StudyCourseStatus.Finished;
             }
 
             _context.TeacherNotifications.Add(teacherNotification);

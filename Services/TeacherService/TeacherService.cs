@@ -1,11 +1,6 @@
 using Firebase.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Google.Api;
 using System.Net;
-using System.Threading.Tasks;
-using griffined_api.Extensions.DateTimeExtensions;
-using System.Xml.Linq;
 
 namespace griffined_api.Services.TeacherService
 {
@@ -17,12 +12,27 @@ namespace griffined_api.Services.TeacherService
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseService _firebaseService;
-        public TeacherService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor, IFirebaseService firebaseService)
+        private readonly IUnitOfWork _uow;
+        private readonly IAsyncRepository<Teacher> _teacherRepo;
+        private readonly IAsyncRepository<WorkTime> _workTimeRepo;
+        private readonly IAsyncRepository<Manday> _mandayRepo;
+        public TeacherService(DataContext context,
+                              IMapper mapper,
+                              IHttpContextAccessor httpContextAccessor,
+                              IFirebaseService firebaseService,
+                              IUnitOfWork uow,
+                              IAsyncRepository<Teacher> teacherRepo,
+                              IAsyncRepository<WorkTime> workTimeRepo,
+                              IAsyncRepository<Manday> mandayRepo)
         {
             _httpContextAccessor = httpContextAccessor;
             _firebaseService = firebaseService;
             _mapper = mapper;
             _context = context;
+            _uow = uow;
+            _teacherRepo = teacherRepo;
+            _workTimeRepo = workTimeRepo;
+            _mandayRepo = mandayRepo;
         }
 
         public async Task<ServiceResponse<GetTeacherDto>> AddTeacher(AddTeacherDto request)
@@ -67,6 +77,7 @@ namespace griffined_api.Services.TeacherService
                 Line = request.Line,
                 CreatedBy = id,
                 LastUpdatedBy = id,
+                IsPartTime = request.IsPartTime,
             };
 
             var mandays = MapMandayDTOToModel(request.Mandays, newTeacher).ToList();
@@ -184,11 +195,11 @@ namespace griffined_api.Services.TeacherService
             var response = new ServiceResponse<GetTeacherDto>();
             int id = Int32.Parse(_httpContextAccessor?.HttpContext?.User?.FindFirstValue("azure_id") ?? "0");
 
-            var teacher = await _context.Teachers.AsNoTracking()
-                                                 .Include(x => x.Mandays)
-                                                    .ThenInclude(x => x.WorkTimes)
-                                                 .FirstOrDefaultAsync(x => x.Id == request.Id)
-                                                 ?? throw new NotFoundException($"Teacher with ID {request.Id} not found.");
+            var teacher = await _teacherRepo.Query()
+                                            .Include(x => x.Mandays)
+                                                .ThenInclude(x => x.WorkTimes)
+                                            .FirstOrDefaultAsync(x => x.Id == request.Id)
+                                            ?? throw new NotFoundException($"Teacher with ID {request.Id} not found.");
 
             var mandays = (from data in request.Mandays
                            select new Manday
@@ -199,40 +210,37 @@ namespace griffined_api.Services.TeacherService
                                             select new WorkTime
                                             {
                                                 Quarter = workTime.Quarter,
-                                                Day = workTime.Day,
-                                                FromTime = workTime.FromTime,
-                                                ToTime = workTime.ToTime
+                                                Day = workTime.Day
                                             })
                                             .ToList()
                            })
                            .ToList();
 
-            using (var transaction = _context.Database.BeginTransaction())
+            teacher.FirstName = request.FirstName;
+            teacher.LastName = request.LastName;
+            teacher.Nickname = request.Nickname;
+            teacher.Phone = request.Phone;
+            teacher.Email = request.Email;
+            teacher.Line = request.Line;
+            teacher.IsPartTime = request.IsPartTime;
+
+            _uow.BeginTran();
+            _teacherRepo.Update(teacher);
+            _workTimeRepo.DeleteRange(teacher.Mandays.SelectMany(x => x.WorkTimes).ToList());
+            _mandayRepo.DeleteRange(teacher.Mandays);
+
+            if (mandays.Any())
             {
-                teacher.FirstName = request.FirstName;
-                teacher.LastName = request.LastName;
-                teacher.Nickname = request.Nickname;
-                teacher.Phone = request.Phone;
-                teacher.Email = request.Email;
-                teacher.Line = request.Line;
+                _mandayRepo.AddRange(mandays);
 
-                _context.WorkTimes.RemoveRange(teacher.Mandays.SelectMany(x => x.WorkTimes));
-                _context.Mandays.RemoveRange(teacher.Mandays);
-
-                if (mandays!.Any())
+                if (mandays.SelectMany(x => x.WorkTimes).Any())
                 {
-                    _context.Mandays.AddRange(mandays!);
-
-                    if (mandays.SelectMany(x => x.WorkTimes).Any())
-                    {
-                        _context.WorkTimes.AddRange(mandays.SelectMany(x => x.WorkTimes));
-                    }
+                    _workTimeRepo.AddRange(mandays.SelectMany(x => x.WorkTimes));
                 }
-
-                transaction.Commit();
             }
 
-            _context.SaveChanges();
+            _uow.Complete();
+            _uow.CommitTran();
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
             {
@@ -307,72 +315,74 @@ namespace griffined_api.Services.TeacherService
 
         public List<TeacherShiftResponseDto> GetTeacherWorkTypesWithHours(Teacher teacher, DateTime date, TimeSpan fromTime, TimeSpan toTime)
         {
-            var requestedDay = date.DayOfWeek;
+            List<TeacherShiftResponseDto> teacherShifts = new List<TeacherShiftResponseDto>();
 
-            var workPeriods = teacher.Mandays
-                                     .SelectMany(x => x.WorkTimes)
-                                     .Where(t => t.Day.ToString() == requestedDay.ToString())
-                                     .ToList();
-
-            if (workPeriods.Count == 0)
+            if (teacher.IsPartTime)
             {
-                return new List<TeacherShiftResponseDto>
+                teacherShifts.Add(new TeacherShiftResponseDto
                 {
-                    new() {
-                        TeacherWorkType = TeacherWorkType.Special,
-                        Hours = (toTime - fromTime).TotalHours
-                    }
-                };
+                    TeacherWorkType = TeacherWorkType.NORMAL,
+                    Hours = (toTime - fromTime).TotalHours,
+                });
+                return teacherShifts;
             }
-            else
+
+            // GET THE MANDAY FOR THE SPECIFIED DATE
+            var manday = teacher.Mandays.FirstOrDefault(m => m.Year == date.Year);
+
+            if (manday is not null)
             {
-                var workTypeHours = new List<TeacherShiftResponseDto>();
+                // GET THE WORK TIMES FOR THE QUARTER AND DAY OF WEEK
+                IEnumerable<WorkTime> workTimes = manday.WorkTimes.Where(w => w.Quarter == GetQuarter(date)
+                                                                           && w.Day == date.DayOfWeek);
 
-                foreach (var workPeriod in workPeriods)
+                foreach (WorkTime workTime in workTimes)
                 {
-                    var intersectionStart = DateTimeExtensions.Max(fromTime, workPeriod.FromTime);
-                    var intersectionEnd = DateTimeExtensions.Min(toTime, workPeriod.ToTime);
-                    var intersectionHours = (intersectionEnd - intersectionStart).TotalHours;
+                    // CALCULATE THE END TIME BASED ON THE START TIME
+                    TimeSpan endTime = fromTime.Add(TimeSpan.FromHours(7));
 
-                    if (intersectionHours > 0)
+                    // ADJUST END TIME BASED ON START TIME
+                    if (fromTime.Hours < 10)
                     {
-                        workTypeHours.Add(new TeacherShiftResponseDto
-                        {
-                            Hours = intersectionHours,
-                            TeacherWorkType = TeacherWorkType.Normal,
-                        });
+                        endTime = endTime.Add(TimeSpan.FromHours(-1));
+                    }
+                    else if (fromTime.Hours > 10)
+                    {
+                        endTime = endTime.Add(TimeSpan.FromHours(1));
                     }
 
-                    if (fromTime < workPeriod.FromTime || toTime > workPeriod.ToTime)
+                    TeacherWorkType workType;
+
+                    // CHECK IF THE TEACHER WORKS OUTSIDE THE POLICY TIME
+                    if (fromTime < TimeSpan.FromHours(10) || fromTime > TimeSpan.FromHours(11))
                     {
-                        double beforeHours = 0;
-                        double afterHours = 0;
-
-                        if (fromTime < workPeriod.FromTime)
-                        {
-                            beforeHours = (workPeriod.FromTime - fromTime).TotalHours;
-                        }
-
-                        if (toTime > workPeriod.ToTime)
-                        {
-                            afterHours = (toTime - workPeriod.ToTime).TotalHours;
-                        }
-
-                        var overtimeHours = beforeHours + afterHours;
-
-                        if (overtimeHours > 0)
-                        {
-                            workTypeHours.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = overtimeHours,
-                                TeacherWorkType = TeacherWorkType.Overtime,
-                            });
-                        }
+                        workType = TeacherWorkType.OVERTIME;
                     }
+                    // CHECK IF THE TEACHER WORKS ON A DIFFERENT DAY
+                    else if (workTime.Day != date.DayOfWeek)
+                    {
+                        workType = TeacherWorkType.SPECIAL;
+                    }
+                    else
+                    {
+                        workType = TeacherWorkType.NORMAL;
+                    }
+
+                    // ADD THE SHIFT TO THE LIST
+                    teacherShifts.Add(new TeacherShiftResponseDto
+                    {
+                        Hours = (toTime - fromTime).TotalHours,
+                        TeacherWorkType = workType
+                    });
                 }
-
-                return workTypeHours;
             }
+
+            return teacherShifts;
+        }
+
+        private int GetQuarter(DateTime date)
+        {
+            return (date.Month - 1) / 3 + 1;
         }
 
         private static GetTeacherDto MapModelToDTO(Teacher model, IEnumerable<Manday> mandays, IEnumerable<WorkTime> workTimes)
@@ -399,8 +409,6 @@ namespace griffined_api.Services.TeacherService
                                            {
                                                Day = workDay.Day,
                                                Quarter = workDay.Quarter,
-                                               FromTime = workDay.FromTime,
-                                               ToTime = workDay.ToTime
                                            })
                                            .ToList()
                            })
@@ -445,9 +453,7 @@ namespace griffined_api.Services.TeacherService
                             {
                                 Manday = model,
                                 Day = workTime.Day,
-                                Quarter = workTime.Quarter,
-                                FromTime = workTime.FromTime,
-                                ToTime = workTime.ToTime
+                                Quarter = workTime.Quarter
                             })
                             .ToList();
 

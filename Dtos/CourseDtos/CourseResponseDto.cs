@@ -1,9 +1,5 @@
 using griffined_api.Dtos.LevelDtos;
 using griffined_api.Dtos.SubjectDtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.CourseDtos
 {

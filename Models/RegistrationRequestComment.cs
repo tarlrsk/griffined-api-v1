@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -17,9 +12,9 @@ namespace griffined_api.Models
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [ForeignKey(nameof(RegistrationRequestId))]
-        public virtual RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
+        public virtual RegistrationRequest RegistrationRequest { get; set; }
 
         [ForeignKey(nameof(StaffId))]
-        public virtual Staff Staff { get; set; } = new Staff();
+        public virtual Staff Staff { get; set; }
     }
 }

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -15,15 +10,15 @@ namespace griffined_api.Models
         public double? Hour { get; set; }
 
         [ForeignKey(nameof(SubjectId))]
-        public virtual Subject Subject { get; set; } = new Subject();
+        public virtual Subject Subject { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
-        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
+        public virtual StudyCourse StudyCourse { get; set; }
 
-        public virtual ICollection<StudySubjectMember> StudySubjectMember { get; set; } = new List<StudySubjectMember>();
-        public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
+        public virtual ICollection<StudySubjectMember> StudySubjectMember { get; set; }
+        public virtual ICollection<StudyClass> StudyClasses { get; set; }
 
-        public virtual ICollection<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; } = new List<StudentAddingSubjectRequest>();
-        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
+        public virtual ICollection<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; }
+        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; }
     }
 }

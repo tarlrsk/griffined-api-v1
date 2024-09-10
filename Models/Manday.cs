@@ -15,6 +15,6 @@ namespace griffined_api.Models
         [ForeignKey(nameof(TeacherId))]
         public Teacher? Teacher { get; set; }
 
-        public virtual ICollection<WorkTime> WorkTimes { get; set; } = new List<WorkTime>();
+        public virtual ICollection<WorkTime> WorkTimes { get; set; }
     }
 }

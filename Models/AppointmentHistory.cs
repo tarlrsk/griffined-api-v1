@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -20,10 +15,10 @@ namespace griffined_api.Models
         public DateTime UpdatedDate { get; set; }
 
         [ForeignKey(nameof(AppointmentId))]
-        public virtual Appointment Appointment { get; set; } = new Appointment();
+        public virtual Appointment Appointment { get; set; }
 
         [ForeignKey(nameof(AppointmentSlotId))]
-        public virtual AppointmentSlot? AppointmentSlot { get; set; } 
+        public virtual AppointmentSlot? AppointmentSlot { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
         public virtual Teacher? Teacher { get; set; }

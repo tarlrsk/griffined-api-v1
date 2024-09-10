@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -21,7 +16,7 @@ namespace griffined_api.Models
         public string? Line { get; set; } = string.Empty;
 
         [ForeignKey(nameof(StudentId))]
-        public virtual Student? Student { get; set; } = new Student();
+        public virtual Student? Student { get; set; }
 
 
     }

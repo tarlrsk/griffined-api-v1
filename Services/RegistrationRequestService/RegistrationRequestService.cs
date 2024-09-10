@@ -1,17 +1,9 @@
-using Google.Api;
-using Google.Cloud.Storage.V1;
-using Google.Rpc;
 using griffined_api.Dtos.CommentDtos;
 using griffined_api.Dtos.RegistrationRequestDto;
+using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudyCourseDtos;
-using griffined_api.Enums;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.RegistrationRequestService
 {
@@ -50,6 +42,8 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     Student = dbStudent
                 };
+
+                request.RegistrationRequestMembers ??= new List<RegistrationRequestMember>();
                 request.RegistrationRequestMembers.Add(member);
             }
 
@@ -71,6 +65,8 @@ namespace griffined_api.Services.RegistrationRequestService
                     FromTime = newPreferredDay.FromTime.ToTimeSpan(),
                     ToTime = newPreferredDay.ToTime.ToTimeSpan()
                 };
+
+                request.NewCoursePreferredDayRequests ??= new List<NewCoursePreferredDayRequest>();
                 request.NewCoursePreferredDayRequests.Add(requestedPreferredDay);
             }
 
@@ -91,7 +87,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     StudyCourseType = newRequestedCourses.Type,
                 };
-                var course = existedCourses.FirstOrDefault(c => c.course == newRequestedCourse.Course);
+                var course = existedCourses.FirstOrDefault(c => c.course.ToLower() == newRequestedCourse.Course.ToLower());
                 if (course == null)
                 {
                     var newCourse = new Course
@@ -108,6 +104,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             subject = subject.Subject
                         };
+                        newCourse.Subjects ??= new List<Subject>();
                         newCourse.Subjects.Add(newSubject);
                     }
 
@@ -117,6 +114,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         {
                             level = newRequestedCourse.Level
                         };
+                        newCourse.Levels ??= new List<Level>();
                         newCourse.Levels.Add(newLevel);
                     }
 
@@ -128,19 +126,21 @@ namespace griffined_api.Services.RegistrationRequestService
 
                     course = existedCourses.First(c => c.course == newRequestedCourse.Course);
 
-                    var level = course.Levels.FirstOrDefault(c => c.level == newRequestedCourse.Level);
+                    var level = course.Levels.FirstOrDefault(c => c.level.ToLower() == newRequestedCourse.Level?.ToLower());
                     newRequestedCourseRequest.Level = level;
 
                     var requestedSubjects = newRequestedCourse.Subjects.Select(s => s.Subject).ToList();
                     var existedSubjects = course.Subjects.Where(s => requestedSubjects.Contains(s.subject));
                     foreach (var requestedSubject in newRequestedCourse.Subjects)
                     {
-                        var subject = existedSubjects.First(s => s.subject == requestedSubject.Subject);
+                        var subject = existedSubjects.First(s => s.subject.ToLower() == requestedSubject.Subject.ToLower());
                         var newRequestedSubject = new NewCourseSubjectRequest
                         {
                             Subject = subject,
                             Hour = requestedSubject.Hour
                         };
+
+                        newRequestedCourseRequest.NewCourseSubjectRequests ??= new List<NewCourseSubjectRequest>();
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
                 }
@@ -174,6 +174,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             newRequestedSubject.Subject = subject;
                         }
                         newRequestedSubject.Hour = requestedSubject.Hour;
+                        newRequestedCourseRequest.NewCourseSubjectRequests ??= new List<NewCourseSubjectRequest>();
                         newRequestedCourseRequest.NewCourseSubjectRequests.Add(newRequestedSubject);
                     }
 
@@ -201,6 +202,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 newRequestedCourseRequest.Method = newRequestedCourse.Method;
                 newRequestedCourseRequest.StartDate = DateTime.Parse(newRequestedCourse.StartDate);
                 newRequestedCourseRequest.EndDate = DateTime.Parse(newRequestedCourse.EndDate);
+                request.NewCourseRequests ??= new List<NewCourseRequest>();
                 request.NewCourseRequests.Add(newRequestedCourseRequest);
             }
 
@@ -218,6 +220,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     Staff = staff,
                     Comment = comment
                 };
+                request.RegistrationRequestComments ??= new List<RegistrationRequestComment>();
                 request.RegistrationRequestComments.Add(newComment);
             }
 
@@ -251,7 +254,10 @@ namespace griffined_api.Services.RegistrationRequestService
         public async Task<ServiceResponse<string>> AddStudentAddingRequest(StudentAddingRequestDto newRequest, List<IFormFile> filesToUpload)
         {
             var response = new ServiceResponse<string>();
-            var request = new RegistrationRequest();
+            var request = new RegistrationRequest
+            {
+                PaymentByStaffId = _firebaseService.GetAzureIdWithToken()
+            };
 
             if (newRequest.MemberIds == null || newRequest.MemberIds.Count == 0)
             {
@@ -274,6 +280,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     Student = dbStudent
                 };
+                request.RegistrationRequestMembers ??= new List<RegistrationRequestMember>();
                 request.RegistrationRequestMembers.Add(member);
             }
 
@@ -294,6 +301,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     var dbStudySubject = dbStudyCourse.StudySubjects.FirstOrDefault(s => s.Id == studySubjectId) ?? throw new NotFoundException($"Study Subject with ID {studySubjectId} not found");
 
+                    newStudentAddingRequest.StudentAddingSubjectRequests ??= new List<StudentAddingSubjectRequest>();
                     newStudentAddingRequest.StudentAddingSubjectRequests.Add(new StudentAddingSubjectRequest()
                     {
                         StudySubject = dbStudySubject
@@ -304,6 +312,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         if (dbStudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
                             throw new BadRequestException($"Student with code {dbStudent.StudentCode} is already enrolled this subject.");
 
+                        dbStudySubject.StudySubjectMember ??= new List<StudySubjectMember>();
                         dbStudySubject.StudySubjectMember.Add(new StudySubjectMember()
                         {
                             Student = dbStudent,
@@ -311,6 +320,7 @@ namespace griffined_api.Services.RegistrationRequestService
                         });
                     }
                 }
+                request.StudentAddingRequest ??= new List<StudentAddingRequest>();
                 request.StudentAddingRequest.Add(newStudentAddingRequest);
             }
 
@@ -324,6 +334,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     Staff = staff,
                     Comment = comment
                 };
+                request.RegistrationRequestComments ??= new List<RegistrationRequestComment>();
                 request.RegistrationRequestComments.Add(newComment);
             }
 
@@ -337,6 +348,7 @@ namespace griffined_api.Services.RegistrationRequestService
             foreach (var newPaymentFile in filesToUpload)
             {
                 var objectName = await _firebaseService.UploadRegistrationRequestPaymentFile(request.Id, request.DateCreated, newPaymentFile);
+                request.RegistrationRequestPaymentFiles ??= new List<RegistrationRequestPaymentFile>();
                 if (!request.RegistrationRequestPaymentFiles.Any(f => f.ObjectName == objectName))
                 {
                     request.RegistrationRequestPaymentFiles.Add(new RegistrationRequestPaymentFile()
@@ -365,6 +377,21 @@ namespace griffined_api.Services.RegistrationRequestService
                 };
 
                 _context.StaffNotifications.Add(notification);
+            }
+
+            foreach (var dbStudent in dbStudents)
+            {
+                var allStudyClasses = await _context.StudyClasses
+                                            .Include(x => x.Schedule)
+                                            .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbStudent.Id)
+                                                      && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                            .ToListAsync();
+
+                var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+                var expiryDate = lastClassEndDate.AddDays(14);
+
+                dbStudent.ExpiryDate = expiryDate;
             }
 
             await _context.SaveChangesAsync();
@@ -2242,7 +2269,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     ?? throw new NotFoundException("EC not found.");
 
             var oa = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Id == dbRequest.CancelledBy)
+                    .FirstOrDefaultAsync(s => s.Id == _firebaseService.GetAzureIdWithToken())
                     ?? throw new NotFoundException("OA not found.");
 
             var ecNotification = new StaffNotification
@@ -3166,34 +3193,40 @@ namespace griffined_api.Services.RegistrationRequestService
                     {
                         var schedule = new ScheduleResponseDto()
                         {
+                            Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                             StudyCourseId = dbStudySubject.StudyCourse.Id,
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             CourseSubject = dbRequestedCourse.Course.course + " "
                                             + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
                                             + " " + (dbRequestedCourse.Level?.level ?? ""),
                             CourseId = dbRequestedCourse.Course.Id,
-                            Course = dbRequestedCourse.Course.course,
+                            CourseName = dbRequestedCourse.Course.course,
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            SubjectName = dbStudySubject.Subject.subject,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                                FullName = dbStudyClass.Teacher.FullName,
+                            },
                             ClassStatus = dbStudyClass.Status,
                         };
                         foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                         {
-                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = dbTeacherShift.Hours,
-                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                            });
+                            if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                                schedule.AdditionalHours = new AdditionalHours
+                                {
+                                    Hours = dbTeacherShift.Hours,
+                                    TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                                };
                         }
                         rawSchedules.Add(schedule);
                     }
@@ -3217,33 +3250,39 @@ namespace griffined_api.Services.RegistrationRequestService
                         var schedule = new ScheduleResponseDto()
                         {
                             StudyCourseId = dbStudySubject.StudyCourse.Id,
+                            Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             CourseSubject = dbStudentAddingRequest.StudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
                             CourseId = dbStudentAddingRequest.StudyCourse.Course.Id,
-                            Course = dbStudentAddingRequest.StudyCourse.Course.course,
+                            CourseName = dbStudentAddingRequest.StudyCourse.Course.course,
                             StudySubjectId = dbStudySubject.Subject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            SubjectName = dbStudySubject.Subject.subject,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                                FullName = dbStudyClass.Teacher.FullName,
+                            },
                             ClassStatus = dbStudyClass.Status,
                         };
                         foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                         {
-                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = dbTeacherShift.Hours,
-                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                            });
+                            if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                                schedule.AdditionalHours = new AdditionalHours
+                                {
+                                    Hours = dbTeacherShift.Hours,
+                                    TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                                };
                         }
                         rawSchedules.Add(schedule);
                     }

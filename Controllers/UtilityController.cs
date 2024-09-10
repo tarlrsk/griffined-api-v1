@@ -1,3 +1,4 @@
+using System.Net;
 using griffined_api.Services.UtilityService;
 
 namespace griffined_api.Controllers
@@ -13,10 +14,10 @@ namespace griffined_api.Controllers
             _utilityService = utilityService;
         }
 
-        [HttpPut("firebase/students/{studentId}")]
-        public async Task<IActionResult> AddStudentFirebaseId(int studentId)
+        [HttpPut("firebase/student")]
+        public async Task<IActionResult> AddStudentFirebaseId()
         {
-            await _utilityService.AddStudentFirebaseId(studentId);
+            await _utilityService.AddStudentFirebaseId();
 
             return Ok();
         }
@@ -29,10 +30,18 @@ namespace griffined_api.Controllers
             return Ok();
         }
 
-        [HttpPut("firebase/teachers/{teacherId}")]
-        public async Task<IActionResult> AddTeacherFirebaseId(int teacherId)
+        [HttpPut("firebase/teacher")]
+        public async Task<IActionResult> AddTeacherFirebaseId()
         {
-            await _utilityService.AddTeacherFirebaseId(teacherId);
+            await _utilityService.AddTeacherFirebaseId();
+
+            return Ok();
+        }
+
+        [HttpPut("firebase/staff")]
+        public async Task<IActionResult> AddStaffFirebaseId()
+        {
+            await _utilityService.AddStaffFirebaseId();
 
             return Ok();
         }
@@ -43,6 +52,14 @@ namespace griffined_api.Controllers
             await _utilityService.DeleteFirebaseAuthentication();
 
             return Ok();
+        }
+
+        [HttpPut("update/study-classes/number")]
+        public IActionResult UpdateStudyClassNumberByStudySubjectId()
+        {
+            _utilityService.UpdateStudyClassNumber();
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
     }
 }

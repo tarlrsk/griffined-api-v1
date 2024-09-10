@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace griffined_api.Dtos.RegistrationRequestDto
 {
     public class RequestedCourseResponseDto
     {
         public string? Section { get; set; }
-        public int? StudyCourseId { get; set;}
+        public int? StudyCourseId { get; set; }
         public int CourseId { get; set; }
         public string Course { get; set; } = string.Empty;
         public int? LevelId { get; set; }

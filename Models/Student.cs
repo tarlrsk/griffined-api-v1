@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace griffined_api.Models
 {
     public class Student
@@ -24,8 +17,7 @@ namespace griffined_api.Models
         {
             get
             {
-                int _age = 0;
-                _age = DateTime.Now.Subtract(DOB).Days;
+                int _age = DateTime.Now.Subtract(DOB).Days;
                 _age /= 365;
                 return _age;
             }
@@ -41,6 +33,7 @@ namespace griffined_api.Models
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+        public string? Remark { get; set; }
 
         public StudentStatus? Status { get; set; }
         public int? CreatedBy { get; set; }
@@ -54,11 +47,11 @@ namespace griffined_api.Models
 
         public virtual ICollection<StudentAttendance>? Attendances { get; set; }
         public virtual ICollection<StudentAdditionalFile>? AdditionalFiles { get; set; }
-        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; } = new List<RegistrationRequestMember>();
-        public virtual ICollection<StudySubjectMember> StudySubjectMember { get; set; } = new List<StudySubjectMember>();
+        public virtual ICollection<RegistrationRequestMember> RegistrationRequestMembers { get; set; }
+        public virtual ICollection<StudySubjectMember> StudySubjectMember { get; set; }
         public virtual ICollection<ClassCancellationRequest>? ClassCancellationRequests { get; set; }
         public virtual ICollection<StudentNotification>? StudentNotifications { get; set; }
-        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; } = new List<StudyCourseHistory>();
+        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; }
 
     }
 }

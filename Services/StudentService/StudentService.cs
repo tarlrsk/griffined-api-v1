@@ -1,13 +1,7 @@
 using Firebase.Auth;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using griffined_api.Extensions.DateTimeExtensions;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.StudentService
 {
@@ -39,6 +33,7 @@ namespace griffined_api.Services.StudentService
 
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
+
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStudent.Email, password);
@@ -53,6 +48,14 @@ namespace griffined_api.Services.StudentService
                     throw new InternalServerException("Something went wrong.");
             }
 
+            var existedStudent = await _context.Students.FirstOrDefaultAsync(x => x.FirstName == newStudent.FirstName
+                                                                               && x.LastName == newStudent.LastName);
+
+            if (existedStudent is not null)
+            {
+                throw new ConflictException($"Student with first name ({newStudent.FirstName}) and last name ({newStudent.LastName}) already exists.");
+            }
+
             var token = new JwtSecurityToken(jwtEncodedString: firebaseAuthLink.FirebaseToken);
             string firebaseId = token.Claims.First(c => c.Type == "user_id").Value;
 
@@ -61,12 +64,39 @@ namespace griffined_api.Services.StudentService
             _student.FirebaseId = firebaseId;
             _student.CreatedBy = id;
             _student.LastUpdatedBy = id;
+            _student.ExpiryDate = DateTime.Now;
+            _student.Status = StudentStatus.Inactive;
 
             _context.Students.Add(_student);
 
             await _context.SaveChangesAsync();
 
-            string studentCode = DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) + (_student.Id % 10000).ToString("0000");
+            // INITIALIZE CURRENT DATE, MONTH, AND RUNNING NUMBER.
+            DateTime now = DateTime.Now;
+            int currentMonth = DateTime.Now.Month;
+            int runningNumber = 0;
+
+            // GET LAST STUDENT CODE.      
+            var latestStudentCode = _context.Students.Where(s => s.DateCreated.Year == now.Year
+                                                              && s.DateCreated.Month == currentMonth)
+                                                     .OrderByDescending(s => s.StudentCode)
+                                                     .Select(s => s.StudentCode)
+                                                     .FirstOrDefault();
+
+            // IF A STUDENT CODE EXISTS FOR THE CURRENT MONTH, EXTRACT AND INCREMENT THE RUNNING NUMBER.
+            if (!string.IsNullOrEmpty(latestStudentCode))
+            {
+                string runningNumberStr = latestStudentCode.Substring(6, 3);
+                runningNumber = int.Parse(runningNumberStr);
+            }
+
+            runningNumber++;
+
+            // GENERATE STUDENT CODE
+            string studentCode = "GF" +
+                                 DateTime.Now.ToString("yy", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
+                                 DateTime.Now.ToString("MM", System.Globalization.CultureInfo.GetCultureInfo("en-GB")) +
+                                 runningNumber.ToString("D3");
 
             _student.StudentCode = studentCode;
 
@@ -375,6 +405,7 @@ namespace griffined_api.Services.StudentService
             student.TargetScore = updatedStudent.TargetScore;
             student.HogInformation = updatedStudent.HogInformation;
             student.HealthInformation = updatedStudent.HealthInformation;
+            student.Remark = updatedStudent.Remark;
             student.LastUpdatedBy = id;
 
             await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
@@ -495,6 +526,48 @@ namespace griffined_api.Services.StudentService
                         student.ProfilePicture.FileName = pictureEntity.FileName;
                         student.ProfilePicture.ObjectName = pictureEntity.ObjectName;
                     }
+
+                    data.ProfilePicture = pictureResponseDto;
+                }
+            }
+            else
+            {
+                if (updatedProfilePicture != null)
+                {
+                    var incomingFileName = updatedProfilePicture.FileName;
+
+                    var pictureRequestDto = new AddProfilePictureRequestDto
+                    {
+                        PictureData = updatedProfilePicture
+                    };
+
+                    var pictureEntity = _mapper.Map<ProfilePicture>(pictureRequestDto);
+                    var fileName = updatedProfilePicture.FileName;
+                    var objectName = $"students/{student.StudentCode}/profile/{fileName}";
+
+                    using (var stream = pictureRequestDto.PictureData.OpenReadStream())
+                    {
+                        var storageObject = await _storageClient.UploadObjectAsync(
+                            FIREBASE_BUCKET,
+                            objectName,
+                            updatedProfilePicture.ContentType,
+                            stream
+                        );
+
+                        pictureEntity.FileName = fileName;
+                        pictureEntity.ObjectName = objectName;
+                    }
+
+                    string url = await _firebaseService.GetUrlByObjectName(objectName);
+
+                    var pictureResponseDto = new FilesResponseDto
+                    {
+                        FileName = pictureEntity.FileName,
+                        ContentType = updatedProfilePicture.ContentType,
+                        URL = url
+                    };
+
+                    student.ProfilePicture = pictureEntity;
 
                     data.ProfilePicture = pictureResponseDto;
                 }

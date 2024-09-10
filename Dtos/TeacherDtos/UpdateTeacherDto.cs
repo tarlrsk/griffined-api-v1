@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace griffined_api.Dtos.TeacherDtos
@@ -41,5 +37,8 @@ namespace griffined_api.Dtos.TeacherDtos
 
         [JsonProperty("mandays")]
         public List<MandayRequestDto> Mandays { get; set; } = new List<MandayRequestDto>();
+
+        [JsonProperty("isPartTime")]
+        public bool IsPartTime { get; set; }
     }
 }

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -15,11 +10,11 @@ namespace griffined_api.Models
         public StudyCourseType StudyCourseType { get; set; }
 
         [ForeignKey(nameof(RegistrationRequestId))]
-        public RegistrationRequest RegistrationRequest { get; set; } = new RegistrationRequest();
+        public RegistrationRequest RegistrationRequest { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
-        public StudyCourse StudyCourse { get; set; } = new StudyCourse();
-        public virtual ICollection<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; } = new List<StudentAddingSubjectRequest>();
+        public StudyCourse StudyCourse { get; set; }
+        public virtual ICollection<StudentAddingSubjectRequest> StudentAddingSubjectRequests { get; set; }
 
     }
 }

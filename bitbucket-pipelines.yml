@@ -58,6 +58,8 @@ definitions:
             FIREBASE_PROJECT_ID="$PROD_FIREBASE_PROJECT_ID"
             GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
             FIREBASE_BUCKET="$PROD_FIREBASE_BUCKET"
+            APP_EMAIL="$PROD_APP_EMAIL"
+            APP_PASSWORD="$PROD_APP_PASSWORD"
             EOF
 
         artifacts:
@@ -78,6 +80,8 @@ definitions:
             FIREBASE_PROJECT_ID="$STG_FIREBASE_PROJECT_ID"
             GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
             FIREBASE_BUCKET="$STG_FIREBASE_BUCKET"
+            APP_EMAIL="$STG_APP_EMAIL"
+            APP_PASSWORD="$STG_APP_PASSWORD"
             EOF
         artifacts:
           - "firebase-config.json"
@@ -120,7 +124,6 @@ pipelines:
           - step:
               name: Deploy Azure App Service Staging
               deployment: staging
-              trigger: manual
               script:
                 - pipe: atlassian/azure-web-apps-deploy:1.1.0
                   variables:

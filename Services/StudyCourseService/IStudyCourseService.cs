@@ -1,15 +1,15 @@
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudyCourseDtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.StudyCourseService
 {
     public interface IStudyCourseService
     {
-        Task<ServiceResponse<String>> AddGroupSchedule(GroupScheduleRequestDto newSchedule);
+        StudyCourse CreateStudyCourse(GroupScheduleRequestDto newSchedule);
+        IEnumerable<StudySubject> CreateStudySubject(StudyCourse studyCourse, GroupScheduleRequestDto newSchedule);
+        void CreateStudyClass(int studyCourseId, IEnumerable<StudySubject> studySubjects, GroupScheduleRequestDto newRequestedSchedule);
+        void CreateTeacherNotificationForStudySubject(int studyCourseId);
+
         Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse();
         Task<ServiceResponse<string>> AddNewStudyClass(List<NewStudyClassScheduleRequestDto> newStudyClasses, int requestId);
         Task<ServiceResponse<string>> EditStudyClassByRegisRequest(EditStudyClassByRegistrationRequestDto requestDto, int requestId);

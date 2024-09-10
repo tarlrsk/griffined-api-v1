@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -19,22 +14,25 @@ namespace griffined_api.Models
 
         public virtual ClassStatus Status { get; set; }
         public bool IsMakeup { get; set; } = false;
+        public bool IsFiftyPercent { get; set; }
+        public bool IsHundredPercent { get; set; }
+        public bool IsSubstitute { get; set; } = false;
 
         [ForeignKey(nameof(ScheduleId))]
-        public virtual Schedule Schedule { get; set; } = new Schedule();
+        public virtual Schedule Schedule { get; set; }
 
         [ForeignKey(nameof(StudyCourseId))]
-        public virtual StudyCourse StudyCourse { get; set; } = new StudyCourse();
+        public virtual StudyCourse StudyCourse { get; set; }
 
         [ForeignKey(nameof(StudySubjectId))]
-        public virtual StudySubject StudySubject { get; set; } = new StudySubject();
+        public virtual StudySubject StudySubject { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
-        public virtual Teacher Teacher { get; set; } = new Teacher();
+        public virtual Teacher Teacher { get; set; }
 
-        public virtual ICollection<StudentAttendance> Attendances { get; set; } = new List<StudentAttendance>();
-        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
-        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; } = new List<StudyCourseHistory>();
-        public virtual ICollection<TeacherShift> TeacherShifts { get; set; } = new List<TeacherShift>();
+        public virtual ICollection<StudentAttendance> Attendances { get; set; }
+        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; }
+        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; }
+        public virtual ICollection<TeacherShift> TeacherShifts { get; set; }
     }
 }

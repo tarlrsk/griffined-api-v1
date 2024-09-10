@@ -17,7 +17,7 @@ namespace griffined_api.Dtos.WorkTimeDtos
     {
         [Required]
         [JsonProperty("day")]
-        public Enums.DayOfWeek Day { get; set; }
+        public System.DayOfWeek Day { get; set; }
 
         [Required]
         [JsonProperty("quarter")]

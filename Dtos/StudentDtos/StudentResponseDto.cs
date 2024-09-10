@@ -1,8 +1,6 @@
 using griffined_api.Extensions.DateTimeExtensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace griffined_api.Dtos.StudentDtos
 {
@@ -41,7 +39,11 @@ namespace griffined_api.Dtos.StudentDtos
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public StudentStatus status { get; set; } = StudentStatus.Inactive;
+
+        public string? Remark { get; set; }
 
         public FilesResponseDto? ProfilePicture { get; set; }
         public ParentResponseDto? Parent { get; set; }

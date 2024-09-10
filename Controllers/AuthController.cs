@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using FirebaseAdmin;
 using Firebase.Auth;
 
 namespace griffined_api.Controllers
@@ -35,7 +29,7 @@ namespace griffined_api.Controllers
             }
         }
 
-        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ec, master")]
+        [HttpPost("reset-password"), Authorize(Roles = "oa, ea, ec, master, allstaff")]
         public async Task<ActionResult> ResetPassword(string email)
         {
             await firebaseAuthProvider.SendPasswordResetEmailAsync(email);

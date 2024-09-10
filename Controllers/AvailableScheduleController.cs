@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace griffined_api.Controllers
 {
     [ApiController]
@@ -17,25 +12,25 @@ namespace griffined_api.Controllers
 
         }
 
-        [HttpPost("schedule"), Authorize(Roles = "master, ea")]
+        [HttpPost("schedule"), Authorize(Roles = "master, allstaff, ea")]
         public async Task<ActionResult> GetAvailableSchedule(RequestedScheduleRequestDto requestedSchedule)
         {
             return Ok(await _checkAvailable.GetAvailableSchedule(requestedSchedule));
         }
 
-        [HttpPost("teacher"), Authorize(Roles = "master, ea")]
+        [HttpPost("teacher"), Authorize(Roles = "master, allstaff, ea")]
         public async Task<ActionResult> GetAvailableTeacherForAppointment(int? appointmentId, List<LocalAppointmentRequestDto> appointmentRequestDtos)
         {
             return Ok(await _checkAvailable.GetAvailableTeacherForAppointment(appointmentId, appointmentRequestDtos));
         }
 
-        [HttpPost("appointment"), Authorize(Roles = "master, ea")]
+        [HttpPost("appointment"), Authorize(Roles = "master, allstaff, ea")]
         public async Task<ActionResult> CheckAppointmentConflict(CheckAppointmentConflictRequestDto requestDto)
         {
             return Ok(await _checkAvailable.CheckAppointmentConflict(requestDto));
         }
 
-        [HttpPost("student-adding"), Authorize(Roles = "master, ec, ea")]
+        [HttpPost("student-adding"), Authorize(Roles = "master, allstaff, ec, ea")]
         public async Task<ActionResult> CheckStudentAddingConflict(StudentAddingConflictRequestDto requestDto)
         {
             return Ok(await _checkAvailable.CheckStudentAddingConflict(requestDto));

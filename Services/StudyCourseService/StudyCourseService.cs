@@ -1,56 +1,69 @@
-using AutoMapper.Execution;
-using Azure;
-using Google.Api;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudentReportDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.StudyCourseService
 {
     public class StudyCourseService : IStudyCourseService
     {
         private readonly DataContext _context;
+        private readonly IUnitOfWork _uow;
+        private readonly IAsyncRepository<Course> _courseRepository;
+        private readonly IAsyncRepository<Subject> _subjectRepository;
+        private readonly IAsyncRepository<Level> _levelRepository;
+        private readonly IAsyncRepository<StudyCourse> _studyCourseRepository;
+        private readonly IAsyncRepository<StudySubject> _studySubjectRepository;
+        private readonly IAsyncRepository<StudyClass> _studyClassRepository;
+        private readonly IAsyncRepository<Teacher> _teacherRepository;
+        private readonly IAsyncRepository<TeacherNotification> _teacherNotificationRepository;
         private readonly IFirebaseService _firebaseService;
         private readonly ITeacherService _teacherService;
 
-        public StudyCourseService(DataContext context, IFirebaseService firebaseService, ITeacherService teacherService)
+        public StudyCourseService(DataContext context,
+                                  IUnitOfWork uow,
+                                  IAsyncRepository<StudyCourse> studyCourseRepository,
+                                  IAsyncRepository<StudySubject> studySubjectRepository,
+                                  IAsyncRepository<StudyClass> studyClassRepository,
+                                  IAsyncRepository<Teacher> teacherRepository,
+                                  IAsyncRepository<Course> courseRepository,
+                                  IAsyncRepository<Subject> subjectRepository,
+                                  IAsyncRepository<Level> levelRepository,
+                                  IAsyncRepository<TeacherNotification> teacherNotificationRepository,
+                                  IFirebaseService firebaseService,
+                                  ITeacherService teacherService)
         {
             _context = context;
             _firebaseService = firebaseService;
             _teacherService = teacherService;
+            _uow = uow;
+            _courseRepository = courseRepository;
+            _subjectRepository = subjectRepository;
+            _levelRepository = levelRepository;
+            _studyCourseRepository = studyCourseRepository;
+            _studySubjectRepository = studySubjectRepository;
+            _studyClassRepository = studyClassRepository;
+            _teacherRepository = teacherRepository;
+            _teacherNotificationRepository = teacherNotificationRepository;
         }
-        public async Task<ServiceResponse<string>> AddGroupSchedule(GroupScheduleRequestDto newRequestedSchedule)
+
+        public StudyCourse CreateStudyCourse(GroupScheduleRequestDto newRequestedSchedule)
         {
-            var response = new ServiceResponse<string>();
+            var course = _courseRepository.Query()
+                                          .FirstOrDefault(x => x.Id == newRequestedSchedule.CourseId)
+                                          ?? throw new NotFoundException("Course is not found.");
 
-            var dbCourse = await _context.Courses
-                            .Include(c => c.Subjects.Where(s => newRequestedSchedule.SubjectIds.Contains(s.Id)))
-                            .FirstOrDefaultAsync(c => c.Id == newRequestedSchedule.CourseId)
-                            ?? throw new NotFoundException($"Course is not found");
-
-            Level? dbLevel = null;
-            if (newRequestedSchedule.LevelId != null)
-            {
-                var foundLevel = await _context.Levels
-                            .FirstOrDefaultAsync(l => l.Id == newRequestedSchedule.LevelId && l.CourseId == newRequestedSchedule.CourseId)
-                            ?? throw new NotFoundException($"Level is not found in course {dbCourse.course}");
-
-                dbLevel = foundLevel;
-            }
+            var level = _levelRepository.Query()
+                                        .FirstOrDefault(x => x.Id == newRequestedSchedule.LevelId
+                                                          && x.CourseId == newRequestedSchedule.CourseId);
 
             var studyCourse = new StudyCourse
             {
-                Course = dbCourse,
-                Level = dbLevel,
                 Section = newRequestedSchedule.Section,
+                CourseId = newRequestedSchedule.CourseId,
+                LevelId = level is null ? null : level.Id,
                 TotalHour = newRequestedSchedule.TotalHours,
                 StartDate = newRequestedSchedule.StartDate.ToDateTime(),
                 EndDate = newRequestedSchedule.EndDate.ToDateTime(),
@@ -59,73 +72,171 @@ namespace griffined_api.Services.StudyCourseService
                 Status = StudyCourseStatus.NotStarted
             };
 
-            var teachers = await _context.Teachers
-                            .Include(t => t.Mandays)
-                                .ThenInclude(x => x.WorkTimes)
-                            .ToListAsync();
+            _uow.BeginTran();
+            _studyCourseRepository.Add(studyCourse);
+            _uow.Complete();
+            _uow.CommitTran();
 
-            foreach (var newStudySubject in dbCourse.Subjects)
+            return studyCourse;
+        }
+
+        public IEnumerable<StudySubject> CreateStudySubject(StudyCourse studyCourse, GroupScheduleRequestDto newRequestedSchedule)
+        {
+            var subjects = _subjectRepository.Query()
+                                             .Where(x => newRequestedSchedule.SubjectIds.Contains(x.Id)
+                                                      && x.CourseId == newRequestedSchedule.CourseId)
+                                             .ToList();
+
+            List<StudySubject> studySubjects = new();
+            double totalSubjectHour = CalculateTotalHours(newRequestedSchedule.Schedules);
+
+            foreach (var subject in subjects)
             {
-                var studySubject = new StudySubject();
-                var classNumber = 1;
-                double totalSubjectHour = 0;
-                foreach (var newSchedule in newRequestedSchedule.Schedules)
+                int c = 0;
+
+                var studySubject = new StudySubject
                 {
-                    if (newSchedule.SubjectId == newStudySubject.Id)
+                    SubjectId = subject.Id,
+                    StudyCourse = studyCourse,
+                    Hour = totalSubjectHour,
+                };
+
+                foreach (var schedule in newRequestedSchedule.Schedules)
+                {
+                    c++;
+                }
+
+                studySubject.Hour = totalSubjectHour;
+                studySubjects.Add(studySubject);
+            }
+
+            _uow.BeginTran();
+
+            if (studySubjects.Any())
+            {
+                _studySubjectRepository.AddRange(studySubjects);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+
+            return studySubjects;
+        }
+
+        private static double CalculateTotalHours(List<NewScheduleRequestDto> schedules)
+        {
+            double totalHours = 0;
+
+            foreach (var schedule in schedules)
+            {
+                if (TimeSpan.TryParseExact(schedule.FromTime, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out TimeSpan fromTime) &&
+                    TimeSpan.TryParseExact(schedule.ToTime, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out TimeSpan toTime))
+                {
+                    TimeSpan duration = toTime - fromTime;
+                    totalHours += duration.TotalHours;
+                }
+                else
+                {
+                    throw new FormatException("Invalid time format. Expected format is hh:mm.");
+                }
+            }
+
+            return totalHours;
+        }
+
+        public void CreateStudyClass(int studyCourseId, IEnumerable<StudySubject> studySubjects, GroupScheduleRequestDto newRequestedSchedule)
+        {
+            var teachers = _teacherRepository.Query()
+                                             .ToList();
+
+            List<StudyClass> studyClasses = new();
+
+            foreach (var subject in studySubjects)
+            {
+                var classNumber = 1;
+                int studyClassCount = newRequestedSchedule.Schedules.Count();
+                int c = 0;
+
+                foreach (var schedule in newRequestedSchedule.Schedules)
+                {
+                    c++;
+
+                    if (schedule.SubjectId == subject.SubjectId)
                     {
-                        var teacher = teachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {newSchedule.TeacherId} is not found.");
+                        var teacher = teachers.FirstOrDefault(t => t.Id == schedule.TeacherId) ?? throw new NotFoundException($"Teacher with ID {schedule.TeacherId} is not found.");
 
                         var studyClass = new StudyClass
                         {
+                            StudySubjectId = subject.Id,
                             IsMakeup = false,
+                            IsFiftyPercent = false,
+                            IsHundredPercent = false,
                             ClassNumber = classNumber,
-                            Teacher = teacher,
-                            StudyCourse = studyCourse,
+                            TeacherId = teacher.Id,
+                            StudyCourseId = studyCourseId,
                             Schedule = new Schedule
                             {
-                                Date = newSchedule.Date.ToDateTime(),
-                                FromTime = newSchedule.FromTime.ToTimeSpan(),
-                                ToTime = newSchedule.ToTime.ToTimeSpan(),
+                                Date = schedule.Date.ToDateTime(),
+                                FromTime = schedule.FromTime.ToTimeSpan(),
+                                ToTime = schedule.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
+                                CalendarType = DailyCalendarType.NORMAL_CLASS,
                             }
                         };
 
-                        // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(teacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
-                        // foreach (var worktype in worktypes)
-                        // {
-                        //     studyClass.TeacherShifts.Add(new TeacherShift
-                        //     {
-                        //         Teacher = teacher,
-                        //         TeacherWorkType = worktype.TeacherWorkType,
-                        //         Hours = worktype.Hours,
-                        //     });
-                        // }
+                        if (c == studyClassCount / 2)
+                        {
+                            studyClass.IsFiftyPercent = true;
+                            studyClass.IsHundredPercent = false;
+                        }
+
+                        if (c == studyClassCount)
+                        {
+                            studyClass.IsFiftyPercent = false;
+                            studyClass.IsHundredPercent = true;
+                        }
 
                         classNumber = +1;
-                        studySubject.StudyClasses.Add(studyClass);
-                        totalSubjectHour += studyClass.Schedule.FromTime.Subtract(studyClass.Schedule.ToTime).TotalHours;
+                        studyClasses.Add(studyClass);
                     }
                 }
-
-                studySubject.Subject = newStudySubject;
-                studySubject.Hour = totalSubjectHour;
-                studyCourse.StudySubjects.Add(studySubject);
             }
 
-            var studySubjects = studyCourse.StudySubjects.ToList();
+            _uow.BeginTran();
 
-            var teachersInCourse = studySubjects
-                .SelectMany(ss => ss.StudyClasses)
-                .Select(sc => sc.Teacher)
-                .Distinct()
-                .ToList();
+            if (studyClasses.Any())
+            {
+                _studyClassRepository.AddRange(studyClasses);
+            }
+
+            _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public void CreateTeacherNotificationForStudySubject(int studyCourseId)
+        {
+            var studyCourse = _studyCourseRepository.Query()
+                                                    .Include(x => x.StudySubjects)
+                                                        .ThenInclude(x => x.StudyClasses)
+                                                            .ThenInclude(x => x.Teacher)
+                                                    .FirstOrDefault(x => x.Id == studyCourseId);
+
+            if (studyCourse is null)
+            {
+                throw new NotFoundException("No study course found.");
+            }
+
+            var teachersInCourse = studyCourse.StudySubjects.SelectMany(ss => ss.StudyClasses)
+                                                            .Select(sc => sc.Teacher)
+                                                            .Distinct()
+                                                            .ToList();
 
             foreach (var teacher in teachersInCourse)
             {
                 var teacherNotification = new TeacherNotification
                 {
-                    Teacher = teacher,
-                    StudyCourse = studyCourse,
+                    TeacherId = teacher.Id,
+                    StudyCourseId = studyCourseId,
                     Title = "New Course Assigned",
                     Message = "You have been assigned to a new course. Click here for more details.",
                     DateCreated = DateTime.Now,
@@ -135,12 +246,6 @@ namespace griffined_api.Services.StudyCourseService
 
                 _context.TeacherNotifications.Add(teacherNotification);
             }
-
-            _context.StudyCourses.Add(studyCourse);
-
-            await _context.SaveChangesAsync();
-            response.StatusCode = (int)HttpStatusCode.OK; ;
-            return response;
         }
 
         public async Task<ServiceResponse<List<StudyCourseResponseDto>>> GetAllStudyCourse()
@@ -212,34 +317,52 @@ namespace griffined_api.Services.StudyCourseService
                     });
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
+                        if (!studyCourse.Teachers.Any(t => t.TeacherId == dbStudyClass.Teacher.Id))
+                        {
+                            studyCourse.Teachers.Add(new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                FullName = dbStudyClass.Teacher.FullName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                            });
+                        }
+
                         var schedule = new ScheduleResponseDto()
                         {
                             StudyCourseId = dbStudyCourse.Id,
+                            Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                             CourseId = dbStudyCourse.Course.Id,
-                            Course = dbStudyCourse.Course.course,
+                            CourseName = dbStudyCourse.Course.course,
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
+                            SubjectName = dbStudySubject.Subject.subject,
                             CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Room = null,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                                FullName = dbStudyClass.Teacher.FullName,
+                            },
                             ClassStatus = dbStudyClass.Status,
                         };
                         foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                         {
-                            schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                            {
-                                Hours = dbTeacherShift.Hours,
-                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                            });
+                            if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                                schedule.AdditionalHours = new AdditionalHours
+                                {
+                                    Hours = dbTeacherShift.Hours,
+                                    TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                                };
                         }
                         studyCourse.Schedules.Add(schedule);
                     }
@@ -275,10 +398,10 @@ namespace griffined_api.Services.StudyCourseService
 
             foreach (var dbNewRequestedCourse in dbRequest.NewCourseRequests)
             {
-                var studyCourse = new StudyCourse()
+                var studyCourse = new StudyCourse
                 {
                     Course = dbNewRequestedCourse.Course,
-                    Level = dbNewRequestedCourse.Level,
+                    Level = dbNewRequestedCourse.Level is null ? null : dbNewRequestedCourse.Level,
                     Section = dbRequest.Section,
                     TotalHour = dbNewRequestedCourse.TotalHours,
                     StartDate = dbNewRequestedCourse.StartDate,
@@ -288,6 +411,7 @@ namespace griffined_api.Services.StudyCourseService
                     Status = StudyCourseStatus.Pending,
                     NewCourseRequest = dbNewRequestedCourse,
                 };
+
                 foreach (var dbNewRequestedSubject in dbNewRequestedCourse.NewCourseSubjectRequests)
                 {
                     var studySubject = new StudySubject()
@@ -303,16 +427,40 @@ namespace griffined_api.Services.StudyCourseService
                             CourseJoinedDate = DateTime.Now,
                             Status = StudySubjectMemberStatus.Pending,
                         };
+
+
+                        var allStudyClasses = await _context.StudyClasses
+                                                    .Include(x => x.Schedule)
+                                                    .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Student.Id)
+                                                              && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                    .ToListAsync();
+
+                        var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+                        var expiryDate = lastClassEndDate.AddDays(14);
+
+                        student.Student.ExpiryDate = expiryDate;
+
+
+                        studySubject.StudySubjectMember ??= new List<StudySubjectMember>();
                         studySubject.StudySubjectMember.Add(member);
                     }
                     var requestedStudyClasses = newStudyClasses.Where(c => c.SubjectId == dbNewRequestedSubject.SubjectId && c.CourseId == dbNewRequestedCourse.CourseId);
+
+                    int studyClassCount = requestedStudyClasses.Count();
+                    int c = 0;
+
                     foreach (var requestedStudyClass in requestedStudyClasses)
                     {
+                        c++;
+
                         var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == requestedStudyClass.TeacherId) ?? throw new NotFoundException($"Teacher with ID {requestedStudyClass.TeacherId} is not found.");
 
-                        var studyClass = new StudyClass()
+                        var studyClass = new StudyClass
                         {
                             IsMakeup = false,
+                            IsFiftyPercent = false,
+                            IsHundredPercent = false,
                             ClassNumber = requestedStudyClass.ClassNo,
                             Teacher = dbTeacher,
                             StudyCourse = studyCourse,
@@ -322,27 +470,27 @@ namespace griffined_api.Services.StudyCourseService
                                 FromTime = requestedStudyClass.FromTime.ToTimeSpan(),
                                 ToTime = requestedStudyClass.ToTime.ToTimeSpan(),
                                 Type = ScheduleType.Class,
+                                CalendarType = DailyCalendarType.NORMAL_CLASS,
                             }
                         };
 
-                        // var worktypes = _teacherService.GetTeacherWorkTypesWithHours(
-                        //                 dbTeacher,
-                        //                 requestedStudyClass.Date.ToDateTime(),
-                        //                 requestedStudyClass.FromTime.ToTimeSpan(),
-                        //                 requestedStudyClass.ToTime.ToTimeSpan());
+                        if (c == studyClassCount / 2)
+                        {
+                            studyClass.IsFiftyPercent = true;
+                            studyClass.IsHundredPercent = false;
+                        }
 
-                        // foreach (var worktype in worktypes)
-                        // {
-                        //     studyClass.TeacherShifts.Add(new TeacherShift
-                        //     {
-                        //         Teacher = dbTeacher,
-                        //         TeacherWorkType = worktype.TeacherWorkType,
-                        //         Hours = worktype.Hours,
-                        //     });
-                        // }
+                        if (c == studyClassCount)
+                        {
+                            studyClass.IsFiftyPercent = false;
+                            studyClass.IsHundredPercent = true;
+                        }
 
+                        studySubject.StudyClasses ??= new List<StudyClass>();
                         studySubject.StudyClasses.Add(studyClass);
                     }
+
+                    studyCourse.StudySubjects ??= new List<StudySubject>();
                     studyCourse.StudySubjects.Add(studySubject);
                 }
                 _context.StudyCourses.Add(studyCourse);
@@ -387,7 +535,7 @@ namespace griffined_api.Services.StudyCourseService
                 var dbStudyClasses = await _context.StudyClasses.Where(s => requestDto.ClassToDelete.Contains(s.Id)).ToListAsync();
                 foreach (var dbStudyClass in dbStudyClasses)
                 {
-                    dbStudyClass.Status = ClassStatus.Deleted;
+                    dbStudyClass.Status = ClassStatus.DELETED;
                 }
             }
 
@@ -419,10 +567,15 @@ namespace griffined_api.Services.StudyCourseService
                                             .Where(c => c.CourseId == dbNewCourseRequest.CourseId
                                             && c.SubjectId == dbStudySubject.SubjectId);
 
+                        int studyClassCount = newStudyClasses.Count();
+                        int c = 0;
+
                         foreach (var newStudyClass in newStudyClasses)
                         {
                             var studyClass = new StudyClass
                             {
+                                IsFiftyPercent = false,
+                                IsHundredPercent = false,
                                 ClassNumber = newStudyClass.ClassNo,
                                 Teacher = dbTeachers.FirstOrDefault(t => t.Id == newStudyClass.TeacherId) ?? throw new Exception($"Cannot Find Teacher ID {newStudyClass.TeacherId}"),
                                 StudyCourse = dbNewCourseRequest.StudyCourse,
@@ -432,8 +585,22 @@ namespace griffined_api.Services.StudyCourseService
                                     FromTime = newStudyClass.FromTime.ToTimeSpan(),
                                     ToTime = newStudyClass.ToTime.ToTimeSpan(),
                                     Type = ScheduleType.Class,
+                                    CalendarType = DailyCalendarType.NORMAL_CLASS,
                                 }
                             };
+
+                            if (c == studyClassCount / 2)
+                            {
+                                studyClass.IsFiftyPercent = true;
+                                studyClass.IsHundredPercent = false;
+                            }
+
+                            if (c == studyClassCount)
+                            {
+                                studyClass.IsFiftyPercent = false;
+                                studyClass.IsHundredPercent = true;
+                            }
+
                             dbStudySubject.StudyClasses.Add(studyClass);
                         }
                     }
@@ -568,6 +735,9 @@ namespace griffined_api.Services.StudyCourseService
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(c => c.Course)
                                 .Include(c => c.Level)
+                                .Include(x => x.StudySubjects)
+                                    .ThenInclude(x => x.StudySubjectMember)
+                                        .ThenInclude(x => x.Student)
                                 .Include(c => c.StudySubjects)
                                     .ThenInclude(c => c.Subject)
                                 .Include(c => c.StudySubjects)
@@ -622,29 +792,36 @@ namespace griffined_api.Services.StudyCourseService
                 });
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
-                    if (dbStudyClass.Status != ClassStatus.Deleted)
+                    if (dbStudyClass.Status != ClassStatus.DELETED)
                     {
                         schedules.Add(new ScheduleResponseDto
                         {
+                            Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                             StudyClassId = dbStudyClass.Id,
                             ClassNo = dbStudyClass.ClassNumber,
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
-                            FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                            ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                            FromTime = dbStudyClass.Schedule.FromTime,
+                            ToTime = dbStudyClass.Schedule.ToTime,
                             StudyCourseId = dbStudyCourse.Id,
                             CourseId = dbStudyCourse.Course.Id,
-                            Course = dbStudyCourse.Course.course,
+                            CourseName = dbStudyCourse.Course.course,
                             StudySubjectId = dbStudySubject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
-                            Subject = dbStudySubject.Subject.subject,
+                            SubjectName = dbStudySubject.Subject.subject,
                             CourseSubject = dbStudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbStudyCourse.Level?.level ?? ""),
                             ClassStatus = dbStudyClass.Status,
-                            TeacherId = dbStudyClass.Teacher.Id,
-                            TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                            TeacherLastName = dbStudyClass.Teacher.LastName,
-                            TeacherNickname = dbStudyClass.Teacher.Nickname,
+                            Teacher = new TeacherNameResponseDto
+                            {
+                                TeacherId = dbStudyClass.Teacher.Id,
+                                FirstName = dbStudyClass.Teacher.FirstName,
+                                LastName = dbStudyClass.Teacher.LastName,
+                                Nickname = dbStudyClass.Teacher.Nickname,
+                                FullName = dbStudyClass.Teacher.FullName,
+                            },
+                            IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                            IsHundredPercent = dbStudyClass.IsHundredPercent
                         });
                     }
 
@@ -683,13 +860,15 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Attendances)
                                     .ThenInclude(a => a.Student)
                                 .Include(c => c.Teacher)
-                                .Where(c => dbStudySubjects.Contains(c.StudySubject) && c.Status != ClassStatus.Deleted)
+                                .Where(c => dbStudySubjects.Contains(c.StudySubject) && c.Status != ClassStatus.DELETED)
                                 .Select(c => new
                                 {
                                     StudyClass = c,
                                     c.StudySubject,
                                     c.Schedule,
                                     Attendance = c.Attendances.FirstOrDefault(a => a.StudentId == studentId),
+                                    c.IsFiftyPercent,
+                                    c.IsHundredPercent
                                 })
                                 .ToListAsync();
 
@@ -747,6 +926,8 @@ namespace griffined_api.Services.StudyCourseService
                     TeacherLastName = dbStudyClass.StudyClass.Teacher.LastName,
                     TeacherNickname = dbStudyClass.StudyClass.Teacher.Nickname,
                     Attendance = dbStudyClass.Attendance.Attendance,
+                    IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                    IsHundredPercent = dbStudyClass.IsHundredPercent
                 });
             }
 
@@ -784,119 +965,111 @@ namespace griffined_api.Services.StudyCourseService
                 Data = new List<StudyCourseByStudentIdResponseDto>()
             };
 
-            var dbStudyCourses = await _context.StudyCourses
-                                .Include(sc => sc.Course)
-                                .Include(sc => sc.Level)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.Subject)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.Student)
-                                .Include(sm => sm.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.StudentReports)
-                                            .ThenInclude(sr => sr.Teacher)
-                                .Where(sc => sc.StudySubjects.Any(ss => ss.StudySubjectMember.Any(sm => sm.Student.StudentCode == studentCode)))
-                                .ToListAsync() ?? throw new NotFoundException($"No courses containing student with code {studentCode} found.");
+            var student = _context.Students.FirstOrDefault(x => x.StudentCode == studentCode);
 
-            foreach (var dbStudyCourse in dbStudyCourses)
+            if (student is null)
             {
-                var studyCourseDto = new StudyCourseByStudentIdResponseDto
+                throw new NotFoundException($"Student with given code ({studentCode}) is not found.");
+            }
+
+            var studyCourseIds = _context.StudySubjectMember.Include(x => x.StudySubject)
+                                                            .Where(x => x.StudentId == student.Id)
+                                                            .Select(x => x.StudySubject.StudyCourseId)
+                                                            .ToList();
+
+            var studyCourses = _context.StudyCourses.Include(x => x.Course)
+                                                    .Include(x => x.Level)
+                                                    .Include(x => x.StudySubjects)
+                                                        .ThenInclude(x => x.StudySubjectMember)
+                                                    .Include(x => x.StudySubjects)
+                                                        .ThenInclude(x => x.StudyClasses)
+                                                    .Where(x => studyCourseIds.Contains(x.Id))
+                                                    .ToList()
+                                                    ?? throw new NotFoundException($"No courses containing student with code {studentCode} found.");
+
+            var studySubjects = _context.StudySubjects.Include(x => x.StudyClasses)
+                                                      .Where(x => studyCourseIds.Contains(x.StudyCourseId))
+                                                      .ToList();
+
+            var studySubjectMember = _context.StudySubjectMember.Include(x => x.StudentReports)
+                                                                .FirstOrDefault(x => x.StudentId == student.Id);
+
+
+            foreach (var studyCourse in studyCourses)
+            {
+                int completedClass = 0;
+                int totalClass = studySubjects.SelectMany(x => x.StudyClasses).Count();
+                double progress = 0;
+
+                if (studySubjects.Any())
                 {
-                    StudentId = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sm => sm.Student.StudentCode == studentCode)
-                            .Select(sm => sm.Student.Id)
-                            .FirstOrDefault()!,
-                    StudentCode = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sm => sm.Student.StudentCode == studentCode)
-                            .Select(sm => sm.Student.StudentCode)
-                            .FirstOrDefault()!,
-                    StudentFirstName = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sm => sm.Student.StudentCode == studentCode)
-                            .Select(sm => sm.Student.FirstName)
-                            .FirstOrDefault()!,
-                    StudentLastName = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sm => sm.Student.StudentCode == studentCode)
-                            .Select(sm => sm.Student.LastName)
-                            .FirstOrDefault()!,
-                    StudentNickname = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sm => sm.Student.StudentCode == studentCode)
-                            .Select(sm => sm.Student.Nickname)
-                            .FirstOrDefault()!,
-                    StudyCourseId = dbStudyCourse.Id,
-                    Course = dbStudyCourse.Course.course,
-                    Level = dbStudyCourse.Level!.level,
-                    Section = dbStudyCourse.Section,
-                    Status = dbStudyCourse.Status,
+                    foreach (var studySubject in studySubjects)
+                    {
+                        foreach (var studyClass in studySubject.StudyClasses)
+                        {
+                            if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                            {
+                                completedClass += 1;
+                            }
+                        }
+                    }
+
+                    double progressRatio = totalClass != 0 ? (double)completedClass / totalClass : 0;
+                    progress = Math.Round(progressRatio * 100);
+                }
+
+                var studyCourseDTO = new StudyCourseByStudentIdResponseDto
+                {
+                    StudentId = student.Id,
+                    StudentCode = student.StudentCode is null ? null : student.StudentCode,
+                    StudentFirstName = student.FirstName is null ? null : student.FirstName,
+                    StudentLastName = student.LastName is null ? null : student.LastName,
+                    StudentNickname = student.Nickname is null ? null : student.Nickname,
+                    StudyCourseId = studyCourse.Id,
+                    Course = studyCourse.Course.course,
+                    Level = studyCourse.Level is null ? null : studyCourse.Level.level,
+                    Status = studyCourse.Status,
+                    Progress = progress,
                     Reports = new List<StudySubjectReportResponseDto>()
                 };
 
-                foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
+                foreach (var subject in studyCourse.StudySubjects)
                 {
-                    var studentReport = dbStudySubject.StudySubjectMember
-                                .FirstOrDefault(sm => sm.Student.StudentCode == studentCode)?
-                                .StudentReports?
-                                .FirstOrDefault();
+                    var studentReports = studySubjectMember is null ? null : studySubjectMember.StudentReports.ToList();
 
-                    var reportDto = new StudySubjectReportResponseDto
+                    if (studentReports is not null)
                     {
-                        StudySubject = new StudySubjectResponseDto
+                        foreach (var report in studentReports)
                         {
-                            StudySubjectId = dbStudySubject.Id,
-                            SubjectId = dbStudySubject.Id,
-                            Subject = dbStudySubject.Subject.subject,
-                            Hour = dbStudySubject.Hour,
-                        },
-                        FiftyPercentReport = studentReport?.Progression == Progression.FiftyPercent
-                            ? new ReportFileResponseDto
+                            var reportDto = new StudySubjectReportResponseDto
                             {
-                                UploadedBy = studentReport.Teacher.Id,
-                                Progression = studentReport.Progression,
-                                File = new FilesResponseDto
+                                StudySubject = new StudySubjectResponseDto
                                 {
-                                    FileName = studentReport.FileName,
-                                    ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
-                                    URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
-                                }
-                            }
-                            : null,
-                        HundredPercentReport = studentReport?.Progression == Progression.HundredPercent
-                            ? new ReportFileResponseDto
-                            {
-                                UploadedBy = studentReport.Teacher.Id,
-                                Progression = studentReport.Progression,
-                                File = new FilesResponseDto
-                                {
-                                    FileName = studentReport.FileName,
-                                    ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
-                                    URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
-                                }
-                            }
-                            : null,
-                        SpecialReport = studentReport?.Progression == Progression.Special
-                            ? new ReportFileResponseDto
-                            {
-                                UploadedBy = studentReport.Teacher.Id,
-                                Progression = studentReport.Progression,
-                                File = new FilesResponseDto
-                                {
-                                    FileName = studentReport.FileName,
-                                    ContentType = await _firebaseService.GetContentTypeByObjectName(studentReport.ObjectName),
-                                    URL = await _firebaseService.GetUrlByObjectName(studentReport.ObjectName)
-                                }
-                            }
-                            : null
-                    };
+                                    StudySubjectId = subject.Id,
+                                    SubjectId = subject.Id,
+                                    Subject = subject.Subject.subject,
+                                    Hour = subject.Hour
+                                },
+                                FiftyPercentReport = report.Progression == Progression.FiftyPercent
+                                    ? await CreateReportFileResponseDto(report)
+                                    : null,
+                                HundredPercentReport = report.Progression == Progression.HundredPercent
+                                    ? await CreateReportFileResponseDto(report)
+                                    : null,
+                                SpecialReport = report.Progression == Progression.Special
+                                    ? await CreateReportFileResponseDto(report)
+                                    : null
+                            };
 
-                    studyCourseDto.Reports.Add(reportDto);
+                            if (reportDto is not null)
+                            {
+                                studyCourseDTO.Reports.Add(reportDto);
+                            }
+                        }
+                    }
                 }
 
-                response.Data.Add(studyCourseDto);
+                response.Data.Add(studyCourseDTO);
             }
 
             return response;
@@ -904,6 +1077,13 @@ namespace griffined_api.Services.StudyCourseService
 
         public async Task<ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>> ListAllStudyCoursesWithReportsByTeacherId(int teacherId)
         {
+            var teacher = _context.Teachers.FirstOrDefault(x => x.Id == teacherId);
+
+            if (teacher is null)
+            {
+                throw new NotFoundException("No teacher found.");
+            }
+
             var response = new ServiceResponse<List<StudyCourseByTeacherIdResponseDto>>()
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -911,48 +1091,60 @@ namespace griffined_api.Services.StudyCourseService
             };
 
             var dbStudyCourses = await _context.StudyCourses
-                                .Include(sc => sc.Course)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.Subject)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudyClasses)
-                                        .ThenInclude(sc => sc.Teacher)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.Student)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.StudentReports)
-                                .Where(sc => sc.StudySubjects.Any(ss => ss.StudyClasses.Any(sm => sm.Teacher.Id == teacherId)))
-                                .ToListAsync() ?? throw new NotFoundException("No courses containing teacher with ID {teacherId} found.");
+                .Include(sc => sc.Course)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.Subject)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudyClasses)
+                        .ThenInclude(sc => sc.Teacher)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudySubjectMember)
+                        .ThenInclude(sm => sm.Student)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudySubjectMember)
+                        .ThenInclude(sm => sm.StudentReports)
+                .Where(sc => sc.StudySubjects.Any(ss => ss.StudyClasses.Any(sm => sm.Teacher.Id == teacherId)))
+                .ToListAsync();
 
+            if (dbStudyCourses == null || !dbStudyCourses.Any())
+            {
+                throw new NotFoundException($"No courses containing teacher with ID {teacherId} found.");
+            }
 
             foreach (var dbStudyCourse in dbStudyCourses)
             {
                 var studentCount = 0;
-                var student = new List<int>();
+                var studentIds = new List<int>();
                 foreach (var dbStudySubject in dbStudyCourse.StudySubjects)
                 {
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
-                        if (!student.Exists(s => s == dbMember.StudentId))
+                        if (!studentIds.Exists(s => s == dbMember.StudentId))
                         {
                             studentCount += 1;
-                            student.Add(dbMember.StudentId);
+                            studentIds.Add(dbMember.StudentId);
                         }
                     }
                 }
 
+                var firstStudyClass = dbStudyCourse.StudySubjects
+                    .FirstOrDefault()?.StudyClasses.FirstOrDefault();
+
+                if (firstStudyClass?.Teacher == null)
+                {
+                    throw new NotFoundException("Teacher information missing in study class.");
+                }
+
                 var studyCourseDto = new StudyCourseByTeacherIdResponseDto
                 {
-                    TeacherId = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.Id,
-                    TeacherFirstName = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.FirstName,
-                    TeacherLastName = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.LastName,
-                    TeacherNickname = dbStudyCourse.StudySubjects.FirstOrDefault()!.StudyClasses.FirstOrDefault()!.Teacher.Nickname,
+                    TeacherId = firstStudyClass.Teacher.Id,
+                    TeacherFirstName = firstStudyClass.Teacher.FirstName,
+                    TeacherLastName = firstStudyClass.Teacher.LastName,
+                    TeacherNickname = firstStudyClass.Teacher.Nickname,
 
                     StudyCourseId = dbStudyCourse.Id,
-                    Course = dbStudyCourse.Course.course,
-                    Level = dbStudyCourse.Level!.level,
+                    Course = dbStudyCourse.Course?.course,
+                    Level = dbStudyCourse.Level?.level,
                     Section = dbStudyCourse.Section,
                     StudentCount = studentCount,
                     TotalHour = dbStudyCourse.TotalHour,
@@ -966,16 +1158,13 @@ namespace griffined_api.Services.StudyCourseService
                     var studySubjectDto = new StudySubjectWithMembersResponseDto
                     {
                         StudySubjectId = dbStudySubject.Id,
-                        SubjectId = dbStudySubject.Subject.Id,
-                        Subject = dbStudySubject.Subject.subject
+                        SubjectId = dbStudySubject.Subject?.Id ?? 0,
+                        Subject = dbStudySubject.Subject?.subject
                     };
 
                     foreach (var dbStudySubjectMember in dbStudySubject.StudySubjectMember)
                     {
-                        var studentReport = dbStudySubject.StudySubjectMember
-                                            .FirstOrDefault(sm => sm.Student.StudentCode == dbStudySubjectMember.Student.StudentCode)?
-                                            .StudentReports?
-                                            .FirstOrDefault();
+                        var studentReport = dbStudySubjectMember.StudentReports?.FirstOrDefault();
 
                         var reportDto = new StudySubjectMemberWithReportsResponseDto
                         {
@@ -1033,8 +1222,10 @@ namespace griffined_api.Services.StudyCourseService
 
                 response.Data.Add(studyCourseDto);
             }
+
             return response;
         }
+
 
         public async Task<ServiceResponse<StaffCoursesDetailResponseDto>> GetCourseDetail(int studyCourseId)
         {
@@ -1061,48 +1252,66 @@ namespace griffined_api.Services.StudyCourseService
                 StudyCourseId = dbStudyCourse.Id,
                 CourseId = dbStudyCourse.Course.Id,
                 Course = dbStudyCourse.Course.course,
-                Subjects = dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
-                {
-                    StudySubjectId = dbStudySubject.Id,
-                    SubjectId = dbStudySubject.Subject.Id,
-                    Subject = dbStudySubject.Subject.subject,
-                    Hour = dbStudySubject.Hour,
-                }).ToList(),
-                Level = new Dtos.LevelDtos.LevelResponseDto
-                {
-                    LevelId = dbStudyCourse.Level!.Id,
-                    Level = dbStudyCourse.Level.level
-                },
+                Subjects = !dbStudyCourse.StudySubjects.Any() ? Enumerable.Empty<StudySubjectResponseDto>()
+                                                              : dbStudyCourse.StudySubjects.Select(dbStudySubject => new StudySubjectResponseDto
+                                                              {
+                                                                  StudySubjectId = dbStudySubject.Id,
+                                                                  SubjectId = dbStudySubject.Subject.Id,
+                                                                  Subject = dbStudySubject.Subject.subject,
+                                                                  Hour = dbStudySubject.Hour,
+                                                              })
+                                                            .ToList(),
+                Level = dbStudyCourse.Level is null ? null
+                                                    : new Dtos.LevelDtos.LevelResponseDto
+                                                    {
+                                                        LevelId = dbStudyCourse.Level.Id,
+                                                        Level = dbStudyCourse.Level.level
+                                                    },
                 Section = dbStudyCourse.Section,
                 Method = dbStudyCourse.Method,
                 StartDate = dbStudyCourse.StartDate.ToDateString(),
                 EndDate = dbStudyCourse.EndDate.ToDateString(),
                 TotalHour = dbStudyCourse.TotalHour,
                 Status = dbStudyCourse.Status,
-                Schedules = dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
-                {
-                    StudyCourseId = dbStudyCourse.Id,
-                    CourseId = dbStudyCourse.Course.Id,
-                    Course = dbStudyCourse.Course.course,
-                    StudySubjectId = dbStudySubject.Id,
-                    SubjectId = dbStudySubject.Subject.Id,
-                    Subject = dbStudySubject.Subject.subject,
-                    CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
-                    StudyClassId = dbStudyClass.Id,
-                    ClassNo = dbStudyClass.ClassNumber,
-                    Date = dbStudyClass.Schedule.Date.ToDateString(),
-                    FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                    ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
-                    TeacherNickname = dbStudyClass.Teacher.Nickname,
-                    ClassStatus = dbStudyClass.Status,
-                    TeacherShifts = dbStudyClass.TeacherShifts.Select(shift => new TeacherShiftResponseDto
-                    {
-                        Hours = shift.Hours,
-                        TeacherWorkType = shift.TeacherWorkType,
-                    }).ToList(),
-                }))
-                .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
-                .ToList()
+                Schedules = !dbStudyCourse.StudySubjects.Any() ? Enumerable.Empty<ScheduleResponseDto>()
+                                                               : dbStudyCourse.StudySubjects.SelectMany(dbStudySubject => dbStudySubject.StudyClasses.Select(dbStudyClass => new ScheduleResponseDto
+                                                               {
+                                                                   ScheduleId = dbStudyClass.ScheduleId.HasValue ? dbStudyClass.ScheduleId.Value : 0,
+                                                                   Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
+                                                                   StudyCourseId = dbStudyCourse.Id,
+                                                                   CourseId = dbStudyCourse.Course.Id,
+                                                                   CourseName = dbStudyCourse.Course.course,
+                                                                   StudySubjectId = dbStudySubject.Id,
+                                                                   SubjectId = dbStudySubject.Subject.Id,
+                                                                   SubjectName = dbStudySubject.Subject.subject,
+                                                                   CourseSubject = dbStudyCourse.Course.course + " " + dbStudySubject.Subject.subject + " " + (dbStudyCourse.Level?.level ?? ""),
+                                                                   StudyClassId = dbStudyClass.Id,
+                                                                   ClassNo = dbStudyClass.ClassNumber,
+                                                                   Date = dbStudyClass.Schedule.Date.ToDateString(),
+                                                                   FromTime = dbStudyClass.Schedule.FromTime,
+                                                                   ToTime = dbStudyClass.Schedule.ToTime,
+                                                                   IsFiftyPercent = dbStudyClass.IsFiftyPercent,
+                                                                   IsHundredPercent = dbStudyClass.IsHundredPercent,
+                                                                   Teacher = new TeacherNameResponseDto
+                                                                   {
+                                                                       TeacherId = dbStudyClass.Teacher.Id,
+                                                                       FirstName = dbStudyClass.Teacher.FirstName,
+                                                                       LastName = dbStudyClass.Teacher.LastName,
+                                                                       Nickname = dbStudyClass.Teacher.Nickname,
+                                                                       FullName = dbStudyClass.Teacher.FullName,
+                                                                   },
+                                                                   ClassStatus = dbStudyClass.Status,
+                                                                   AdditionalHours = dbStudyClass.TeacherShifts
+                                                                                                 .Where(x => x.TeacherWorkType != TeacherWorkType.NORMAL)
+                                                                                                 .Select(shift => new AdditionalHours
+                                                                                                 {
+                                                                                                     Hours = shift.Hours,
+                                                                                                     TeacherWorkType = shift.TeacherWorkType,
+                                                                                                 })
+                                                                                                .FirstOrDefault()
+                                                               }))
+                                                              .OrderBy(s => (s.Date + " " + s.FromTime).ToDateTime())
+                                                              .ToList()
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -1115,64 +1324,71 @@ namespace griffined_api.Services.StudyCourseService
             var response = new ServiceResponse<StudySubjectMemberResponseDto>();
 
             var dbStudyCourse = await _context.StudyCourses
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.Subject)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudySubjectMember)
-                                        .ThenInclude(sm => sm.Student)
-                                .Include(sc => sc.StudySubjects)
-                                    .ThenInclude(ss => ss.StudyClasses)
-                                        .ThenInclude(sc => sc.Teacher)
-                                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("No course found.");
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.Subject)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudySubjectMember)
+                        .ThenInclude(sm => sm.Student)
+                .Include(sc => sc.StudySubjects)
+                    .ThenInclude(ss => ss.StudyClasses)
+                        .ThenInclude(sc => sc.Teacher)
+                            .ThenInclude(x => x.StudyClasses)
+                                .ThenInclude(x => x.Schedule)
+                .FirstOrDefaultAsync(sc => sc.Id == studyCourseId)
+                ?? throw new NotFoundException("No course found.");
+
+            var studentGroups = dbStudyCourse.StudySubjects?
+                .SelectMany(ss => ss.StudySubjectMember)
+                .Where(sm => sm.Student != null)
+                .GroupBy(sm => sm.Student.Id)
+                .Select(group => new StudentStudySubjectMemberResponseDto
+                {
+                    StudentId = group.Key,
+                    StudentCode = group.First().Student?.StudentCode,
+                    StudentFirstName = group.First().Student?.FirstName,
+                    StudentLastName = group.First().Student?.LastName,
+                    StudentNickname = group.First().Student?.Nickname,
+                    Phone = group.First().Student?.Phone,
+                    CourseJoinedDate = group.First().CourseJoinedDate.ToDateTimeString(),
+                    Subjects = group.Select(member => new StudySubjectResponseDto
+                    {
+                        StudySubjectId = member.StudySubject?.Id ?? 0,
+                        SubjectId = member.StudySubject?.Subject?.Id ?? 0,
+                        Subject = member.StudySubject?.Subject?.subject,
+                        Hour = member.StudySubject?.Hour ?? 0,
+                    }).ToList()
+                }).ToList() ?? new List<StudentStudySubjectMemberResponseDto>();
+
+            var teacherGroups = dbStudyCourse.StudySubjects?
+                .SelectMany(ss => ss.StudyClasses)
+                .Where(sc => sc.Teacher != null)
+                .GroupBy(sc => sc.Teacher.Id)
+                .Select(group => new TeacherStudySubjectMemberResponseDto
+                {
+                    TeacherId = group.Key,
+                    TeacherFirstName = group.First().Teacher?.FirstName,
+                    TeacherLastName = group.First().Teacher?.LastName,
+                    TeacherNickname = group.First().Teacher?.Nickname,
+                    Phone = group.First().Teacher?.Phone,
+                    CourseJoinedDate = group.First().Schedule?.Date.ToDateTimeString(),
+                    Subjects = group.Select(cls => new StudySubjectResponseDto
+                    {
+                        StudySubjectId = cls.StudySubject?.Id ?? 0,
+                        SubjectId = cls.StudySubject?.Subject?.Id ?? 0,
+                        Subject = cls.StudySubject?.Subject?.subject,
+                        Hour = cls.StudySubject?.Hour ?? 0,
+                    }).ToList()
+                }).ToList() ?? new List<TeacherStudySubjectMemberResponseDto>();
 
             var data = new StudySubjectMemberResponseDto
             {
-                Students = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudySubjectMember)
-                            .Where(sc => sc.Student != null)
-                            .GroupBy(sm => sm.Student.Id)
-                            .Select(group => new StudentStudySubjectMemberResponseDto
-                            {
-                                StudentId = group.First().Student.Id,
-                                StudentCode = group.First().Student.StudentCode!,
-                                StudentFirstName = group.First().Student.FirstName,
-                                StudentLastName = group.First().Student.LastName,
-                                StudentNickname = group.First().Student.Nickname,
-                                Phone = group.First().Student.Phone, // Corrected phone retrieval
-                                CourseJoinedDate = group.First().CourseJoinedDate.ToDateTimeString(),
-                                Subjects = group.Select(member => new StudySubjectResponseDto
-                                {
-                                    StudySubjectId = member.StudySubject.Id,
-                                    SubjectId = member.StudySubject.Subject.Id,
-                                    Subject = member.StudySubject.Subject.subject,
-                                    Hour = member.StudySubject.Hour,
-                                }).ToList()
-                            }).ToList(),
-
-                Teachers = dbStudyCourse.StudySubjects
-                            .SelectMany(ss => ss.StudyClasses)
-                            .Where(sc => sc.Teacher != null)
-                            .GroupBy(sc => sc.Teacher)
-                            .Select(group => new TeacherStudySubjectMemberResponseDto
-                            {
-                                TeacherId = group.Key.Id,
-                                TeacherFirstName = group.Key.FirstName,
-                                TeacherLastName = group.Key.LastName,
-                                TeacherNickname = group.Key.Nickname,
-                                Phone = group.Key.Phone,
-                                CourseJoinedDate = group.First().Schedule.Date.ToDateTimeString(),
-                                Subjects = group.Select(cls => new StudySubjectResponseDto
-                                {
-                                    StudySubjectId = cls.StudySubject.Id,
-                                    SubjectId = cls.StudySubject.Subject.Id,
-                                    Subject = cls.StudySubject.Subject.subject,
-                                    Hour = cls.StudySubject.Hour,
-                                }).ToList()
-                            }).ToList()
+                Students = studentGroups,
+                Teachers = teacherGroups
             };
 
             response.StatusCode = (int)HttpStatusCode.OK;
             response.Data = data;
+
             return response;
         }
 
@@ -1182,6 +1398,7 @@ namespace griffined_api.Services.StudyCourseService
 
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(sc => sc.Course)
+                                .Include(x => x.StudyCourseHistories)
                                 .FirstOrDefaultAsync(sc => sc.Id == requestDto.StudyCourseId) ?? throw new NotFoundException("No Course Found.");
 
             var dbStudySubjects = await _context.StudySubjects
@@ -1248,6 +1465,18 @@ namespace griffined_api.Services.StudyCourseService
             history.Description = historyDescription;
 
             dbStudyCourse.StudyCourseHistories.Add(history);
+
+            var allStudyClasses = await _context.StudyClasses
+                                        .Include(x => x.Schedule)
+                                        .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
+                                                  && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                        .ToListAsync();
+
+            var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+            var expiryDate = lastClassEndDate.AddDays(14);
+
+            student.ExpiryDate = expiryDate;
 
             await _context.SaveChangesAsync();
 
@@ -1318,6 +1547,18 @@ namespace griffined_api.Services.StudyCourseService
 
             dbStudyCourse.StudyCourseHistories.Add(history);
 
+            var allStudyClasses = await _context.StudyClasses
+                                        .Include(x => x.Schedule)
+                                        .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
+                                                  && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                        .ToListAsync();
+
+            var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+            var expiryDate = lastClassEndDate.AddDays(14);
+
+            student.ExpiryDate = expiryDate;
+
             await _context.SaveChangesAsync();
 
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -1345,25 +1586,25 @@ namespace griffined_api.Services.StudyCourseService
                                 ?? throw new NotFoundException("No Subject Found.");
 
             int completedClass = 0;
-            int incompleteClass = 0;
+            int totalClass = dbStudySubjects.SelectMany(x => x.StudyClasses).Count();
+            double progress = 0;
 
-            foreach (var dbStudySubject in dbStudySubjects)
+            if (dbStudySubjects.Any())
             {
-                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                foreach (var studySubject in dbStudySubjects)
                 {
-                    if (dbStudyClass.Status == ClassStatus.Checked || dbStudyClass.Status == ClassStatus.Unchecked)
+                    foreach (var studyClass in studySubject.StudyClasses)
                     {
-                        completedClass += 1;
-                    }
-                    else if (dbStudyClass.Status == ClassStatus.None)
-                    {
-                        incompleteClass += 1;
+                        if (studyClass.Status == ClassStatus.CHECKED || studyClass.Status == ClassStatus.UNCHECKED)
+                        {
+                            completedClass += 1;
+                        }
                     }
                 }
-            }
 
-            double progressRatio = incompleteClass != 0 ? (double)completedClass / incompleteClass : 0;
-            double progress = Math.Round(progressRatio * 100);
+                double progressRatio = totalClass != 0 ? (double)completedClass / totalClass : 0;
+                progress = Math.Round(progressRatio * 100);
+            }
 
             data.StudyCourseId = dbStudyCourse.Id;
             data.CourseId = dbStudyCourse.Course.Id;
@@ -1396,7 +1637,9 @@ namespace griffined_api.Services.StudyCourseService
                 {
                     _context.StudentAttendances.Remove(dbAttendance);
                 }
-                dbRemoveStudyClass.Status = ClassStatus.Deleted;
+                dbRemoveStudyClass.Status = ClassStatus.DELETED;
+                dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.DELETED;
+
                 var removeHistory = new StudyCourseHistory
                 {
                     StudyCourse = dbRemoveStudyClass.StudyCourse,
@@ -1410,6 +1653,7 @@ namespace griffined_api.Services.StudyCourseService
                 string removedStudyClassHistoryDescription = $"Removed {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
 
                 removeHistory.Description = removedStudyClassHistoryDescription;
+                dbRemoveStudyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                 dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
             }
 
@@ -1424,7 +1668,10 @@ namespace griffined_api.Services.StudyCourseService
                             .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
                             .ToListAsync();
 
-            var dbTeachers = await _context.Teachers.ToListAsync();
+            var dbTeachers = await _context.Teachers
+                                           .Include(x => x.Mandays)
+                                                .ThenInclude(x => x.WorkTimes)
+                                           .ToListAsync();
 
             foreach (var dbStudySubject in dbStudySubjects)
             {
@@ -1433,6 +1680,10 @@ namespace griffined_api.Services.StudyCourseService
                     var classCount = dbStudySubject.StudyClasses.Count;
                     var dbTeacher = dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)
                                 ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found.");
+
+                    int studyClassCount = updateRequest.NewSchedule.Where(x => x.StudySubjectId == dbStudySubject.Id).Count();
+                    int c = 0;
+
                     var studyClass = new StudyClass
                     {
                         //TODO Class Count
@@ -1447,9 +1698,22 @@ namespace griffined_api.Services.StudyCourseService
                         },
                     };
 
+                    if (c == studyClassCount / 2)
+                    {
+                        studyClass.IsFiftyPercent = true;
+                        studyClass.IsHundredPercent = false;
+                    }
+
+                    if (c == studyClassCount)
+                    {
+                        studyClass.IsFiftyPercent = false;
+                        studyClass.IsHundredPercent = true;
+                    }
+
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)
                     {
+                        studyClass.TeacherShifts ??= new List<TeacherShift>();
                         studyClass.TeacherShifts.Add(new TeacherShift
                         {
                             Teacher = dbTeacher,
@@ -1460,13 +1724,27 @@ namespace griffined_api.Services.StudyCourseService
 
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
+                        studyClass.Attendances ??= new List<StudentAttendance>();
                         studyClass.Attendances.Add(new StudentAttendance
                         {
                             Attendance = Attendance.None,
                             Student = dbMember.Student,
                         });
+
+                        var allStudyClasses = await _context.StudyClasses
+                                                    .Include(x => x.Schedule)
+                                                    .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbMember.Student.Id)
+                                                              && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                    .ToListAsync();
+
+                        var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+                        var expiryDate = lastClassEndDate.AddDays(14);
+
+                        dbMember.Student.ExpiryDate = expiryDate;
                     }
 
+                    dbStudySubject.StudyClasses ??= new List<StudyClass>();
                     dbStudySubject.StudyClasses.Add(studyClass);
 
                     var addHistory = new StudyCourseHistory
@@ -1482,6 +1760,7 @@ namespace griffined_api.Services.StudyCourseService
                     string addedStudyClassHistoryDescription = $"Added {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
 
                     addHistory.Description = addedStudyClassHistoryDescription;
+                    studyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
                 }
             }
@@ -1513,8 +1792,8 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Schedule)
                                 .Where(c =>
                                 c.Schedule.Date == requestDate.ToDateTime()
-                                && c.Status != ClassStatus.Cancelled
-                                && c.Status != ClassStatus.Deleted
+                                && c.Status != ClassStatus.CANCELLED
+                                && c.Status != ClassStatus.DELETED
                                 && c.TeacherId == userId
                                 && c.StudyCourse.Status != StudyCourseStatus.Pending
                                 && c.StudyCourse.Status != StudyCourseStatus.Cancelled)
@@ -1533,8 +1812,8 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.Schedule)
                                 .Where(c =>
                                 c.Schedule.Date == requestDate.ToDateTime()
-                                && c.Status != ClassStatus.Cancelled
-                                && c.Status != ClassStatus.Deleted
+                                && c.Status != ClassStatus.CANCELLED
+                                && c.Status != ClassStatus.DELETED
                                 && c.StudySubject.StudySubjectMember.Any(m => m.StudentId == userId && m.Status == StudySubjectMemberStatus.Success))
                                 .ToListAsync();
             }
@@ -1608,13 +1887,41 @@ namespace griffined_api.Services.StudyCourseService
         {
             var dbStudyCourse = await _context.StudyCourses
                                 .Include(c => c.StudyClasses)
+                                    .ThenInclude(c => c.Schedule)
                                 .FirstOrDefaultAsync(c => c.Id == studyCourseId)
                                 ?? throw new NotFoundException($"StudyCourse with ID {studyCourseId} is not found.");
 
             dbStudyCourse.Status = StudyCourseStatus.Cancelled;
+
             foreach (var dbStudyClass in dbStudyCourse.StudyClasses)
             {
-                dbStudyClass.Status = ClassStatus.Deleted;
+                dbStudyClass.Status = ClassStatus.DELETED;
+                dbStudyClass.Schedule.CalendarType = DailyCalendarType.DELETED;
+            }
+
+            var studySubjectMembers = await _context.StudySubjectMember
+                .Include(sm => sm.Student)
+                .Include(sm => sm.StudySubject)
+                .Where(sm => sm.StudySubject.StudyCourseId == studyCourseId)
+                .ToListAsync();
+
+
+            foreach (var member in studySubjectMembers)
+            {
+                var student = member.Student;
+
+
+                var allStudyClasses = await _context.StudyClasses
+                                    .Include(sc => sc.Schedule)
+                                    .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
+                                              && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                    .ToListAsync();
+
+                var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+
+                var expiryDate = lastClassEndDate.AddDays(14);
+
+                student.ExpiryDate = expiryDate;
             }
 
             await _context.SaveChangesAsync();
@@ -1624,6 +1931,21 @@ namespace griffined_api.Services.StudyCourseService
                 StatusCode = (int)HttpStatusCode.OK,
             };
             return response;
+        }
+
+        private async Task<ReportFileResponseDto> CreateReportFileResponseDto(StudentReport report)
+        {
+            return new ReportFileResponseDto
+            {
+                UploadedBy = report.Teacher.Id,
+                Progression = report.Progression,
+                File = new FilesResponseDto
+                {
+                    FileName = report.FileName,
+                    ContentType = await _firebaseService.GetContentTypeByObjectName(report.ObjectName),
+                    URL = await _firebaseService.GetUrlByObjectName(report.ObjectName)
+                }
+            };
         }
     }
 }

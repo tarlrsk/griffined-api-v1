@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 
@@ -14,7 +10,7 @@ namespace griffined_api.Dtos.TeacherDtos
         public string FirstName { get; set; } = string.Empty;
 
         [Required]
-        [JsonProperty("firstName")]
+        [JsonProperty("lastName")]
         public string LastName { get; set; } = string.Empty;
 
         [JsonProperty("fullName")]
@@ -41,6 +37,9 @@ namespace griffined_api.Dtos.TeacherDtos
 
         [JsonProperty("isActive")]
         public bool IsActive { get; set; } = true;
+
+        [JsonProperty("isPartTime")]
+        public bool IsPartTime { get; set; } = false;
 
     }
 }

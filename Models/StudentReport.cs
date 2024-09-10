@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -21,9 +16,9 @@ namespace griffined_api.Models
         public virtual Progression Progression { get; set; }
 
         [ForeignKey(nameof(StudySubjectMemberId))]
-        public virtual StudySubjectMember StudySubjectMember { get; set; } = new StudySubjectMember();
+        public virtual StudySubjectMember StudySubjectMember { get; set; }
 
         [ForeignKey(nameof(TeacherId))]
-        public virtual Teacher Teacher { get; set; } = new Teacher();
+        public virtual Teacher Teacher { get; set; }
     }
 }

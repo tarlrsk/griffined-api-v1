@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace griffined_api.Integrations.Firebase
 {
@@ -78,6 +73,7 @@ namespace griffined_api.Integrations.Firebase
             string customRole = string.Empty;
             string azure_id = string.Empty;
 
+            // TODO FIX SWITCH CASE
             var master = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "master");
             if (master != null)
             {
@@ -86,52 +82,65 @@ namespace griffined_api.Integrations.Firebase
             }
             else
             {
-                var oa = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "oa");
-                if (oa != null)
+                var allstaff = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "allstaff");
+                if (allstaff != null)
                 {
-                    azure_id = oa.Id.ToString();
-                    customRole = "oa";
+                    azure_id = allstaff.Id.ToString();
+                    customRole = "master";
                 }
                 else
                 {
-                    var ea = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "ea");
-                    if (ea != null)
+
+                    var oa = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "oa");
+                    if (oa != null)
                     {
-                        azure_id = ea.Id.ToString();
-                        customRole = "ea";
+                        azure_id = oa.Id.ToString();
+                        customRole = "oa";
                     }
                     else
                     {
-                        var ec = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "ec");
-                        if (ec != null)
+                        var ea = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "ea");
+                        if (ea != null)
                         {
-                            azure_id = ec.Id.ToString();
-                            customRole = "ec";
+                            azure_id = ea.Id.ToString();
+                            customRole = "ea";
                         }
                         else
                         {
-                            var teacher = await _context.Teachers.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
-                            if (teacher != null)
+                            var ec = await _context.Staff.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId && u.Role == "ec");
+                            if (ec != null)
                             {
-                                azure_id = teacher.Id.ToString();
-                                customRole = "teacher";
+                                azure_id = ec.Id.ToString();
+                                customRole = "ec";
                             }
                             else
                             {
-                                var student = await _context.Students.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
-                                if (student != null)
+                                var teacher = await _context.Teachers.Include(x => x.Mandays)
+                                                                        .ThenInclude(x => x.WorkTimes)
+                                                                     .FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
+                                if (teacher != null)
                                 {
-                                    azure_id = student.Id.ToString();
-                                    customRole = "student";
+                                    azure_id = teacher.Id.ToString();
+                                    customRole = "teacher";
                                 }
                                 else
                                 {
-                                    throw new NotFoundException("User not found");
+                                    var student = await _context.Students.FirstOrDefaultAsync(u => u.FirebaseId == firebaseId);
+                                    if (student != null)
+                                    {
+                                        azure_id = student.Id.ToString();
+                                        customRole = "student";
+                                    }
+                                    else
+                                    {
+                                        throw new NotFoundException("User not found");
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
             }
 
             return new List<Claim>

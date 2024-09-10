@@ -21,11 +21,11 @@ namespace griffined_api.Jobs.UpdateClassStatus
             {
                 var classEndTime = dbStudyClass.Schedule.Date.Add(dbStudyClass.Schedule.ToTime);
 
-                if (dbStudyClass.Status == ClassStatus.None)
+                if (dbStudyClass.Status == ClassStatus.NONE)
                 {
                     if (DateTime.Now >= classEndTime)
                     {
-                        dbStudyClass.Status = ClassStatus.Unchecked;
+                        dbStudyClass.Status = ClassStatus.UNCHECKED;
 
                         await _context.SaveChangesAsync();
                     }

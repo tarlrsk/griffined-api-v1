@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
 using griffined_api.Dtos.ClassCancellationRequestDto;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using griffined_api.Dtos.ScheduleDtos;
 
 namespace griffined_api.Services.ClassCancellationRequestService
 {
@@ -25,14 +22,30 @@ namespace griffined_api.Services.ClassCancellationRequestService
         public async Task<ServiceResponse<string>> AddClassCancellationRequest(int studyClassId)
         {
             var dbStudyClass = await _context.StudyClasses
-                            .Include(c => c.StudyCourse)
-                            .Include(c => c.StudySubject)
-                            .Include(c => c.Teacher)
-                            .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.None)
-                            ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
+                                             .Include(x => x.Schedule)
+                                             .Include(c => c.StudyCourse)
+                                             .Include(c => c.StudySubject)
+                                             .Include(c => c.Teacher)
+                                             .FirstOrDefaultAsync(c => c.Id == studyClassId && c.Status == ClassStatus.NONE)
+                                             ?? throw new NotFoundException($"StudyClass that can cancel with ID {studyClassId} is not found.");
 
             if (dbStudyClass.StudyCourse.StudyCourseType == StudyCourseType.Group)
                 throw new BadRequestException($"Group Class cannot cancel");
+
+            // GET THE CURRENT DATE.
+            DateTime currentTime = DateTime.Now;
+
+            // COMBINE THE CURRENT DATE WITH CLASS START TIME TO GET DATETIME OBJECT.
+            DateTime classStartTime = currentTime.Date + dbStudyClass.Schedule.FromTime;
+
+            // CALCULATE THE TIME DIFFERENCE BETWEEN THE CLASS START TIME AND THE CURRENT TIME.
+            TimeSpan timeDifference = classStartTime - currentTime;
+
+            // CHECK FOR 17 HOURS LIMIT.
+            if (Math.Abs(timeDifference.TotalHours) > 17)
+            {
+                throw new ConflictException("Class cancellation can only be requested outside ±17 hours period of the class start time.");
+            }
 
             var classCancellationRequest = new ClassCancellationRequest
             {
@@ -55,14 +68,16 @@ namespace griffined_api.Services.ClassCancellationRequestService
             }
             else
             {
-                var dbTeacher = await _context.Teachers.FirstOrDefaultAsync(s => s.Id == userId)
-                                    ?? throw new NotFoundException($"Teacher with ID {userId} is not found.");
+                var dbTeacher = await _context.Teachers.Include(x => x.Mandays)
+                                                        .ThenInclude(x => x.WorkTimes)
+                                                       .FirstOrDefaultAsync(s => s.Id == userId)
+                                                       ?? throw new NotFoundException($"Teacher with ID {userId} is not found.");
 
                 classCancellationRequest.Teacher = dbTeacher;
                 classCancellationRequest.RequestedRole = CancellationRole.Teacher;
             }
 
-            dbStudyClass.Status = ClassStatus.PendingCancellation;
+            dbStudyClass.Status = ClassStatus.PENDING_CANCELLATION;
 
             _context.ClassCancellationRequests.Add(classCancellationRequest);
 
@@ -252,6 +267,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                 .ThenInclude(s => s.Subject)
                             .Include(r => r.Student)
                             .Include(r => r.Teacher)
+                            .Where(x => x.StudyCourse.StudySubjects.Any(y => y.StudyClasses.Any(z => z.Status != ClassStatus.DELETED)))
                             .FirstOrDefaultAsync(r => r.Id == requestId)
                             ?? throw new NotFoundException($"Class Cancellation Request with ID {requestId} is not found.");
 
@@ -285,6 +301,9 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     Date = dbRequest.StudyClass.Schedule.Date.ToDateString(),
                     FromTime = dbRequest.StudyClass.Schedule.FromTime.ToTimeSpanString(),
                     ToTime = dbRequest.StudyClass.Schedule.ToTime.ToTimeSpanString(),
+                    TeacherFirstName = dbRequest.StudyClass.Teacher.FirstName,
+                    TeacherLastName = dbRequest.StudyClass.Teacher.LastName,
+                    TeacherNickname = dbRequest.StudyClass.Teacher.Nickname,
                 },
             };
 
@@ -363,43 +382,48 @@ namespace griffined_api.Services.ClassCancellationRequestService
             foreach (var dbStudySubject in dbRequest.StudyCourse.StudySubjects)
             {
                 if (dbRequest.RequestedRole == CancellationRole.Student
-                && dbStudySubject.StudySubjectMember.Any(s => s.StudentId != dbRequest.StudentId))
+                && !dbStudySubject.StudySubjectMember.Any(s => s.StudentId == dbRequest.StudentId))
                 {
                     continue;
                 }
-                foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                foreach (var dbStudyClass in dbStudySubject.StudyClasses.Where(sc => sc.Status != ClassStatus.DELETED))
                 {
                     var schedule = new ScheduleResponseDto
                     {
                         StudyCourseId = dbStudySubject.StudyCourse.Id,
+                        Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
                         StudyClassId = dbStudyClass.Id,
                         ClassNo = dbStudyClass.ClassNumber,
                         Room = dbStudyClass.Schedule.Room,
                         Date = dbStudyClass.Schedule.Date.ToDateString(),
-                        FromTime = dbStudyClass.Schedule.FromTime.ToTimeSpanString(),
-                        ToTime = dbStudyClass.Schedule.ToTime.ToTimeSpanString(),
+                        FromTime = dbStudyClass.Schedule.FromTime,
+                        ToTime = dbStudyClass.Schedule.ToTime,
                         CourseSubject = dbRequest.StudyCourse.Course.course + " "
                                             + dbStudySubject.Subject.subject
                                             + " " + (dbRequest.StudyCourse.Level?.level ?? ""),
                         CourseId = dbRequest.StudyCourse.Course.Id,
-                        Course = dbRequest.StudyCourse.Course.course,
+                        CourseName = dbRequest.StudyCourse.Course.course,
                         StudySubjectId = dbStudySubject.Subject.Id,
                         SubjectId = dbStudySubject.Subject.Id,
-                        Subject = dbStudySubject.Subject.subject,
-                        TeacherId = dbStudyClass.Teacher.Id,
-                        TeacherFirstName = dbStudyClass.Teacher.FirstName,
-                        TeacherLastName = dbStudyClass.Teacher.LastName,
-                        TeacherNickname = dbStudyClass.Teacher.Nickname,
+                        SubjectName = dbStudySubject.Subject.subject,
+                        Teacher = new TeacherNameResponseDto
+                        {
+                            TeacherId = dbStudyClass.Teacher.Id,
+                            FirstName = dbStudyClass.Teacher.FirstName,
+                            LastName = dbStudyClass.Teacher.LastName,
+                            Nickname = dbStudyClass.Teacher.Nickname,
+                        },
                         ClassStatus = dbStudyClass.Status,
                     };
 
                     foreach (var dbTeacherShift in dbStudyClass.TeacherShifts)
                     {
-                        schedule.TeacherShifts.Add(new TeacherShiftResponseDto
-                        {
-                            Hours = dbTeacherShift.Hours,
-                            TeacherWorkType = dbTeacherShift.TeacherWorkType,
-                        });
+                        if (dbTeacherShift.TeacherWorkType != TeacherWorkType.NORMAL)
+                            schedule.AdditionalHours = new AdditionalHours
+                            {
+                                Hours = dbTeacherShift.Hours,
+                                TeacherWorkType = dbTeacherShift.TeacherWorkType,
+                            };
                     }
 
                     rawSchedules.Add(schedule);
@@ -468,11 +492,24 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                         .Include(c => c.Schedule)
                                         .Include(c => c.Teacher)
                                         .Include(c => c.Attendances)
+                                            .ThenInclude(a => a.Student)
                                         .Where(c => updateRequest.RemoveStudyClassId.Contains(c.Id)).ToListAsync();
+
+
+            var dbTeachers = await _context.Teachers
+                            .Include(t => t.Mandays)
+                                .ThenInclude(x => x.WorkTimes)
+                            .ToListAsync();
 
             foreach (var dbRemoveStudyClass in dbRemoveStudyClasses)
             {
-                dbRemoveStudyClass.Status = ClassStatus.Cancelled;
+                // FIND IF IT IS SUBSTITUTE CLASS OR NOT
+                var duplicateClassTime = updateRequest.NewSchedule.FirstOrDefault(x =>
+                                                                    x.StudySubjectId == dbRemoveStudyClass.StudySubjectId &&
+                                                                    x.Date.ToDateTime() == dbRemoveStudyClass.Schedule.Date &&
+                                                                    x.FromTime.ToTimeSpan() == dbRemoveStudyClass.Schedule.FromTime
+                                                                    && x.ToTime.ToTimeSpan() == dbRemoveStudyClass.Schedule.ToTime
+                                                                );
 
                 var removeHistory = new StudyCourseHistory
                 {
@@ -483,10 +520,122 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     StudyClass = dbRemoveStudyClass,
                 };
 
-                string removedStudyClassHistoryDescription = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+                // IF IS SUBSTITUTE CLASS
+                if (duplicateClassTime != null)
+                {
+                    dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.SUBSTITUTE;
+                    dbRemoveStudyClass.IsSubstitute = true;
 
-                removeHistory.Description = removedStudyClassHistoryDescription;
+                    var newTeacher = dbTeachers.FirstOrDefault(x => x.Id == duplicateClassTime.TeacherId)
+                                                        ?? throw new NotFoundException("Teacher not found");
+
+                    // UPDATE SUBSTITUTED TEACHER IN HISTORY DESCRIPTION
+                    removeHistory.Description = $"Update teacher {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) from Teacher {dbRemoveStudyClass.Teacher.Nickname} to {newTeacher.Nickname}.";
+
+                    // REMOVE PREVIOUS TEACHER SHIFT
+                    foreach (var shift in dbRemoveStudyClass.TeacherShifts)
+                    {
+                        dbRemoveStudyClass.TeacherShifts.Remove(shift);
+                    }
+
+                    // ADD NEW TEACHER SHIFT
+                    var worktypes = _teacherService.GetTeacherWorkTypesWithHours(newTeacher, dbRemoveStudyClass.Schedule.Date, dbRemoveStudyClass.Schedule.FromTime, dbRemoveStudyClass.Schedule.ToTime);
+                    foreach (var worktype in worktypes)
+                    {
+                        dbRemoveStudyClass.TeacherShifts ??= new List<TeacherShift>();
+                        dbRemoveStudyClass.TeacherShifts.Add(new TeacherShift
+                        {
+                            Teacher = newTeacher,
+                            TeacherWorkType = worktype.TeacherWorkType,
+                            Hours = worktype.Hours,
+                        });
+                    }
+
+                    // REMOVE SUBSTITUTE CLASS FROM NEW SCHEDULE
+                    updateRequest.NewSchedule.Remove(duplicateClassTime);
+
+                    // NOTIFY SUBSTITUTE TEACHER
+                    var notification = new TeacherNotification
+                    {
+                        Teacher = newTeacher,
+                        StudyCourse = dbRemoveStudyClass.StudyCourse,
+                        Title = "You have been assigned to a new class as substitute teacher.",
+                        Message = $"You have been assigned to a new class on {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}).",
+                        DateCreated = DateTime.Now,
+                        Type = TeacherNotificationType.MakeupClass,
+                        HasRead = false
+                    };
+                    _context.TeacherNotifications.Add(notification);
+
+                    // NOTIFY EVERY STUDENT IN THAT CLASS
+                    foreach (var attendance in dbRemoveStudyClass.Attendances)
+                    {
+                        if (attendance.Student != null)
+                        {
+                            var studentNotification = new StudentNotification
+                            {
+                                Student = attendance.Student!,
+                                StudyCourse = dbRemoveStudyClass.StudyCourse,
+                                Title = "Your Teacher Has Been Updated.",
+                                Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been substituted by {newTeacher.Nickname}.",
+                                DateCreated = DateTime.Now,
+                                Type = StudentNotificationType.ClassCancellation,
+                                HasRead = false
+                            };
+
+                            _context.StudentNotifications.Add(studentNotification);
+                        }
+                    }
+
+                }
+                // IF IT IS NOT SUBSTITUTE CLASS
+                else
+                {
+                    dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.CANCELLED_CLASS;
+                    dbRemoveStudyClass.Status = ClassStatus.CANCELLED;
+
+                    // UPDATE CANCELLED CLASS HISTORY
+                    removeHistory.Description = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+
+                    // NOTIFY EVERY STUDENT IN THAT CLASS
+                    foreach (var attendance in dbRemoveStudyClass.Attendances)
+                    {
+                        if (attendance.Student != null)
+                        {
+                            var studentNotification = new StudentNotification
+                            {
+                                Student = attendance.Student!,
+                                StudyCourse = dbRemoveStudyClass.StudyCourse,
+                                Title = "Your Class Has Been Cancelled.",
+                                Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                                DateCreated = DateTime.Now,
+                                Type = StudentNotificationType.ClassCancellation,
+                                HasRead = false
+                            };
+
+                            _context.StudentNotifications.Add(studentNotification);
+                        }
+                    }
+                }
+
+                // INSERT REMOVE HISTORY TO DB
+                dbRemoveStudyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                 dbRemoveStudyClass.StudyCourse.StudyCourseHistories.Add(removeHistory);
+
+                // NOTIFY OLD TEACHER
+                var teacherNotification = new TeacherNotification
+                {
+                    Teacher = dbRemoveStudyClass.Teacher,
+                    StudyCourse = dbRemoveStudyClass.StudyCourse,
+                    Title = "Your Class Has Been Cancelled.",
+                    Message = $"Your class on {dbRemoveStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                    DateCreated = DateTime.Now,
+                    Type = TeacherNotificationType.ClassCancellation,
+                    HasRead = false
+                };
+
+                _context.TeacherNotifications.Add(teacherNotification);
+
             }
 
             var dbStudySubjects = await _context.StudySubjects
@@ -501,13 +650,11 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             .Where(s => updateRequest.StudySubjectIds.Contains(s.Id))
                             .ToListAsync();
 
-            var dbTeachers = await _context.Teachers
-                            .Include(t => t.Mandays)
-                                .ThenInclude(x => x.WorkTimes)
-                            .ToListAsync();
-
             foreach (var dbStudySubject in dbStudySubjects)
             {
+                int studyClassCount = updateRequest.NewSchedule.Where(x => x.StudySubjectId == dbStudySubject.Id).Count();
+                int c = 0;
+
                 foreach (var newSchedule in updateRequest.NewSchedule.Where(s => s.StudySubjectId == dbStudySubject.Id))
                 {
                     var classCount = dbStudySubject.StudyClasses.Count;
@@ -525,12 +672,26 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             FromTime = newSchedule.FromTime.ToTimeSpan(),
                             ToTime = newSchedule.ToTime.ToTimeSpan(),
                             Type = ScheduleType.Class,
+                            CalendarType = DailyCalendarType.MAKEUP_CLASS,
                         },
                     };
+
+                    if (c == studyClassCount / 2)
+                    {
+                        studyClass.IsFiftyPercent = true;
+                        studyClass.IsHundredPercent = false;
+                    }
+
+                    if (c == studyClassCount)
+                    {
+                        studyClass.IsFiftyPercent = false;
+                        studyClass.IsHundredPercent = true;
+                    }
 
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)
                     {
+                        studyClass.TeacherShifts ??= new List<TeacherShift>();
                         studyClass.TeacherShifts.Add(new TeacherShift
                         {
                             Teacher = dbTeacher,
@@ -541,6 +702,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
                     foreach (var dbMember in dbStudySubject.StudySubjectMember)
                     {
+                        studyClass.Attendances ??= new List<StudentAttendance>();
                         studyClass.Attendances.Add(new StudentAttendance
                         {
                             Attendance = Attendance.None,
@@ -560,8 +722,20 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         };
 
                         _context.StudentNotifications.Add(makeupClassStudentNotification);
-                    }
 
+                        var allStudyClasses = await _context.StudyClasses
+                            .Include(sc => sc.Schedule)
+                            .Where(sc => sc.Attendances.Any(a => a.StudentId == dbMember.Student.Id) &&
+                                         sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                            .ToListAsync();
+
+                        var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                        var expiryDate = lastClassEndDate.AddDays(14);
+
+                        dbMember.Student.ExpiryDate = expiryDate;
+
+                    }
+                    dbStudySubject.StudyClasses ??= new List<StudyClass>();
                     dbStudySubject.StudyClasses.Add(studyClass);
 
                     var addHistory = new StudyCourseHistory
@@ -576,6 +750,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     string addedStudyClassHistoryDescription = $"Added Makeup Class {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}) taught by Teacher {dbTeachers.FirstOrDefault(t => t.Id == newSchedule.TeacherId)!.Nickname}.";
 
                     addHistory.Description = addedStudyClassHistoryDescription;
+                    studyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
                 }
             }
@@ -588,35 +763,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
                                 .ThenInclude(sc => sc.Schedule)
                             .FirstOrDefaultAsync(r => r.Id == requestId) ?? throw new NotFoundException("Request is not found.");
             dbRequest.Status = ClassCancellationRequestStatus.Completed;
-
-            if (dbRequest.RequestedRole == CancellationRole.Student)
-            {
-                var studentNotification = new StudentNotification
-                {
-                    Student = dbRequest.Student!,
-                    StudyCourse = dbRequest.StudyCourse,
-                    Title = "Your Class Has Been Cancelled.",
-                    Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-                    DateCreated = DateTime.Now,
-                    Type = StudentNotificationType.ClassCancellation,
-                    HasRead = false
-                };
-
-                _context.StudentNotifications.Add(studentNotification);
-            }
-
-            var teacherNotification = new TeacherNotification
-            {
-                Teacher = dbRequest.Teacher!,
-                StudyCourse = dbRequest.StudyCourse,
-                Title = "Your Class Has Been Cancelled.",
-                Message = $"Your class on {dbRequest.StudyClass.Schedule.Date.ToDateString()} has been cancelled.",
-                DateCreated = DateTime.Now,
-                Type = TeacherNotificationType.ClassCancellation,
-                HasRead = false
-            };
-
-            _context.TeacherNotifications.Add(teacherNotification);
 
             await _context.SaveChangesAsync();
 

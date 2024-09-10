@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -25,19 +20,19 @@ namespace griffined_api.Models
         public virtual StudyCourseStatus Status { get; set; }
 
         [ForeignKey(nameof(CourseId))]
-        public virtual Course Course { get; set; } = new Course();
+        public virtual Course Course { get; set; }
 
         [ForeignKey(nameof(LevelId))]
-        public virtual Level? Level { get; set; } = new Level();
+        public virtual Level? Level { get; set; }
         public virtual NewCourseRequest? NewCourseRequest { get; set; }
 
-        public virtual ICollection<StudentAddingRequest> StudentAddingRequests { get; set; } = new List<StudentAddingRequest>();
-        public virtual ICollection<StudySubject> StudySubjects { get; set; } = new List<StudySubject>();
-        public virtual ICollection<StudyClass> StudyClasses { get; set; } = new List<StudyClass>();
-        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; } = new List<StudyCourseHistory>();
-        public virtual ICollection<StudentNotification> StudentNotifications { get; set; } = new List<StudentNotification>();
-        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
-        public virtual ICollection<StaffNotification> StaffNotifications { get; set; } = new List<StaffNotification>();
-        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; } = new List<ClassCancellationRequest>();
+        public virtual ICollection<StudentAddingRequest> StudentAddingRequests { get; set; }
+        public virtual ICollection<StudySubject> StudySubjects { get; set; }
+        public virtual ICollection<StudyClass> StudyClasses { get; set; }
+        public virtual ICollection<StudyCourseHistory> StudyCourseHistories { get; set; }
+        public virtual ICollection<StudentNotification> StudentNotifications { get; set; }
+        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; }
+        public virtual ICollection<StaffNotification> StaffNotifications { get; set; }
+        public virtual ICollection<ClassCancellationRequest> ClassCancellationRequests { get; set; }
     }
 }

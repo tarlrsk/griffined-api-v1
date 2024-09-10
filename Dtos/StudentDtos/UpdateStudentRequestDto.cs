@@ -1,8 +1,4 @@
 using griffined_api.Extensions.DateTimeExtensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Dtos.StudentDtos
 {
@@ -45,6 +41,8 @@ namespace griffined_api.Dtos.StudentDtos
         public string? TargetScore { get; set; }
         public string? HogInformation { get; set; }
         public string? HealthInformation { get; set; }
+
+        public string? Remark { get; set; }
 
         public ParentRequestDto? Parent { get; set; }
         public AddressRequestDto? Address { get; set; }

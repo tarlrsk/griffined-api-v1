@@ -1,9 +1,3 @@
-using griffined_api.Services.StudentReportService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Google.Rpc;
 using griffined_api.Dtos.StudentReportDtos;
 
 namespace griffined_api.Controllers
@@ -18,7 +12,7 @@ namespace griffined_api.Controllers
             _studentReportService = studentReportService;
         }
 
-        [HttpGet("student"), Authorize(Roles = "student, master")]
+        [HttpGet("student"), Authorize(Roles = "student, ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> StudentGetStudentReport(int studyCourseId)
         {
             var response = await _studentReportService.StudentGetStudentReport(studyCourseId);
@@ -27,7 +21,7 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("teacher"), Authorize(Roles = "teacher, master")]
+        [HttpGet("teacher"), Authorize(Roles = "teacher, ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> TeacherGetStudentReport(int studyCourseId)
         {
             var response = await _studentReportService.TeacherGetStudentReport(studyCourseId);
@@ -36,14 +30,14 @@ namespace griffined_api.Controllers
             return Ok(response);
         }
 
-        [HttpPost, Authorize(Roles = "teacher, master")]
+        [HttpPost, Authorize(Roles = "ea, ec oa, master, allstaff")]
         public async Task<ActionResult> AddStudentReport([FromForm] StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
             var response = await _studentReportService.AddStudentReport(detailRequestDto, fileToUpload);
             return Ok(response);
         }
 
-        [HttpPut, Authorize(Roles = "teacher, master")]
+        [HttpPut, Authorize(Roles = "teacher, ec, ea, oa, master, allstaff")]
         public async Task<ActionResult> UpdateStudentReport([FromForm] StudentReportDetailRequestDto detailRequestDto, IFormFile fileToUpload)
         {
             var response = await _studentReportService.UpdateStudentReport(detailRequestDto, fileToUpload);

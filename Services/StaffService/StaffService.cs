@@ -1,9 +1,5 @@
 using Firebase.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace griffined_api.Services.StaffService
 {
@@ -31,6 +27,7 @@ namespace griffined_api.Services.StaffService
             string password = "hog" + newStaff.Phone;
             FirebaseAuthProvider firebaseAuthProvider = new(new FirebaseConfig(API_KEY));
             FirebaseAuthLink firebaseAuthLink;
+
             try
             {
                 firebaseAuthLink = await firebaseAuthProvider.CreateUserWithEmailAndPasswordAsync(newStaff.Email, password);
@@ -209,7 +206,7 @@ namespace griffined_api.Services.StaffService
                     { "email", staff.Email },
                     { "id", staff.Id },
                     { "role", staff.Role },
-                    { "uid", staff.FirebaseId}
+                    { "uid", staff.FirebaseId!}
                 };
             await docRef.SetAsync(staffDoc);
         }

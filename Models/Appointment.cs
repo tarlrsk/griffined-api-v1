@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace griffined_api.Models
 {
@@ -20,11 +15,11 @@ namespace griffined_api.Models
 
 
         [ForeignKey(nameof(CreatedByStaffId))]
-        public virtual Staff Staff { get; set; } = new Staff();
+        public virtual Staff Staff { get; set; }
 
-        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; } = new List<TeacherNotification>();
-        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; } = new List<AppointmentHistory>();
-        public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; } = new List<AppointmentMember>();
-        public virtual ICollection<AppointmentSlot> AppointmentSlots { get; set; } = new List<AppointmentSlot>();
+        public virtual ICollection<TeacherNotification> TeacherNotifications { get; set; }
+        public virtual ICollection<AppointmentHistory> AppointmentHistories { get; set; }
+        public virtual ICollection<AppointmentMember> AppointmentMembers { get; set; }
+        public virtual ICollection<AppointmentSlot> AppointmentSlots { get; set; }
     }
 }
