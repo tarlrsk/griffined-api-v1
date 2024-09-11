@@ -10,18 +10,21 @@ namespace griffined_api.Services.UtilityService
         private readonly FirebaseApp _firebaseApp;
         private readonly DataContext _context;
         private readonly IUnitOfWork _uow;
+        private readonly IAsyncRepository<StudyCourse> _studyCourseRepo;
         private readonly IAsyncRepository<StudySubject> _studySubjectRepo;
         private readonly IAsyncRepository<StudyClass> _studyClassRepo;
 
         public UtilityService(DataContext context,
                               FirebaseApp firebaseApp,
                               IUnitOfWork uow,
+                              IAsyncRepository<StudyCourse> studyCourseRepo,
                               IAsyncRepository<StudySubject> studySubjectRepo,
                               IAsyncRepository<StudyClass> studyClassRepo)
         {
             _context = context;
             _firebaseApp = firebaseApp;
             _uow = uow;
+            _studyCourseRepo = studyCourseRepo;
             _studySubjectRepo = studySubjectRepo;
             _studyClassRepo = studyClassRepo;
         }
@@ -271,6 +274,33 @@ namespace griffined_api.Services.UtilityService
             }
 
             _uow.Complete();
+            _uow.CommitTran();
+        }
+
+        public async Task UpdateStudyCourseStatus()
+        {
+            var studyCourses = await _context.StudyCourses
+                                             .Include(sc => sc.StudySubjects)
+                                                 .ThenInclude(ss => ss.StudyClasses)
+                                             .ToListAsync();
+
+            _uow.BeginTran();
+
+            foreach (var studyCourse in studyCourses)
+            {
+                bool allClassesCheckedOrUnchecked = studyCourse.StudySubjects
+                                                               .All(subject => subject.StudyClasses
+                                                                .All(studyClass => studyClass.Status == ClassStatus.CHECKED
+                                                                                || studyClass.Status == ClassStatus.UNCHECKED));
+
+                if (allClassesCheckedOrUnchecked)
+                {
+                    studyCourse.Status = StudyCourseStatus.Finished;
+
+                    await _uow.CompleteAsync();
+                }
+            }
+
             _uow.CommitTran();
         }
     }
