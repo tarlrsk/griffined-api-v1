@@ -61,5 +61,13 @@ namespace griffined_api.Controllers
 
             return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
+
+        [HttpPut("update/study-course/status")]
+        public async Task<IActionResult> UpdateStudyCourseStatus()
+        {
+            await _utilityService.UpdateStudyCourseStatus();
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
+        }
     }
 }

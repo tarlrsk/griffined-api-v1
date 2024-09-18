@@ -35,5 +35,11 @@ namespace griffined_api.Services.UtilityService
         /// </summary>
         /// <returns></returns>
         void UpdateStudyClassNumber();
+
+        /// <summary>
+        /// Update study course status.
+        /// </summary>
+        /// <returns></returns>
+        Task UpdateStudyCourseStatus();
     }
 }
