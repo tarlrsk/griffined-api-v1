@@ -2215,7 +2215,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
             foreach (var member in dbRequest.RegistrationRequestMembers)
             {
-                if (member.Student.Status == StudentStatus.OnProcess)
+                if (member.Student.Status == StudentStatus.OnProcess || member.Student.Status == StudentStatus.Inactive)
                     member.Student.Status = StudentStatus.Active;
 
                 foreach (var course in dbRequest.NewCourseRequests)
