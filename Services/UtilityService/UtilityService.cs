@@ -290,8 +290,10 @@ namespace griffined_api.Services.UtilityService
             {
                 bool allClassesCheckedOrUnchecked = studyCourse.StudySubjects
                                                                .All(subject => subject.StudyClasses
-                                                                .All(studyClass => studyClass.Status == ClassStatus.CHECKED
-                                                                                || studyClass.Status == ClassStatus.UNCHECKED));
+                                                               .All(studyClass => studyClass.Status == ClassStatus.CHECKED
+                                                                               || studyClass.Status == ClassStatus.UNCHECKED
+                                                                               || studyClass.Status == ClassStatus.CANCELLED
+                                                                               || studyClass.Status == ClassStatus.DELETED));
 
                 if (allClassesCheckedOrUnchecked)
                 {
@@ -301,6 +303,59 @@ namespace griffined_api.Services.UtilityService
                 }
             }
 
+            _uow.CommitTran();
+        }
+
+        public async Task UpdateStudentExpiryDate()
+        {
+            // Get current date
+            DateTime today = DateTime.UtcNow;
+
+            // Fetch all students along with their associated study subject memberships and classes
+            var students = await _context.Students.AsNoTracking()
+                                                  .Include(s => s.StudySubjectMember)
+                                                      .ThenInclude(ssm => ssm.StudySubject)
+                                                        .ThenInclude(ss => ss.StudyClasses)
+                                                            .ThenInclude(sc => sc.Schedule)
+                                                  .AsSplitQuery()
+                                                  .ToListAsync();
+
+            foreach (var student in students)
+            {
+                if (student.StudySubjectMember is null || !student.StudySubjectMember.Any())
+                {
+                    student.ExpiryDate = today;
+                    student.Status = StudentStatus.Inactive;
+                    continue;
+                }
+
+                foreach (var studySubjectMember in student.StudySubjectMember)
+                {
+                    DateTime classEndDateTime = studySubjectMember.StudySubject
+                                              .StudyClasses
+                                              .OrderByDescending(sc => sc.Schedule.Date)
+                                              .Select(sc => sc.Schedule.Date)
+                                              .FirstOrDefault();
+
+                    if (student.ExpiryDate <= classEndDateTime.AddDays(14) || student.ExpiryDate is null)
+                    {
+                        student.ExpiryDate = classEndDateTime.AddDays(14);
+                    }
+                }
+
+                if (student.ExpiryDate <= DateTime.UtcNow)
+                {
+                    student.Status = StudentStatus.Inactive;
+                }
+            }
+
+            // Save changes
+            _uow.BeginTran();
+            foreach (var student in students)
+            {
+                _context.Students.Entry(student).State = EntityState.Modified;
+            }
+            await _uow.CompleteAsync();
             _uow.CommitTran();
         }
     }

@@ -2218,6 +2218,17 @@ namespace griffined_api.Services.RegistrationRequestService
                 if (member.Student.Status == StudentStatus.OnProcess)
                     member.Student.Status = StudentStatus.Active;
 
+                if (member.Student.Status == StudentStatus.Inactive)
+                {
+                    member.Student.Status = StudentStatus.Active;
+
+                    await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                    {
+                        Uid = member.Student.FirebaseId,
+                        Disabled = false
+                    });
+                }
+
                 foreach (var course in dbRequest.NewCourseRequests)
                 {
                     if (member.Student.ExpiryDate < course.EndDate)

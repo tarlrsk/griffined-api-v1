@@ -12,7 +12,7 @@ namespace griffined_api.Jobs.UpdateStudentStatus
                 .AddTrigger(trigger =>
                     trigger
                         .ForJob(jobKey)
-                        .WithCronSchedule("0 0 0 * * ?"));
+                        .WithCronSchedule("0 0 1 * * ?"));
             // .WithSimpleSchedule(schedule =>
             //     schedule.WithIntervalInMinutes(1).RepeatForever()));
         }
