@@ -69,5 +69,13 @@ namespace griffined_api.Controllers
 
             return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
+
+        [HttpPut("update/student/expiry-date")]
+        public async Task<IActionResult> UpdateStudentExpiryDate()
+        {
+            await _utilityService.UpdateStudentExpiryDate();
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
+        }
     }
 }

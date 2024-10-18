@@ -41,5 +41,11 @@ namespace griffined_api.Services.UtilityService
         /// </summary>
         /// <returns></returns>
         Task UpdateStudyCourseStatus();
+
+        /// <summary>
+        /// Update student status.
+        /// </summary>
+        /// <returns></returns>
+        Task UpdateStudentExpiryDate();
     }
 }
