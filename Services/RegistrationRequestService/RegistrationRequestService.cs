@@ -3079,7 +3079,9 @@ namespace griffined_api.Services.RegistrationRequestService
                 DateCreated = DateTime.Now
             };
 
+            dbRequest.RegistrationRequestComments ??= new List<RegistrationRequestComment>();
             dbRequest.RegistrationRequestComments.Add(newComment);
+
 
             switch (dbStaff.Role)
             {
