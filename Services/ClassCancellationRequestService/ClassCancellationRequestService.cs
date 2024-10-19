@@ -81,12 +81,14 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
             _context.ClassCancellationRequests.Add(classCancellationRequest);
 
+            var message = $"Your class on {dbStudyClass.Schedule.Date.ToDateString()} has been cancelled.";
+
             var teacherNotification = new TeacherNotification
             {
                 Teacher = dbStudyClass.Teacher,
                 StudyCourse = dbStudyClass.StudyCourse,
                 Title = "Your Class Has Been Cancelled.",
-                Message = $"Your class on {dbStudyClass.Schedule.Date.ToDateString()} has been cancelled.",
+                Message = message,
                 DateCreated = DateTime.Now,
                 Type = TeacherNotificationType.ClassCancellation,
                 HasRead = false
@@ -529,8 +531,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var newTeacher = dbTeachers.FirstOrDefault(x => x.Id == duplicateClassTime.TeacherId)
                                                         ?? throw new NotFoundException("Teacher not found");
 
+                    var description = $"Update teacher {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) from Teacher {dbRemoveStudyClass.Teacher.Nickname} to {newTeacher.Nickname}.";
+
                     // UPDATE SUBSTITUTED TEACHER IN HISTORY DESCRIPTION
-                    removeHistory.Description = $"Update teacher {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) from Teacher {dbRemoveStudyClass.Teacher.Nickname} to {newTeacher.Nickname}.";
+                    removeHistory.Description = description;
 
                     // REMOVE PREVIOUS TEACHER SHIFT
                     foreach (var shift in dbRemoveStudyClass.TeacherShifts)
@@ -594,8 +598,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     dbRemoveStudyClass.Schedule.CalendarType = DailyCalendarType.CANCELLED_CLASS;
                     dbRemoveStudyClass.Status = ClassStatus.CANCELLED;
 
+                    var description = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+
                     // UPDATE CANCELLED CLASS HISTORY
-                    removeHistory.Description = $"Cancelled {dbRemoveStudyClass.StudyCourse.Course.course} {dbRemoveStudyClass.StudySubject.Subject.subject} on {dbRemoveStudyClass.Schedule.Date.ToDateWithDayString()} ({dbRemoveStudyClass.Schedule.FromTime.ToTimeSpanString()} - {dbRemoveStudyClass.Schedule.ToTime.ToTimeSpanString()}) taught by Teacher {dbRemoveStudyClass.Teacher.Nickname}.";
+                    removeHistory.Description = description;
 
                     // NOTIFY EVERY STUDENT IN THAT CLASS
                     foreach (var attendance in dbRemoveStudyClass.Attendances)
@@ -709,13 +715,14 @@ namespace griffined_api.Services.ClassCancellationRequestService
                             Student = dbMember.Student,
                         });
 
+                        var message = $"You have been assigned to a make up class on {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}).";
 
                         var makeupClassStudentNotification = new StudentNotification
                         {
                             Student = dbMember.Student,
                             StudyCourse = dbStudySubject.StudyCourse,
                             Title = "You have been assigned to a make up class",
-                            Message = $"You have been assigned to a make up class on {dbStudySubject.StudyCourse.Course.course} {dbStudySubject.Subject.subject} on {newSchedule.Date.ToDateTime().ToDateWithDayString()} ({newSchedule.FromTime.ToTimeSpan().ToTimeSpanString()} - {newSchedule.ToTime.ToTimeSpan().ToTimeSpanString()}).",
+                            Message = message,
                             DateCreated = DateTime.Now,
                             Type = StudentNotificationType.MakeupClass,
                             HasRead = false
@@ -725,8 +732,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
                         var allStudyClasses = await _context.StudyClasses
                             .Include(sc => sc.Schedule)
-                            .Where(sc => sc.Attendances.Any(a => a.StudentId == dbMember.Student.Id) &&
-                                         sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                            .Where(sc => sc.Attendances.Any(a => a.StudentId == dbMember.Student.Id))
                             .ToListAsync();
 
                         var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
