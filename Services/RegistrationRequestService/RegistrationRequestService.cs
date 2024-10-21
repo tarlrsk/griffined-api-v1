@@ -3278,6 +3278,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             StudySubjectId = dbStudySubject.Subject.Id,
                             SubjectId = dbStudySubject.Subject.Id,
                             SubjectName = dbStudySubject.Subject.subject,
+                            LevelId = dbStudySubject.StudyCourse.LevelId,
+                            LevelName = dbStudySubject.StudyCourse.Level?.level,
                             Teacher = new TeacherNameResponseDto
                             {
                                 TeacherId = dbStudyClass.Teacher.Id,
