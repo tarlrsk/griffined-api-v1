@@ -3204,6 +3204,9 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
+                        var courseSubjectName = dbRequestedCourse.Course.course + " "
+                                            + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
+                                            + " " + (dbRequestedCourse.Level?.level ?? "");
                         var schedule = new ScheduleResponseDto()
                         {
                             Day = dbStudyClass.Schedule.Date.DayOfWeek.ToString().ToUpper(),
@@ -3216,9 +3219,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             ToTime = dbStudyClass.Schedule.ToTime,
                             LevelId = dbRequestedCourse.LevelId,
                             LevelName = dbRequestedCourse.Level?.level,
-                            CourseSubject = dbRequestedCourse.Course.course + " "
-                                            + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
-                                            + " " + (dbRequestedCourse.Level?.level ?? ""),
+                            CourseSubject = courseSubjectName.Trim(),
                             CourseId = dbRequestedCourse.Course.Id,
                             CourseName = dbRequestedCourse.Course.course,
                             StudySubjectId = dbStudySubject.Id,
@@ -3262,6 +3263,9 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                     {
+                        var courseSubjectName = dbStudentAddingRequest.StudyCourse.Course.course + " "
+                                            + dbStudySubject.Subject.subject
+                                            + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? "");
                         var schedule = new ScheduleResponseDto()
                         {
                             StudyCourseId = dbStudySubject.StudyCourse.Id,
@@ -3272,9 +3276,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime,
                             ToTime = dbStudyClass.Schedule.ToTime,
-                            CourseSubject = dbStudentAddingRequest.StudyCourse.Course.course + " "
-                                            + dbStudySubject.Subject.subject
-                                            + " " + (dbStudentAddingRequest.StudyCourse.Level?.level ?? ""),
+                            CourseSubject = courseSubjectName.Trim(),
                             CourseId = dbStudentAddingRequest.StudyCourse.Course.Id,
                             CourseName = dbStudentAddingRequest.StudyCourse.Course.course,
                             StudySubjectId = dbStudySubject.Subject.Id,
