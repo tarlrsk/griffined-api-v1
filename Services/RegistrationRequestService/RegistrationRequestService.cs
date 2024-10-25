@@ -3214,6 +3214,8 @@ namespace griffined_api.Services.RegistrationRequestService
                             Date = dbStudyClass.Schedule.Date.ToDateString(),
                             FromTime = dbStudyClass.Schedule.FromTime,
                             ToTime = dbStudyClass.Schedule.ToTime,
+                            LevelId = dbRequestedCourse.LevelId,
+                            LevelName = dbRequestedCourse.Level?.level,
                             CourseSubject = dbRequestedCourse.Course.course + " "
                                             + dbRequestedCourse.NewCourseSubjectRequests.First(r => r.SubjectId == dbStudySubject.SubjectId).Subject.subject
                                             + " " + (dbRequestedCourse.Level?.level ?? ""),
