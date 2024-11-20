@@ -1474,10 +1474,19 @@ namespace griffined_api.Services.StudyCourseService
             var allStudyClasses = await _context.StudyClasses
                                         .Include(x => x.Schedule)
                                         .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
-                                                  && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                  && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                         .ToListAsync();
 
-            var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+            var lastClassEndDate = dbStudyCourse.EndDate;
+
+            if (allStudyClasses.Count != 0)
+            {
+                var endDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                if (lastClassEndDate < endDate)
+                {
+                    lastClassEndDate = endDate;
+                }
+            }
 
             var expiryDate = lastClassEndDate.AddDays(14);
 
@@ -1927,7 +1936,11 @@ namespace griffined_api.Services.StudyCourseService
 
                     if (allStudyClasses.Count() != 0)
                     {
-                        lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                        var endDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                        if (lastClassEndDate < endDate)
+                        {
+                            lastClassEndDate = endDate;
+                        }
                     }
 
                     var expiryDate = lastClassEndDate.AddDays(14);

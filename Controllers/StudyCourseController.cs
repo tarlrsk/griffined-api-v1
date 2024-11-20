@@ -121,7 +121,7 @@ namespace griffined_api.Controllers
             return Ok(await _studyCourseService.UpdateScheduleWithoutCancelRequest(updateRequest));
         }
 
-        [HttpPut("cancel/{studyCourseId}")]
+        [HttpPut("cancel/{studyCourseId}"), Authorize(Roles = "ea, master, allstaff")]
         public async Task<ActionResult> CancelStudyCourse(int studyCourseId)
         {
             return Ok(await _studyCourseService.CancelStudyCourse(studyCourseId));

@@ -41,7 +41,7 @@ namespace griffined_api.Controllers
             return Ok(appointments);
         }
 
-        [HttpPost("classes/generate"),]
+        [HttpPost("classes/generate"), Authorize(Roles = "ea, master, allstaff")]
         public IActionResult GenerateAppointmentSchedule(CheckAvailableClassScheduleDTO request)
         {
             var appointments = _scheduleService.GenerateAvailableClassSchedule(request);
