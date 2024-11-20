@@ -744,7 +744,9 @@ namespace griffined_api.Services.ScheduleService
                                                             .ThenInclude(x => x.Subject)
                                                           .Where(x => x.ScheduleId.HasValue && x.TeacherId.HasValue
                                                                       && conflictScheduleIds.Contains(x.ScheduleId.Value)
-                                                                      && request.TeacherIds.Contains(x.TeacherId.Value))
+                                                                      && request.TeacherIds.Contains(x.TeacherId.Value)
+                                                                      && x.Status != ClassStatus.CANCELLED
+                                                                      && x.Status != ClassStatus.DELETED)
                                                           .ToList();
 
                 // FETCH ALL APPOINTMENT IDS BASED ON THE TEACHER IDS.
@@ -759,7 +761,8 @@ namespace griffined_api.Services.ScheduleService
                                                                .Include(x => x.Schedule)
                                                                .Where(x => x.ScheduleId.HasValue
                                                                            && appointmentIds.Contains(x.AppointmentId)
-                                                                           && conflictScheduleIds.Contains(x.ScheduleId.Value))
+                                                                           && conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                           && x.AppointmentSlotStatus != AppointmentSlotStatus.DELETED)
                                                                .ToList();
 
                 // GET THE DATES OF CONFLICTING STUDY CLASSES AND APPOINTMENTS.
@@ -968,7 +971,9 @@ namespace griffined_api.Services.ScheduleService
                                                             .ThenInclude(x => x.Student)
                                                        .Where(x => x.ScheduleId.HasValue
                                                                 && conflictScheduleIds.Contains(x.ScheduleId.Value)
-                                                                && x.StudySubject.StudySubjectMember.Any(x => request.StudentIds.Contains(x.StudentId)))
+                                                                && x.StudySubject.StudySubjectMember.Any(x => request.StudentIds.Contains(x.StudentId))
+                                                                && x.Status != ClassStatus.DELETED
+                                                                && x.Status != ClassStatus.CANCELLED)
                                                        .ToList();
 
                 conflictStudentStudyClasses.AddRange(studentStudyClass);
@@ -987,7 +992,9 @@ namespace griffined_api.Services.ScheduleService
                                                                   .ThenInclude(x => x.Student)
                                                              .Where(x => x.ScheduleId.HasValue
                                                                       && conflictScheduleIds.Contains(x.ScheduleId.Value)
-                                                                      && x.TeacherId == request.TeacherId)
+                                                                      && x.TeacherId == request.TeacherId
+                                                                      && x.Status != ClassStatus.DELETED
+                                                                      && x.Status != ClassStatus.CANCELLED)
                                                              .ToList();
 
             // GET CONFLICT STUDY CLASSES.
@@ -1016,7 +1023,8 @@ namespace griffined_api.Services.ScheduleService
                                                            .Include(x => x.Schedule)
                                                            .Where(x => x.ScheduleId.HasValue
                                                                        && conflictAppointmentIds.Contains(x.AppointmentId)
-                                                                       && conflictScheduleIds.Contains(x.ScheduleId.Value))
+                                                                       && conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                       && x.AppointmentSlotStatus != AppointmentSlotStatus.DELETED)
                                                            .ToList();
 
             // QUERY FOR COURSE, SUBJECT, AND LEVEL.
@@ -1278,7 +1286,9 @@ namespace griffined_api.Services.ScheduleService
             var conflictStudyClasses = _studyClassRepo.Query()
                                                       .Include(x => x.Schedule)
                                                       .Where(x => conflictScheduleIds.Contains(x.ScheduleId.Value)
-                                                               && request.TeacherIds.Contains(x.TeacherId.Value))
+                                                               && request.TeacherIds.Contains(x.TeacherId.Value)
+                                                               && x.Status != ClassStatus.DELETED
+                                                               && x.Status != ClassStatus.CANCELLED)
                                                       .ToList();
 
             // Fetch all conflicting appointments based on teacher IDs
@@ -1290,7 +1300,8 @@ namespace griffined_api.Services.ScheduleService
             var conflictAppointments = _appointmentSlotRepo.Query()
                                                            .Include(x => x.Schedule)
                                                            .Where(x => appointmentIds.Contains(x.AppointmentId)
-                                                                    && conflictScheduleIds.Contains(x.ScheduleId.Value))
+                                                                    && conflictScheduleIds.Contains(x.ScheduleId.Value)
+                                                                    && x.AppointmentSlotStatus != AppointmentSlotStatus.DELETED)
                                                            .ToList();
 
             // Get all conflicting dates and times
