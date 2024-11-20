@@ -1474,10 +1474,19 @@ namespace griffined_api.Services.StudyCourseService
             var allStudyClasses = await _context.StudyClasses
                                         .Include(x => x.Schedule)
                                         .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
-                                                  && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                  && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                         .ToListAsync();
 
-            var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+            var lastClassEndDate = dbStudyCourse.EndDate;
+
+            if (allStudyClasses.Count != 0)
+            {
+                var endDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                if (lastClassEndDate < endDate)
+                {
+                    lastClassEndDate = endDate;
+                }
+            }
 
             var expiryDate = lastClassEndDate.AddDays(14);
 
@@ -1910,23 +1919,34 @@ namespace griffined_api.Services.StudyCourseService
                 .Where(sm => sm.StudySubject.StudyCourseId == studyCourseId)
                 .ToListAsync();
 
-
-            foreach (var member in studySubjectMembers)
+            if (studySubjectMembers != null)
             {
-                var student = member.Student;
+                foreach (var member in studySubjectMembers)
+                {
+                    var student = member.Student;
 
 
-                var allStudyClasses = await _context.StudyClasses
-                                    .Include(sc => sc.Schedule)
-                                    .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
-                                              && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
-                                    .ToListAsync();
+                    var allStudyClasses = await _context.StudyClasses
+                                        .Include(sc => sc.Schedule)
+                                        .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
+                                                && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
+                                        .ToListAsync();
 
-                var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                    DateTime lastClassEndDate = DateTime.Now;
 
-                var expiryDate = lastClassEndDate.AddDays(14);
+                    if (allStudyClasses.Count() != 0)
+                    {
+                        var endDate = allStudyClasses.Max(sc => sc.Schedule.Date);
+                        if (lastClassEndDate < endDate)
+                        {
+                            lastClassEndDate = endDate;
+                        }
+                    }
 
-                student.ExpiryDate = expiryDate;
+                    var expiryDate = lastClassEndDate.AddDays(14);
+
+                    student.ExpiryDate = expiryDate;
+                }
             }
 
             await _context.SaveChangesAsync();
