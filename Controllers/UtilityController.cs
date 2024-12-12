@@ -77,5 +77,13 @@ namespace griffined_api.Controllers
 
             return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
         }
+
+        [HttpPost("new/attendences")]
+        public async Task<IActionResult> CreateNewStudentAttendences()
+        {
+            await _utilityService.AddStudentAttendence();
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
+        }
     }
 }
