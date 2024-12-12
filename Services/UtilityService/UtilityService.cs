@@ -361,7 +361,10 @@ namespace griffined_api.Services.UtilityService
 
         public async Task AddStudentAttendence()
         {
-            var allStudyClasses = await _context.StudyClasses.AsNoTracking()
+            var allStudyClasses = await _context.StudyClasses.Include(x => x.StudyCourse)
+                                                             .Where(x => x.StudyCourse.Status != StudyCourseStatus.Pending)
+                                                             .AsNoTracking()
+                                                             .AsSplitQuery()
                                                              .ToListAsync();
 
             List<int> studyClassIds = new();
