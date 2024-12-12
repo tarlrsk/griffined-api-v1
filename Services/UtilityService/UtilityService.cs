@@ -358,5 +358,57 @@ namespace griffined_api.Services.UtilityService
             await _uow.CompleteAsync();
             _uow.CommitTran();
         }
+
+        public async Task AddStudentAttendence()
+        {
+            var allStudyClasses = await _context.StudyClasses.Include(x => x.StudyCourse)
+                                                             .Where(x => x.StudyCourse.Status != StudyCourseStatus.Pending)
+                                                             .AsNoTracking()
+                                                             .AsSplitQuery()
+                                                             .ToListAsync();
+
+            List<int> studyClassIds = new();
+
+            foreach (var cls in allStudyClasses)
+            {
+                var attendences = await _context.StudentAttendances.AsNoTracking()
+                                                                   .Where(x => x.StudyClassId == cls.Id)
+                                                                   .ToListAsync();
+
+                if (attendences is null || !attendences.Any())
+                {
+                    studyClassIds.Add(cls.Id);
+                }
+            }
+
+            var studyClasses = await _context.StudyClasses.Include(x => x.StudySubject)
+                                                            .ThenInclude(x => x.StudySubjectMember)
+                                                          .Where(x => studyClassIds.Contains(x.Id))
+                                                          .AsNoTracking()
+                                                          .AsSplitQuery()
+                                                          .ToListAsync();
+
+            List<StudentAttendance> attendances = new();
+
+            foreach (var cls in studyClasses)
+            {
+                foreach (var member in cls.StudySubject.StudySubjectMember)
+                {
+                    var attendence = new StudentAttendance
+                    {
+                        StudentId = member.StudentId,
+                        StudyClassId = cls.Id,
+                        Attendance = Attendance.None
+                    };
+
+                    attendances.Add(attendence);
+                }
+            }
+
+            _uow.BeginTran();
+            await _context.StudentAttendances.AddRangeAsync(attendances);
+            await _uow.CompleteAsync();
+            _uow.CommitTran();
+        }
     }
 }

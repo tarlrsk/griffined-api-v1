@@ -47,5 +47,11 @@ namespace griffined_api.Services.UtilityService
         /// </summary>
         /// <returns></returns>
         Task UpdateStudentExpiryDate();
+
+        /// <summary>
+        /// Add student attendence to the study classes that do not have any attendence records.
+        /// </summary>
+        /// <returns></returns>
+        Task AddStudentAttendence();
     }
 }
