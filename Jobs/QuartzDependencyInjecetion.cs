@@ -1,5 +1,7 @@
+using griffined_api.Jobs.BeginStudyCourse;
 using griffined_api.Jobs.UpdateClassStatus;
 using griffined_api.Jobs.UpdateStudentStatus;
+using griffined_api.Jobs.UpdateStudyCourseStatus;
 using Quartz;
 
 namespace griffined_api.Jobs
@@ -18,6 +20,10 @@ namespace griffined_api.Jobs
             services.ConfigureOptions<UpdateClassStatusJobSetup>();
 
             services.ConfigureOptions<UpdateStudentStatusJobSetup>();
+
+            services.ConfigureOptions<UpdateStudyCourseStatusJobSetup>();
+
+            services.ConfigureOptions<BeginStudyCourseJob>();
         }
     }
 }
