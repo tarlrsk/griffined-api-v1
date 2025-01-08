@@ -2097,6 +2097,7 @@ namespace griffined_api.Services.RegistrationRequestService
                                     .ThenInclude(s => s.StudySubjects)
                                         .ThenInclude(s => s.StudyClasses)
                                             .ThenInclude(c => c.Teacher)
+                            .AsSplitQuery()
                             .FirstOrDefaultAsync(r => r.Id == requestId && r.RegistrationStatus == RegistrationStatus.PendingOA)
                             ?? throw new NotFoundException($"PendingOA Request with ID {requestId} is not found");
 
