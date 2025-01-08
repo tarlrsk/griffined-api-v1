@@ -23,7 +23,7 @@ namespace griffined_api.Jobs
 
             services.ConfigureOptions<UpdateStudyCourseStatusJobSetup>();
 
-            services.ConfigureOptions<BeginStudyCourseJob>();
+            services.ConfigureOptions<BeginStudyCourseJobSetup>();
         }
     }
 }
