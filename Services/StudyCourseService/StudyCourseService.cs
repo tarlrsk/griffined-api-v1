@@ -431,7 +431,7 @@ namespace griffined_api.Services.StudyCourseService
                         var allStudyClasses = await _context.StudyClasses
                                                     .Include(x => x.Schedule)
                                                     .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Student.Id)
-                                                              && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                              && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                                     .ToListAsync();
 
                         if (!allStudyClasses.Any())
@@ -1564,7 +1564,7 @@ namespace griffined_api.Services.StudyCourseService
             var allStudyClasses = await _context.StudyClasses
                                         .Include(x => x.Schedule)
                                         .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == student.Id)
-                                                  && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                  && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                         .ToListAsync();
 
             var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
@@ -1748,7 +1748,7 @@ namespace griffined_api.Services.StudyCourseService
                         var allStudyClasses = await _context.StudyClasses
                                                     .Include(x => x.Schedule)
                                                     .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbMember.Student.Id)
-                                                              && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                              && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                                     .ToListAsync();
 
                         var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
