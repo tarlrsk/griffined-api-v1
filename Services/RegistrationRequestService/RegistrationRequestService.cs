@@ -383,7 +383,8 @@ namespace griffined_api.Services.RegistrationRequestService
             {
                 var allStudyClasses = await _context.StudyClasses
                                             .Include(x => x.Schedule)
-                                            .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbStudent.Id))
+                                            .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbStudent.Id)
+                                             && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                             .ToListAsync();
 
                 var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
