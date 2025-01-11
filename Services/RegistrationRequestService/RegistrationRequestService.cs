@@ -309,7 +309,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
                     foreach (var dbStudent in dbStudents)
                     {
-                        if (dbStudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                        if (dbStudySubject.StudySubjectMember.Where(s => s.Status != StudySubjectMemberStatus.Cancelled).Any(m => m.StudentId == dbStudent.Id))
                             throw new BadRequestException($"Student with code {dbStudent.StudentCode} is already enrolled this subject.");
 
                         dbStudySubject.StudySubjectMember ??= new List<StudySubjectMember>();
