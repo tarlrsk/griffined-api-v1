@@ -309,7 +309,7 @@ namespace griffined_api.Services.RegistrationRequestService
 
                     foreach (var dbStudent in dbStudents)
                     {
-                        if (dbStudySubject.StudySubjectMember.Any(m => m.StudentId == dbStudent.Id))
+                        if (dbStudySubject.StudySubjectMember.Where(s => s.Status != StudySubjectMemberStatus.Cancelled).Any(m => m.StudentId == dbStudent.Id))
                             throw new BadRequestException($"Student with code {dbStudent.StudentCode} is already enrolled this subject.");
 
                         dbStudySubject.StudySubjectMember ??= new List<StudySubjectMember>();
@@ -384,7 +384,7 @@ namespace griffined_api.Services.RegistrationRequestService
                 var allStudyClasses = await _context.StudyClasses
                                             .Include(x => x.Schedule)
                                             .Where(sc => sc.StudySubject.StudySubjectMember.Any(sm => sm.StudentId == dbStudent.Id)
-                                                      && sc.StudyCourse.Status == StudyCourseStatus.Ongoing)
+                                                    && sc.StudyCourse.Status != StudyCourseStatus.Cancelled)
                                             .ToListAsync();
 
                 var lastClassEndDate = allStudyClasses.Max(sc => sc.Schedule.Date);
