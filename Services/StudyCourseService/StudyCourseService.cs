@@ -1559,6 +1559,7 @@ namespace griffined_api.Services.StudyCourseService
 
             history.Description = historyDescription;
 
+            dbStudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
             dbStudyCourse.StudyCourseHistories.Add(history);
 
             var allStudyClasses = await _context.StudyClasses
