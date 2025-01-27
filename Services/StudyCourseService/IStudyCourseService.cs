@@ -29,5 +29,6 @@ namespace griffined_api.Services.StudyCourseService
         Task<ServiceResponse<List<TodayClassMobileResponseDto>>> GetMobileTodayClass(string date);
         Task<ServiceResponse<List<StudyCourseHistoryResponseDto>>> GetStudyCourseHistory(int studyCourseId);
         Task<ServiceResponse<string>> CancelStudyCourse(int studyCourseId);
+        Task UpdateStudyCourseInfo(int studyCourseId, UpdateStudyCourseDto request);
     }
 }

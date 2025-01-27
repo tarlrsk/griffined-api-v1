@@ -1972,5 +1972,31 @@ namespace griffined_api.Services.StudyCourseService
                 }
             };
         }
+
+        public async Task UpdateStudyCourseInfo(int studyCourseId, UpdateStudyCourseDto request)
+        {
+            var studyCourse = await _studyCourseRepository.Query()
+                                                          .FirstOrDefaultAsync(x => x.Id == studyCourseId);
+
+            if (studyCourse is null)
+            {
+                throw new NotFoundException("Study course is not found.");
+            }
+
+            TimeSpan duration = request.EndDate - request.StartDate;
+            double totalHours = duration.TotalHours;
+
+            _uow.BeginTran();
+
+            studyCourse.Method = request.Method;
+            studyCourse.StartDate = request.StartDate;
+            studyCourse.EndDate = request.EndDate;
+            studyCourse.Section = request.Section;
+            studyCourse.TotalHour = totalHours;
+
+            _studyCourseRepository.Update(studyCourse);
+            await _uow.CompleteAsync();
+            _uow.CommitTran();
+        }
     }
 }
