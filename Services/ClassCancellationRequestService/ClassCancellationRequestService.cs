@@ -758,6 +758,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     addHistory.Description = addedStudyClassHistoryDescription;
                     studyClass.StudyCourse.StudyCourseHistories ??= new List<StudyCourseHistory>();
                     studyClass.StudyCourse.StudyCourseHistories.Add(addHistory);
+                    studyClass.HasAttemptedCancellation = true;
                 }
             }
 
@@ -829,6 +830,11 @@ namespace griffined_api.Services.ClassCancellationRequestService
 
                 _context.TeacherNotifications.Add(classCancellationTeacherNotification);
             }
+
+            var studyClass = await _context.StudyClasses.FirstOrDefaultAsync(x => x.Id == dbRequest.StudyClassId) ?? throw new NotFoundException("Study class not found.");
+
+            studyClass.Status = ClassStatus.NONE;
+            studyClass.HasAttemptedCancellation = true;
 
             await _context.SaveChangesAsync();
 
