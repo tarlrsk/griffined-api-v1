@@ -1498,6 +1498,7 @@ namespace griffined_api.Services.StudyCourseService
             return response;
         }
 
+
         public async Task<ServiceResponse<string>> EaRemoveStudent(EaStudentManagementRequestDto requestDto)
         {
             var response = new ServiceResponse<string>();
@@ -1535,10 +1536,12 @@ namespace griffined_api.Services.StudyCourseService
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
                     var attendanceToRemove = dbStudyClass.Attendances
-                                            .FirstOrDefault(a => a.Student!.Id == requestDto.StudentId)
-                                            ?? throw new NotFoundException($"No Attendance with Student {requestDto.StudentId} Found.");
+                                            .FirstOrDefault(a => a.Student!.Id == requestDto.StudentId);
 
-                    _context.StudentAttendances.Remove(attendanceToRemove);
+                    if (attendanceToRemove is not null)
+                    {
+                        _context.StudentAttendances.Remove(attendanceToRemove);
+                    }
                 }
 
                 _context.StudySubjectMember.Remove(studentToRemove);
