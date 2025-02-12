@@ -669,7 +669,6 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var studyClass = new StudyClass
                     {
                         //TODO Class Count
-                        ClassNumber = classCount + 1,
                         Teacher = dbTeacher,
                         StudyCourse = dbStudySubject.StudyCourse,
                         IsMakeup = true,
@@ -740,6 +739,16 @@ namespace griffined_api.Services.ClassCancellationRequestService
                         var expiryDate = lastClassEndDate.AddDays(14);
 
                         dbMember.Student.ExpiryDate = expiryDate;
+
+                        var allStudyClassesOrderedByDate = dbStudySubject.StudyClasses
+                            .OrderBy(sc => sc.Schedule.Date)
+                            .ThenBy(sc => sc.Schedule.FromTime)
+                            .ToList();
+
+                        for (int i = 0; i < allStudyClasses.Count; i++)
+                        {
+                            allStudyClassesOrderedByDate[i].ClassNumber = i + 1;
+                        }
 
                     }
                     dbStudySubject.StudyClasses ??= new List<StudyClass>();
