@@ -300,7 +300,7 @@ namespace griffinedapi.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Mandays");
+                    b.ToTable("Mandays", (string)null);
                 });
 
             modelBuilder.Entity("griffined_api.Models.NewCoursePreferredDayRequest", b =>
@@ -1051,9 +1051,6 @@ namespace griffinedapi.Migrations
 
                     b.Property<int>("ClassNumber")
                         .HasColumnType("int");
-
-                    b.Property<bool>("HasAttemptedCancellation")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsFiftyPercent")
                         .HasColumnType("bit");
