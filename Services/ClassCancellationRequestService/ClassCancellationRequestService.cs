@@ -669,6 +669,7 @@ namespace griffined_api.Services.ClassCancellationRequestService
                     var studyClass = new StudyClass
                     {
                         //TODO Class Count
+                        ClassNumber = classCount + 1,
                         Teacher = dbTeacher,
                         StudyCourse = dbStudySubject.StudyCourse,
                         IsMakeup = true,
