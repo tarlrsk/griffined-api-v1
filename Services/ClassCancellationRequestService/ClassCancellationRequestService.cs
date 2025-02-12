@@ -830,6 +830,10 @@ namespace griffined_api.Services.ClassCancellationRequestService
                 _context.TeacherNotifications.Add(classCancellationTeacherNotification);
             }
 
+            var studyClass = await _context.StudyClasses.FirstOrDefaultAsync(x => x.Id == dbRequest.StudyClassId) ?? throw new NotFoundException("Study class not found.");
+
+            studyClass.Status = ClassStatus.NONE;
+
             await _context.SaveChangesAsync();
 
             var response = new ServiceResponse<string>
