@@ -1700,7 +1700,6 @@ namespace griffined_api.Services.StudyCourseService
                                 ?? throw new NotFoundException($"Teacher ID {newSchedule.TeacherId} is not found.");
 
                     int studyClassCount = updateRequest.NewSchedule.Where(x => x.StudySubjectId == dbStudySubject.Id).Count();
-                    int c = 0;
 
                     var studyClass = new StudyClass
                     {
@@ -1716,17 +1715,6 @@ namespace griffined_api.Services.StudyCourseService
                         },
                     };
 
-                    if (c == studyClassCount / 2)
-                    {
-                        studyClass.IsFiftyPercent = true;
-                        studyClass.IsHundredPercent = false;
-                    }
-
-                    if (c == studyClassCount)
-                    {
-                        studyClass.IsFiftyPercent = false;
-                        studyClass.IsHundredPercent = true;
-                    }
 
                     var worktypes = _teacherService.GetTeacherWorkTypesWithHours(dbTeacher, newSchedule.Date.ToDateTime(), newSchedule.FromTime.ToTimeSpan(), newSchedule.ToTime.ToTimeSpan());
                     foreach (var worktype in worktypes)
@@ -1784,6 +1772,51 @@ namespace griffined_api.Services.StudyCourseService
             }
 
             await _context.SaveChangesAsync();
+
+            foreach (var studySubject in dbStudySubjects)
+            {
+                int c = 0;
+
+                var studyClasses = studySubject.StudyClasses
+                                               .OrderBy(sc => sc.Schedule.Date)
+                                               .ThenBy(sc => sc.Schedule.FromTime)
+                                               .Where(x => x.Status != ClassStatus.DELETED && x.Status != ClassStatus.CANCELLED)
+                                               .ToList();
+
+                var studyClassCount = studyClasses.Count;
+
+                foreach (var studyClass in studyClasses)
+                {
+                    c++;
+                    studyClass.IsFiftyPercent = false;
+                    studyClass.IsHundredPercent = false;
+                    if (c == studyClassCount / 2)
+                    {
+                        studyClass.IsFiftyPercent = true;
+                        studyClass.IsHundredPercent = false;
+                    }
+
+                    if (c == studyClassCount)
+                    {
+                        studyClass.IsFiftyPercent = false;
+                        studyClass.IsHundredPercent = true;
+                    }
+                }
+
+                for (int i = 0; i < studyClasses.Count; i++)
+                {
+                    studyClasses[i].ClassNumber = i + 1;
+                }
+
+                foreach (var studyClass in studySubject.StudyClasses.Where(x => x.Status == ClassStatus.DELETED || x.Status == ClassStatus.CANCELLED))
+                {
+                    studyClass.IsFiftyPercent = false;
+                    studyClass.IsHundredPercent = false;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
 
             var response = new ServiceResponse<string>
             {
