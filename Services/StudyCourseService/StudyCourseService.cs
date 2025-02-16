@@ -1680,6 +1680,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .ThenInclude(sc => sc.Course)
                             .Include(s => s.Subject)
                             .Include(s => s.StudyClasses)
+                                .ThenInclude(x => x.Schedule)
                             .Include(s => s.StudyCourse)
                             .Include(s => s.StudySubjectMember)
                                 .ThenInclude(s => s.Student)
