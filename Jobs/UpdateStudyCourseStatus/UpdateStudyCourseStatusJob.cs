@@ -18,7 +18,7 @@ namespace griffined_api.Jobs.UpdateStudyCourseStatus
             var studyCourses = await _context.StudyCourses
                                              .Include(sc => sc.StudySubjects)
                                                  .ThenInclude(ss => ss.StudyClasses)
-                                             .Where(x => x.Status != StudyCourseStatus.NotStarted && x.Status != StudyCourseStatus.Cancelled)
+                                             .Where(x => x.Status != StudyCourseStatus.NotStarted)
                                              .ToListAsync();
 
             _uow.BeginTran();
