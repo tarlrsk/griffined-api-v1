@@ -1713,6 +1713,7 @@ namespace griffined_api.Services.StudyCourseService
                             FromTime = newSchedule.FromTime.ToTimeSpan(),
                             ToTime = newSchedule.ToTime.ToTimeSpan(),
                             Type = ScheduleType.Class,
+                            CalendarType = DailyCalendarType.NORMAL_CLASS
                         },
                     };
 
