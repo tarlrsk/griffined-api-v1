@@ -1250,6 +1250,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(sc => sc.StudySubjects)
                                     .ThenInclude(ss => ss.StudyClasses)
                                         .ThenInclude(sc => sc.TeacherShifts)
+                                .AsSplitQuery()
                                 .FirstOrDefaultAsync(sc => sc.Id == studyCourseId) ?? throw new NotFoundException("Course not found.");
 
             var data = new StaffCoursesDetailResponseDto
@@ -1339,6 +1340,7 @@ namespace griffined_api.Services.StudyCourseService
                         .ThenInclude(sc => sc.Teacher)
                             .ThenInclude(x => x.StudyClasses)
                                 .ThenInclude(x => x.Schedule)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(sc => sc.Id == studyCourseId)
                 ?? throw new NotFoundException("No course found.");
 
