@@ -31,6 +31,7 @@ namespace griffined_api.Jobs.BeginStudyCourse
                 }
             }
 
+            await _uow.CompleteAsync();
             _uow.CommitTran();
         }
     }
