@@ -315,7 +315,7 @@ namespace griffined_api.Services.StudyCourseService
                         Subject = dbStudySubject.Subject.subject,
                         Hour = dbStudySubject.Hour,
                     });
-                    foreach (var dbStudyClass in dbStudySubject.StudyClasses)
+                    foreach (var dbStudyClass in dbStudySubject.StudyClasses.Where(x => x.Status != ClassStatus.DELETED))
                     {
                         if (!studyCourse.Teachers.Any(t => t.TeacherId == dbStudyClass.Teacher.Id))
                         {
@@ -746,7 +746,7 @@ namespace griffined_api.Services.StudyCourseService
                                 .Include(c => c.StudySubjects)
                                     .ThenInclude(c => c.Subject)
                                 .Include(c => c.StudySubjects)
-                                    .ThenInclude(c => c.StudyClasses)
+                                    .ThenInclude(c => c.StudyClasses.Where(x => x.Status != ClassStatus.DELETED))
                                         .ThenInclude(c => c.Schedule)
                                 .Include(c => c.StudySubjects)
                                     .ThenInclude(c => c.StudyClasses)
