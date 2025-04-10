@@ -21,16 +21,23 @@ namespace griffined_api.Jobs.BeginStudyCourse
                                   .Where(x => x.Status == StudyCourseStatus.NotStarted)
                                   .ToListAsync();
 
+            var now = DateTime.UtcNow.AddHours(7).Date;
+
             _uow.BeginTran();
 
             foreach (var studyCourse in studyCourses)
             {
-                if (DateTime.UtcNow.AddHours(7) >= studyCourse.StartDate)
+                if (studyCourse.EndDate.Date < now)
+                {
+                    studyCourse.Status = StudyCourseStatus.Finished;
+                }
+                else if (studyCourse.Status == StudyCourseStatus.NotStarted && studyCourse.StartDate <= now)
                 {
                     studyCourse.Status = StudyCourseStatus.Ongoing;
                 }
             }
 
+            await _uow.CompleteAsync();
             _uow.CommitTran();
         }
     }
