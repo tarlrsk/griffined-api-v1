@@ -2223,11 +2223,14 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     member.Student.Status = StudentStatus.Active;
 
-                    await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                    if (member.Student.FirebaseId != null)
                     {
-                        Uid = member.Student.FirebaseId,
-                        Disabled = false
-                    });
+                        await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                        {
+                            Uid = member.Student.FirebaseId,
+                            Disabled = false
+                        });
+                    }
                 }
 
                 foreach (var course in dbRequest.NewCourseRequests)
