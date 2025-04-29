@@ -948,11 +948,17 @@ namespace griffined_api.Services.ScheduleService
             var daysOfWeek = request.Days?.Select(day => Enum.Parse<DayOfWeek>(day, true)).ToList() ?? new List<DayOfWeek>();
 
             // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
+            var exceptStudyCourseIds = request.StudyCourseIds.ToList();
+
             var conflictScheduleIds = _scheduleRepo.Query()
-                                                   .Where(x => dates.Contains(x.Date)
-                                                            && x.FromTime < request.ToTime && x.ToTime > request.FromTime)
-                                                   .Select(x => x.Id)
-                                                   .ToList();
+                .Where(x => dates.Contains(x.Date)
+                         && x.FromTime < request.ToTime
+                         && x.ToTime > request.FromTime
+                         && x.StudyClass != null
+                         && x.StudyClass.StudyCourseId.HasValue
+                         && !exceptStudyCourseIds.Contains(x.StudyClass.StudyCourseId.Value))
+                .Select(x => x.Id)
+                .ToList();
 
             // IF STUDENT IDs IN REQUEST HAS ITEMS, CHECK CONFLICT CLASS FOR STUDENTS.
             List<StudyClass> conflictStudentStudyClasses = new();
