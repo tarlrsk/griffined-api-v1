@@ -3,6 +3,7 @@ using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
 
 namespace griffined_api.Services.RegistrationRequestService
@@ -2233,7 +2234,7 @@ namespace griffined_api.Services.RegistrationRequestService
                     }
                     catch
                     {
-                        throw new Exception("Student does not have an account.");
+                        throw new NotFoundException("Student does not have an account.");
                     }
                 }
 
