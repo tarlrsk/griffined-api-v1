@@ -948,11 +948,35 @@ namespace griffined_api.Services.ScheduleService
             var daysOfWeek = request.Days?.Select(day => Enum.Parse<DayOfWeek>(day, true)).ToList() ?? new List<DayOfWeek>();
 
             // FETCH ALL CONFLICTING SCHEDULE IDS BASED ON THE GIVEN DATES.
-            var conflictScheduleIds = _scheduleRepo.Query()
-                                                   .Where(x => dates.Contains(x.Date)
-                                                            && x.FromTime < request.ToTime && x.ToTime > request.FromTime)
-                                                   .Select(x => x.Id)
-                                                   .ToList();
+            var exceptStudyCourseIds = request.StudyCourseIds.ToList();
+
+            List<int> conflictScheduleIds = new();
+
+            if (exceptStudyCourseIds.Any())
+            {
+                conflictScheduleIds = _scheduleRepo.Query()
+                                .Include(x => x.StudyClass)
+                                .Where(x => dates.Contains(x.Date)
+                                         && x.FromTime < request.ToTime
+                                         && x.ToTime > request.FromTime
+                                         && x.StudyClass != null
+                                         && x.StudyClass.StudyCourseId.HasValue
+                                         && !exceptStudyCourseIds.Contains(x.StudyClass.StudyCourseId.Value))
+                                .Select(x => x.Id)
+                                .ToList();
+            }
+            else
+            {
+                conflictScheduleIds = _scheduleRepo.Query()
+                                .Include(x => x.StudyClass)
+                                .Where(x => dates.Contains(x.Date)
+                                         && x.FromTime < request.ToTime
+                                         && x.ToTime > request.FromTime
+                                         && x.StudyClass != null
+                                         && x.StudyClass.StudyCourseId.HasValue)
+                                .Select(x => x.Id)
+                                .ToList();
+            }
 
             // IF STUDENT IDs IN REQUEST HAS ITEMS, CHECK CONFLICT CLASS FOR STUDENTS.
             List<StudyClass> conflictStudentStudyClasses = new();

@@ -163,6 +163,9 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("studentIds")]
         public IEnumerable<int> StudentIds { get; set; }
 
+        [JsonProperty("studyCourseIds")]
+        public IEnumerable<int> StudyCourseIds { get; set; }
+
         [JsonProperty("courseId")]
         public int CourseId { get; set; }
 
