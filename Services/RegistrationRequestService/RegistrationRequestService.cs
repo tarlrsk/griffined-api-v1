@@ -2223,11 +2223,18 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     member.Student.Status = StudentStatus.Active;
 
-                    await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                    try
                     {
-                        Uid = member.Student.FirebaseId,
-                        Disabled = false
-                    });
+                        await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                        {
+                            Uid = member.Student.FirebaseId,
+                            Disabled = false
+                        });
+                    }
+                    catch
+                    {
+                        throw new Exception("Student does not have an account.");
+                    }
                 }
 
                 foreach (var course in dbRequest.NewCourseRequests)
