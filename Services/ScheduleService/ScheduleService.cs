@@ -1021,8 +1021,33 @@ namespace griffined_api.Services.ScheduleService
                                                                       && x.Status != ClassStatus.CANCELLED)
                                                              .ToList();
 
+            var overlappingTeacherScheduleIds = request.CurrentSchedules?
+                .Where(cs =>
+                       request.Dates.Contains(cs.Date) &&
+                       cs.FromTime < request.ToTime &&
+                       cs.ToTime > request.FromTime)
+                .Select(x => x.ScheduleId)
+                .ToList();
+
+            var overlappingTeacherStudyClasses = _studyClassRepo.Query()
+                .Include(x => x.Schedule)
+                .Include(x => x.Teacher)
+                .Include(x => x.StudyCourse)
+                   .ThenInclude(x => x.Course)
+                .Include(x => x.StudySubject)
+                 .ThenInclude(x => x.Subject)
+                .Include(x => x.StudySubject)
+                 .ThenInclude(x => x.StudySubjectMember)
+                     .ThenInclude(x => x.Student)
+                .Where(x => overlappingTeacherScheduleIds != null &&
+                            overlappingTeacherScheduleIds.Any() &&
+                            x.ScheduleId.HasValue &&
+                            overlappingTeacherScheduleIds.Contains(x.ScheduleId.Value))
+                .ToList();
+
             // GET CONFLICT STUDY CLASSES.
             List<StudyClass> conflictStudyClasses = new();
+            conflictTeacherStudyClasses.AddRange(overlappingTeacherStudyClasses);
             conflictStudyClasses.AddRange(conflictTeacherStudyClasses);
 
             // JOIN STUDENT'S CONFLICT CLASSES WITH TEACHER'S IF THERE ARE ANY.

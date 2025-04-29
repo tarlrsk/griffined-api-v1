@@ -205,6 +205,9 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     public class GeneratedAvailableClassScheduleDTO
     {
+        [JsonProperty("scheduleId")]
+        public int ScheduleId { get; set; }
+
         [JsonProperty("id")]
         public Guid Id { get; set; }
 
