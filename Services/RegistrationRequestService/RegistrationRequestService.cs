@@ -2232,7 +2232,7 @@ namespace griffined_api.Services.RegistrationRequestService
                             Disabled = false
                         });
                     }
-                    catch
+                    catch (Exception)
                     {
                         throw new NotFoundException("Student does not have an account.");
                     }
