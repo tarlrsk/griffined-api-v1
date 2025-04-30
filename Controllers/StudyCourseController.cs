@@ -126,5 +126,13 @@ namespace griffined_api.Controllers
         {
             return Ok(await _studyCourseService.CancelStudyCourse(studyCourseId));
         }
+
+        [HttpPut("{studyCourseId}")]
+        public async Task<IActionResult> UpdateStudyCourse(int studyCourseId, UpdateStudyCourseDto request)
+        {
+            await _studyCourseService.UpdateStudyCourseInfo(studyCourseId, request);
+
+            return Ok(ResponseWrapper.Success(HttpStatusCode.OK));
+        }
     }
 }
