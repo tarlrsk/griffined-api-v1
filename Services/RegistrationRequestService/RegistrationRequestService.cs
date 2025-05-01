@@ -3,6 +3,7 @@ using griffined_api.Dtos.RegistrationRequestDto;
 using griffined_api.Dtos.ScheduleDtos;
 using griffined_api.Dtos.StudyCourseDtos;
 using griffined_api.Extensions.DateTimeExtensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
 
 namespace griffined_api.Services.RegistrationRequestService
@@ -2223,11 +2224,18 @@ namespace griffined_api.Services.RegistrationRequestService
                 {
                     member.Student.Status = StudentStatus.Active;
 
-                    await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                    try
                     {
-                        Uid = member.Student.FirebaseId,
-                        Disabled = false
-                    });
+                        await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(new FirebaseAdmin.Auth.UserRecordArgs
+                        {
+                            Uid = member.Student.FirebaseId,
+                            Disabled = false
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        throw new NotFoundException("Student does not have an account.");
+                    }
                 }
 
                 foreach (var course in dbRequest.NewCourseRequests)

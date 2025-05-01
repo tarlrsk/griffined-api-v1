@@ -163,6 +163,9 @@ namespace griffined_api.Dtos.ScheduleDtos
         [JsonProperty("studentIds")]
         public IEnumerable<int> StudentIds { get; set; }
 
+        [JsonProperty("studyCourseIds")]
+        public IEnumerable<int> StudyCourseIds { get; set; }
+
         [JsonProperty("courseId")]
         public int CourseId { get; set; }
 
@@ -202,6 +205,9 @@ namespace griffined_api.Dtos.ScheduleDtos
 
     public class GeneratedAvailableClassScheduleDTO
     {
+        [JsonProperty("scheduleId")]
+        public int ScheduleId { get; set; }
+
         [JsonProperty("id")]
         public Guid Id { get; set; }
 
