@@ -270,6 +270,7 @@ namespace griffined_api.Services.ScheduleService
             {
                 List<Teacher> teacherList = new();
 
+                // CASE STUDY CLASS SCHEDULE
                 var studyClassTeacherIds = schedule.StudyClass?.TeacherId;
 
                 if (studyClassTeacherIds is int teacherId)
@@ -277,15 +278,19 @@ namespace griffined_api.Services.ScheduleService
                     teacherList.Add(teacherDict[teacherId]);
                 }
 
-                var appointmentTeacher = appointmentMember.Where(x => appointmentIds.Contains((int)x.AppointmentId))
-                                                          .Select(a => a.Teacher)
-                                                          .ToList();
+                // CASE APPOINTMENT SCHEDULE
+                if (schedule.AppointmentSlot != null)
+                {
+                    var appointmentTeacher = appointmentMember.Where(x => x.AppointmentId == schedule.AppointmentSlot.AppointmentId)
+                                                              .Select(a => a.Teacher)
+                                                              .ToList();
 
-                teacherList.AddRange(appointmentTeacher);
+                    teacherList.AddRange(appointmentTeacher);
+                }
 
                 foreach (var teacher in teacherList)
                 {
-                    var teacherGroup = groupedSchedules.FirstOrDefault(group => group.Teacher == teacher);
+                    var teacherGroup = groupedSchedules.FirstOrDefault(group => group.Teacher?.Id == teacher.Id);
 
                     if (teacherGroup == null)
                     {
