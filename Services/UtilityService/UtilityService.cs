@@ -282,6 +282,9 @@ namespace griffined_api.Services.UtilityService
             var studyCourses = await _context.StudyCourses
                                              .Include(sc => sc.StudySubjects)
                                                  .ThenInclude(ss => ss.StudyClasses)
+                                             .Where(x => x.Status != StudyCourseStatus.NotStarted
+                                                      && x.Status != StudyCourseStatus.Finished
+                                                      && x.Status != StudyCourseStatus.Cancelled)
                                              .ToListAsync();
 
             _uow.BeginTran();
