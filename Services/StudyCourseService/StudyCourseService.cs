@@ -268,6 +268,7 @@ namespace griffined_api.Services.StudyCourseService
                                             .ThenInclude(s => s.Subject)
                                         .Include(c => c.Course)
                                         .Include(c => c.Level)
+                                        .AsSplitQuery()
                                         .ToListAsync();
 
             var studyCourses = new List<StudyCourseResponseDto>();
