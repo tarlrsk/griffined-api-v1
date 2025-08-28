@@ -1533,8 +1533,8 @@ namespace griffined_api.Services.StudyCourseService
                 subjectList.Add(dbStudySubject.Subject.subject);
 
                 var studentToRemove = dbStudySubject.StudySubjectMember
-                                        .FirstOrDefault(sm => sm.Student.Id == requestDto.StudentId)
-                                        ?? throw new NotFoundException("No Student Found");
+                                        .FirstOrDefault(sm => sm.StudentId == requestDto.StudentId && sm.Status == StudySubjectMemberStatus.Success)
+                                        ?? throw new NotFoundException("Student is not in the subject or registration request is not successful.");
 
                 foreach (var dbStudyClass in dbStudySubject.StudyClasses)
                 {
